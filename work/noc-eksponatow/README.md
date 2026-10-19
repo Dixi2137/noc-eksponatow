@@ -88,3 +88,19 @@ Noc to obchód po salach. Jeden poziom = jedna epoka = jeden przeciwnik:
 - Postęp w profilu (`localStorage`): `cleared` (zaliczone sale) i `level` (sala, od której zaczyna się następna noc). Pasek sal w menu pozwala wybrać dowolną odblokowaną salę.
 - Hitler i Stalin są wyłącznie przeciwnikami do pokonania, nie przedmiotami kolekcji. Opaska na ramieniu jest jednolicie czerwona, bez symbolu.
 - `tests/levels.js` sprawdza komplet danych poziomów i eksponatów, rysowanie wszystkich póz i motywów oraz to, że z każdym eksponatem da się wygrać i od każdego oberwać. `tests/gallery.html` pokazuje wszystkich przeciwników i scenerie na jednej stronie.
+
+## Faza 2 — ekonomia, broń, karty (2026-10-19)
+
+Jeden katalog przedmiotów (`MuseumLoot.items`): 58 strojów, 5 broni, 13 kart. Każdy ma rzadkość i wartość (`values`: zwykły 150, rzadki 400, epicki 1000, legendarny 2500; podstawowy i prezent 0).
+
+- **Broń** (`dist/weapons.js`): miecz (podstawowy), topór (wolny, 13 obrażeń, mocniejsze odbicie), włócznia (zasięg 470), rapier (szybki, bonus serii od 2. ciosu), rewolwer (legendarny, dystansowy). Każda ma własny zasięg, koszt energii, czas zamachu, obrażenia w słabą gardę, bonus serii i odbicie parady.
+- **Rewolwer**: 6 naboi na walkę, strzał trafia z całej areny, ale tylko w osłabioną gardę; zamach i cios przeciwnik odbija, w ruchu uskakuje. Po wystrzelaniu bębna próba strzału uruchamia przeładowanie 1,6 s (bez strzałów, parada działa). HUD pokazuje naboje. Stan w `getState().weapon` (`ammo`, `maxAmmo`, `reload`).
+- **Karty** (`dist/cards.js`): 8 kart bohaterów (Spartakus, Pułaski, Zawisza, Hannibal, Kościuszko, Sobieski, Joanna d'Arc, Chrobry) z jednym pasywnym bonusem; aktywna jest jedna, wybierana w kolekcji. 5 kart broni działa automatycznie, gdy założona jest pasująca broń (+10% obrażeń, rewolwer +2 naboje). Bossowie nocy nigdy nie są kartami.
+- **Modyfikatory** (`loot.modifiers(profile)` → `MuseumGame.start({modifiers})`): karta bohatera, karta broni i ulepszenia łączą się z perkiem skina: wartości płaskie dodają się, mnożniki mnożą.
+- **Skrzynki** (`dist/loot.js`, pole `pool`): 9 skrzyń strojów jak dotąd plus Arsenał Kustosza (900 ✦, broń) i Archiwum Bohaterów (800 ✦, karty). Sklep ma filtry BROŃ i KARTY. Bez duplikatów, szanse widoczne, nagroda zapisana przed animacją (`pendingReward`, `pendingKind`).
+- **Sprzedaż** (`loot.sell`): 40% wartości; nie da się sprzedać założonego przedmiotu, przedmiotu podstawowego ani prezentu. Sprzedaż kasuje ulepszenia przedmiotu. Przycisk z potwierdzeniem w kolekcji.
+- **Ulepszanie** (`loot.upgrade`): pięć poziomów, koszt 250 + 350·poziom. Strój: +6 maks. HP na poziom. Broń: +8% obrażeń w słabą gardę na poziom. Zapis w `profile.upgrades` pod kluczem `rodzaj:id`.
+- **Bonus dzienny** (`loot.dailyBonus`): 50 ✦ pierwszego dnia, +25 za każdy kolejny dzień z rzędu, maksymalnie 300; dzień przerwy resetuje serię. Liczony lokalnie po dacie w `profile.login` (serwerowa wersja w fazie 4). Menu pokazuje serię i jutrzejszy bonus.
+- Kolekcja ma zakładki STROJE / BROŃ / KARTY; miniatury broni i kart rysuje `art.js` (`drawWeaponIcon`, `drawCardArt`).
+- Profil migruje bez utraty: stare zapisy dostają `weapons: ['sword']`, puste karty i ulepszenia, nieznane id są odrzucane.
+- Testy: `tests/economy.js` (15 testów), łącznie 44.

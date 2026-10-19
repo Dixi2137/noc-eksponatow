@@ -12,15 +12,28 @@
   const particles = [], labels = [], rings = [];
   let shake = 0, flash = 0, hitstop = 0, eventClock = 0, lastHint = '';
 
-  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum') {
-    const perk = window.MuseumPerks.get(skin), stats = perk.stats;
-    const exhibit = window.MuseumExhibits.get(exhibitId), weapon = window.MuseumWeapons.get(weaponId);
-    const combat = exhibit.stats.combat;
+  // Modifiers come from the equipped card and item upgrades: additive for flat stats, multiplicative for multipliers.
+  function applyModifiers(perk, weapon, modifiers = {}) {
+    const stats = { ...perk.stats }, w = { ...weapon.stats };
+    for (const [key, value] of Object.entries(modifiers || {})) {
+      if (!Number.isFinite(value)) continue;
+      if (key === 'ammo') { if (w.ammo != null) w.ammo += value; }
+      else if (key === 'weaponDamageMultiplier') w.weakGuardDamage = Math.ceil(w.weakGuardDamage * value);
+      else if (key.endsWith('Multiplier')) stats[key] = (stats[key] ?? 1) * value;
+      else if (key in stats) stats[key] += value;
+    }
+    return { perk: { ...perk, stats }, weapon: { ...weapon, stats: w } };
+  }
+  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null) {
+    const exhibit = window.MuseumExhibits.get(exhibitId);
+    const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
+    const stats = perk.stats, combat = exhibit.stats.combat;
     return {
       status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, theme,
       hint: `Zbliż się do ${exhibit.alias}a. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
-        cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99 },
+        cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
+        ammo: weapon.stats.ammo, maxAmmo: weapon.stats.ammo, reload: 0, shots: 0 },
       foe: { x: 1060, hp: exhibit.stats.hp, maxHP: exhibit.stats.hp, state: 'idle', timer: 0, cycle: 0, attackTargetX: null,
         heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false }
     };
@@ -38,7 +51,7 @@
       parries: state.parries, combo: state.combo, hint: state.hint, foeState: state.foe.state,
       player: { ...state.player }, foe: { ...state.foe }, skin: state.skin, perk: state.perk, scene,
       exhibit: { id: state.exhibit.id, name: state.exhibit.name, alias: state.exhibit.alias, tag: state.exhibit.tag, maxHP: state.exhibit.stats.hp },
-      weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind }, theme: state.theme,
+      weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind, ammo: state.player.ammo, maxAmmo: state.player.maxAmmo, reload: state.player.reload }, theme: state.theme,
       combat: { ...state.combat }
     };
   }
@@ -92,6 +105,7 @@
   function label(text, x, y, color = '#f3deaf', size = 24) {
     labels.push({ text, x, y, color, size, life: 1.1, max: 1.1 });
   }
+  function impactFlash(amount) { flash = Math.max(flash, amount); }
   function impact(x, y, color, power = 1) {
     shake = Math.max(shake, 7 * power); hitstop = .055 * power;
     flash = Math.max(flash, .10 * power);
@@ -121,7 +135,7 @@
     tone(win ? 'win' : 'loss'); updateEvent(true);
     emit('game:end', { win, parries: state.parries, time: state.elapsed, combo: state.combo,
       coins: win ? 180 + state.parries * 20 : 40, playerHP: state.player.hp, foeHP: state.foe.hp,
-      exhibit: state.exhibit.id, weapon: state.weapon.id, skin: state.skin });
+      exhibit: state.exhibit.id, weapon: state.weapon.id, skin: state.skin, shots: state.player.shots });
   }
   function checkEnd() {
     if (state.foe.hp <= 0) finish(true);
@@ -130,10 +144,15 @@
 
   function attack() {
     const p = state.player, w = state.weapon.stats;
-    if (state.status !== 'running' || p.cooldown > 0 || p.attack > 0 || p.hurt > .13 || p.evade > 0) return;
+    if (state.status !== 'running' || p.cooldown > 0 || p.attack > 0 || p.hurt > .13 || p.evade > 0 || p.reload > 0) return;
     if (p.stamina < w.staminaCost) { hint('Złap oddech — wytrzymałość wraca, gdy nie atakujesz.'); return; }
+    if (w.kind === 'ranged' && p.ammo != null && p.ammo <= 0) {
+      p.reload = w.reload; p.cooldown = w.reload; hint('Przeładowanie! Paruj, dopóki bęben się nie obróci.', w.reload); tone('dodge');
+      updateEvent(true); return;
+    }
     p.stamina -= w.staminaCost; p.attack = w.swing; p.attackDone = false; p.cooldown = w.cooldown;
-    tone('swing');
+    if (w.kind === 'ranged' && p.ammo != null) { p.ammo--; p.shots++; }
+    tone(w.kind === 'ranged' ? 'hit' : 'swing');
   }
 
   // Every blow provokes a dodge or a parry. A tired guard still lets damage through.
@@ -141,6 +160,8 @@
     if (state.status !== 'running' || state.player.hp <= 0 || state.foe.hp <= 0) return;
     const p = state.player, r = state.foe, w = state.weapon.stats, distance = r.x - p.x;
     r.defense = .35;
+    const ranged = w.kind === 'ranged';
+    if (ranged) { burst(p.x + 70, FLOOR - 165, '#fff1b6', 8, .5); impactFlash(.05); }
     if (distance > w.range) {
       r.defenseKind = 'dodge'; tone('dodge');
       hint(`Podejdź bliżej. ${alias()} jest poza zasięgiem.`);
@@ -150,18 +171,18 @@
       state.combo++;
       const amount = Math.ceil((w.weakGuardDamage + (state.combo >= w.comboAt ? w.comboBonus : 0)) * state.perk.stats.weakGuardDamageMultiplier);
       damageFoe(amount);
-      label('SŁABA GARDA', r.x - 80, FLOOR - 255, '#edc37d', 19);
-      hint(`Słaba garda! Atakuj, dopóki ${alias()} odzyskuje siły.`, 1.5);
+      label(ranged ? 'CELNY STRZAŁ' : 'SŁABA GARDA', r.x - 80, FLOOR - 255, '#edc37d', 19);
+      hint(ranged ? `Celny strzał! ${alias()} nie ma czym się zasłonić.` : `Słaba garda! Atakuj, dopóki ${alias()} odzyskuje siły.`, 1.5);
     } else if (r.state === 'windup' || r.state === 'strike') {
       r.defenseKind = 'guard';
       burst(r.x - 135, FLOOR - 155, '#eac584', 14, .7); tone('parry');
-      label('PAROWANIE', r.x - 65, FLOOR - 285, '#efc27c', 20);
+      label(ranged ? 'ODBITY' : 'PAROWANIE', r.x - 65, FLOOR - 285, '#efc27c', 20);
       p.stamina = Math.max(0, p.stamina - w.parryDrain);
-      hint('Twarda garda! Poczekaj na jego atak, potem odpowiedz.');
+      hint(ranged ? 'Odbił kulę! Strzelaj tylko w osłabioną gardę.' : 'Twarda garda! Poczekaj na jego atak, potem odpowiedz.');
     } else {
       r.defenseKind = 'dodge'; tone('dodge');
       label('UNIK', r.x - 70, FLOOR - 285, '#adb6b9', 20);
-      hint(`${alias()} unika. Sprowokuj go i uderz po jego ataku.`);
+      hint(ranged ? `${alias()} uskoczył przed kulą. Czekaj na jego cios, potem strzelaj.` : `${alias()} unika. Sprowokuj go i uderz po jego ataku.`);
     }
     checkEnd();
   }
@@ -242,6 +263,7 @@
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats, GAP = combat.minGap;
     p.cooldown = Math.max(0, p.cooldown - dt); p.hurt = Math.max(0, p.hurt - dt);
     p.evade = Math.max(0, p.evade - dt); p.defense = Math.max(0, p.defense - dt);
+    if (p.reload > 0) { p.reload = Math.max(0, p.reload - dt); if (p.reload <= 0 && p.maxAmmo != null) { p.ammo = p.maxAmmo; hint('Bęben pełny. Czekaj na osłabioną gardę.', 1.5); updateEvent(true); } }
     r.hurt = Math.max(0, r.hurt - dt); r.defense = Math.max(0, r.defense - dt);
     p.guarding = input.guard && p.attack <= 0 && p.evade <= 0;
     if (input.attack && !p.guarding) attack();
@@ -416,7 +438,17 @@
       progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 }) : fallbackFighter(p.x, playerPose);
     drawR(); drawP();
     if (p.guarding || p.defense > 0 && p.evade <= 0) drawGuard(p.x, state.elapsed - p.guardSince < state.perk.stats.perfectParryWindow);
-    if (p.attack > .1 && p.attack < .3) {
+    if (w.kind === 'ranged') {
+      if (p.attackDone && p.attack > 0 && p.attack > w.contact - .12) {
+        ctx.save(); ctx.strokeStyle = '#fff3c4'; ctx.lineWidth = 3; ctx.globalAlpha = clamp((p.attack - (w.contact - .12)) / .12, 0, 1) * .85;
+        ctx.beginPath(); ctx.moveTo(p.x + 70, FLOOR - 168); ctx.lineTo(r.x + rEvadeX - 60, FLOOR - 190); ctx.stroke(); ctx.restore();
+      }
+      if (p.reload > 0) {
+        ctx.save(); ctx.textAlign = 'center'; ctx.font = '700 16px system-ui'; ctx.fillStyle = '#ffd98a';
+        ctx.fillText('PRZEŁADOWANIE', p.x, FLOOR - 300); ctx.strokeStyle = '#ffd98a55'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(p.x, FLOOR - 325, 14, -Math.PI / 2, -Math.PI / 2 + (1 - p.reload / w.reload) * Math.PI * 2); ctx.stroke(); ctx.restore();
+      }
+    } else if (p.attack > .1 && p.attack < .3) {
       ctx.save(); ctx.strokeStyle = '#ffe4a1'; ctx.lineWidth = 5; ctx.globalAlpha = Math.sin((.3 - p.attack) / .2 * Math.PI) * .7;
       ctx.beginPath(); ctx.ellipse(p.x + 75, FLOOR - 150, 95, 110, -.2, -.9, 1.1); ctx.stroke(); ctx.restore();
     }
@@ -482,7 +514,7 @@
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon, options.theme); scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;

@@ -54,3 +54,12 @@
 .timejump.arrived .jump-center strong{color:var(--lime)}.timejump .jump-to{color:var(--gold)}
 @media(max-width:1000px){.timejump .jump-center strong{font-size:36px}.level-strip{gap:4px}.level-pip{min-width:70px;padding:5px 7px}}
 @media(max-width:650px){.level-strip{display:none}.timejump .jump-center{top:28%}}
+
+/* Faza 2: rodzaje przedmiotów, sprzedaż, ulepszenia, naboje, bonus dzienny */
+.kind-tabs{display:flex;gap:6px;margin:10px 0 12px}.kind-tab{background:#0f140f;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:9px;letter-spacing:2px;font-weight:700;padding:8px 14px;cursor:pointer}
+.kind-tab[aria-pressed="true"]{border-color:var(--lime);color:var(--lime);background:#1a2213}.kind-tab:hover{border-color:var(--gold)}
+.skin-cell{display:flex;flex-direction:column;gap:4px;min-width:0}.skin-cell>.skin-card{width:100%}
+.skin-actions{display:flex;gap:4px}.skin-action{flex:1;background:#121711;border:1px solid var(--line);color:var(--cream);font:inherit;font-size:7.5px;letter-spacing:1px;font-weight:700;padding:6px 4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skin-action:hover:not(:disabled){border-color:var(--lime)}.skin-action.sell:hover:not(:disabled){border-color:#d9a0c6}.skin-action:disabled{opacity:.4;cursor:not-allowed}
+.ammo-row{display:flex;justify-content:space-between;font-size:8px;letter-spacing:2px;color:var(--muted);margin-top:4px}.ammo-row strong{color:#ffd98a}
+.daily-line{font-size:8px;letter-spacing:2px;color:var(--gold);margin-top:8px;font-weight:700}

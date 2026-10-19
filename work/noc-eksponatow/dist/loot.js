@@ -1,7 +1,11 @@
-/* Crates spend earned museum tokens. PLN prices are previews, not live payments. */
+/* Crates spend earned museum tokens. PLN prices are previews, not live payments.
+   Items (skins, weapons, cards) share one catalogue with a value per rarity; selling, upgrades and the daily bonus live here too. */
 (() => {
  'use strict';
+ const weaponsApi=window.MuseumWeapons,cardsApi=window.MuseumCards;
  const categories=Object.freeze([
+  {id:'arsenal',name:'Arsenał',color:'#c9b37a'},
+  {id:'heroes',name:'Bohaterowie',color:'#d9a0c6'},
   {id:'elements',name:'Smoki i Żywioły',color:'#f69b55'},
   {id:'shadow',name:'Mrok i Widma',color:'#b997ee'},
   {id:'nature',name:'Dzika Natura',color:'#84ca91'},
@@ -62,7 +66,16 @@
    description:'Wędrowcy, błędni rycerze i złote skorpiony ze szlaków poza horyzontem.',
    guarantee:'1 nowy skin · tylko piaski i szlaki',color:'#d8ba86',
    rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
- ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,...crate})));
+,
+  {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:900,pricePLN:24.99,
+   description:'Topór, włócznia, rapier albo rewolwer. Każda broń zmienia rytm walki.',
+   guarantee:'1 nowa broń · wszystkie rzadkości',color:'#c9b37a',
+   rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
+  {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:800,pricePLN:22.99,
+   description:'Karty prawdziwych bohaterów historii z pasywnym bonusem oraz karty broni.',
+   guarantee:'1 nowa karta · bohaterowie i broń',color:'#d9a0c6',
+   rarityWeights:Object.freeze({common:40,rare:35,epic:19,legendary:6})}
+ ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',...crate})));
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -84,12 +97,31 @@
   {id:'solar',name:'SŁONECZNY PALADYN',era:'ZŁOTO · LEGENDARNY EKSPONAT',rarity:'legendary',weight:10},
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
  ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
+ // One catalogue for everything a crate can drop or a player can sell.
+ const values=Object.freeze({basic:0,common:150,rare:400,epic:1000,legendary:2500});
+ const SELL_RATE=.4, UPGRADE_MAX=5;
+ const items=Object.freeze([
+  ...skins.map(skin=>({kind:'skin',...skin})),
+  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,summary:w.summary,description:w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:'arsenal'})),
+  ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'}))
+ ].map(Object.freeze));
+ const itemsById=new Map(items.map(item=>[item.id,item]));
+ function getItem(id){return itemsById.get(id)||null;}
+ function value(item){const it=typeof item==='string'?getItem(item):item;return it&&!it.gift?values[it.rarity]||0:0;}
+ function sellPrice(item){return Math.floor(value(item)*SELL_RATE);}
+ function listFor(profile,kind){return kind==='weapon'?profile.weapons:kind==='card'?profile.cards:profile.owned;}
+ function has(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&listFor(profile,it.kind).includes(it.id);}
+ function equipped(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&(it.kind==='skin'?profile.skin===it.id:it.kind==='weapon'?profile.weapon===it.id:profile.card===it.id);}
  const integer = value => Number.isFinite(Number(value)) ? Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(Number(value)))) : 0;
  function migrate(saved) {
   const source = saved && typeof saved === 'object' ? saved : {};
   const inventory = Array.isArray(source.owned) ? source.owned : [];
   const owned = skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id);
-  const pendingReward=source.pendingReward !== 'brass' && owned.includes(source.pendingReward) ? source.pendingReward : null;
+  const weapons=['sword',...(Array.isArray(source.weapons)?source.weapons:[]).filter(id=>id!=='sword'&&weaponsApi.has(id))];
+  const cards=(Array.isArray(source.cards)?source.cards:[]).filter(id=>cardsApi.get(id));
+  const pendingItem=getItem(source.pendingReward);
+  const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:cards).includes(pendingItem.id) ? pendingItem.id : null;
+  const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(item&&item.kind===kind&&(kind==='skin'||kind==='weapon'))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}
   return {
    coins:integer(source.coins),owned,
    skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,
@@ -99,12 +131,15 @@
    cleared:Array.isArray(source.cleared) ? source.cleared.filter(id=>typeof id==='string') : [],
    level:typeof source.level==='string' ? source.level : null,
    exhibit:typeof source.exhibit==='string' ? source.exhibit : null,
-   weapon:typeof source.weapon==='string' ? source.weapon : 'sword'
+   weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
+   cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
+   pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
+   upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))}
   };
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  return crate ? skins.filter(s => s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && !profile.owned.includes(s.id)) : [];
+  return crate ? items.filter(s => s.kind===crate.pool && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);
@@ -118,7 +153,7 @@
  function entries(profile,crateId='gallery') {
   const pool=remaining(profile,crateId),chances=odds(profile,crateId);
   const counts=pool.reduce((result,skin)=>(result[skin.rarity]=(result[skin.rarity]||0)+1,result),{});
-  return pool.map(skin=>({skin,chance:chances[skin.rarity]/counts[skin.rarity]}));
+  return pool.map(item=>({item,skin:item,chance:chances[item.rarity]/counts[item.rarity]}));
  }
  function randomValue() {
   if(window.crypto?.getRandomValues){const value=new Uint32Array(1);window.crypto.getRandomValues(value);return value[0]/4294967296;}
@@ -146,11 +181,55 @@
   if(profile.coins<cost)return null;
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
-  return {reward,cost,free,crate,profile:{...profile,coins:profile.coins-cost,freeCrates:free?profile.freeCrates-1:profile.freeCrates,owned:[...profile.owned,reward.id],pendingReward:reward.id,pendingCrateId:crate.id}};
+  const next={...profile,coins:profile.coins-cost,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
+  if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else next.cards=[...profile.cards,reward.id];
+  return {reward,cost,free,crate,profile:next};
  }
  function claim(profile, {equip=false}={}) {
-  const reward=skins.find(s=>s.id===profile.pendingReward);
-  return {...profile,skin:equip&&reward&&profile.owned.includes(reward.id)?reward.id:profile.skin,pendingReward:null,pendingCrateId:null};
+  const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null};
+  if(equip&&reward&&has(profile,reward)){if(reward.kind==='skin')next.skin=reward.id;else if(reward.kind==='weapon')next.weapon=reward.id;else if(reward.type==='hero')next.card=reward.id;}
+  return next;
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,getCrate,skins,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
+ function equip(profile,id){
+  const item=getItem(id);if(!item||!has(profile,item))return null;
+  if(item.kind==='skin')return {...profile,skin:item.id};if(item.kind==='weapon')return {...profile,weapon:item.id};
+  if(item.type==='hero')return {...profile,card:profile.card===item.id?null:item.id};return null;
+ }
+ // Selling: owned, not equipped, not a gift or basic item. Pays SELL_RATE of the value and forgets the upgrades.
+ function canSell(profile,id){const item=getItem(id);return !!item&&has(profile,item)&&!equipped(profile,item)&&value(item)>0&&!item.gift&&profile.pendingReward!==item.id;}
+ function sell(profile,id){
+  if(!canSell(profile,id))return null;const item=getItem(id),price=sellPrice(item),upgrades={...profile.upgrades};delete upgrades[`${item.kind}:${item.id}`];
+  const next={...profile,coins:profile.coins+price,upgrades};
+  if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
+  return {profile:next,price,item};
+ }
+ // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
+ const upgradeKey=(kind,id)=>`${kind}:${id}`;
+ function upgradeLevel(profile,id){const item=getItem(id);return item?integer(profile.upgrades?.[upgradeKey(item.kind,item.id)]):0;}
+ function upgradeCost(level){return level>=UPGRADE_MAX?null:250+level*350;}
+ function upgradeEffect(item,level){const it=typeof item==='string'?getItem(item):item;if(!it||!level)return null;return it.kind==='skin'?`+${6*level} maks. HP`:it.kind==='weapon'?`+${8*level}% obrażeń`:null;}
+ function canUpgrade(profile,id){const item=getItem(id);if(!item||!has(profile,item)||!(item.kind==='skin'||item.kind==='weapon'))return false;const cost=upgradeCost(upgradeLevel(profile,id));return cost!==null&&profile.coins>=cost;}
+ function upgrade(profile,id){
+  if(!canUpgrade(profile,id))return null;const item=getItem(id),level=upgradeLevel(profile,id),cost=upgradeCost(level);
+  return {profile:{...profile,coins:profile.coins-cost,upgrades:{...profile.upgrades,[upgradeKey(item.kind,item.id)]:level+1}},level:level+1,cost,item};
+ }
+ // Everything that changes the next fight beyond the skin perk: hero card, weapon card for the equipped weapon, upgrades.
+ function modifiers(profile){
+  const result={};const add=(key,v)=>{result[key]=key.endsWith('Multiplier')?(result[key]??1)*v:(result[key]??0)+v;};
+  const hero=cardsApi.get(profile.card);if(hero&&profile.cards.includes(hero.id))for(const [k,v] of Object.entries(hero.modifiers))add(k,v);
+  const weaponCard=cardsApi.weaponCards().find(c=>c.weapon===profile.weapon);if(weaponCard&&profile.cards.includes(weaponCard.id))for(const [k,v] of Object.entries(weaponCard.modifiers))add(k,v);
+  const skinLevel=upgradeLevel(profile,profile.skin);if(skinLevel)add('maxHP',6*skinLevel);
+  const weaponLevel=upgradeLevel(profile,profile.weapon);if(weaponLevel)add('weaponDamageMultiplier',1+.08*weaponLevel);
+  return result;
+ }
+ // Daily bonus: grows 25 a day from 50, caps at 300, resets after a missed day. Local clock for now; the server takes over in phase 4.
+ function dateKey(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+ function dailyBonus(profile,now=new Date()){
+  const today=dateKey(now);if(profile.login?.last===today)return null;
+  const yesterday=dateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1));
+  const streak=profile.login?.last===yesterday?integer(profile.login.streak)+1:1;
+  const bonus=Math.min(300,50+(streak-1)*25);
+  return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
+ }
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
 })();

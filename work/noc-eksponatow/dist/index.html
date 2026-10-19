@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza1">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza2">
 </head>
 <body>
  <div class="app">
@@ -26,12 +26,13 @@
      <p id="heroTagline">Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.</p>
      <button id="startBtn" class="primary-btn">ROZPOCZNIJ NOC <span>↗</span></button>
      <div class="intro-note" id="introNote"><span>◷</span> Najpierw historia. 18 sekund. Bez pomijania.</div>
+     <div id="dailyLine" class="daily-line hidden"></div>
      <div id="levelStrip" class="level-strip" aria-label="Sale nocnego obchodu"></div>
      <div class="hero-edition">NOCNA ZMIANA <span>VOL. 02 / 2026</span></div>
     </div>
     <div id="exhibitTag" class="exhibit-tag"><span class="tag-dot"></span><div><span id="exhibitTagName">TYRANNOSAURUS REX</span><small id="exhibitTagInfo">KREDA PÓŹNA · NR INW. 066</small></div><span class="tag-arrow">↗</span></div>
     <div id="hud" class="hud hidden" aria-live="off">
-      <div class="fighter-hud player-hud"><div class="fighter-label"><span>01 / TWÓJ EKSPONAT</span><strong id="playerName">ŻELAZNY RYCERZ</strong></div><div class="health-track"><div id="playerHealth" class="health-fill"></div></div><div class="health-numbers"><span id="playerHP">100 / 100</span><span class="stamina-label">ENERGIA <span id="staminaNum">100</span></span></div><div class="stamina-track"><div id="staminaBar"></div></div><div id="activePerk" class="active-perk" aria-label="Aktywna zdolność skina"></div></div>
+      <div class="fighter-hud player-hud"><div class="fighter-label"><span>01 / TWÓJ EKSPONAT</span><strong id="playerName">ŻELAZNY RYCERZ</strong></div><div class="health-track"><div id="playerHealth" class="health-fill"></div></div><div class="health-numbers"><span id="playerHP">100 / 100</span><span class="stamina-label">ENERGIA <span id="staminaNum">100</span></span></div><div class="stamina-track"><div id="staminaBar"></div></div><div id="ammoRow" class="ammo-row hidden"><span>NABOJE</span><strong id="ammoNum">6 / 6</strong></div><div id="activePerk" class="active-perk" aria-label="Aktywna zdolność skina"></div></div>
       <div class="center-hud"><span class="vs">VS</span><span id="fightTime">00:00</span><button id="pauseBtn" aria-label="Wstrzymaj walkę">Ⅱ</button></div>
       <div class="fighter-hud rex-hud"><div class="fighter-label"><span>02 / PRZECIWNIK</span><strong id="foeName">TYRANNOSAURUS REX</strong></div><div class="health-track"><div id="foeHealth" class="health-fill"></div></div><div class="health-numbers"><span id="foeState">ŻYWY EKSPONAT</span><span id="foeHP">100 / 100</span></div></div>
     </div>
@@ -52,8 +53,8 @@
  </div>
  <div id="collection" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="collectionTitle">
   <div class="collection-panel">
-   <div class="modal-heading"><div><span class="eyebrow">ZBROJOWNIA / 50 NOWYCH STROJÓW</span><h2 id="collectionTitle">SKRZYNKI I SKINY.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij kolekcję">✕</button></div>
-   <p class="modal-lead">58 strojów w kolekcjach tematycznych. Wybierz motyw skrzyni lub znajdź zbroję po kategorii. Stachu Jones pozostaje prezentem dla ciebie.</p>
+   <div class="modal-heading"><div><span class="eyebrow">ZBROJOWNIA / STROJE, BROŃ I KARTY</span><h2 id="collectionTitle">SKRZYNKI I KOLEKCJA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij kolekcję">✕</button></div>
+   <p class="modal-lead">58 strojów, 5 rodzajów broni i 13 kart bohaterów. Każdy przedmiot ma wartość: zbędne sprzedasz, ulubione ulepszysz. Stachu Jones pozostaje prezentem dla ciebie.</p>
    <div class="crate-box">
     <div class="crate-art" aria-hidden="true"><svg viewBox="0 0 120 105" fill="none"><path d="m13 43 47-18 47 18v45l-47 15L13 88V43Z" fill="#2c3320" stroke="#b5c47a" stroke-width="1.5"/><path d="m13 43 47 17 47-17M60 60v43M13 65l47 16 47-16" stroke="#b5c47a" stroke-width="1.5"/><path d="m32 36 47 17v44M82 34 36 51v45" stroke="#d5ed71" stroke-width="6"/><path d="m54 57 13 1v21l-7 5-6-5V57Z" fill="#d5ed71"/><path d="M60 63v10" stroke="#28311a" stroke-width="3"/><path d="m60 1 3 11 11 3-11 3-3 11-3-11-11-3 11-3 3-11ZM99 14l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Z" fill="#d5ed71"/></svg></div>
     <div class="crate-copy"><label class="crate-type-label" for="crateType">WYBIERZ SKRZYNIĘ</label><select id="crateType"></select><h3 id="crateTitle">Skrzynia Galerii</h3><span id="crateCategory" class="crate-category"></span><p id="crateGuarantee">Gwarantowany nowy skin. Bez duplikatów.</p><span id="freeCrateCount" class="free-crate-badge">1 DARMOWA SKRZYNIA NA START</span></div>
@@ -64,6 +65,7 @@
    <button id="crateShopBtn" class="store-link">ZOBACZ WSZYSTKIE OFERTY W SKLEPIE ↗</button>
    <p id="collectionMessage" class="collection-message" aria-live="polite">Pierwszy eksponat czeka. Otwórz darmową skrzynię.</p>
    <div class="collection-section"><span>TWOJE EKSPONATY</span><span id="collectionCount">2 / 58</span></div>
+   <div class="kind-tabs" role="group" aria-label="Rodzaj przedmiotów"><button id="kindSkins" class="kind-tab" aria-pressed="true">STROJE</button><button id="kindWeapons" class="kind-tab" aria-pressed="false">BROŃ</button><button id="kindCards" class="kind-tab" aria-pressed="false">KARTY</button></div>
    <div class="wardrobe-toolbar">
     <label class="skin-search-label"><span>SZUKAJ STROJU LUB ZDOLNOŚCI</span><input id="skinSearch" type="search" placeholder="Nazwa, motyw lub zdolność…" autocomplete="off"></label>
     <label><span>KATEGORIA</span><select id="categoryFilter"></select></label>
@@ -75,7 +77,7 @@
    <div id="skinGrid" class="skin-grid"></div>
    <div id="skinEmpty" class="skin-empty hidden"><strong>Ta gablota jest pusta.</strong><p>Zmień nazwę lub filtry, żeby znaleźć inne stroje.</p><button id="resetSkinFilters" class="secondary-btn">WYCZYŚĆ FILTRY</button></div>
    <div id="skinPagination" class="skin-pagination" aria-label="Strony kolekcji"><button id="skinPagePrev" aria-label="Poprzednia strona strojów">← POPRZEDNIA</button><span id="skinPageInfo" aria-live="polite"></span><button id="skinPageNext" aria-label="Następna strona strojów">NASTĘPNA →</button></div>
-   <p class="collection-footnote">Każdy skin daje inną zdolność w walce. Wybierasz jeden przed pojedynkiem — bonusy nie sumują się. Żetony zdobywasz w grze.</p>
+   <p class="collection-footnote">Jeden skin, jedna broń i jedna karta bohatera działają naraz. Karty broni działają same, gdy masz założoną pasującą broń. Sprzedaż daje 40% wartości, ulepszenia mają pięć poziomów. Żetony zdobywasz w grze i za codzienne logowanie.</p>
   </div>
  </div>
  <div id="loot" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="lootTitle">
@@ -95,7 +97,7 @@
    <div class="modal-heading"><div><span class="eyebrow">SKRZYNIE / NOCNA OFERTA</span><h2 id="shopTitle">SKLEP KUSTOSZA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij sklep">✕</button></div>
    <div class="shop-intro"><p class="modal-lead">Niektóre skarby nie trafiają na wystawę.<br>Wybierz skrzynię. Odkryj nowy strój i jego zdolność.</p><div class="shop-wallet"><span>TWOJE ŻETONY</span><strong id="shopBalance">0 ✦</strong></div></div>
    <p class="shop-notice"><span>◷</span><span><strong>ZAPOWIEDŹ SKLEPU</strong> Ceny w złotówkach są planowane. Płatności nie są jeszcze dostępne. Skrzynki za żetony zdobyte w grze możesz otwierać już teraz.</span></p>
-   <div class="shop-browse"><div class="shop-filters" aria-label="Rodzaje skrzyń"><button id="shopFilterAll" aria-pressed="true">WSZYSTKIE</button><button id="shopFilterClassic" aria-pressed="false">KLASYCZNE</button><button id="shopFilterThemed" aria-pressed="false">TEMATYCZNE</button></div><span id="shopOffersCount" aria-live="polite"></span></div>
+   <div class="shop-browse"><div class="shop-filters" aria-label="Rodzaje skrzyń"><button id="shopFilterAll" aria-pressed="true">WSZYSTKIE</button><button id="shopFilterClassic" aria-pressed="false">KLASYCZNE</button><button id="shopFilterThemed" aria-pressed="false">TEMATYCZNE</button><button id="shopFilterWeapons" aria-pressed="false">BROŃ</button><button id="shopFilterCards" aria-pressed="false">KARTY</button></div><span id="shopOffersCount" aria-live="polite"></span></div>
    <div id="shopOffers" class="shop-offers" aria-label="Oferty skrzyń"></div>
    <div id="shopSummary" class="shop-summary" tabindex="-1">
     <div><span class="eyebrow">WYBRANA SKRZYNIA</span><h3 id="shopSelectedName"></h3><span id="shopSelectedCategory" class="shop-family-label"></span><p id="shopSelectedGuarantee"></p><div id="shopSelectedOdds" class="shop-odds" aria-label="Szanse na rzadkości"></div><p class="shop-odds-note">Szanse dotyczą twojej obecnej kolekcji. Po zebraniu całej rzadkości są przeliczane dla pozostałych strojów.</p><details id="shopContents" class="drop-contents"><summary id="shopContentsSummary">ZAWARTOŚĆ I SZANSE NA SKINY</summary><ul id="shopContentsList" class="drop-list"></ul></details></div>
@@ -104,5 +106,5 @@
   </div>
  </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="knights.js?v=faza1"></script><script src="perks.js?v=faza1"></script><script src="weapons.js?v=faza1"></script><script src="exhibits.js?v=faza1"></script><script src="levels.js?v=faza1"></script><script src="art.js?v=faza1"></script><script src="game.js?v=faza1"></script><script src="loot.js?v=faza1"></script><script src="shop.js?v=faza1"></script><script src="loot-show.js?v=faza1"></script><script src="ui.js?v=faza1"></script>
+ <script src="knights.js?v=faza2"></script><script src="perks.js?v=faza2"></script><script src="weapons.js?v=faza2"></script><script src="exhibits.js?v=faza2"></script><script src="levels.js?v=faza2"></script><script src="cards.js?v=faza2"></script><script src="art.js?v=faza2"></script><script src="game.js?v=faza2"></script><script src="loot.js?v=faza2"></script><script src="shop.js?v=faza2"></script><script src="loot-show.js?v=faza2"></script><script src="ui.js?v=faza2"></script>
 </body></html>

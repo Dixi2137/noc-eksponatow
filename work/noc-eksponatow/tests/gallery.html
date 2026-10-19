@@ -4,7 +4,8 @@
 <body>
 <h2>PRZECIWNICY · pozy idle / guard / attack</h2><div class="row" id="foes"></div>
 <h2>SCENERIE</h2><div class="row" id="themes"></div>
-<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/art.js"></script>
+<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script>
+<script src="../dist/cards.js"></script><script src="../dist/art.js"></script>
 <script>
 const A=window.MuseumArt,E=window.MuseumExhibits;
 for(const ex of E.all()){for(const pose of ['idle','guard','attack']){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=260;c.height=320;const x=c.getContext('2d');x.fillStyle='#1a2020';x.fillRect(0,0,260,320);x.save();x.translate(ex.stats.art==='rex'?170:130,300);if(ex.stats.art==='rex')x.scale(.72,.72);A.drawExhibit(x,ex,0,0,{pose,facing:-1,time:1.2,progress:.5,phase:.5});x.restore();f.append(c);const cap=document.createElement('figcaption');cap.textContent=ex.name+' · '+pose;f.append(cap);foes.append(f);}}

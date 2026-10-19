@@ -518,5 +518,33 @@
     const key=def?.stats?.art||exhibit;
     (fighters[key]||drawRex)(c,x,y,{figure:def?.stats?.figure||null,...o});
   }
-  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,fighters,themes,drawGuardScene};
+  // Collection thumbnails for weapons and cards. Centered on (0,0), roughly 200 units tall.
+  function drawWeaponIcon(c,weapon,o={}){
+    const key=weapon?.icon||weapon?.id||'sword',col=o.color||'#d8e2dc';
+    c.save();c.lineCap='round';c.lineJoin='round';c.rotate(-.65);
+    const steel=grad(c,-10,0,10,0,[[0,'#627d85'],[.46,'#d8e8de'],[.52,'#eff8df'],[.6,'#8ca9ac'],[1,'#3c555f']]);
+    if(key==='sword'){rr(c,-5,60,10,40,2,'#372d25','#a68b56',1);ellipse(c,0,100,7,7,'#a58e57','#dfc58b');poly(c,[[-28,60],[-27,52],[-7,50],[0,44],[7,50],[27,52],[28,60],[6,56],[-6,56]],'#a18d59','#e2c68c',1);poly(c,[[-7,50],[-9,-100],[0,-125],[9,-100],[7,50]],steel,'#b6d9cc',1);line(c,0,-105,0,40,'#f5f6d3',1)}
+    else if(key==='axe'){line(c,0,-110,0,110,'#4a3420',11);line(c,0,-110,0,110,'#8a6a42',6);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(55,-110,95,-70,90,-10);q.bezierCurveTo(60,-30,30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(-55,-110,-95,-70,-90,-10);q.bezierCurveTo(-60,-30,-30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);line(c,-80,-15,80,-15,'#f5f6d3',1)}
+    else if(key==='spear'){line(c,0,-70,0,130,'#4a3420',8);line(c,0,-70,0,130,'#8a6a42',4);poly(c,[[-12,-70],[0,-135],[12,-70],[0,-60]],steel,'#b6d9cc',1.5);rr(c,-8,-72,16,10,2,'#8f7a3e','#d4af37',1);line(c,0,-125,0,-70,'#f5f6d3',1)}
+    else if(key==='rapier'){rr(c,-3,55,6,45,2,'#2b2420','#8f7a3e',1);ellipse(c,0,100,6,6,'#c9a94a','#e7d08a');ellipse(c,0,50,22,10,null,'#d4af37',3);path(c,q=>{q.moveTo(-18,50);q.bezierCurveTo(-30,20,30,20,18,50)},null,'#d4af37',2);poly(c,[[-3,40],[-3,-110],[0,-130],[3,-110],[3,40]],steel,'#b6d9cc',1)}
+    else if(key==='revolver'){c.rotate(.65);rr(c,-60,-18,120,22,6,'#2b2b2b','#6b6b6b',1.5);rr(c,-20,-28,40,36,5,'#1f1f1f','#7a7a7a',1.5);for(let k=0;k<3;k++)ellipse(c,-8+k*8,-10,3,3,'#3a3a3a','#8a8a8a',1);poly(c,[[-22,4],[-2,4],[6,52],[-20,58]],'#5a3a22','#8a6a42',1.5);path(c,q=>{q.moveTo(-6,10);q.bezierCurveTo(-2,24,8,28,12,20)},null,'#8a8a8a',3);rr(c,52,-20,12,10,2,'#444','#888',1);line(c,-55,-12,50,-12,'#9a9a9a',1)}
+    c.restore();
+  }
+  function drawCardArt(c,card,w=360,h=360){
+    const col=card?.color||'#777',tier=card?.rarity||'common';
+    c.save();
+    rr(c,40,24,w-80,h-48,14,grad(c,0,0,0,h,[[0,mixColor(col,'#000',.55)],[1,mixColor(col,'#000',.8)]]),mixColor(col,'#fff',.35),4);
+    rr(c,52,36,w-104,h-72,10,null,mixColor(col,'#fff',.15),1);
+    // Portrait medallion with initials; a laurel for heroes, crossed marks for weapons.
+    glow(c,w/2,h*.42,110,mixColor(col,'#fff',.1)+'66');
+    ellipse(c,w/2,h*.42,74,74,grad(c,w/2-70,h*.42-70,w/2+70,h*.42+70,[[0,mixColor(col,'#fff',.3)],[1,col]]),mixColor(col,'#fff',.5),3);
+    txt(c,card?.initials||'?',w/2,h*.42+(card?.initials?.length>1?22:24),card?.initials?.length>1?56:62,'#f6efd8','center','Georgia');
+    if(card?.type==='hero'){for(let side=-1;side<=1;side+=2)for(let i=0;i<7;i++){const a=-Math.PI/2+side*(.35+i*.17),x=w/2+Math.cos(a)*96,y=h*.42+Math.sin(a)*96;c.save();c.translate(x,y);c.rotate(a+side*.9);ellipse(c,0,0,10,4,mixColor(col,'#fff',.45));c.restore()}}
+    rr(c,64,h-118,w-128,34,6,'#0d110e','#5a5a4a',1);txt(c,(card?.name||'').toLocaleUpperCase('pl-PL'),w/2,h-95,card?.name?.length>18?14:17,'#f3e9cf','center','Arial');
+    txt(c,card?.era||'',w/2,h-66,11,mixColor(col,'#fff',.55),'center','Arial');
+    txt(c,(card?.summary||'').toLocaleUpperCase('pl-PL'),w/2,h-46,10,'#cfd6c4','center','Arial');
+    for(let k=0;k<{basic:0,common:1,rare:2,epic:3,legendary:4}[tier];k++)txt(c,'★',w/2-30+k*20,56,16,mixColor(col,'#fff',.6),'center','Arial');
+    c.restore();
+  }
+  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,fighters,themes,drawGuardScene};
 })();
