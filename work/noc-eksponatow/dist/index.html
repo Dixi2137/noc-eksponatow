@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza2">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza3">
 </head>
 <body>
  <div class="app">
   <header class="topbar">
    <div class="brand-area"><a class="brand" href="#" aria-label="Noc Eksponatów — strona główna"><span class="brand-mark">N<span>↗</span></span><span>NOC<br>EKSPONATÓW<span class="brand-sub">MUZEUM PO GODZINACH</span></span></a><button id="secretCoinsBtn" class="secret-coins" aria-label="Sekret stróża: dodaj 2137 monet">✦</button></div>
-   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button></nav>
+   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button><button id="hallTab" class="nav-tab">04 <span>MOJA SALA</span></button></nav>
    <div class="top-actions"><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
   </header>
   <main>
@@ -105,6 +105,22 @@
    </div>
   </div>
  </div>
+ <div id="hall" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="hallTitle">
+  <div class="hall-panel">
+   <div class="modal-heading"><div><span class="eyebrow">ZBROJOWNIA / SALA PRYWATNA</span><h2 id="hallTitle">MOJA SALA MUZEALNA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij salę">✕</button></div>
+   <p class="modal-lead">Osiem miejsc ekspozycji: dwa postumenty na zbroje, dwa wieszaki na broń, dwie ramy na karty i dwie gabloty na trofea. Trofea to przedmioty limitowane: jedno za każdą pokonaną salę, nie do kupienia i nie na sprzedaż.</p>
+   <div class="hall-top">
+    <label class="hall-name-label"><span>NAZWA SALI</span><input id="hallName" type="text" maxlength="28" autocomplete="off" spellcheck="false"></label>
+    <div id="hallSummary" class="hall-summary" aria-live="polite"></div>
+   </div>
+   <div class="hall-stage"><canvas id="hallCanvas" width="1440" height="810" aria-label="Podgląd twojej sali muzealnej"></canvas></div>
+   <div class="collection-section"><span>MIEJSCA EKSPOZYCJI</span><span id="hallFilled">0 / 8</span></div>
+   <div id="hallSlots" class="hall-slots"></div>
+   <div class="collection-section"><span>TROFEA</span><span id="hallTrophyCount">0 / 6</span></div>
+   <div id="hallTrophies" class="hall-trophies"></div>
+   <p class="collection-footnote">Prestiż liczy się z rzadkości wystawionych przedmiotów, ich ulepszeń i trofeów; pełna sala daje +20. Sprzedany przedmiot znika z ekspozycji.</p>
+  </div>
+ </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="knights.js?v=faza2"></script><script src="perks.js?v=faza2"></script><script src="weapons.js?v=faza2"></script><script src="exhibits.js?v=faza2"></script><script src="levels.js?v=faza2"></script><script src="cards.js?v=faza2"></script><script src="art.js?v=faza2"></script><script src="game.js?v=faza2"></script><script src="loot.js?v=faza2"></script><script src="shop.js?v=faza2"></script><script src="loot-show.js?v=faza2"></script><script src="ui.js?v=faza2"></script>
+ <script src="knights.js?v=faza3"></script><script src="perks.js?v=faza3"></script><script src="weapons.js?v=faza3"></script><script src="exhibits.js?v=faza3"></script><script src="levels.js?v=faza3"></script><script src="cards.js?v=faza3"></script><script src="hall.js?v=faza3"></script><script src="art.js?v=faza3"></script><script src="game.js?v=faza3"></script><script src="loot.js?v=faza3"></script><script src="shop.js?v=faza3"></script><script src="loot-show.js?v=faza3"></script><script src="ui.js?v=faza3"></script>
 </body></html>

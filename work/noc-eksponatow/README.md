@@ -104,3 +104,15 @@ Jeden katalog przedmiotów (`MuseumLoot.items`): 58 strojów, 5 broni, 13 kart. 
 - Kolekcja ma zakładki STROJE / BROŃ / KARTY; miniatury broni i kart rysuje `art.js` (`drawWeaponIcon`, `drawCardArt`).
 - Profil migruje bez utraty: stare zapisy dostają `weapons: ['sword']`, puste karty i ulepszenia, nieznane id są odrzucane.
 - Testy: `tests/economy.js` (15 testów), łącznie 44.
+
+## Faza 3 — zbrojownia: własna sala muzealna (2026-10-19)
+
+Zakładka **04 MOJA SALA** otwiera prywatną salę gracza (`dist/hall.js`, `window.MuseumHall`).
+
+- Osiem miejsc ekspozycji (`slots`): dwa postumenty na zbroje (skiny), dwa wieszaki na broń, dwie ramy na karty, dwie gabloty na trofea. Miejsce przyjmuje tylko posiadany przedmiot właściwego rodzaju; sprzedany przedmiot znika z ekspozycji przy następnym renderze (`exhibition()` sprawdza posiadanie).
+- **Trofea** to przedmioty limitowane: po jednym za każdą pokonaną salę (`trophies`, klucz `level`), nie ma ich w katalogu skrzyń, nie da się ich kupić ani sprzedać. Posiadanie wynika z `profile.cleared`, więc nic dodatkowego nie trzeba zapisywać.
+- **Prestiż** (`summary()`): punkty za rzadkość wystawionych przedmiotów (podstawowy 1, zwykły 2, rzadki 4, epicki 8, legendarny 16, trofeum 12) + 2 za każdy poziom ulepszenia + 20 za pełną salę. **Wartość ekspozycji** to suma wartości wystawionych przedmiotów (trofea 0).
+- Nazwa sali (do 28 znaków) jest wypisana nad wejściem; zapis w `profile.hall = {name, slots}` (migracja w `loot.migrate` przez `MuseumHall.migrate`).
+- Rysowanie: `art.js` ma motyw `hall` (bez reklamy sponsora i bez reliefów), `drawHall(ctx, w, h, t, ekspozycja, {name})` i `drawTrophy`. Panel sali: pole nazwy, podgląd na canvasie, lista miejsc z wyborem, siatka trofeów (nieodkryte jako „???" z nazwą sali do pokonania).
+- Kolejność skryptów: `hall.js` po `cards.js`, przed `art.js` i `loot.js`.
+- Testy: `tests/hall.js` (8 testów), łącznie 52.

@@ -134,7 +134,8 @@
    weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
-   upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))}
+   upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
+   hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}}
   };
  }
  function remaining(profile,crateId='gallery') {

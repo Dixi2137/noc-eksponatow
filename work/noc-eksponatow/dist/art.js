@@ -20,6 +20,7 @@
     sparta:{bg:[[0,'#140b05'],[.65,'#3b2a1b'],[1,'#130c07']],wall:['#2b2219','#27201a'],sign:['ΘΕΡΜΟΠΥΛΑΙ','SALA ANTYKU · 480 P.N.E.'],consoles:['SPARTA','HOPLITAI'],floor:[[0,'#4d3d27'],[.25,'#3f3121'],[1,'#1a130d']],window:'sun',particles:'dust',light:'rgba(255,176,96,.12)',banner:{color:'#8b1a1a',edge:'#d08a4a',glyph:'Λ'}},
     napoleon:{bg:[[0,'#0a0e15'],[.65,'#27313e'],[1,'#0c1118']],wall:['#1d2531','#1b222d'],sign:['BORODINO','SALA EMPIRE · 1812'],consoles:['GRANDE ARMÉE','1812'],floor:[[0,'#d6dbe0'],[.25,'#b4bcc5'],[1,'#56606b']],window:'snow',particles:'snow',light:'rgba(200,222,255,.10)',banner:{color:'#1f3a6b',edge:'#d4af37',glyph:'N'}},
     bunker:{bg:[[0,'#0f0f0e'],[.65,'#2b2b27'],[1,'#121211']],wall:['#3b3b37','#373733'],sign:['FÜHRERBUNKER','BERLIN · 1945'],consoles:['1945','BERLIN'],floor:[[0,'#3c3b36'],[.25,'#34332f'],[1,'#17171a']],window:'none',particles:'ash',light:'rgba(255,222,160,.07)',banner:{color:'#4d4634',edge:'#8a7f5e',glyph:''}},
+    hall:{bg:[[0,'#0c0a06'],[.65,'#2d2416'],[1,'#0e0b07']],wall:['#2a2219','#271f18'],sign:['SALA PRYWATNA','KOLEKCJA NOCNEGO STRÓŻA'],consoles:['ZBROJE','BROŃ'],floor:[[0,'#3a2f1f'],[.25,'#32291c'],[1,'#15100b']],window:'moon',particles:'dust',light:'rgba(255,214,140,.11)',banner:null,sponsor:false},
     kremlin:{bg:[[0,'#170808'],[.65,'#3f1414'],[1,'#130606']],wall:['#4b1b1b','#451919'],sign:['КРЕМЛЬ','MOSKWA · 1953'],consoles:['1953','МОСКВА'],floor:[[0,'#5c2323'],[.25,'#4b1d1d'],[1,'#1f0b0b']],window:'moon',particles:'dust',light:'rgba(255,204,124,.10)',banner:{color:'#b3202a',edge:'#e8c547',glyph:'★'}}
   };
   function banner(c,x,y,w,h,b){
@@ -68,8 +69,8 @@
     path(c,q=>{q.moveTo(x1,y+5);q.bezierCurveTo(x1+30,y+42,x2-30,y+42,x2,y+5)},null,'#6c2637',6);
     path(c,q=>{q.moveTo(x1,y+4);q.bezierCurveTo(x1+30,y+39,x2-30,y+39,x2,y+4)},null,'#9d4955',1);
   }
-  function drawArena(c,w=1440,h=810,t=0,themeKey='museum'){
-    const T=themes[themeKey]||themes.museum;
+  function drawArena(c,w=1440,h=810,t=0,themeKey='museum',overrides=null){
+    const T=overrides?{...(themes[themeKey]||themes.museum),...overrides}:(themes[themeKey]||themes.museum);
     c.save();c.scale(w/1440,h/810);
     c.fillStyle=grad(c,0,0,0,810,T.bg);c.fillRect(0,0,1440,810);
     // Deep gallery and coffered stonework.
@@ -77,7 +78,7 @@
     for(let y=150;y<570;y+=70)line(c,0,y,1440,y,'rgba(155,149,108,.055)',1);
     rr(c,0,80,1440,17,1,'#25312d','#575b47',1);rr(c,0,98,1440,9,1,'#0b161b','#343e36');
     windowArch(c,226,164,170,335,t,T.window);windowArch(c,1044,164,170,335,t,T.window);
-    if(T.banner){banner(c,452,200,105,210,T.banner);banner(c,883,200,105,210,T.banner)}else{wallFrame(c,452,238,105,158);wallFrame(c,883,238,105,158)}
+    if(T.banner){banner(c,452,200,105,210,T.banner);banner(c,883,200,105,210,T.banner)}else if(T.frames!==false){wallFrame(c,452,238,105,158);wallFrame(c,883,238,105,158)}
     // Center entrance, pediment and museum identity.
     path(c,q=>arch(q,598,210,244,342),'#0b171b','#4b5144',3);
     path(c,q=>arch(q,613,225,214,327),'#0a151a','#343f38',2);
@@ -87,7 +88,7 @@
     path(c,q=>{q.moveTo(720,262);q.lineTo(720,282);q.lineTo(734,290)},null,'#d9c28a',2);
     txt(c,T.sign[0],720,187,22,'#a8a17c');txt(c,T.sign[1],720,206,8,'#7f8a73','center','Arial');
     // The supplied advertisement is mounted in the back wall, behind the fighters.
-    if(sponsorImage?.complete&&sponsorImage.naturalWidth>0){
+    if(T.sponsor!==false&&sponsorImage?.complete&&sponsorImage.naturalWidth>0){
       c.save();c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=15;c.shadowOffsetY=5;
       rr(c,602,302,236,246,2,'#151a15','#b9a36d',3);c.shadowBlur=0;c.shadowOffsetY=0;
       c.imageSmoothingEnabled=true;c.drawImage(sponsorImage,608,308,224,234);
@@ -546,5 +547,30 @@
     for(let k=0;k<{basic:0,common:1,rare:2,epic:3,legendary:4}[tier];k++)txt(c,'★',w/2-30+k*20,56,16,mixColor(col,'#fff',.6),'center','Arial');
     c.restore();
   }
-  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,fighters,themes,drawGuardScene};
+  // A trophy under glass: a glowing glyph on a velvet cushion.
+  function drawTrophy(c,trophy,o={}){
+    const col=trophy?.color||'#c9b37a',size=o.size||1;c.save();c.scale(size,size);
+    ellipse(c,0,22,36,10,'#1a1410','#4a3a2a',1);rr(c,-40,14,80,10,3,'#3b2a3a','#6a4a6a',1);
+    glow(c,0,-20,60,mixColor(col,'#fff',.2)+'77');
+    c.save();c.shadowColor=col;c.shadowBlur=18;txt(c,trophy?.glyph||'?',0,-2,54,mixColor(col,'#fff',.45),'center','Georgia');c.restore();
+    c.restore();
+  }
+  // The player's hall: the arena room without the sponsor, filled with their exhibition. `shown` comes from MuseumHall.exhibition().
+  function drawHall(c,w=1440,h=810,t=0,shown=[],o={}){
+    drawArena(c,w,h,t,'hall',{sign:[o.name||'SALA PRYWATNA','KOLEKCJA NOCNEGO STRÓŻA'],frames:false});
+    c.save();c.scale(w/1440,h/810);
+    const at=id=>shown.find(e=>e.slot.id===id)?.item||null;
+    const pedestal=(x,label)=>{rr(c,x-70,640,140,26,3,'#3a2f22','#8a7352',1.5);rr(c,x-80,664,160,10,2,'#241c13','#6e5a3e',1);rr(c,x-60,628,120,14,2,'#4a3b2a','#a08a60',1);txt(c,label,x,658,9,'#d9c89a','center','Arial')};
+    const emptyTag=(x,y,text)=>{rr(c,x-52,y-9,104,18,2,'#120f0b','#5a4a36',1);txt(c,text,x,y+4,8,'#8a7a5e','center','Arial')};
+    // Armour pedestals by the windows.
+    [['armor-1',320],['armor-2',1120]].forEach(([id,x],i)=>{const item=at(id);pedestal(x,item?item.name:'WOLNY POSTUMENT');if(item){c.save();c.translate(x,628);c.scale(.92,.92);drawKnight(c,0,0,{pose:'idle',facing:i?-1:1,time:t,skin:item.id});c.restore();glow(c,x,520,120,'rgba(255,220,160,.08)')}else emptyTag(x,560,'ZBROJA')});
+    // Weapon mounts on the wall above the consoles.
+    [['weapon-1',176],['weapon-2',1280]].forEach(([id,x])=>{const item=at(id);rr(c,x-34,250,68,200,4,'#1d1710','#8a7352',1.5);rr(c,x-28,256,56,188,3,'#241c13','#5a4a36',1);if(item){c.save();c.translate(x,352);c.scale(.62,.62);drawWeaponIcon(c,window.MuseumWeapons?.get(item.id)||item);c.restore();rr(c,x-30,452,60,14,2,'#120f0b','#8a7352',1);txt(c,item.name.split(' ')[0],x,462,8,'#d9c89a','center','Arial')}else emptyTag(x,352,'BROŃ')});
+    // Card frames where the reliefs used to hang.
+    [['card-1',452],['card-2',883]].forEach(([id,x])=>{const item=at(id);rr(c,x-7,231,119,172,2,'#181f20','#716448',2);rr(c,x,238,105,158,1,'#0e1a20','#ac9360',2);if(item){c.save();c.translate(x+3,241);c.scale(99/360,152/360);drawCardArt(c,window.MuseumCards?.get(item.id)||item,360,360);c.restore()}else emptyTag(x+52,317,'KARTA')});
+    // Glass cases inside the central arch.
+    [['trophy-1',660],['trophy-2',782]].forEach(([id,x])=>{const item=at(id);rr(c,x-48,392,96,150,3,'#2a2219','#a08a60',1.5);c.save();c.globalAlpha=.18;rr(c,x-44,396,88,120,2,'#9ad0e8');c.restore();rr(c,x-44,396,88,120,2,null,'rgba(190,230,255,.35)',1);if(item){c.save();c.translate(x,480);drawTrophy(c,item,{size:.8});c.restore();rr(c,x-44,520,88,18,2,'#120f0b','#8a7352',1);txt(c,item.name.split(' ')[0],x,533,8,'#d9c89a','center','Arial')}else{txt(c,'GABLOTA',x,460,9,'#6a5a46','center','Arial');txt(c,'WOLNA',x,474,9,'#6a5a46','center','Arial')}});
+    c.restore();
+  }
+  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,drawTrophy,drawHall,fighters,themes,drawGuardScene};
 })();

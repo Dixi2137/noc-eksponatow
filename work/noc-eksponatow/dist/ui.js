@@ -3,7 +3,7 @@
  'use strict';
  const $ = id => document.getElementById(id);
  const show = (id, visible = true) => $(id).classList.toggle('hidden', !visible);
- const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks, levels=window.MuseumLevels, exhibits=window.MuseumExhibits, weapons=window.MuseumWeapons, cardsApi=window.MuseumCards;
+ const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks, levels=window.MuseumLevels, exhibits=window.MuseumExhibits, weapons=window.MuseumWeapons, cardsApi=window.MuseumCards, hallApi=window.MuseumHall;
  let profile=loot.migrate(null);
  try { profile=loot.migrate(JSON.parse(localStorage.getItem('museum-night-v1')||'null')); } catch(_){}
  let selectedCrateId=profile.pendingCrateId||'gallery';
@@ -32,7 +32,7 @@
  function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();}
  function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
  function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
- function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
+ function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
  function renderLevelStrip(){
   const strip=$('levelStrip');strip.replaceChildren();const chosen=currentLevel();
   for(const level of levels.all()){const b=document.createElement('button');const cleared=profile.cleared.includes(level.id),open=isUnlocked(level);b.type='button';b.className=`level-pip ${cleared?'cleared':''} ${level.id===chosen.id?'chosen':''} ${open?'':'locked'}`;b.disabled=!open;b.innerHTML=`<span>${String(level.number).padStart(2,'0')}</span><strong>${level.title}</strong><small>${cleared?'✓ POKONANY':open?level.yearLabel:'◇ ZAMKNIĘTE'}</small>`;b.setAttribute('aria-label',`Poziom ${level.number}: ${level.title}, ${levelExhibit(level).name}${cleared?', pokonany':open?'':', zamknięty'}`);b.setAttribute('aria-pressed',String(level.id===chosen.id));
@@ -84,8 +84,35 @@
  function updateTimeJump(){const k=Math.min(1,jumpTime/(totalJump*.72)),eased=1-Math.pow(1-k,3);const year=Math.round(jumpFrom.year+(jumpTo.year-jumpFrom.year)*eased);$('jumpYear').textContent=k>=1?jumpTo.yearLabel:yearText(year);$('jumpProgress').style.width=(jumpTime/totalJump*100)+'%';$('timejump').classList.toggle('arrived',k>=1);}
  function startEnding(){screen='ending';window.MuseumGame?.setScene('external');show('hud',false);show('stageMeta',false);show('ending');show('results',false);const won=endData?.win&&!levels.next(night.levelId);$('dreamTitle').textContent=won?'ŚWIT. MUZEUM OCALONE.':'TO BYŁ TYLKO SEN.';$('dreamText').innerHTML=won?'Stróż otwiera oczy o 06:00. Wszystkie sale są ciche. Wszystkie eksponaty stoją tam, gdzie powinny.<br>„Dobra zmiana.”':'„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.';stageState();}
  function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
+ function renderHall(){
+  const shown=hallApi.exhibition(profile),sum=hallApi.summary(profile),name=profile.hall?.name||hallApi.DEFAULT_NAME;
+  if($('hallName').value!==name&&document.activeElement!==$('hallName'))$('hallName').value=name;
+  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);window.MuseumArt.drawHall(ctx,1440,810,0,shown,{name});}
+  $('hallSummary').replaceChildren(...[['PRESTIŻ',String(sum.prestige)],['WARTOŚĆ EKSPOZYCJI',`${number(sum.value)} ✦`],['TROFEA',`${sum.trophies} / ${sum.trophiesTotal}`]].map(([k,v])=>{const span=document.createElement('span'),strong=document.createElement('strong');strong.textContent=v;span.append(k,strong);return span;}));
+  $('hallFilled').textContent=`${sum.filled} / ${sum.total}${sum.fullBonus?' · PEŁNA SALA +20':''}`;
+  const busy=()=>crateBusy||!['menu','result'].includes(screen);
+  $('hallSlots').replaceChildren(...shown.map(({slot,item})=>{
+   const box=document.createElement('div');box.className=`hall-slot ${item?'filled':''}`;
+   const label=document.createElement('span');label.textContent=slot.name;const title=document.createElement('strong');title.textContent=item?item.name:'PUSTE MIEJSCE';
+   const select=document.createElement('select');select.setAttribute('aria-label',`${slot.name}: wybierz przedmiot`);
+   const empty=document.createElement('option');empty.value='';empty.textContent='— puste —';select.append(empty);
+   for(const candidate of hallApi.candidates(profile,slot.id)){const option=document.createElement('option');option.value=candidate.id;option.textContent=`${candidate.name} · ${loot.rarities[candidate.rarity].name}`;select.append(option);}
+   select.value=item?item.id:'';
+   select.addEventListener('change',()=>{if(busy())return;const next=hallApi.setSlot(profile,slot.id,select.value||null);if(!next){toast('Tego przedmiotu nie możesz tu wystawić.');renderHall();return;}profile=next;persist();renderHall();});
+   const hint=document.createElement('small');hint.textContent=select.options.length>1?slot.hint:slot.kind==='trophy'?'Trofea zdobywasz, pokonując sale nocnego obchodu.':`Nie masz jeszcze żadnego przedmiotu tego rodzaju.`;
+   box.append(label,title,select,hint);return box;
+  }));
+  $('hallTrophyCount').textContent=`${sum.trophies} / ${sum.trophiesTotal}`;
+  $('hallTrophies').replaceChildren(...hallApi.trophies.map(trophy=>{
+   const owned=hallApi.hasTrophy(profile,trophy.id),card=document.createElement('div');card.className=`hall-trophy ${owned?'':'locked'}`;card.title=trophy.description;
+   const canvas=document.createElement('canvas');canvas.width=180;canvas.height=180;const ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawTrophy){ctx.translate(90,96);if(owned)window.MuseumArt.drawTrophy(ctx,trophy,{size:1.1});else{ctx.globalAlpha=.5;window.MuseumArt.drawTrophy(ctx,{...trophy,glyph:'?',color:'#555'},{size:1.1});}}
+   const name=document.createElement('strong');name.textContent=owned?trophy.name:'???';const era=document.createElement('small');era.textContent=owned?trophy.era:`ZA SALĘ: ${levels.get(trophy.level).title}`;
+   card.append(canvas,name,era);return card;
+  }));
+ }
+ function hall(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Swoją salę urządzisz przed następnym pojedynkiem.');return;}closeModal();renderHall();openModal('hall');}
  function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}
- function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
+ function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
  function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
  function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
@@ -183,7 +210,7 @@
  $('categoryFilter').value='all';
  $('crateType').addEventListener('change',()=>{if(crateBusy||!['menu','result'].includes(screen))return;const crate=loot.getCrate($('crateType').value);if(crate)selectedCrateId=crate.id;renderSkins();});
  window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,notify:toast});
- $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);
+ $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
  $('secretCoinsBtn').addEventListener('click',()=>{if(!canOpenShop())return;profile.coins+=2137;persist();if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();toast('Sekret stróża odkryty. +2137 monet ✦');});
  $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);
  $('newSkinsOnly').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=!collectionFilters.newOnly;collectionPage=0;renderSkins();});
