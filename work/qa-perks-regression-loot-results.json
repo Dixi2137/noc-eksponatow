@@ -1,0 +1,72 @@
+{
+  "passed": 14,
+  "total": 14,
+  "results": [
+    {
+      "name": "Seven cosmetic skins include a default and a weighted rarity pool",
+      "pass": true
+    },
+    {
+      "name": "Migration preserves valid legacy coins/skins and gives one free starter crate once",
+      "pass": true
+    },
+    {
+      "name": "Malformed saves cannot invent unknown skins, reward IDs, negative money or infinite balance",
+      "pass": true
+    },
+    {
+      "name": "Weighted random boundaries select rare, epic and legendary without default skin",
+      "pass": true
+    },
+    {
+      "name": "Odds recalculate among remaining skins and every opening is unique",
+      "pass": true
+    },
+    {
+      "name": "Free crate costs zero, paid crate costs exactly80, and insufficient coins cannot be charged",
+      "pass": true
+    },
+    {
+      "name": "Reserved reward is persisted in inventory and cannot be charged twice while pending",
+      "pass": true
+    },
+    {
+      "name": "All-unlocked state has no fee or free-crate consumption",
+      "pass": true
+    },
+    {
+      "name": "UI offers a free crate immediately and reserves reward before the reel animation",
+      "pass": true
+    },
+    {
+      "name": "Repeated clicks, premature claim, Escape, backdrop and start cannot interrupt or double-charge roll",
+      "pass": true
+    },
+    {
+      "name": "Reload mid-roll restores exactly the same reward with no additional fee or free crate",
+      "pass": true
+    },
+    {
+      "name": "UI keeps or equips explicitly and charges exactly80 for each subsequent new appearance",
+      "pass": true
+    },
+    {
+      "name": "Collection card and crate handlers reject changes during a live or paused fight",
+      "pass": true
+    },
+    {
+      "name": "Complete collection disables crate UI and no forged click charges coins",
+      "pass": true
+    }
+  ],
+  "report": {
+    "allRewards": [
+      "frost",
+      "obsidian",
+      "verdigris",
+      "ember",
+      "royal",
+      "solar"
+    ]
+  }
+}

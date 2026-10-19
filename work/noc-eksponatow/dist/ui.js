@@ -1,0 +1,134 @@
+/* Museum after hours — menu, unskippable prologue, collection and dream epilogue. */
+(() => {
+ 'use strict';
+ const $ = id => document.getElementById(id);
+ const show = (id, visible = true) => $(id).classList.toggle('hidden', !visible);
+ const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks;
+ let profile=loot.migrate(null);
+ try { profile=loot.migrate(JSON.parse(localStorage.getItem('museum-night-v1')||'null')); } catch(_){}
+ let selectedCrateId=profile.pendingCrateId||'gallery';
+ let screen='menu', introTime=0, endingTime=0, endData=null, frameTime=0, toastTimer, helpWasPlaying=false, lastFocus, lootReturnFocus, crateBusy=false, rollToken=0;
+ const totalIntro=18;
+ const SKINS_PER_PAGE=12;let collectionPage=0;
+ const collectionFilters={search:'',category:'all',rarity:'all',ownership:'all',newOnly:false};
+ const outfitCount=n=>`${n} ${n===1?'strój':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'stroje':'strojów'}`;
+ const normalizeSkinText=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ł/gi,'l').toLocaleLowerCase('pl-PL').trim();
+ function matchingSkins(){const query=normalizeSkinText(collectionFilters.search);return skins.filter(s=>{const owned=profile.owned.includes(s.id);return (!collectionFilters.newOnly||/^knight-\d{2}$/.test(s.id))&&(collectionFilters.category==='all'||s.categoryId===collectionFilters.category)&&(collectionFilters.rarity==='all'||s.rarity===collectionFilters.rarity)&&(collectionFilters.ownership==='all'||(collectionFilters.ownership==='owned'?owned:!owned))&&(!query||normalizeSkinText([s.name,s.description||'',s.motif||'',loot.getCategory(s.categoryId)?.name||'',perks.get(s.id).title,perks.get(s.id).summary].join(' ')).includes(query));});}
+ function perkText(perk){return `${perk.title}: ${perk.summary}`;}
+ function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),text=`${skin.name} — ${perkText(perks.get(skin.id))}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
+ function updateActivePerk(perk){const target=$('activePerk');if(target.dataset.perk===perk.id)return;const title=document.createElement('strong'),summary=document.createElement('span');title.textContent=perk.title;summary.textContent=perk.summary;target.replaceChildren(title,summary);target.dataset.perk=perk.id;target.setAttribute('aria-label',perkText(perk));}
+ function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();}
+ function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
+ function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
+ function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
+ function menu(){screen='menu';window.MuseumGame?.reset();window.MuseumGame?.setScene('external');['hud','combatHint','intro','ending','pause','results'].forEach(id=>show(id,false));show('menu');show('exhibitTag');show('stageMeta');$('topStatus').innerHTML='ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI';stageState();$('startBtn').focus({preventScroll:true});}
+ function beginIntro(){if(crateBusy||!$('loot').classList.contains('hidden')||!['menu','result'].includes(screen))return;closeModal();screen='intro';introTime=0;window.MuseumGame?.reset();window.MuseumGame?.setScene('external');['menu','exhibitTag','hud','combatHint','ending','pause','results','stageMeta'].forEach(id=>show(id,false));show('intro');$('topStatus').textContent='PROLOG / OSTATNI OBCHÓD';stageState();$('startBtn').blur();updateIntro();}
+ const chapters=[
+  {until:6,label:'23:58 / OSTATNI OBCHÓD',text:'W muzeum zapada cisza. Stróż kończy swój ostatni obchód.'},
+  {until:12,label:'00:00 / COŚ SIĘ OBUDZIŁO',text:'Z galerii dobiega trzask. Stal porusza się. Kości łapią oddech.'},
+  {until:18,label:'00:01 / HISTORIA KONTRA HISTORIA',text:'Jeden rycerz. Jeden T‑rex. Zamknięta sala. Przetrwa tylko jeden.'}
+ ];
+ function updateIntro(){const i=introTime<6?0:introTime<12?1:2;const c=chapters[i];$('sceneLabel').textContent=c.label;$('sceneText').textContent=c.text;$('introChapter').textContent=`PROLOG / 0${i+1}`;$('introRemaining').textContent=Math.ceil(totalIntro-introTime);$('introProgress').style.width=(introTime/totalIntro*100)+'%';}
+ function startFight(){if(screen!=='intro'||introTime<totalIntro)return;screen='fight';show('intro',false);show('hud');show('combatHint');show('stageMeta');$('playerName').textContent=profile.skin==='stachu-jones'?'STACHU JONES':'ŻELAZNY RYCERZ';$('topStatus').textContent='POJEDYNEK / RYCERZ KONTRA T‑REX';stageState();window.MuseumGame.start({skin:profile.skin,sound:profile.sound});}
+ function pause(){if(screen!=='fight')return;screen='paused';window.MuseumGame.pause();show('pause');stageState();}
+ function resume(){if(screen!=='paused')return;screen='fight';show('pause',false);window.MuseumGame.resume();stageState();}
+ function formatTime(n){return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(Math.floor(n%60)).padStart(2,'0')}`;}
+ window.addEventListener('game:update',e=>{const s=e.detail;if(!['fight','paused'].includes(screen))return;const maxP=s.player?.maxHP||120,maxR=s.rex?.maxHP||160;$('playerHealth').style.width=Math.max(0,s.playerHP/maxP*100)+'%';$('rexHealth').style.width=Math.max(0,s.rexHP/maxR*100)+'%';$('playerHP').textContent=`${Math.ceil(s.playerHP)} / ${maxP}`;$('rexHP').textContent=`${Math.ceil(s.rexHP)} / ${maxR}`;$('staminaNum').textContent=Math.floor(s.stamina);$('staminaBar').style.width=s.stamina+'%';$('fightTime').textContent=formatTime(s.time||s.elapsed||0);$('hintText').textContent=s.hint||'Wyczuj moment. Paruj tuż przed ciosem.';if(s.perk)updateActivePerk(s.perk);const names={idle:'OBSERWUJE',approach:'PODCHODZI',retreat:'ODSTĘPUJE',reposition:'ŁAPIE DYSTANS',windup:'SZYKUJE ATAK',strike:'ATAKUJE',recover:'OSŁABIONA GARDA'};$('rexState').textContent=names[s.rexState]||'TYRANNOSAURUS REX';});
+ window.addEventListener('game:end',e=>{if(screen!=='fight')return;endData=e.detail;screen='ko';endingTime=0;show('combatHint',false);$('outcomeLabel').textContent=endData.win?'T‑REX POKONANY / ZWYCIĘSTWO':'RYCERZ POKONANY / KONIEC GRY';const reward=endData.win?180+(endData.parries||0)*20:40;profile.coins+=reward;persist();$('resultTime').textContent=formatTime(endData.time);$('resultParries').textContent=endData.parries||0;$('resultCoins').textContent=`+${reward} ✦`;$('topStatus').textContent=endData.win?'ZWYCIĘSTWO / GALERIA OCALONA':'KONIEC GRY / OSTATNIE ŚWIATŁO GAŚNIE';stageState();});
+ function startEnding(){screen='ending';window.MuseumGame?.setScene('external');show('hud',false);show('stageMeta',false);show('ending');show('results',false);$('dreamTitle').textContent='TO BYŁ TYLKO SEN.';$('dreamText').innerHTML='„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.';stageState();}
+ function revealResults(){screen='result';show('results');stageState();$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
+ function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}
+ function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
+ function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
+ function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
+ function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
+ function chooseShopCrate(id){if(!canOpenShop()||!loot.getCrate(id))return;closeModal();selectedCrateId=id;collection();}
+ function drawSkin(canvas,skin){
+  const ctx=canvas.getContext('2d'),d=canvas.width/360;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,360,360);
+  const g=ctx.createRadialGradient(180,175,15,180,180,230);g.addColorStop(0,loot.rarities[skin.rarity].color+'30');g.addColorStop(1,'#10180e');if(canvas.id!=='lootCanvas'){ctx.fillStyle=g;ctx.fillRect(0,0,360,360);}
+  ctx.save();ctx.translate(180,320);ctx.scale(.95,.95);window.MuseumArt?.drawKnight(ctx,0,0,{pose:'idle',facing:1,time:0,skin:skin.id});ctx.restore();
+ }
+ function renderDropContents(target,entries){const rows=entries.map(({skin,chance})=>{const row=document.createElement('div'),name=document.createElement('span'),rarity=document.createElement('small'),odds=document.createElement('strong');row.className='drop-row';name.textContent=skin.name;rarity.textContent=loot.rarities[skin.rarity].name;rarity.style.color=loot.rarities[skin.rarity].color;odds.textContent=chance.toLocaleString('pl-PL',{maximumFractionDigits:2})+'%';row.append(name,rarity,odds);return row;});target.replaceChildren(...rows);if(!rows.length){const text=document.createElement('p');text.textContent='Masz już wszystkie stroje dostępne w tej skrzyni. Żetony nie zostaną pobrane.';target.append(text);}}
+ function renderSkins(){
+  const grid=$('skinGrid');grid.replaceChildren();
+  const matches=matchingSkins(),pages=Math.max(1,Math.ceil(matches.length/SKINS_PER_PAGE));collectionPage=Math.max(0,Math.min(collectionPage,pages-1));const page=matches.slice(collectionPage*SKINS_PER_PAGE,(collectionPage+1)*SKINS_PER_PAGE);
+  $('skinResultsCount').textContent=matches.length?`${outfitCount(matches.length)} · ${collectionPage*SKINS_PER_PAGE+1}–${Math.min((collectionPage+1)*SKINS_PER_PAGE,matches.length)} na stronie`:'0 strojów';
+  $('skinPageInfo').textContent=`Strona ${collectionPage+1} / ${pages}`;$('skinPagePrev').disabled=collectionPage===0;$('skinPageNext').disabled=collectionPage>=pages-1;show('skinPagination',matches.length>SKINS_PER_PAGE);show('skinEmpty',!matches.length);$('newSkinsOnly').setAttribute('aria-pressed',String(collectionFilters.newOnly));
+  const equipped=skins.find(s=>s.id===profile.skin);$('equippedSkin').textContent=`ZAŁOŻONO: ${equipped.name} · ${perks.get(profile.skin).summary}`;
+  for(const s of page){
+   const owned=profile.owned.includes(s.id),selected=profile.skin===s.id,perk=perks.get(s.id),b=document.createElement('button');
+   b.className=`skin-card ${selected?'selected':''} ${owned?'':'locked'}`;b.dataset.rarity=s.rarity;b.dataset.skinId=s.id;b.dataset.category=s.categoryId;b.style.setProperty('--rarity',loot.rarities[s.rarity].color);b.setAttribute('aria-pressed',String(selected));b.setAttribute('aria-label',`${s.name}. ${loot.getCategory(s.categoryId)?.name||''}. ${perkText(perk)}${owned?(selected?' — wybrany':' — wybierz'):' — do odkrycia'}`);
+   b.innerHTML=`${s.number?`<span class="skin-number">${String(s.number).padStart(2,'0')} / 50</span>`:s.gift?'<span class="skin-number">★ SPECJALNY</span>':''}<canvas width="360" height="360" aria-hidden="true"></canvas><small>${s.era}</small><strong>${s.name}</strong><span class="skin-category"></span><span class="skin-perk"><strong></strong><span></span></span><span class="skin-state">${selected?'● WYBRANY':owned?'WYBIERZ SKIN ↗':'◇ DO ODKRYCIA'}</span>`;
+   b.querySelector('.skin-category').textContent=loot.getCategory(s.categoryId)?.name||'';
+   b.querySelector('.skin-perk strong').textContent=perk.title;b.querySelector('.skin-perk span').textContent=perk.summary;
+   b.addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;if(!profile.owned.includes(s.id)){$('collectionMessage').textContent=`${s.name} czeka w muzealnej skrzyni. ${perkText(perk)}`;return;}profile.skin=s.id;persist();renderSkins();$('collectionMessage').textContent=`Wybrano ${s.name}. ${perkText(perk)}`;});grid.appendChild(b);drawSkin(b.querySelector('canvas'),s);
+  }
+  const crate=loot.getCrate(selectedCrateId)||loot.getCrate('gallery');selectedCrateId=crate.id;
+  const entries=loot.entries(profile,crate.id),all=!entries.length,free=crate.id==='gallery'&&profile.freeCrates>0,odds=loot.odds(profile,crate.id);
+  $('crateType').value=crate.id;$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie';$('crateCategory').style.color=crate.color;
+  $('crateContentsSummary').textContent=`ZAWARTOŚĆ I SZANSE · ${outfitCount(entries.length)}`;renderDropContents($('crateContentsList'),entries);
+  $('crateBtn').disabled=all||crateBusy||!!profile.pendingReward||(!free&&profile.coins<crate.cost);
+  $('crateBtn').innerHTML=all?'ZAWARTOŚĆ ZEBRANA <span>✓</span>':free?'OTWÓRZ GRATIS <span>◇</span>':`OTWÓRZ SKRZYNIĘ <span>${crate.cost.toLocaleString('pl-PL')} ✦</span>`;
+  $('collectionCount').textContent=`${profile.owned.length} / ${skins.length} ODKRYTYCH`;
+  $('freeCrateCount').textContent=all?'ZEBRANO ZAWARTOŚĆ TEJ SKRZYNI':free?'1 DARMOWA SKRZYNIA GALERII NA START':`${crate.cost.toLocaleString('pl-PL')} ✦${profile.freeCrates>0?' · PREZENT DOTYCZY GALERII':''}`;
+  const percent=n=>(Math.round(n*10)/10).toLocaleString('pl-PL')+'%';
+  $('crateOdds').textContent=all?'Zebrano wszystkie stroje dostępne w tej skrzyni. Wybierz inną skrzynię, aby sprawdzić pozostałe.':`Szanse w następnej skrzyni: zwykły ${percent(odds.common||0)} · rzadki ${percent(odds.rare)} · epicki ${percent(odds.epic)} · legendarny ${percent(odds.legendary)}. Bez duplikatów. Szanse przeliczają się po zebraniu całej rzadkości.`;
+  $('collectionMessage').textContent=all?'Ta skrzynia nie pobierze kolejnych żetonów. Wybierz inny rodzaj lub załóż odkryty strój.':free?'Pierwsza Skrzynia Galerii czeka na ciebie. Otwórz ją za darmo i odkryj skin z bonusem do walki.':profile.coins<crate.cost?`Do tej skrzyni brakuje ${(crate.cost-profile.coins).toLocaleString('pl-PL')} żetonów. Zwycięstwo daje co najmniej 180 ✦.`:'Każda skrzynia zawiera nowy skin z własnym bonusem. Wybierz go przed walką — jeden skin, jeden aktywny bonus.';
+ }
+ function setLootBusy(value){crateBusy=value;document.querySelectorAll('.close-modal').forEach(b=>b.disabled=value);$('startBtn').disabled=value;$('retryBtn').disabled=value;}
+ function showLoot(){
+  lootReturnFocus=document.activeElement;$('collection').inert=true;show('loot');$('lootPanel').setAttribute('tabindex','-1');$('lootPanel').focus({preventScroll:true});document.body.style.overflow='hidden';
+ }
+ function revealReward(recovered=false){
+  const s=skins.find(s=>s.id===profile.pendingReward);if(!s)return;
+  if(recovered)window.MuseumLootShow.cancel();setLootBusy(false);delete $('lootPanel').dataset.lootPhase;$('lootPanel').classList.remove('is-rolling');$('lootPanel').classList.add('is-revealed');$('lootPanel').dataset.rarity=s.rarity;$('lootPanel').style.setProperty('--rarity',loot.rarities[s.rarity].color);
+  $('lootEyebrow').textContent=recovered?'TWOJA SKRZYNIA NIE PRZEPADŁA':'PIECZĘĆ ZERWANA / NOWE ODKRYCIE';$('lootTitle').textContent='NOWY EKSPONAT.';$('lootSubtitle').textContent=recovered?'Odzyskano odkryty wygląd. Czeka bezpiecznie w twojej kolekcji.':'Ten wygląd już należy do ciebie. Załóż go na kolejny pojedynek.';
+  show('lootWindow',false);show('lootSuspense',false);show('lootReward');show('lootActions');$('lootRarity').textContent=loot.rarities[s.rarity].name;$('lootName').textContent=s.name;$('lootEra').textContent=s.era;$('lootPerk').textContent=perkText(perks.get(s.id));drawSkin($('lootCanvas'),s);$('lootEquipBtn').focus({preventScroll:true});renderSkins();
+ }
+ function claimReward(equip){
+  if(crateBusy||!['menu','result'].includes(screen))return;
+  if(profile.pendingReward){profile=loot.claim(profile,{equip});persist();}
+  show('loot',false);$('collection').inert=false;renderSkins();if(lootReturnFocus?.isConnected&&lootReturnFocus!==document.body&&!lootReturnFocus.disabled)lootReturnFocus.focus({preventScroll:true});else $('collection').querySelector('button:not(:disabled)')?.focus({preventScroll:true});
+  $('collectionMessage').textContent=equip?`Skin wybrany. ${perkText(perks.get(profile.skin))}`:'Nowy skin zachowany w kolekcji. Możesz założyć go przed walką, aby aktywować jego bonus.';
+ }
+ function openCrate(){
+  if(crateBusy||!['menu','result'].includes(screen))return;
+  if(profile.pendingReward){showLoot();revealReward(true);return;}
+  const reservation=loot.reserve(profile,undefined,selectedCrateId);if(!reservation)return;
+  // Persist the exact reward and payment before any visual effects. Reloading cannot eat a crate.
+  profile=reservation.profile;persist();setLootBusy(true);renderSkins();showLoot();
+  const token=++rollToken,reel=$('lootReel');window.MuseumLootShow.cancel();reel.replaceChildren();$('lootPanel').classList.remove('is-revealed');$('lootPanel').classList.add('is-rolling');delete $('lootPanel').dataset.rarity;$('lootPanel').style.removeProperty('--rarity');
+  $('lootEyebrow').textContent=reservation.crate.name.toLocaleUpperCase('pl-PL')+' / LOSOWANIE';$('lootTitle').textContent='CO KRYJE SKRZYNIA?';$('lootSubtitle').textContent=reservation.free?'Darmowa skrzynia. Jeden nowy wygląd, zero duplikatów.':`Wymieniono ${reservation.cost.toLocaleString('pl-PL')} żetonów. ${reservation.crate.guarantee}.`;show('lootReward',false);show('lootActions',false);show('lootWindow');
+  show('lootSuspense');$('lootProgressFill').style.width='0%';
+  const winner=48,cards=[];
+  for(let i=0;i<54;i++){
+   const s=i===winner?reservation.reward:loot.draw(profile,Math.random,reservation.crate.id)||reservation.reward,card=document.createElement('div');card.className='loot-card';card.dataset.rarity=s.rarity;card.style.setProperty('--rarity',loot.rarities[s.rarity].color);card.innerHTML=`<canvas width="240" height="240" aria-hidden="true"></canvas><small>${loot.rarities[s.rarity].name}</small><strong>${s.name}</strong>`;reel.appendChild(card);drawSkin(card.querySelector('canvas'),s);cards.push(card);
+  }
+  window.MuseumLootShow.start({reel,viewport:$('lootWindow'),cards,winner,isSoundEnabled:()=>profile.sound,onReveal:()=>{if(token===rollToken)revealReward();}});
+ }
+ function changeCollectionFilter(){if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.search=$('skinSearch').value;collectionFilters.category=$('categoryFilter').value;collectionFilters.rarity=$('rarityFilter').value;collectionFilters.ownership=$('ownershipFilter').value;collectionPage=0;renderSkins();}
+ for(const crate of loot.crates){const option=document.createElement('option');option.value=crate.id;option.textContent=`${crate.name} · ${crate.cost.toLocaleString('pl-PL')} ✦`;$('crateType').append(option);}
+ for(const category of [{id:'all',name:'Wszystkie kategorie'},...loot.categories]){const option=document.createElement('option');option.value=category.id;option.textContent=category.name;$('categoryFilter').append(option);}
+ $('categoryFilter').value='all';
+ $('crateType').addEventListener('change',()=>{if(crateBusy||!['menu','result'].includes(screen))return;const crate=loot.getCrate($('crateType').value);if(crate)selectedCrateId=crate.id;renderSkins();});
+ window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,notify:toast});
+ $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);
+ $('secretCoinsBtn').addEventListener('click',()=>{if(!canOpenShop())return;profile.coins+=2137;persist();if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();toast('Sekret stróża odkryty. +2137 monet ✦');});
+ $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);
+ $('newSkinsOnly').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=!collectionFilters.newOnly;collectionPage=0;renderSkins();});
+ $('resetSkinFilters').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=false;$('skinSearch').value='';$('categoryFilter').value='all';$('rarityFilter').value='all';$('ownershipFilter').value='all';changeCollectionFilter();});
+ $('skinPagePrev').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen)||collectionPage<=0)return;collectionPage--;renderSkins();$('skinResultsCount').scrollIntoView({block:'nearest'});});
+ $('skinPageNext').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen)||collectionPage>=Math.ceil(matchingSkins().length/SKINS_PER_PAGE)-1)return;collectionPage++;renderSkins();$('skinResultsCount').scrollIntoView({block:'nearest'});});
+ $('startBtn').addEventListener('click',beginIntro);$('retryBtn').addEventListener('click',beginIntro);$('menuBtn').addEventListener('click',menu);$('pauseBtn').addEventListener('click',pause);$('resumeBtn').addEventListener('click',resume);$('collectionTab').addEventListener('click',collection);$('crateBtn').addEventListener('click',openCrate);$('lootEquipBtn').addEventListener('click',()=>claimReward(true));$('lootKeepBtn').addEventListener('click',()=>claimReward(false));
+ $('arenaTab').addEventListener('click',()=>{if(screen==='menu')$('gameFrame').scrollIntoView({behavior:'smooth',block:'center'});});
+ document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();if(screen==='menu')window.scrollTo({top:0,behavior:'smooth'});});
+ $('soundBtn').addEventListener('click',()=>{profile.sound=!profile.sound;persist();soundUI();toast(profile.sound?'Dźwięk włączony. Muzeum już nie śpi.':'Dźwięk wyłączony.');});
+ $('helpBtn').addEventListener('click',()=>{if(crateBusy||!$('loot').classList.contains('hidden'))return;if(screen==='intro'||screen==='ending'||screen==='ko'){toast('Historia trwa. Instrukcja będzie dostępna po scenie.');return;}helpWasPlaying=screen==='fight';if(helpWasPlaying)pause();openModal('help');});
+ $('helpClose').addEventListener('click',closeModal);document.querySelectorAll('.close-modal').forEach(b=>b.addEventListener('click',closeModal));document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal();}));
+ document.addEventListener('keydown',e=>{const modals=[...document.querySelectorAll('.modal:not(.hidden)')],modal=modals.find(m=>m.id==='loot')||modals.at(-1);if(modal){if(e.key==='Escape'){e.preventDefault();closeModal();}if(e.key==='Tab'){const buttons=[...modal.querySelectorAll('button:not(:disabled)')].filter(b=>b.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(!first){e.preventDefault();$('lootPanel').focus();}else if(e.shiftKey&&(document.activeElement===first||!modal.contains(document.activeElement))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||!modal.contains(document.activeElement))){e.preventDefault();first.focus();}}return;}if(e.key==='Escape'){e.preventDefault();if(screen==='fight')pause();else if(screen==='paused')resume();}});
+ document.addEventListener('visibilitychange',()=>{frameTime=0;if(document.hidden&&screen==='fight')pause();});
+ window.addEventListener('blur',()=>{if(screen==='fight')pause();frameTime=0;});
+ function renderScene(time){const c=$('arena'),ctx=c.getContext('2d'),a=window.MuseumArt;if(!ctx||!a)return;const d=c.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);ctx.save();if(screen==='menu'){a.drawArena(ctx,1440,810,time);a.drawKnight(ctx,325,665,{pose:'idle',facing:1,time,skin:profile.skin});ctx.save();ctx.translate(1085,665);ctx.scale(1.18,1.18);a.drawRex(ctx,0,0,{pose:'idle',facing:-1,time});ctx.restore();}else if(screen==='intro'){if(introTime<6&&a.drawGuardScene){a.drawGuardScene(ctx,1440,810,time);}else{a.drawArena(ctx,1440,810,time);const awake=Math.min(1,Math.max(0,(introTime-6)/3));a.drawRex(ctx,1055,665,{pose:introTime<11?'guard':'idle',facing:-1,time,phase:awake,glow:introTime<11});a.drawKnight(ctx,365,665,{pose:introTime<12?'idle':'guard',facing:1,time,skin:profile.skin});ctx.fillStyle=`rgba(0,8,5,${Math.max(0,.65-awake*.65)})`;ctx.fillRect(0,0,1440,810);}const boundary=[0,6,12].some(t=>introTime>=t&&introTime<t+.6);if(boundary){const at=introTime%6;ctx.fillStyle=`rgba(4,9,6,${1-at/.6})`;ctx.fillRect(0,0,1440,810);}}else if(screen==='ending'||screen==='result'){if(a.drawGuardScene)a.drawGuardScene(ctx,1440,810,time,{awake:endingTime>3});else a.drawArena(ctx,1440,810,time);ctx.fillStyle='#08110a65';ctx.fillRect(0,0,1440,810);if(endingTime<3){ctx.fillStyle=`rgba(0,0,0,${Math.max(0,1-(endingTime-1.8)/1.2)})`;ctx.fillRect(0,0,1440,810);}}ctx.restore();}
+ function loop(now){const dt=frameTime?Math.min(.1,(now-frameTime)/1000):0;frameTime=now;if(!document.hidden){if(screen==='intro'){introTime=Math.min(totalIntro,introTime+dt);updateIntro();if(introTime>=totalIntro)startFight();}else if(screen==='ko'){endingTime+=dt;if(endingTime>=1.8)startEnding();}else if(screen==='ending'){endingTime+=dt;if(endingTime>=7.8)revealResults();}if(['menu','intro','ending','result'].includes(screen))renderScene(now/1000);}requestAnimationFrame(loop);}
+ persist();soundUI();stageState();window.MuseumGame?.setScene('external');if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
+})();

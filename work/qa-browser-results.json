@@ -1,0 +1,13 @@
+{
+  "introMs": 18212,
+  "fight": {
+    "status": "won",
+    "hp": 120,
+    "rexHP": 0,
+    "parries": 4,
+    "time": 12.516099999999982
+  },
+  "coins": 260,
+  "unlocked": "obsidian",
+  "errors": []
+}

@@ -1,0 +1,157 @@
+{
+  "passed": 20,
+  "total": 20,
+  "results": [
+    {
+      "name": "Seven named benefits share a read-only registry; unknown skins use the brass fallback",
+      "pass": true
+    },
+    {
+      "name": "Brass adds 20 maximum and starting HP; each other skin starts with 120",
+      "pass": true
+    },
+    {
+      "name": "Starting another fight replaces the equipped benefit and cannot stack HP or effects",
+      "pass": true
+    },
+    {
+      "name": "Frost turns a 0.34 second guard into a perfect parry; the base window remains shorter",
+      "pass": true
+    },
+    {
+      "name": "Obsidian reduces late-parry and exhausted-guard damage by 20%, rounded up",
+      "pass": true
+    },
+    {
+      "name": "Verdigris regenerates stamina 30% faster while resting, guarding and attacking",
+      "pass": true
+    },
+    {
+      "name": "Ember breaks weak guards for 35% more damage, including the combo bonus",
+      "pass": true
+    },
+    {
+      "name": "Ember cannot damage a fully prepared guard by attacking outside recovery",
+      "pass": true
+    },
+    {
+      "name": "Royal spends exactly 25% less stamina on manual dodges",
+      "pass": true
+    },
+    {
+      "name": "Royal discounts normal and heavy blocks, automatic dodges, perfect and late parries",
+      "pass": true
+    },
+    {
+      "name": "Royal preserves attack costs and the energy drained when Rex parries the player",
+      "pass": true
+    },
+    {
+      "name": "Solar heals six HP on a perfect parry and caps healing at its current maximum",
+      "pass": true
+    },
+    {
+      "name": "Solar never revives a fallen knight or heals after the fight is over",
+      "pass": true
+    },
+    {
+      "name": "Healing a finishing Solar parry still ends only when Rex HP reaches zero",
+      "pass": true
+    },
+    {
+      "name": "Only the equipped skin applies; merely owning all seven adds no stacked benefits",
+      "pass": true
+    },
+    {
+      "name": "Collection and HUD describe the same selected benefit from the shared data",
+      "pass": true
+    },
+    {
+      "name": "Reward reveals its actual benefit and equipping applies it on the next fight",
+      "pass": true
+    },
+    {
+      "name": "Collection handlers cannot change benefits during active or paused combat",
+      "pass": true
+    },
+    {
+      "name": "The mandatory prologue still consumes 18 visible seconds before benefits can fight",
+      "pass": true
+    },
+    {
+      "name": "Natural AI stays spaced and remains beatable with the new starter benefit",
+      "pass": true
+    }
+  ],
+  "report": {
+    "perks": [
+      {
+        "id": "brass",
+        "title": "HARTOWANA STAL",
+        "summary": "+20 maks. HP"
+      },
+      {
+        "id": "frost",
+        "title": "ZIMNA KREW",
+        "summary": "+0,12 s na perfekcyjną paradę"
+      },
+      {
+        "id": "obsidian",
+        "title": "OBSYDIANOWY PANCERZ",
+        "summary": "−20% otrzymywanych obrażeń"
+      },
+      {
+        "id": "verdigris",
+        "title": "DRUGI ODDECH",
+        "summary": "+30% regeneracji wytrzymałości"
+      },
+      {
+        "id": "ember",
+        "title": "ŻAR KONTRATAKU",
+        "summary": "+35% obrażeń w słabą gardę"
+      },
+      {
+        "id": "royal",
+        "title": "KRÓLEWSKA DYSCYPLINA",
+        "summary": "−25% kosztu obrony"
+      },
+      {
+        "id": "solar",
+        "title": "SŁONECZNE ODNOWIENIE",
+        "summary": "+6 HP za perfekcyjną paradę"
+      }
+    ],
+    "obsidianDamage": [
+      {
+        "heavy": false,
+        "guard": false,
+        "before": 16,
+        "after": 13
+      },
+      {
+        "heavy": false,
+        "guard": true,
+        "before": 14,
+        "after": 12
+      },
+      {
+        "heavy": true,
+        "guard": false,
+        "before": 23,
+        "after": 19
+      },
+      {
+        "heavy": true,
+        "guard": true,
+        "before": 19,
+        "after": 16
+      }
+    ],
+    "naturalVictory": {
+      "seconds": 15.349999999999568,
+      "hp": 140,
+      "parries": 3,
+      "minGap": 365.86666666666986
+    }
+  }
+}

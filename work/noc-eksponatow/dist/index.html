@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=themed-crates">
+</head>
+<body>
+ <div class="app">
+  <header class="topbar">
+   <div class="brand-area"><a class="brand" href="#" aria-label="Noc Eksponatów — strona główna"><span class="brand-mark">N<span>↗</span></span><span>NOC<br>EKSPONATÓW<span class="brand-sub">MUZEUM PO GODZINACH</span></span></a><button id="secretCoinsBtn" class="secret-coins" aria-label="Sekret stróża: dodaj 2137 monet">✦</button></div>
+   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button></nav>
+   <div class="top-actions"><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
+  </header>
+  <main>
+   <div class="section-line"><div><span class="status-dot"></span>MUZEUM HISTORII NIEZBYT NATURALNEJ</div><span id="topStatus">ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI</span></div>
+   <section id="gameFrame" class="game-frame" aria-label="Arena gry">
+    <canvas id="arena" width="1440" height="810" aria-label="Arena: rycerz kontra T-rex. Poruszaj się A i D, atakuj J, paruj K."></canvas>
+    <div class="frame-vignette"></div>
+    <div class="sponsor-credit" id="sponsorCredit">Walka sponsorowana przez markę Kustosz</div>
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div id="menu" class="menu-screen">
+     <div class="hero-kicker"><span class="tiny-line"></span> EKSPONATY ŻYJĄ. TY PRZETRWAJ.</div>
+     <h1>HISTORIA<br>PISZE SIĘ<br><em>PO ZMROKU.</em></h1>
+     <p>Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.</p>
+     <button id="startBtn" class="primary-btn">ROZPOCZNIJ NOC <span>↗</span></button>
+     <div class="intro-note"><span>◷</span> Najpierw historia. 18 sekund. Bez pomijania.</div>
+     <div class="hero-edition">NOCNA ZMIANA <span>VOL. 01 / 2026</span></div>
+    </div>
+    <div id="exhibitTag" class="exhibit-tag"><span class="tag-dot"></span><div>TYRANNOSAURUS REX<small>KREDA PÓŹNA · NR INW. 066</small></div><span class="tag-arrow">↗</span></div>
+    <div id="hud" class="hud hidden" aria-live="off">
+      <div class="fighter-hud player-hud"><div class="fighter-label"><span>01 / TWÓJ EKSPONAT</span><strong id="playerName">ŻELAZNY RYCERZ</strong></div><div class="health-track"><div id="playerHealth" class="health-fill"></div></div><div class="health-numbers"><span id="playerHP">100 / 100</span><span class="stamina-label">ENERGIA <span id="staminaNum">100</span></span></div><div class="stamina-track"><div id="staminaBar"></div></div><div id="activePerk" class="active-perk" aria-label="Aktywna zdolność skina"></div></div>
+      <div class="center-hud"><span class="vs">VS</span><span id="fightTime">00:00</span><button id="pauseBtn" aria-label="Wstrzymaj walkę">Ⅱ</button></div>
+      <div class="fighter-hud rex-hud"><div class="fighter-label"><span>02 / PRZECIWNIK</span><strong>TYRANNOSAURUS REX</strong></div><div class="health-track"><div id="rexHealth" class="health-fill"></div></div><div class="health-numbers"><span id="rexState">ŻYWY EKSPONAT</span><span id="rexHP">100 / 100</span></div></div>
+    </div>
+    <div id="combatHint" class="combat-hint hidden"><span class="hint-icon">!</span><span id="hintText">Wyczuj moment. Paruj tuż przed ciosem.</span></div>
+    <div id="intro" class="cinematic hidden" aria-live="polite"><div class="cinema-top"><span>NOC EKSPONATÓW</span><span id="introChapter">PROLOG / 01</span></div><div class="cinema-bottom"><span class="scene-label" id="sceneLabel">23:58 / OSTATNI OBCHÓD</span><p id="sceneText">W muzeum zapada cisza. Stróż kończy swoją zmianę.</p><div class="scene-progress"><div id="introProgress"></div></div><span class="cinema-note">SCENKA WSTĘPNA · <span id="introRemaining">18</span> S</span></div></div>
+    <div id="pause" class="overlay hidden"><div class="dialog pause-dialog"><span class="eyebrow">MUZEUM MOŻE POCZEKAĆ</span><h2>CHWILA<br>ODDECHU.</h2><p>Arena jest wstrzymana.</p><button id="resumeBtn" class="primary-btn">WRÓĆ DO WALKI <span>↗</span></button><div class="key-hint">ESC — WZNÓW</div></div></div>
+    <div id="ending" class="cinematic hidden"><div class="cinema-top"><span id="outcomeLabel">KONIEC POJEDYNKU</span><span>EPILOG</span></div><div class="dream-caption"><span class="eyebrow">06:00 / POKÓJ STRÓŻA</span><h2 id="dreamTitle">TO BYŁ TYLKO SEN.</h2><p id="dreamText">„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.</p></div><div id="results" class="results hidden"><div class="result-stats"><span>CZAS WALKI<strong id="resultTime">00:00</strong></span><span>PARADY<strong id="resultParries">0</strong></span><span>ZDOBYTE ŻETONY<strong id="resultCoins">+0 ✦</strong></span></div><div class="result-actions"><button id="retryBtn" class="primary-btn">JESZCZE JEDEN SEN <span>↗</span></button><button id="menuBtn" class="secondary-btn">WRÓĆ DO MUZEUM</button></div></div></div>
+    <div class="stage-meta" id="stageMeta"><span>GŁÓWNA GALERIA</span><span>23:58 <span class="meta-live">●</span></span></div>
+   </section>
+   <div id="touchControls" class="touch-controls"><div><button data-control="left" aria-label="W lewo">←</button><button data-control="right" aria-label="W prawo">→</button></div><div><button data-control="guard" class="touch-guard" aria-label="Parada">◈ <small>PARADA</small></button><button data-control="attack" class="touch-attack" aria-label="Atak">✕ <small>ATAK</small></button></div></div>
+   <section class="understage"><div class="control-group"><span class="control-label">TWOJE RUCHY</span><span class="control"><kbd>A</kbd><kbd>D</kbd><span>Ruch</span></span><span class="control"><kbd>J</kbd><span>Atak</span></span><span class="control"><kbd>K</kbd><span>Parada</span></span><span class="control"><kbd>L</kbd><span>Unik</span></span></div><div class="under-tip"><span>✦</span> Dobry timing jest silniejszy od ostrego miecza.</div></section>
+   <div id="loadoutPerk" class="loadout-perk" aria-live="polite"></div>
+   <section class="rules-strip"><div class="rule-intro"><span class="eyebrow">KODEKS NOCNEJ ZMIANY</span><h2>Dwa eksponaty.<br>Jedna historia.</h2></div><div class="rule"><span>01</span><h3>NIE MA ŁATWYCH CIOSÓW</h3><p>Każdy atak spotka unik lub paradę. Trafiaj w osłabioną gardę T‑rexa.</p></div><div class="rule"><span>02</span><h3>OBRONA JEST BRONIĄ</h3><p>Paruj tuż przed uderzeniem. Perfekcyjna parada odbija obrażenia w rywala.</p></div><div class="rule"><span>03</span><h3>TYLKO JEDEN ZWYCIĘZCA</h3><p>Pokonaj T‑rexa, zanim stracisz całe życie. Z tej sali nie ma ucieczki.</p></div></section>
+  </main>
+  <footer><span>© NOC EKSPONATÓW <span class="footer-dot">·</span> NIE DOTYKAĆ EKSPONATÓW. CHYBA ŻE ODDADZĄ.</span><span>ZAPROJEKTOWANO NA NOCNĄ ZMIANĘ ↗</span></footer>
+ </div>
+ <div id="collection" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="collectionTitle">
+  <div class="collection-panel">
+   <div class="modal-heading"><div><span class="eyebrow">ZBROJOWNIA / 50 NOWYCH STROJÓW</span><h2 id="collectionTitle">SKRZYNKI I SKINY.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij kolekcję">✕</button></div>
+   <p class="modal-lead">58 strojów w kolekcjach tematycznych. Wybierz motyw skrzyni lub znajdź zbroję po kategorii. Stachu Jones pozostaje prezentem dla ciebie.</p>
+   <div class="crate-box">
+    <div class="crate-art" aria-hidden="true"><svg viewBox="0 0 120 105" fill="none"><path d="m13 43 47-18 47 18v45l-47 15L13 88V43Z" fill="#2c3320" stroke="#b5c47a" stroke-width="1.5"/><path d="m13 43 47 17 47-17M60 60v43M13 65l47 16 47-16" stroke="#b5c47a" stroke-width="1.5"/><path d="m32 36 47 17v44M82 34 36 51v45" stroke="#d5ed71" stroke-width="6"/><path d="m54 57 13 1v21l-7 5-6-5V57Z" fill="#d5ed71"/><path d="M60 63v10" stroke="#28311a" stroke-width="3"/><path d="m60 1 3 11 11 3-11 3-3 11-3-11-11-3 11-3 3-11ZM99 14l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Z" fill="#d5ed71"/></svg></div>
+    <div class="crate-copy"><label class="crate-type-label" for="crateType">WYBIERZ SKRZYNIĘ</label><select id="crateType"></select><h3 id="crateTitle">Skrzynia Galerii</h3><span id="crateCategory" class="crate-category"></span><p id="crateGuarantee">Gwarantowany nowy skin. Bez duplikatów.</p><span id="freeCrateCount" class="free-crate-badge">1 DARMOWA SKRZYNIA NA START</span></div>
+    <button id="crateBtn" class="primary-btn">OTWÓRZ SKRZYNIĘ <span>↗</span></button>
+   </div>
+   <p id="crateOdds" class="crate-odds">ZWYKŁY 55% · RZADKI 28% · EPICKI 14% · LEGENDARNY 3%</p>
+   <details id="crateContents" class="drop-contents"><summary id="crateContentsSummary">ZAWARTOŚĆ I SZANSE NA SKINY</summary><p>Dokładne szanse w następnym otwarciu. Odkryte stroje wypadają z puli; pozostałe szanse są przeliczane.</p><div id="crateContentsList" class="drop-list"></div></details>
+   <button id="crateShopBtn" class="store-link">ZOBACZ WSZYSTKIE OFERTY W SKLEPIE ↗</button>
+   <p id="collectionMessage" class="collection-message" aria-live="polite">Pierwszy eksponat czeka. Otwórz darmową skrzynię.</p>
+   <div class="collection-section"><span>TWOJE EKSPONATY</span><span id="collectionCount">2 / 58</span></div>
+   <div class="wardrobe-toolbar">
+    <label class="skin-search-label"><span>SZUKAJ STROJU LUB ZDOLNOŚCI</span><input id="skinSearch" type="search" placeholder="Nazwa, motyw lub zdolność…" autocomplete="off"></label>
+    <label><span>KATEGORIA</span><select id="categoryFilter"></select></label>
+    <label><span>RZADKOŚĆ</span><select id="rarityFilter"><option value="all">Wszystkie rzadkości</option><option value="basic">Podstawowy</option><option value="common">Zwykłe</option><option value="rare">Rzadkie</option><option value="epic">Epickie</option><option value="legendary">Legendarne</option></select></label>
+    <label><span>KOLEKCJA</span><select id="ownershipFilter"><option value="all">Wszystkie stroje</option><option value="owned">Odkryte</option><option value="locked">Do odkrycia</option></select></label>
+   </div>
+   <div class="wardrobe-meta"><button id="newSkinsOnly" class="new-skins-toggle" aria-pressed="false">✦ NOWE 50</button><span id="skinResultsCount" aria-live="polite"></span></div>
+   <p id="equippedSkin" class="equipped-skin"></p>
+   <div id="skinGrid" class="skin-grid"></div>
+   <div id="skinEmpty" class="skin-empty hidden"><strong>Ta gablota jest pusta.</strong><p>Zmień nazwę lub filtry, żeby znaleźć inne stroje.</p><button id="resetSkinFilters" class="secondary-btn">WYCZYŚĆ FILTRY</button></div>
+   <div id="skinPagination" class="skin-pagination" aria-label="Strony kolekcji"><button id="skinPagePrev" aria-label="Poprzednia strona strojów">← POPRZEDNIA</button><span id="skinPageInfo" aria-live="polite"></span><button id="skinPageNext" aria-label="Następna strona strojów">NASTĘPNA →</button></div>
+   <p class="collection-footnote">Każdy skin daje inną zdolność w walce. Wybierasz jeden przed pojedynkiem — bonusy nie sumują się. Żetony zdobywasz w grze.</p>
+  </div>
+ </div>
+ <div id="loot" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="lootTitle">
+  <div id="lootPanel" class="loot-panel">
+   <div class="modal-heading"><div><span id="lootEyebrow" class="eyebrow">ODPIECZĘTOWYWANIE ZNALEZISKA</span><h2 id="lootTitle">CO KRYJE SKRZYNIA?</h2></div><button id="lootClose" class="close-modal icon-btn" aria-label="Zamknij nagrodę" disabled>✕</button></div>
+   <p id="lootSubtitle" class="modal-lead">Niektóre eksponaty czekają całe wieki na ten moment.</p>
+   <div id="lootWindow" class="loot-window" aria-hidden="true"><div class="loot-center-glow"></div><div id="lootReel" class="loot-reel"></div><div class="loot-selector"><span></span><span></span></div><div class="loot-seal" aria-hidden="true"><span class="seal-ring">◇</span><small>MAGAZYN MUZEUM / ZAPIECZĘTOWANE</small></div></div>
+   <div id="lootSuspense" class="loot-suspense hidden"><div class="loot-stage"><span id="lootStageLabel" aria-live="polite">PIECZĘĆ PĘKA</span><span class="loot-stage-dots" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="loot-progress"><div id="lootProgressFill"></div></div><p id="lootStageHint">Za chwilę odkryjesz nowy eksponat.</p></div>
+   <div id="lootReward" class="loot-reward hidden"><div class="reward-aura"></div><canvas id="lootCanvas" width="560" height="560" aria-hidden="true"></canvas><span id="lootRarity" class="reward-rarity"></span><h3 id="lootName"></h3><p id="lootEra"></p><div id="lootPerk" class="loot-perk"></div></div>
+   <div id="lootActions" class="loot-actions hidden"><button id="lootEquipBtn" class="primary-btn">ZAŁÓŻ SKIN <span>↗</span></button><button id="lootKeepBtn" class="secondary-btn">ZACHOWAJ W KOLEKCJI</button></div>
+   <p class="loot-footer">NOWY WYGLĄD GWARANTOWANY <span>✦</span> ZERO DUPLIKATÓW</p>
+  </div>
+ </div>
+ <div id="help" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><div class="help-panel"><div class="modal-heading"><div><span class="eyebrow">INSTRUKCJA OBSŁUGI EKSPONATU</span><h2 id="helpTitle">WYCZUJ MOMENT.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij instrukcję">✕</button></div><div class="help-grid"><p><kbd>A</kbd> <kbd>D</kbd> lub strzałki<br><strong>Poruszaj się po arenie.</strong></p><p><kbd>J</kbd> lub spacja<br><strong>Atakuj osłabioną gardę.</strong></p><p><kbd>K</kbd> lub Shift<br><strong>Paruj tuż przed ciosem.</strong></p><p><kbd>L</kbd><br><strong>Zrób unik kosztem energii.</strong></p></div><p class="help-explain">T‑rex zawsze próbuje uniknąć lub sparować twój atak. Gdy odzyskuje siły po swoim ciosie, jego parada jest słabsza — wtedy atakuj. Kiedy widzisz zapowiedź ataku, naciśnij paradę tuż przed uderzeniem, aby odbić obrażenia. Bez gardy rycerz próbuje uniku, ale potrzebuje do tego energii. Po jej wyczerpaniu osłabiona parada przepuszcza obrażenia.</p><button id="helpClose" class="primary-btn">ROZUMIEM <span>↗</span></button></div></div>
+ <div id="shop" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
+  <div class="shop-panel">
+   <div class="modal-heading"><div><span class="eyebrow">SKRZYNIE / NOCNA OFERTA</span><h2 id="shopTitle">SKLEP KUSTOSZA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij sklep">✕</button></div>
+   <div class="shop-intro"><p class="modal-lead">Niektóre skarby nie trafiają na wystawę.<br>Wybierz skrzynię. Odkryj nowy strój i jego zdolność.</p><div class="shop-wallet"><span>TWOJE ŻETONY</span><strong id="shopBalance">0 ✦</strong></div></div>
+   <p class="shop-notice"><span>◷</span><span><strong>ZAPOWIEDŹ SKLEPU</strong> Ceny w złotówkach są planowane. Płatności nie są jeszcze dostępne. Skrzynki za żetony zdobyte w grze możesz otwierać już teraz.</span></p>
+   <div class="shop-browse"><div class="shop-filters" aria-label="Rodzaje skrzyń"><button id="shopFilterAll" aria-pressed="true">WSZYSTKIE</button><button id="shopFilterClassic" aria-pressed="false">KLASYCZNE</button><button id="shopFilterThemed" aria-pressed="false">TEMATYCZNE</button></div><span id="shopOffersCount" aria-live="polite"></span></div>
+   <div id="shopOffers" class="shop-offers" aria-label="Oferty skrzyń"></div>
+   <div id="shopSummary" class="shop-summary" tabindex="-1">
+    <div><span class="eyebrow">WYBRANA SKRZYNIA</span><h3 id="shopSelectedName"></h3><span id="shopSelectedCategory" class="shop-family-label"></span><p id="shopSelectedGuarantee"></p><div id="shopSelectedOdds" class="shop-odds" aria-label="Szanse na rzadkości"></div><p class="shop-odds-note">Szanse dotyczą twojej obecnej kolekcji. Po zebraniu całej rzadkości są przeliczane dla pozostałych strojów.</p><details id="shopContents" class="drop-contents"><summary id="shopContentsSummary">ZAWARTOŚĆ I SZANSE NA SKINY</summary><ul id="shopContentsList" class="drop-list"></ul></details></div>
+    <div class="shop-checkout"><div class="shop-total"><span>PLANOWANA CENA</span><strong id="shopSelectedPrice"></strong></div><button id="shopPaymentBtn" class="primary-btn" disabled aria-describedby="shopPaymentHint">PŁATNOŚCI WKRÓTCE</button><p id="shopPaymentHint" class="shop-payment-note">Zakup za złotówki będzie dostępny po uruchomieniu płatności.</p><button id="shopTokenBtn" class="secondary-btn"></button><p id="shopTokenHint" class="shop-token-hint" aria-live="polite"></p></div>
+   </div>
+  </div>
+ </div>
+ <div id="toast" class="toast hidden" role="status"></div>
+ <script src="knights.js?v=themed-crates"></script><script src="perks.js?v=themed-crates"></script><script src="art.js?v=themed-crates"></script><script src="game.js?v=themed-crates"></script><script src="loot.js?v=themed-crates"></script><script src="shop.js?v=themed-crates"></script><script src="loot-show.js?v=themed-crates"></script><script src="ui.js?v=themed-crates"></script>
+</body></html>

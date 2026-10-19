@@ -1,0 +1,45 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {chromium}=require('/Users/jakub/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/Applications/Opera.app/Contents/MacOS/Opera',headless:true,args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']});
+ const context=await browser.newContext({viewport:{width:1440,height:1100}});
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:8765',{waitUntil:'networkidle'});
+ assert.equal(await page.evaluate(()=>MuseumGame.getState().status),'idle');
+ const start=Date.now();await page.locator('#startBtn').click();
+ await page.keyboard.press('Escape');await page.keyboard.press('Space');await page.keyboard.press('j');
+ assert.equal(await page.locator('#collectionTab').getAttribute('aria-disabled'),'true');
+ assert.ok(await page.locator('#collection').evaluate(el=>el.classList.contains('hidden')));
+ await page.waitForTimeout(16500);
+ assert.equal(await page.evaluate(()=>MuseumGame.getState().status),'idle','No gameplay before full18-second intro');
+ assert.ok(await page.locator('#intro').isVisible());
+ await page.waitForFunction(()=>MuseumGame.getState().status==='running',{timeout:10000});
+ const introMs=Date.now()-start;assert.ok(introMs>=18000);
+ console.log('PASS: intro unskippable, combat starts after '+introMs+'ms.');
+ const held={};async function key(code,down){if(held[code]!==down){held[code]=down;await page.keyboard[down?'down':'up'](code);}}
+ const timeout=Date.now()+80000;
+ while(Date.now()<timeout){const s=await page.evaluate(()=>MuseumGame.getState());if(s.status!=='running')break;
+  await key('d',s.rex.x-s.player.x>305);
+  await key('k',(s.rex.state==='windup'&&s.rex.timer>(s.rex.heavy?.95:.70)) || s.rex.state==='strike'&&!s.rex.attackDone);
+  await key('j',s.rex.state==='recover'&&s.rex.timer<.82&&s.player.stamina>35);
+  await page.waitForTimeout(20);
+ }
+ const fight=await page.evaluate(()=>MuseumGame.getState());assert.equal(fight.status,'won');assert.equal(fight.rex.hp,0);assert.ok(fight.player.hp>0);
+ console.log('PASS: natural keyboard victory',JSON.stringify({hp:fight.player.hp,parries:fight.parries,time:fight.elapsed}));
+ await page.waitForFunction(()=>!document.getElementById('results').classList.contains('hidden'),{timeout:15000});
+ assert.equal(await page.locator('#dreamTitle').textContent(),'TO BYŁ TYLKO SEN.');
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('museum-night-v1')));assert.ok(saved.coins>=180);assert.equal(saved.owned.length,1);
+ await page.screenshot({path:'work/qa-result.png'});
+ console.log('PASS: dream epilogue, results and earned coins',saved.coins);
+ await page.locator('#collectionTab').click();assert.ok(await page.locator('#collection').isVisible());
+ await page.locator('#crateBtn').click();
+ const opened=await page.evaluate(()=>JSON.parse(localStorage.getItem('museum-night-v1')));assert.equal(opened.coins,saved.coins-80);assert.equal(opened.owned.length,2);assert.notEqual(opened.skin,'brass');
+ await page.screenshot({path:'work/qa-crate.png'});
+ console.log('PASS: crate spends80 coins, unlocks nonduplicate skin, persists selection',opened.skin);
+ await page.reload({waitUntil:'networkidle'});const persisted=await page.evaluate(()=>JSON.parse(localStorage.getItem('museum-night-v1')));assert.deepEqual(persisted,opened);
+ console.log('PASS: profile persisted after reload; errors:',errors.length);assert.deepEqual(errors,[]);
+ fs.writeFileSync('work/qa-browser-results.json',JSON.stringify({introMs,fight:{status:fight.status,hp:fight.player.hp,rexHP:fight.rex.hp,parries:fight.parries,time:fight.elapsed},coins:saved.coins,unlocked:opened.skin,errors},null,2));
+ await browser.close();
+})().catch(e=>{console.error(e);process.exitCode=1});

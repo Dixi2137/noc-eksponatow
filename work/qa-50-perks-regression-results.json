@@ -1,0 +1,407 @@
+{
+  "passed": 20,
+  "total": 20,
+  "results": [
+    {
+      "name": "Seven named benefits share a read-only registry; unknown skins use the brass fallback",
+      "pass": true
+    },
+    {
+      "name": "Brass adds 20 maximum and starting HP; each other skin starts with 120",
+      "pass": true
+    },
+    {
+      "name": "Starting another fight replaces the equipped benefit and cannot stack HP or effects",
+      "pass": true
+    },
+    {
+      "name": "Frost turns a 0.34 second guard into a perfect parry; the base window remains shorter",
+      "pass": true
+    },
+    {
+      "name": "Obsidian reduces late-parry and exhausted-guard damage by 20%, rounded up",
+      "pass": true
+    },
+    {
+      "name": "Verdigris regenerates stamina 30% faster while resting, guarding and attacking",
+      "pass": true
+    },
+    {
+      "name": "Ember breaks weak guards for 35% more damage, including the combo bonus",
+      "pass": true
+    },
+    {
+      "name": "Ember cannot damage a fully prepared guard by attacking outside recovery",
+      "pass": true
+    },
+    {
+      "name": "Royal spends exactly 25% less stamina on manual dodges",
+      "pass": true
+    },
+    {
+      "name": "Royal discounts normal and heavy blocks, automatic dodges, perfect and late parries",
+      "pass": true
+    },
+    {
+      "name": "Royal preserves attack costs and the energy drained when Rex parries the player",
+      "pass": true
+    },
+    {
+      "name": "Solar heals six HP on a perfect parry and caps healing at its current maximum",
+      "pass": true
+    },
+    {
+      "name": "Solar never revives a fallen knight or heals after the fight is over",
+      "pass": true
+    },
+    {
+      "name": "Healing a finishing Solar parry still ends only when Rex HP reaches zero",
+      "pass": true
+    },
+    {
+      "name": "Only the equipped skin applies; merely owning all seven adds no stacked benefits",
+      "pass": true
+    },
+    {
+      "name": "Collection and HUD describe the same selected benefit from the shared data",
+      "pass": true
+    },
+    {
+      "name": "Reward reveals its actual benefit and equipping applies it on the next fight",
+      "pass": true
+    },
+    {
+      "name": "Collection handlers cannot change benefits during active or paused combat",
+      "pass": true
+    },
+    {
+      "name": "The mandatory prologue still consumes 18 visible seconds before benefits can fight",
+      "pass": true
+    },
+    {
+      "name": "Natural AI stays spaced and remains beatable with the new starter benefit",
+      "pass": true
+    }
+  ],
+  "report": {
+    "perks": [
+      {
+        "id": "brass",
+        "title": "HARTOWANA STAL",
+        "summary": "+20 maks. HP"
+      },
+      {
+        "id": "frost",
+        "title": "ZIMNA KREW",
+        "summary": "+0,12 s na perfekcyjną paradę"
+      },
+      {
+        "id": "obsidian",
+        "title": "OBSYDIANOWY PANCERZ",
+        "summary": "−20% otrzymywanych obrażeń"
+      },
+      {
+        "id": "verdigris",
+        "title": "DRUGI ODDECH",
+        "summary": "+30% regeneracji wytrzymałości"
+      },
+      {
+        "id": "ember",
+        "title": "ŻAR KONTRATAKU",
+        "summary": "+35% obrażeń w słabą gardę"
+      },
+      {
+        "id": "royal",
+        "title": "KRÓLEWSKA DYSCYPLINA",
+        "summary": "−25% kosztu obrony"
+      },
+      {
+        "id": "solar",
+        "title": "SŁONECZNE ODNOWIENIE",
+        "summary": "+6 HP za perfekcyjną paradę"
+      },
+      {
+        "id": "knight-01",
+        "title": "WIERNA WARTA",
+        "summary": "+12 maks. HP"
+      },
+      {
+        "id": "knight-02",
+        "title": "KRUCZE OSTRZE",
+        "summary": "+18% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-03",
+        "title": "ZŁOTA TARCZA",
+        "summary": "−10% otrzymywanych obrażeń"
+      },
+      {
+        "id": "knight-04",
+        "title": "ODDECH PUSZCZY",
+        "summary": "+18% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-05",
+        "title": "MROŹNY REFLEKS",
+        "summary": "+0,06 s na perfekcyjną paradę"
+      },
+      {
+        "id": "knight-06",
+        "title": "SMOCZY ŻAR",
+        "summary": "+20% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-07",
+        "title": "KROK BURZY",
+        "summary": "−12% kosztu obrony"
+      },
+      {
+        "id": "knight-08",
+        "title": "KRÓLEWSKA ŻYWOTNOŚĆ",
+        "summary": "+16 maks. HP"
+      },
+      {
+        "id": "knight-09",
+        "title": "ODDECH PUSTYNI",
+        "summary": "+20% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-10",
+        "title": "WIDMOWY REFLEKS",
+        "summary": "+0,07 s na perfekcyjną paradę"
+      },
+      {
+        "id": "knight-11",
+        "title": "PŁASZCZ CIENIA",
+        "summary": "−12% otrzymywanych obrażeń"
+      },
+      {
+        "id": "knight-12",
+        "title": "WILCZY INSTYNKT",
+        "summary": "−14% kosztu obrony"
+      },
+      {
+        "id": "knight-13",
+        "title": "SZLACHETNE ODNOWIENIE",
+        "summary": "+2 HP za perfekcyjną paradę"
+      },
+      {
+        "id": "knight-14",
+        "title": "TYTANOWA WYTRWAŁOŚĆ",
+        "summary": "+16 maks. HP"
+      },
+      {
+        "id": "knight-15",
+        "title": "KWIAT ŻYCIA",
+        "summary": "+2 HP za perfekcyjną paradę"
+      },
+      {
+        "id": "knight-16",
+        "title": "SŁONECZNY ODDECH",
+        "summary": "+30% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-17",
+        "title": "PANCERZ PÓŁNOCY",
+        "summary": "−16% otrzymywanych obrażeń"
+      },
+      {
+        "id": "knight-18",
+        "title": "BŁYSK GARDY",
+        "summary": "−20% kosztu obrony"
+      },
+      {
+        "id": "knight-19",
+        "title": "ŻELAZNE SERCE",
+        "summary": "+25 maks. HP"
+      },
+      {
+        "id": "knight-20",
+        "title": "CZUJNOŚĆ WĘDROWCA",
+        "summary": "+0,10 s na perfekcyjną paradę"
+      },
+      {
+        "id": "knight-21",
+        "title": "DZIOB KRUKA",
+        "summary": "+30% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-22",
+        "title": "SIŁA PRZYPŁYWU",
+        "summary": "+32% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-23",
+        "title": "ERUPCJA KONTRY",
+        "summary": "+35% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-24",
+        "title": "KSIĘŻYCOWY REFLEKS",
+        "summary": "+0,12 s na perfekcyjną paradę"
+      },
+      {
+        "id": "knight-25",
+        "title": "ELIKSIR ODNOWY",
+        "summary": "+4 HP za perfekcyjną paradę"
+      },
+      {
+        "id": "knight-26",
+        "title": "PIASKOWY PANCERZ",
+        "summary": "−15% otrzymywanych obrażeń"
+      },
+      {
+        "id": "knight-27",
+        "title": "CIOS ŁOWCY",
+        "summary": "+32% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-28",
+        "title": "STALOWA DYSCYPLINA",
+        "summary": "−22% kosztu obrony"
+      },
+      {
+        "id": "knight-29",
+        "title": "KWARCOWA ŻYWOTNOŚĆ",
+        "summary": "+22 maks. HP"
+      },
+      {
+        "id": "knight-30",
+        "title": "AWARYJNY NAPĘD",
+        "summary": "+28% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-31",
+        "title": "SPOKÓJ SAMURAJA",
+        "summary": "−28% kosztu obrony"
+      },
+      {
+        "id": "knight-32",
+        "title": "JADOWITA KONTRA",
+        "summary": "+38% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-33",
+        "title": "SMOCZA CZUJNOŚĆ",
+        "summary": "+0,13 s na perfekcyjną paradę"
+      },
+      {
+        "id": "knight-34",
+        "title": "BARONOWE ODNOWIENIE",
+        "summary": "+5 HP za perfekcyjną paradę"
+      },
+      {
+        "id": "knight-35",
+        "title": "LEKKOŚĆ CHMUR",
+        "summary": "−30% kosztu obrony"
+      },
+      {
+        "id": "knight-36",
+        "title": "KRYSZTAŁOWY PANCERZ",
+        "summary": "−24% otrzymywanych obrażeń"
+      },
+      {
+        "id": "knight-37",
+        "title": "NAKRĘCANY ODDECH",
+        "summary": "+38% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-38",
+        "title": "DZIEDZICTWO DYNASTII",
+        "summary": "+28 maks. HP"
+      },
+      {
+        "id": "knight-39",
+        "title": "INSTYNKT GLADIATORA",
+        "summary": "+0,14 s na perfekcyjną paradę"
+      },
+      {
+        "id": "knight-40",
+        "title": "LEŚNE ODNOWIENIE",
+        "summary": "+5 HP za perfekcyjną paradę"
+      },
+      {
+        "id": "knight-41",
+        "title": "JASTRZĘBIA LEKKOŚĆ",
+        "summary": "−27% kosztu obrony"
+      },
+      {
+        "id": "knight-42",
+        "title": "GWIEZDNY ODDECH",
+        "summary": "+40% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-43",
+        "title": "PIEKIELNA RIPOSTA",
+        "summary": "+40% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-44",
+        "title": "SIŁA NOWEGO DNIA",
+        "summary": "+28 maks. HP"
+      },
+      {
+        "id": "knight-45",
+        "title": "BAGIENNY PANCERZ",
+        "summary": "−23% otrzymywanych obrażeń"
+      },
+      {
+        "id": "knight-46",
+        "title": "SERCE PUSZCZY",
+        "summary": "+45% regeneracji wytrzymałości"
+      },
+      {
+        "id": "knight-47",
+        "title": "SERCE WIECZNEGO LODU",
+        "summary": "+30 maks. HP"
+      },
+      {
+        "id": "knight-48",
+        "title": "TANIEC SKORPIONA",
+        "summary": "−35% kosztu obrony"
+      },
+      {
+        "id": "knight-49",
+        "title": "NEONOWA RIPOSTA",
+        "summary": "+45% obrażeń w słabą gardę"
+      },
+      {
+        "id": "knight-50",
+        "title": "ODRODZENIE SMOKA",
+        "summary": "+7 HP za perfekcyjną paradę"
+      }
+    ],
+    "obsidianDamage": [
+      {
+        "heavy": false,
+        "guard": false,
+        "before": 16,
+        "after": 13
+      },
+      {
+        "heavy": false,
+        "guard": true,
+        "before": 14,
+        "after": 12
+      },
+      {
+        "heavy": true,
+        "guard": false,
+        "before": 23,
+        "after": 19
+      },
+      {
+        "heavy": true,
+        "guard": true,
+        "before": 19,
+        "after": 16
+      }
+    ],
+    "naturalVictory": {
+      "seconds": 15.349999999999568,
+      "hp": 140,
+      "parries": 3,
+      "minGap": 365.86666666666986
+    }
+  }
+}

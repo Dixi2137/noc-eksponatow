@@ -1,0 +1,102 @@
+{
+  "passed": 16,
+  "total": 16,
+  "results": [
+    {
+      "name": "Shipping combat exposes no QA mutation helpers",
+      "pass": true
+    },
+    {
+      "name": "The 18 second intro cannot be skipped, shortened or fought during",
+      "pass": true
+    },
+    {
+      "name": "Hidden tab time does not count as viewing the intro",
+      "pass": true
+    },
+    {
+      "name": "Exactly two combatants, fixed knight and T-Rex, remain in the arena",
+      "pass": true
+    },
+    {
+      "name": "Natural stationary AI respects 330px personal space through all phases",
+      "pass": true
+    },
+    {
+      "name": "Holding movement cannot cross Rex, push his skull through knight, or leave bounds",
+      "pass": true
+    },
+    {
+      "name": "Rex commits to his windup and strike position rather than tracking the player",
+      "pass": true
+    },
+    {
+      "name": "Normal strike telegraph lasts at least one second before attack",
+      "pass": true
+    },
+    {
+      "name": "Retreating from a telegraphed attack avoids damage without the Rex chasing",
+      "pass": true
+    },
+    {
+      "name": "Rex responds to player attacks with defense; recovery creates a real damage window",
+      "pass": true
+    },
+    {
+      "name": "Pause freezes HP, time and motion; resuming restores combat",
+      "pass": true
+    },
+    {
+      "name": "Natural AI can be defeated using real keyboard events and readable timing",
+      "pass": true
+    },
+    {
+      "name": "Dodge art offsets stay inside the physical arena at both walls",
+      "pass": true
+    },
+    {
+      "name": "Idle, windup, attack, recovery and defensive art never overlap knight torso",
+      "pass": true
+    },
+    {
+      "name": "Rex attack always provokes dodge or parry; exhausted defense can lose",
+      "pass": true
+    },
+    {
+      "name": "Only Rex HP defeat awards victory; elapsed time cannot end the fight",
+      "pass": true
+    }
+  ],
+  "report": {
+    "stationary": {
+      "minGap": 365.63333333333446,
+      "phases": [
+        "idle",
+        "approach",
+        "windup",
+        "strike",
+        "recover",
+        "reposition"
+      ]
+    },
+    "movement": {
+      "minGap": 330
+    },
+    "naturalVictory": {
+      "status": "won",
+      "hp": 120,
+      "rexHP": 0,
+      "parries": 3,
+      "seconds": 15.349999999999568,
+      "minGap": 365.86666666666986,
+      "phases": [
+        "idle",
+        "approach",
+        "windup",
+        "strike",
+        "recover",
+        "reposition"
+      ]
+    }
+  }
+}

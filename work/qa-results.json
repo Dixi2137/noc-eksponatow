@@ -1,0 +1,70 @@
+{
+  "passed": 16,
+  "total": 16,
+  "results": [
+    {
+      "name": "Production API does not expose QA state mutation",
+      "pass": true
+    },
+    {
+      "name": "Idle combat cannot move, attack or change HP before start",
+      "pass": true
+    },
+    {
+      "name": "RAF can draw 120 frames without starting combat",
+      "pass": true
+    },
+    {
+      "name": "Only player and T. rex are active fighters; no character mutation API",
+      "pass": true
+    },
+    {
+      "name": "Movement remains inside both arena boundaries and collision gap",
+      "pass": true
+    },
+    {
+      "name": "Pause freezes time, movement and health; resume restores updates",
+      "pass": true
+    },
+    {
+      "name": "Distant player attack causes T. rex dodge with no damage",
+      "pass": true
+    },
+    {
+      "name": "T. rex parries attacks during windup with no HP damage",
+      "pass": true
+    },
+    {
+      "name": "Tired T. rex parry during recovery lets through damage",
+      "pass": true
+    },
+    {
+      "name": "Undefended Rex strike automatically provokes player dodge",
+      "pass": true
+    },
+    {
+      "name": "Fresh guard reflects Rex strike and damages only Rex",
+      "pass": true
+    },
+    {
+      "name": "Active manual dodge avoids an incoming strike at low remaining stamina",
+      "pass": true
+    },
+    {
+      "name": "Eight successive perfect parries can legitimately defeat Rex",
+      "pass": true
+    },
+    {
+      "name": "Exhausted late parry can reduce player to zero and lose",
+      "pass": true
+    },
+    {
+      "name": "After HP defeat, combat state stops responding and no further damage occurs",
+      "pass": true
+    },
+    {
+      "name": "Five minutes passing cannot produce victory without defeating Rex",
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "passed": 20,
+  "total": 20,
+  "results": [
+    {
+      "name": "All 50 requested names, ordering, four rarity ranges and exact supplied palettes are shipped",
+      "pass": true
+    },
+    {
+      "name": "The full 57-item catalog and perk registry are immutable, unique and retain the seven original IDs",
+      "pass": true
+    },
+    {
+      "name": "Old progress, equipped skin, 7 owned skins, currency, paid/free state and pending reward survive migration and reload",
+      "pass": true
+    },
+    {
+      "name": "New skin saves and pending rewards survive validation, while unknown IDs and invalid balances are sanitized",
+      "pass": true
+    },
+    {
+      "name": "Fresh crates have exact 55/28/14/3 tier odds and uniformly selectable boundaries inside every tier",
+      "pass": true
+    },
+    {
+      "name": "Empty tiers redistribute odds; removing one item in a tier does not distort that tier chance",
+      "pass": true
+    },
+    {
+      "name": "All 56 obtainable skins drop once, payments are exact, and a completed collection never charges again",
+      "pass": true
+    },
+    {
+      "name": "Insufficient funds cannot reserve a crate; reserved new rewards survive reload and equip explicitly",
+      "pass": true
+    },
+    {
+      "name": "Every one of the new 50 skins starts a real fight with its own perk and bounded stats",
+      "pass": true
+    },
+    {
+      "name": "Switching skins between starts replaces its perk without accumulating stats",
+      "pass": true
+    },
+    {
+      "name": "Original seven benefit values remain intact and attached to their original skins",
+      "pass": true
+    },
+    {
+      "name": "Canvas art renders all57 skins in every combat pose and direction, and no nonfinite geometry is passed",
+      "pass": true
+    },
+    {
+      "name": "The free new-common crate displays, persists, recovers and equips its own skin and benefit",
+      "pass": true
+    },
+    {
+      "name": "Repeated crate/start/claim actions during a roll never duplicate payments or bypass its result",
+      "pass": true
+    },
+    {
+      "name": "Live and paused fights reject card, crate and reward-equipping handlers",
+      "pass": true
+    },
+    {
+      "name": "Mandatory18s intro cannot be skipped, and T-Rex keeps at least330px separation through natural play",
+      "pass": true
+    },
+    {
+      "name": "Collection paginates all57 cards in pages of12 with no missing or duplicate IDs",
+      "pass": true
+    },
+    {
+      "name": "Search treats Polish diacritics,case andŁ equally, then handles an empty result accessibly",
+      "pass": true
+    },
+    {
+      "name": "Rarity,ownership and newcollection filters combine and reset page to valid range",
+      "pass": true
+    },
+    {
+      "name": "Locked filtered skins never equip; owned filtered skins equip and preserve filters",
+      "pass": true
+    }
+  ],
+  "report": {
+    "catalog": {
+      "common": 15,
+      "rare": 15,
+      "epic": 15,
+      "legendary": 5
+    },
+    "uniqueDrops": 56,
+    "fightLoads": 50,
+    "artCalls": 411064,
+    "naturalVictory": {
+      "skin": "knight-50",
+      "seconds": 15.349999999999568,
+      "hp": 120,
+      "minGap": 365.86666666666986
+    }
+  }
+}
