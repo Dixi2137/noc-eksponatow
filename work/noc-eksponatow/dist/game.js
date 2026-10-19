@@ -12,12 +12,12 @@
   const particles = [], labels = [], rings = [];
   let shake = 0, flash = 0, hitstop = 0, eventClock = 0, lastHint = '';
 
-  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword') {
+  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum') {
     const perk = window.MuseumPerks.get(skin), stats = perk.stats;
     const exhibit = window.MuseumExhibits.get(exhibitId), weapon = window.MuseumWeapons.get(weaponId);
     const combat = exhibit.stats.combat;
     return {
-      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat,
+      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, theme,
       hint: `Zbliż się do ${exhibit.alias}a. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99 },
@@ -38,7 +38,7 @@
       parries: state.parries, combo: state.combo, hint: state.hint, foeState: state.foe.state,
       player: { ...state.player }, foe: { ...state.foe }, skin: state.skin, perk: state.perk, scene,
       exhibit: { id: state.exhibit.id, name: state.exhibit.name, alias: state.exhibit.alias, tag: state.exhibit.tag, maxHP: state.exhibit.stats.hp },
-      weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind },
+      weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind }, theme: state.theme,
       combat: { ...state.combat }
     };
   }
@@ -390,7 +390,7 @@
       art.drawGuardScene(ctx, W, H, visualTime); ctx.restore(); return;
     }
     const artTime = state.status === 'idle' ? visualTime : state.elapsed;
-    if (art?.drawArena) art.drawArena(ctx, W, H, artTime); else fallbackArena();
+    if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
     shadow(p.x, 94); shadow(r.x, state.exhibit.stats.shadow);
     drawTelegraph();
@@ -410,7 +410,7 @@
     if (p.hp <= 0) { playerPose = 'dead'; playerProgress = 1; }
     const pEvadeX = p.evade > 0 ? Math.max(LEFT - p.x, -Math.sin(clamp(playerProgress, 0, 1) * Math.PI) * 55) : 0;
     const rEvadeX = foePose === 'dodge' ? Math.min(RIGHT - r.x - 29, Math.sin(clamp(foeProgress, 0, 1) * Math.PI) * 48) : 0;
-    const drawR = () => art?.drawExhibit ? art.drawExhibit(ctx, state.exhibit.stats.art, r.x + rEvadeX, FLOOR, { facing: -1, pose: foePose,
+    const drawR = () => art?.drawExhibit ? art.drawExhibit(ctx, state.exhibit, r.x + rEvadeX, FLOOR, { facing: -1, pose: foePose,
       progress: clamp(foeProgress, 0, 1), phase: clamp(foeProgress, 0, 1), time: artTime, heavy: r.heavy, glow: r.hurt > 0 }) : fallbackFighter(r.x, foePose, true);
     const drawP = () => art?.drawKnight ? art.drawKnight(ctx, p.x + pEvadeX, FLOOR, { facing: 1, pose: playerPose,
       progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 }) : fallbackFighter(p.x, playerPose);
@@ -482,7 +482,7 @@
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon); scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme); scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;

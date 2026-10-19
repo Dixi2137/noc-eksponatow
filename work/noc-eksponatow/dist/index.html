@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza0">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza1">
 </head>
 <body>
  <div class="app">
@@ -15,19 +15,21 @@
   <main>
    <div class="section-line"><div><span class="status-dot"></span>MUZEUM HISTORII NIEZBYT NATURALNEJ</div><span id="topStatus">ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI</span></div>
    <section id="gameFrame" class="game-frame" aria-label="Arena gry">
-    <canvas id="arena" width="1440" height="810" aria-label="Arena: rycerz kontra T-rex. Poruszaj się A i D, atakuj J, paruj K."></canvas>
+    <canvas id="arena" width="1440" height="810" aria-label="Arena: rycerz kontra eksponat z epoki. Poruszaj się A i D, atakuj J, paruj K."></canvas>
     <div class="frame-vignette"></div>
     <div class="sponsor-credit" id="sponsorCredit">Walka sponsorowana przez markę Kustosz</div>
     <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
     <div id="menu" class="menu-screen">
      <div class="hero-kicker"><span class="tiny-line"></span> EKSPONATY ŻYJĄ. TY PRZETRWAJ.</div>
      <h1>HISTORIA<br>PISZE SIĘ<br><em>PO ZMROKU.</em></h1>
-     <p>Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.</p>
+     <div class="hero-level" id="heroLevel">POZIOM 01 / 06</div>
+     <p id="heroTagline">Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.</p>
      <button id="startBtn" class="primary-btn">ROZPOCZNIJ NOC <span>↗</span></button>
-     <div class="intro-note"><span>◷</span> Najpierw historia. 18 sekund. Bez pomijania.</div>
-     <div class="hero-edition">NOCNA ZMIANA <span>VOL. 01 / 2026</span></div>
+     <div class="intro-note" id="introNote"><span>◷</span> Najpierw historia. 18 sekund. Bez pomijania.</div>
+     <div id="levelStrip" class="level-strip" aria-label="Sale nocnego obchodu"></div>
+     <div class="hero-edition">NOCNA ZMIANA <span>VOL. 02 / 2026</span></div>
     </div>
-    <div id="exhibitTag" class="exhibit-tag"><span class="tag-dot"></span><div>TYRANNOSAURUS REX<small>KREDA PÓŹNA · NR INW. 066</small></div><span class="tag-arrow">↗</span></div>
+    <div id="exhibitTag" class="exhibit-tag"><span class="tag-dot"></span><div><span id="exhibitTagName">TYRANNOSAURUS REX</span><small id="exhibitTagInfo">KREDA PÓŹNA · NR INW. 066</small></div><span class="tag-arrow">↗</span></div>
     <div id="hud" class="hud hidden" aria-live="off">
       <div class="fighter-hud player-hud"><div class="fighter-label"><span>01 / TWÓJ EKSPONAT</span><strong id="playerName">ŻELAZNY RYCERZ</strong></div><div class="health-track"><div id="playerHealth" class="health-fill"></div></div><div class="health-numbers"><span id="playerHP">100 / 100</span><span class="stamina-label">ENERGIA <span id="staminaNum">100</span></span></div><div class="stamina-track"><div id="staminaBar"></div></div><div id="activePerk" class="active-perk" aria-label="Aktywna zdolność skina"></div></div>
       <div class="center-hud"><span class="vs">VS</span><span id="fightTime">00:00</span><button id="pauseBtn" aria-label="Wstrzymaj walkę">Ⅱ</button></div>
@@ -35,9 +37,11 @@
     </div>
     <div id="combatHint" class="combat-hint hidden"><span class="hint-icon">!</span><span id="hintText">Wyczuj moment. Paruj tuż przed ciosem.</span></div>
     <div id="intro" class="cinematic hidden" aria-live="polite"><div class="cinema-top"><span>NOC EKSPONATÓW</span><span id="introChapter">PROLOG / 01</span></div><div class="cinema-bottom"><span class="scene-label" id="sceneLabel">23:58 / OSTATNI OBCHÓD</span><p id="sceneText">W muzeum zapada cisza. Stróż kończy swoją zmianę.</p><div class="scene-progress"><div id="introProgress"></div></div><span class="cinema-note">SCENKA WSTĘPNA · <span id="introRemaining">18</span> S</span></div></div>
+    <div id="card" class="cinematic level-card hidden" aria-live="polite"><div class="cinema-top"><span>NOC EKSPONATÓW</span><span id="cardLevel">SALA 02 / 06</span></div><div class="cinema-bottom"><span class="scene-label" id="cardLabel">66 MLN LAT TEMU / GŁÓWNA GALERIA</span><p id="cardText">Główna galeria. Król kredy schodzi z postumentu.</p><div class="card-foe"><span>PRZECIWNIK</span><strong id="cardFoe">TYRANNOSAURUS REX</strong></div><div class="scene-progress"><div id="cardProgress"></div></div></div></div>
+    <div id="timejump" class="cinematic timejump hidden" aria-live="polite"><div class="cinema-top"><span>PRZESKOK W CZASIE</span><span id="jumpLevel">SALA 03 / 06</span></div><div class="jump-center"><span class="eyebrow" id="jumpFrom">66 MLN LAT TEMU</span><strong id="jumpYear">480 P.N.E.</strong><span class="eyebrow jump-to" id="jumpTo">→ 480 P.N.E.</span></div><div class="cinema-bottom"><span class="scene-label" id="jumpLabel">TERMOPILE / SALA ANTYKU</span><p id="jumpText">Wąwóz Termopil.</p><div class="card-foe"><span>NASTĘPNY PRZECIWNIK</span><strong id="jumpFoe">LEONIDAS I</strong></div><div class="scene-progress"><div id="jumpProgress"></div></div></div></div>
     <div id="pause" class="overlay hidden"><div class="dialog pause-dialog"><span class="eyebrow">MUZEUM MOŻE POCZEKAĆ</span><h2>CHWILA<br>ODDECHU.</h2><p>Arena jest wstrzymana.</p><button id="resumeBtn" class="primary-btn">WRÓĆ DO WALKI <span>↗</span></button><div class="key-hint">ESC — WZNÓW</div></div></div>
-    <div id="ending" class="cinematic hidden"><div class="cinema-top"><span id="outcomeLabel">KONIEC POJEDYNKU</span><span>EPILOG</span></div><div class="dream-caption"><span class="eyebrow">06:00 / POKÓJ STRÓŻA</span><h2 id="dreamTitle">TO BYŁ TYLKO SEN.</h2><p id="dreamText">„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.</p></div><div id="results" class="results hidden"><div class="result-stats"><span>CZAS WALKI<strong id="resultTime">00:00</strong></span><span>PARADY<strong id="resultParries">0</strong></span><span>ZDOBYTE ŻETONY<strong id="resultCoins">+0 ✦</strong></span></div><div class="result-actions"><button id="retryBtn" class="primary-btn">JESZCZE JEDEN SEN <span>↗</span></button><button id="menuBtn" class="secondary-btn">WRÓĆ DO MUZEUM</button></div></div></div>
-    <div class="stage-meta" id="stageMeta"><span>GŁÓWNA GALERIA</span><span>23:58 <span class="meta-live">●</span></span></div>
+    <div id="ending" class="cinematic hidden"><div class="cinema-top"><span id="outcomeLabel">KONIEC POJEDYNKU</span><span>EPILOG</span></div><div class="dream-caption"><span class="eyebrow">06:00 / POKÓJ STRÓŻA</span><h2 id="dreamTitle">TO BYŁ TYLKO SEN.</h2><p id="dreamText">„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.</p></div><div id="results" class="results hidden"><div class="result-stats"><span>SALE<strong id="resultLevel">0 / 6</strong></span><span>CZAS WALK<strong id="resultTime">00:00</strong></span><span>PARADY<strong id="resultParries">0</strong></span><span>ZDOBYTE ŻETONY<strong id="resultCoins">+0 ✦</strong></span></div><div class="result-actions"><button id="retryBtn" class="primary-btn">JESZCZE JEDEN SEN <span>↗</span></button><button id="menuBtn" class="secondary-btn">WRÓĆ DO MUZEUM</button></div></div></div>
+    <div class="stage-meta" id="stageMeta"><span id="stageHall">GŁÓWNA GALERIA</span><span id="stageYear">23:58 <span class="meta-live">●</span></span></div>
    </section>
    <div id="touchControls" class="touch-controls"><div><button data-control="left" aria-label="W lewo">←</button><button data-control="right" aria-label="W prawo">→</button></div><div><button data-control="guard" class="touch-guard" aria-label="Parada">◈ <small>PARADA</small></button><button data-control="attack" class="touch-attack" aria-label="Atak">✕ <small>ATAK</small></button></div></div>
    <section class="understage"><div class="control-group"><span class="control-label">TWOJE RUCHY</span><span class="control"><kbd>A</kbd><kbd>D</kbd><span>Ruch</span></span><span class="control"><kbd>J</kbd><span>Atak</span></span><span class="control"><kbd>K</kbd><span>Parada</span></span><span class="control"><kbd>L</kbd><span>Unik</span></span></div><div class="under-tip"><span>✦</span> Dobry timing jest silniejszy od ostrego miecza.</div></section>
@@ -100,5 +104,5 @@
   </div>
  </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="knights.js?v=faza0"></script><script src="perks.js?v=faza0"></script><script src="weapons.js?v=faza0"></script><script src="exhibits.js?v=faza0"></script><script src="art.js?v=faza0"></script><script src="game.js?v=faza0"></script><script src="loot.js?v=faza0"></script><script src="shop.js?v=faza0"></script><script src="loot-show.js?v=faza0"></script><script src="ui.js?v=faza0"></script>
+ <script src="knights.js?v=faza1"></script><script src="perks.js?v=faza1"></script><script src="weapons.js?v=faza1"></script><script src="exhibits.js?v=faza1"></script><script src="levels.js?v=faza1"></script><script src="art.js?v=faza1"></script><script src="game.js?v=faza1"></script><script src="loot.js?v=faza1"></script><script src="shop.js?v=faza1"></script><script src="loot-show.js?v=faza1"></script><script src="ui.js?v=faza1"></script>
 </body></html>

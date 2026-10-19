@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><title>Galeria eksponatów</title>
+<style>body{margin:0;background:#10120f;color:#eee;font:12px system-ui}h2{margin:12px 12px 4px;font-size:12px;letter-spacing:2px}.row{display:flex;flex-wrap:wrap;gap:8px;padding:0 12px}canvas{background:#000;border:1px solid #333}figure{margin:0}figcaption{font-size:10px;color:#aaa;margin-top:2px}</style></head>
+<body>
+<h2>PRZECIWNICY · pozy idle / guard / attack</h2><div class="row" id="foes"></div>
+<h2>SCENERIE</h2><div class="row" id="themes"></div>
+<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/art.js"></script>
+<script>
+const A=window.MuseumArt,E=window.MuseumExhibits;
+for(const ex of E.all()){for(const pose of ['idle','guard','attack']){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=260;c.height=320;const x=c.getContext('2d');x.fillStyle='#1a2020';x.fillRect(0,0,260,320);x.save();x.translate(ex.stats.art==='rex'?170:130,300);if(ex.stats.art==='rex')x.scale(.72,.72);A.drawExhibit(x,ex,0,0,{pose,facing:-1,time:1.2,progress:.5,phase:.5});x.restore();f.append(c);const cap=document.createElement('figcaption');cap.textContent=ex.name+' · '+pose;f.append(cap);foes.append(f);}}
+for(const key of Object.keys(A.themes)){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=480;c.height=270;const x=c.getContext('2d');A.drawArena(x,480,270,2,key);f.append(c);const cap=document.createElement('figcaption');cap.textContent=key;f.append(cap);themes.append(f);}
+</script></body></html>

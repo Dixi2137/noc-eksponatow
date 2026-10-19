@@ -94,7 +94,12 @@
    coins:integer(source.coins),owned,
    skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,
    lootVersion:2,freeCrates:Number(source.lootVersion)>=2 ? Math.min(1,integer(source.freeCrates)) : 1,
-   pendingReward,pendingCrateId:pendingReward ? (getCrate(source.pendingCrateId)||crates[0]).id : null
+   pendingReward,pendingCrateId:pendingReward ? (getCrate(source.pendingCrateId)||crates[0]).id : null,
+   // Night patrol progress: ids of cleared levels and the level chosen for the next night.
+   cleared:Array.isArray(source.cleared) ? source.cleared.filter(id=>typeof id==='string') : [],
+   level:typeof source.level==='string' ? source.level : null,
+   exhibit:typeof source.exhibit==='string' ? source.exhibit : null,
+   weapon:typeof source.weapon==='string' ? source.weapon : 'sword'
   };
  }
  function remaining(profile,crateId='gallery') {

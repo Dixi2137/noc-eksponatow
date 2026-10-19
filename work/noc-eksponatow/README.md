@@ -67,3 +67,24 @@ Kolejność skryptów: `knights.js`, `perks.js`, `weapons.js`, `exhibits.js`, `a
 ### Testy bez Node
 
 `tests/index.html` uruchamia testy walki w przeglądarce. Odpal dowolny serwer HTTP w folderze `work/noc-eksponatow` i otwórz `/tests/`. Wynik jest w tytule strony, na stronie i w `window.__results`. Testy odpowiadają dawnemu `work/qa-suite.cjs`, ale sprawdzają liczby z obecnej gry (zapisane w `work/qa-results.json` „16/16” pochodziło ze starszej wersji bez perków i bez obecnych czasów ciosu).
+
+## Faza 1 — poziomy, przeciwnicy z historii, przeskok w czasie (2026-10-19)
+
+Noc to obchód po salach. Jeden poziom = jedna epoka = jeden przeciwnik:
+
+| # | Sala | Rok | Przeciwnik | Sceneria |
+| --- | --- | --- | --- | --- |
+| 01 | Kreda późna | 75 mln lat temu | Velociraptor (110 HP, szybki) | muzeum |
+| 02 | Koniec kredy | 66 mln lat temu | Tyrannosaurus rex (160 HP) | muzeum |
+| 03 | Termopile | 480 p.n.e. | Leonidas I (180 HP, włócznia i tarcza) | sala antyku, słońce, sztandary Λ |
+| 04 | Borodino | 1812 | Napoleon Bonaparte (170 HP, szabla) | śnieg, sztandary N |
+| 05 | Berlin | 1945 | Adolf Hitler (150 HP, pistolet z bliska) | bunkier, beton, popiół |
+| 06 | Moskwa | 1953 | Józef Stalin (220 HP, szaszka, ciężki co drugi cios) | Kreml, czerwone sztandary ★ |
+
+- `dist/levels.js` — `window.MuseumLevels`: kolejność, rok, sala, eksponat, motyw scenerii, nagroda bazowa, tekst karty i (tylko dla sali 1) trzyczęściowy prolog.
+- `dist/exhibits.js` — pięciu nowych przeciwników. Postacie historyczne używają wspólnego rigu `drawFigure` w `art.js` z kostiumem opisanym w polu `figure` (nakrycie głowy, płaszcz, wąsy, broń, tarcza). Velociraptor to szkielet T-rexa w skali 0,62 z innym odcieniem.
+- `art.js` — `drawArena(ctx, w, h, t, motyw)` i mapa `themes` (museum, sparta, napoleon, bunker, kremlin): kolory ścian i podłogi, napis nad wejściem, okna (księżyc, słońce, śnieg, zamurowane), sztandary, cząsteczki (kurz, śnieg, popiół).
+- `ui.js` — przebieg nocy: prolog 18 s tylko przy starcie od sali 1; inne sale dostają kartę 2,6 s. Wygrana → ekran „KO" → przeskok w czasie (4,2 s, rok przewija się od epoki do epoki, sceneria zmienia się w błysku) → następna walka. Przegrana lub ostatnia sala → epilog ze snem i wyniki całej nocy. Nagroda za salę: `reward` poziomu + 20 za każdą perfekcyjną paradę; przegrana 40.
+- Postęp w profilu (`localStorage`): `cleared` (zaliczone sale) i `level` (sala, od której zaczyna się następna noc). Pasek sal w menu pozwala wybrać dowolną odblokowaną salę.
+- Hitler i Stalin są wyłącznie przeciwnikami do pokonania, nie przedmiotami kolekcji. Opaska na ramieniu jest jednolicie czerwona, bez symbolu.
+- `tests/levels.js` sprawdza komplet danych poziomów i eksponatów, rysowanie wszystkich póz i motywów oraz to, że z każdym eksponatem da się wygrać i od każdego oberwać. `tests/gallery.html` pokazuje wszystkich przeciwników i scenerie na jednej stronie.
