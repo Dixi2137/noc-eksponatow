@@ -10,11 +10,11 @@
     close(actual, expected, tolerance = 1e-6, message) { if (Math.abs(actual - expected) > tolerance) fail(`${message || 'close'}: expected ${expected}±${tolerance}, got ${actual}`); }
   };
   function test(name, fn) { tests.push({ name, fn }); }
-  function run() {
+  async function run() {
     const results = [], list = document.getElementById('results'), summary = document.getElementById('summary');
     for (const { name, fn } of tests) {
       const item = document.createElement('li'); item.textContent = name;
-      try { fn(); results.push({ name, pass: true }); item.className = 'pass'; console.log('PASS:', name); }
+      try { await fn(); results.push({ name, pass: true }); item.className = 'pass'; console.log('PASS:', name); }
       catch (error) { results.push({ name, pass: false, error: error.message }); item.className = 'fail'; const pre = document.createElement('pre'); pre.textContent = error.stack || error.message; item.append(pre); console.error('FAIL:', name, error); }
       list.append(item);
     }

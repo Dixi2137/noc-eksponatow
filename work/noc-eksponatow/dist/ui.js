@@ -3,7 +3,7 @@
  'use strict';
  const $ = id => document.getElementById(id);
  const show = (id, visible = true) => $(id).classList.toggle('hidden', !visible);
- const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks, levels=window.MuseumLevels, exhibits=window.MuseumExhibits, weapons=window.MuseumWeapons, cardsApi=window.MuseumCards, hallApi=window.MuseumHall;
+ const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks, levels=window.MuseumLevels, exhibits=window.MuseumExhibits, weapons=window.MuseumWeapons, cardsApi=window.MuseumCards, hallApi=window.MuseumHall, cloud=window.MuseumCloud;
  let profile=loot.migrate(null);
  try { profile=loot.migrate(JSON.parse(localStorage.getItem('museum-night-v1')||'null')); } catch(_){}
  let selectedCrateId=profile.pendingCrateId||'gallery';
@@ -29,10 +29,13 @@
  function perkText(perk){return `${perk.title}: ${perk.summary}`;}
  function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),weapon=weapons.get(profile.weapon),card=cardsApi.get(profile.card);const up=loot.upgradeLevel(profile,skin.id),wup=loot.upgradeLevel(profile,weapon.id);const text=`${skin.name}${up?` +${up}`:''} — ${perkText(perks.get(skin.id))} · ${weapon.name}${wup?` +${wup}`:''}${card?` · ${card.name}: ${card.summary}`:''}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
  function updateActivePerk(perk){const target=$('activePerk');if(target.dataset.perk===perk.id)return;const title=document.createElement('strong'),summary=document.createElement('span');title.textContent=perk.title;summary.textContent=perk.summary;target.replaceChildren(title,summary);target.dataset.perk=perk.id;target.setAttribute('aria-label',perkText(perk));}
- function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();}
+ let pushTimer=null,pushing=false;
+ function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
+ async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),2500);return null;}if(pushing)return null;pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
+ function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();pushCloud();}
  function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
  function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
- function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
+ function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab','rankTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
  function renderLevelStrip(){
   const strip=$('levelStrip');strip.replaceChildren();const chosen=currentLevel();
   for(const level of levels.all()){const b=document.createElement('button');const cleared=profile.cleared.includes(level.id),open=isUnlocked(level);b.type='button';b.className=`level-pip ${cleared?'cleared':''} ${level.id===chosen.id?'chosen':''} ${open?'':'locked'}`;b.disabled=!open;b.innerHTML=`<span>${String(level.number).padStart(2,'0')}</span><strong>${level.title}</strong><small>${cleared?'✓ POKONANY':open?level.yearLabel:'◇ ZAMKNIĘTE'}</small>`;b.setAttribute('aria-label',`Poziom ${level.number}: ${level.title}, ${levelExhibit(level).name}${cleared?', pokonany':open?'':', zamknięty'}`);b.setAttribute('aria-pressed',String(level.id===chosen.id));
@@ -83,7 +86,7 @@
  function startTimeJump(from,to){screen='timejump';jumpTime=0;jumpFrom=from;jumpTo=to;night.levelId=to.id;show('hud',false);show('stageMeta',false);show('timejump');$('jumpLevel').textContent=`SALA ${String(to.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('jumpFrom').textContent=from.yearLabel;$('jumpTo').textContent=`→ ${to.yearLabel}`;$('jumpYear').textContent=from.yearLabel;$('jumpLabel').textContent=`${to.title} / ${to.hall}`;$('jumpText').textContent=to.card;$('jumpFoe').textContent=levelExhibit(to).name;$('jumpProgress').style.width='0%';$('topStatus').textContent=`PRZESKOK W CZASIE / ${to.yearLabel}`;stageState();}
  function updateTimeJump(){const k=Math.min(1,jumpTime/(totalJump*.72)),eased=1-Math.pow(1-k,3);const year=Math.round(jumpFrom.year+(jumpTo.year-jumpFrom.year)*eased);$('jumpYear').textContent=k>=1?jumpTo.yearLabel:yearText(year);$('jumpProgress').style.width=(jumpTime/totalJump*100)+'%';$('timejump').classList.toggle('arrived',k>=1);}
  function startEnding(){screen='ending';window.MuseumGame?.setScene('external');show('hud',false);show('stageMeta',false);show('ending');show('results',false);const won=endData?.win&&!levels.next(night.levelId);$('dreamTitle').textContent=won?'ŚWIT. MUZEUM OCALONE.':'TO BYŁ TYLKO SEN.';$('dreamText').innerHTML=won?'Stróż otwiera oczy o 06:00. Wszystkie sale są ciche. Wszystkie eksponaty stoją tam, gdzie powinny.<br>„Dobra zmiana.”':'„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.';stageState();}
- function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
+ function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);profile.records=profile.records||{fastestNight:null,nightCoins:0};if(night.coins>profile.records.nightCoins)profile.records.nightCoins=night.coins;if(endData?.win&&!next&&night.wins===levels.count&&(profile.records.fastestNight===null||night.time<profile.records.fastestNight))profile.records.fastestNight=Math.round(night.time*10)/10;persist();pushCloud(true);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
  function renderHall(){
   const shown=hallApi.exhibition(profile),sum=hallApi.summary(profile),name=profile.hall?.name||hallApi.DEFAULT_NAME;
   if($('hallName').value!==name&&document.activeElement!==$('hallName'))$('hallName').value=name;
@@ -111,8 +114,50 @@
   }));
  }
  function hall(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Swoją salę urządzisz przed następnym pojedynkiem.');return;}closeModal();renderHall();openModal('hall');}
+ let accountMode='login';
+ function setAccountStatus(text,error=false){$('accountMsg').textContent=text;$('accountMsg').classList.toggle('error',!!error);}
+ function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;
+  $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
+ function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
+ function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();}
+ function saveLooksEmpty(save){return !save||typeof save!=='object'||!Object.keys(save).length||(!(save.cleared||[]).length&&(Number(save.coins)||0)<100&&(save.owned||[]).length<=2);}
+ function localLooksEmpty(){return !profile.cleared.length&&profile.coins<100&&profile.owned.length<=2;}
+ async function afterLogin(){
+  const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
+  const remote=r.data;
+  if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+  else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
+  await claimServerDaily();renderAccount();
+ }
+ async function claimServerDaily(){
+  if(!cloud.user())return;const r=await cloud.claimDaily();if(!r.ok||!r.data||r.data.error)return;
+  const d=r.data;if(d.claimed){profile.coins+=d.bonus;profile.login={last:d.today,streak:d.streak};persist();renderDaily();toast(d.reset?`Seria przerwana. Bonus z serwera za dziś: +${d.bonus} ✦.`:`Bonus z serwera za ${d.streak}. dzień z rzędu: +${d.bonus} ✦`);}
+  else if(profile.login?.streak!==d.streak){profile.login={last:d.today,streak:d.streak};persist();renderDaily();}
+ }
+ async function submitAccount(event){
+  event.preventDefault();if(!cloud.enabled())return;const email=$('accountEmail').value.trim(),password=$('accountPassword').value,nickname=$('accountNickname').value.trim();
+  if(!email||password.length<6){setAccountStatus('Podaj e-mail i hasło (co najmniej 6 znaków).',true);return;}
+  $('accountSubmit').disabled=true;setAccountStatus(accountMode==='register'?'Zakładam konto…':'Loguję…');
+  try{
+   if(accountMode==='register'){
+    if(nickname.length<3||nickname.length>20){setAccountStatus('Pseudonim: 3–20 znaków.',true);return;}
+    const taken=await cloud.nicknameTaken(nickname);if(taken){setAccountStatus('Ten pseudonim jest zajęty.',true);return;}
+    const r=await cloud.signUp(email,password,nickname);if(!r.ok){setAccountStatus(r.error,true);return;}
+    if(r.data.confirmEmail){setAccountStatus('Konto założone. Potwierdź e-mail linkiem z wiadomości, potem zaloguj się.');accountMode='login';renderAccount();return;}
+    renderAccount();await afterLogin();
+   }else{const r=await cloud.signIn(email,password);if(!r.ok){setAccountStatus(r.error,true);return;}renderAccount();await afterLogin();}
+  }finally{$('accountSubmit').disabled=!cloud.enabled();}
+ }
+ function formatNight(seconds){return seconds==null?'—':formatTime(Number(seconds));}
+ async function renderRanking(){
+  $('rankMsg').textContent=cloud.enabled()?'Pobieram…':'Chmura nie jest skonfigurowana. Ranking pojawi się po podaniu kluczy w dist/config.js.';$('rankList').replaceChildren();if(!cloud.enabled())return;
+  const r=await cloud.leaderboard(50);if(!r.ok){$('rankMsg').textContent=`Nie udało się pobrać rankingu: ${r.error}`;return;}
+  const rows=Array.isArray(r.data)?r.data:[],me=cloud.user();$('rankMsg').textContent=rows.length?'':'Ranking jest jeszcze pusty. Zaloguj się i przejdź pierwszą salę.';
+  $('rankList').replaceChildren(...rows.map((row,i)=>{const li=document.createElement('li');li.className=`rank-row ${me&&row.nickname===me.nickname?'me':''}`;const no=document.createElement('span');no.className='rank-no';no.textContent=String(i+1).padStart(2,'0');const name=document.createElement('strong');name.textContent=row.nickname;const halls=document.createElement('span');halls.textContent=`${row.halls_cleared} / ${levels.count}`;const prestige=document.createElement('span');prestige.textContent=String(row.prestige);const time=document.createElement('span');time.textContent=formatNight(row.fastest_night);li.append(no,name,halls,prestige,time);return li;}));
+ }
+ function ranking(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Ranking sprawdzisz przed następnym pojedynkiem.');return;}closeModal();openModal('ranking');renderRanking();}
  function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}
- function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
+ function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall','account','ranking'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
  function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
  function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
@@ -210,7 +255,7 @@
  $('categoryFilter').value='all';
  $('crateType').addEventListener('change',()=>{if(crateBusy||!['menu','result'].includes(screen))return;const crate=loot.getCrate($('crateType').value);if(crate)selectedCrateId=crate.id;renderSkins();});
  window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,notify:toast});
- $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
+ $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
  $('secretCoinsBtn').addEventListener('click',()=>{if(!canOpenShop())return;profile.coins+=2137;persist();if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();toast('Sekret stróża odkryty. +2137 monet ✦');});
  $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);
  $('newSkinsOnly').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=!collectionFilters.newOnly;collectionPage=0;renderSkins();});
@@ -244,7 +289,8 @@
    else if(screen==='ko'){endingTime+=dt;if(endingTime>=1.8){const level=levels.get(night.levelId),next=endData?.win?levels.next(level.id):null;if(next)startTimeJump(level,next);else startEnding();}}
    else if(screen==='ending'){endingTime+=dt;if(endingTime>=7.8)revealResults();}
    if(['menu','intro','card','timejump','ending','result'].includes(screen))renderScene(now/1000);}requestAnimationFrame(loop);}
- const daily=loot.dailyBonus(profile);if(daily){profile=daily.profile;}
+ const daily=cloud.user()?null:loot.dailyBonus(profile);if(daily){profile=daily.profile;}
  function renderDaily(){const streak=profile.login?.streak||0;$('dailyLine').textContent=streak?`SERIA LOGOWAŃ: ${streak} ${streak===1?'DZIEŃ':'DNI'} · JUTRO +${Math.min(300,50+streak*25)} ✦`:'';show('dailyLine',streak>0);}
- persist();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
+ persist();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
+ renderAccount();cloud.restore().then(async me=>{renderAccount();if(me)await claimServerDaily();});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
 })();

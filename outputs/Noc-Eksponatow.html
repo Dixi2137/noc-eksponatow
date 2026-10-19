@@ -85,14 +85,28 @@
 .hall-trophy{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 10px;background:#0f140f;border:1px solid var(--line);text-align:center}.hall-trophy.locked{opacity:.45}
 .hall-trophy canvas{width:90px;height:90px}.hall-trophy strong{font-size:9px;letter-spacing:1px;color:var(--cream)}.hall-trophy small{font-size:7px;letter-spacing:1.5px;color:var(--muted)}
 @media(max-width:650px){.hall-panel{padding:18px 14px}.hall-summary strong{font-size:14px}}
+
+/* Faza 4: konto, chmura, ranking */
+.account-btn{display:flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:8px;letter-spacing:2px;font-weight:700;padding:8px 11px;cursor:pointer;max-width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.account-btn:hover{border-color:var(--lime);color:var(--cream)}.account-dot{width:6px;height:6px;border-radius:50%;background:#5a5a4a;flex:0 0 auto}.account-btn.online .account-dot{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.account-panel,.ranking-panel{width:min(620px,94vw);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:28px 30px 32px;margin:4vh auto;box-shadow:0 30px 120px #000d}
+.account-modes{display:flex;gap:6px;margin:14px 0 12px}
+.account-form{display:flex;flex-direction:column;gap:10px}.account-form label{display:flex;flex-direction:column;gap:5px}.account-form label span{font-size:7px;letter-spacing:3px;color:var(--muted)}
+.account-form input{background:#0f140f;border:1px solid var(--line);color:var(--cream);font:inherit;font-size:14px;padding:10px 12px}.account-form input:focus{outline:none;border-color:var(--lime)}
+.account-form .primary-btn{align-self:flex-start;margin-top:6px}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.account-msg{font-size:11px;color:var(--gold);min-height:16px;margin:12px 0 0}.account-msg.error{color:#ff9d8e}
+.ranking-head,.rank-row{display:grid;grid-template-columns:34px 1fr 60px 70px 110px;gap:8px;align-items:center;font-size:10px}
+.ranking-head{font-size:7px;letter-spacing:2px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+.rank-list{list-style:none;margin:0;padding:0}.rank-row{padding:9px 10px;border-bottom:1px solid #1e2419}.rank-row strong{color:var(--cream);letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rank-row.me{background:#1a2213;border-color:#4f6b2c}.rank-row .rank-no{color:var(--muted)}
+@media(max-width:650px){.ranking-head,.rank-row{grid-template-columns:26px 1fr 44px 54px 80px;font-size:9px}.account-btn #accountLabel{display:none}}
 </style>
 </head>
 <body>
  <div class="app">
   <header class="topbar">
    <div class="brand-area"><a class="brand" href="#" aria-label="Noc Eksponatów — strona główna"><span class="brand-mark">N<span>↗</span></span><span>NOC<br>EKSPONATÓW<span class="brand-sub">MUZEUM PO GODZINACH</span></span></a><button id="secretCoinsBtn" class="secret-coins" aria-label="Sekret stróża: dodaj 2137 monet">✦</button></div>
-   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button><button id="hallTab" class="nav-tab">04 <span>MOJA SALA</span></button></nav>
-   <div class="top-actions"><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
+   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button><button id="hallTab" class="nav-tab">04 <span>MOJA SALA</span></button><button id="rankTab" class="nav-tab">05 <span>RANKING</span></button></nav>
+   <div class="top-actions"><button id="accountBtn" class="account-btn" aria-label="Konto gracza"><span class="account-dot"></span><span id="accountLabel">GOŚĆ</span></button><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
   </header>
   <main>
    <div class="section-line"><div><span class="status-dot"></span>MUZEUM HISTORII NIEZBYT NATURALNEJ</div><span id="topStatus">ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI</span></div>
@@ -203,8 +217,121 @@
    <p class="collection-footnote">Prestiż liczy się z rzadkości wystawionych przedmiotów, ich ulepszeń i trofeów; pełna sala daje +20. Sprzedany przedmiot znika z ekspozycji.</p>
   </div>
  </div>
+ <div id="account" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+  <div class="account-panel">
+   <div class="modal-heading"><div><span class="eyebrow">KONTO / ZAPIS W CHMURZE</span><h2 id="accountTitle">KSIĘGA GOŚCI.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij konto">✕</button></div>
+   <div id="accountGuest">
+    <p class="modal-lead">Grasz jako gość, wszystko zapisuje się w tej przeglądarce. Konto jest opcjonalne: daje miejsce w rankingu, zapis w chmurze i bonus dzienny liczony po stronie serwera.</p>
+    <div class="account-modes"><button id="accountModeLogin" class="kind-tab" aria-pressed="true">LOGOWANIE</button><button id="accountModeRegister" class="kind-tab" aria-pressed="false">REJESTRACJA</button></div>
+    <form id="accountForm" class="account-form" novalidate>
+     <label><span>E-MAIL</span><input id="accountEmail" type="email" autocomplete="email" required></label>
+     <label><span>HASŁO</span><input id="accountPassword" type="password" autocomplete="current-password" minlength="6" required></label>
+     <label id="accountNicknameLabel" class="hidden"><span>PSEUDONIM W RANKINGU</span><input id="accountNickname" type="text" autocomplete="nickname" minlength="3" maxlength="20"></label>
+     <button id="accountSubmit" type="submit" class="primary-btn">ZALOGUJ <span>↗</span></button>
+    </form>
+   </div>
+   <div id="accountUser" class="hidden">
+    <p class="modal-lead">Zalogowano jako <strong id="accountWho"></strong>. Postęp zapisuje się w chmurze po każdej zmianie.</p>
+    <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button></div>
+   </div>
+   <p id="accountMsg" class="account-msg" aria-live="polite"></p>
+   <p id="accountOffline" class="collection-footnote hidden">Chmura nie jest jeszcze skonfigurowana (dist/config.js). Gra działa w trybie gościa.</p>
+  </div>
+ </div>
+ <div id="ranking" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rankingTitle">
+  <div class="ranking-panel">
+   <div class="modal-heading"><div><span class="eyebrow">RANKING / NOCNI STRÓŻE</span><h2 id="rankingTitle">TABLICA WYNIKÓW.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij ranking">✕</button></div>
+   <p class="modal-lead">Kolejność: pokonane sale, potem prestiż sali, potem najszybsza pełna noc. Twój wynik trafia tu po zalogowaniu.</p>
+   <div class="ranking-head"><span>#</span><span>STRÓŻ</span><span>SALE</span><span>PRESTIŻ</span><span>NAJSZYBSZA NOC</span></div>
+   <ol id="rankList" class="rank-list" aria-live="polite"></ol>
+   <p id="rankMsg" class="account-msg"></p>
+   <div class="account-actions"><button id="rankRefresh" class="secondary-btn">ODŚWIEŻ</button></div>
+  </div>
+ </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script>/* Fifty knight appearances: user palettes, collection tiers and one combat benefit each. */
+ <script>/* Cloud configuration. The anon key is public by design: Row Level Security on the server decides what it may touch.
+   Leave both empty to run fully offline (guest mode only). */
+window.MuseumConfig = Object.freeze({
+  supabaseUrl: '',
+  supabaseAnonKey: ''
+});
+</script><script>/* Supabase without a client library: auth and PostgREST over fetch. Session lives in localStorage.
+   Every call resolves to {ok, data|error}; the game keeps working offline when the cloud is off or unreachable. */
+(() => {
+  'use strict';
+  const SESSION_KEY = 'museum-night-session';
+  const config = () => window.MuseumConfig || {};
+  const enabled = () => !!(config().supabaseUrl && config().supabaseAnonKey);
+  let session = null;
+  const listeners = new Set();
+  try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (_) { session = null; }
+
+  function emit() { for (const fn of listeners) { try { fn(user()); } catch (_) {} } }
+  function store(next) { session = next; try { if (next) localStorage.setItem(SESSION_KEY, JSON.stringify(next)); else localStorage.removeItem(SESSION_KEY); } catch (_) {} emit(); }
+  function user() { return session?.user ? { id: session.user.id, email: session.user.email, nickname: session.user.user_metadata?.nickname || null } : null; }
+  function expired() { return !session?.expires_at || session.expires_at * 1000 - Date.now() < 60000; }
+  function messageFor(error) {
+    const text = String(error?.msg || error?.message || error?.error_description || error?.error || error || 'Nieznany błąd');
+    if (/invalid login credentials/i.test(text)) return 'Zły e-mail albo hasło.';
+    if (/email not confirmed/i.test(text)) return 'Potwierdź e-mail linkiem z wiadomości, potem zaloguj się.';
+    if (/already registered|already been registered/i.test(text)) return 'Ten e-mail ma już konto. Zaloguj się.';
+    if (/password/i.test(text) && /6|short|weak/i.test(text)) return 'Hasło musi mieć co najmniej 6 znaków.';
+    if (/nickname|profiles_nickname_key|duplicate key/i.test(text)) return 'Ten pseudonim jest zajęty.';
+    if (/database error saving new user/i.test(text)) return 'Pseudonim zajęty albo nieprawidłowy (3–20 znaków).';
+    if (/failed to fetch|networkerror|load failed/i.test(text)) return 'Brak połączenia z chmurą.';
+    return text;
+  }
+  async function request(path, { method = 'GET', body, auth = true, headers = {}, prefer } = {}) {
+    if (!enabled()) return { ok: false, error: 'Chmura jest wyłączona: brak konfiguracji.', offline: true };
+    const base = config().supabaseUrl.replace(/\/$/, '');
+    const h = { apikey: config().supabaseAnonKey, 'Content-Type': 'application/json', ...headers };
+    if (auth && session?.access_token) { if (expired()) await refresh(); if (session?.access_token) h.Authorization = `Bearer ${session.access_token}`; }
+    if (!h.Authorization) h.Authorization = `Bearer ${config().supabaseAnonKey}`;
+    if (prefer) h.Prefer = prefer;
+    try {
+      const response = await fetch(`${base}${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) });
+      const text = await response.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
+      if (!response.ok) return { ok: false, error: messageFor(data), status: response.status, raw: data };
+      return { ok: true, data };
+    } catch (error) { return { ok: false, error: messageFor(error), offline: true }; }
+  }
+  async function refresh() {
+    if (!session?.refresh_token) return false;
+    const result = await request('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: session.refresh_token }, auth: false });
+    if (result.ok && result.data?.access_token) { store(result.data); return true; }
+    if (result.status === 400 || result.status === 401) store(null);
+    return false;
+  }
+  async function signUp(email, password, nickname) {
+    const result = await request('/auth/v1/signup', { method: 'POST', body: { email, password, data: { nickname } }, auth: false });
+    if (!result.ok) return result;
+    if (result.data?.access_token) { store(result.data); return { ok: true, data: { session: true, user: user() } }; }
+    return { ok: true, data: { session: false, confirmEmail: true } };
+  }
+  async function signIn(email, password) {
+    const result = await request('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password }, auth: false });
+    if (result.ok && result.data?.access_token) { store(result.data); return { ok: true, data: user() }; }
+    return result.ok ? { ok: false, error: 'Brak sesji w odpowiedzi.' } : result;
+  }
+  async function signOut() { if (session?.access_token) await request('/auth/v1/logout', { method: 'POST' }); store(null); return { ok: true }; }
+  async function restore() { if (!enabled() || !session) return null; if (expired()) await refresh(); return user(); }
+  async function nicknameTaken(nickname) { const r = await request('/rest/v1/rpc/nickname_taken', { method: 'POST', body: { name: nickname }, auth: false }); return r.ok ? !!r.data : null; }
+  async function fetchProfile() {
+    const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at`);
+    return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
+  }
+  async function upsertProfile(fields) {
+    const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
+    return request('/rest/v1/profiles?on_conflict=id', { method: 'POST', body: { id: me.id, ...fields, updated_at: new Date().toISOString() }, prefer: 'resolution=merge-duplicates,return=representation' });
+  }
+  async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
+  async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor,
+    onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+    _test: { store, expired: () => expired(), request } });
+})();
+</script><script>/* Fifty knight appearances: user palettes, collection tiers and one combat benefit each. */
 (() => {
  'use strict';
  const rows = [
@@ -1945,7 +2072,8 @@
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
-   hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}}
+   hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
+   records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
  }
  function remaining(profile,crateId='gallery') {
@@ -2271,7 +2399,7 @@
  'use strict';
  const $ = id => document.getElementById(id);
  const show = (id, visible = true) => $(id).classList.toggle('hidden', !visible);
- const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks, levels=window.MuseumLevels, exhibits=window.MuseumExhibits, weapons=window.MuseumWeapons, cardsApi=window.MuseumCards, hallApi=window.MuseumHall;
+ const loot=window.MuseumLoot, skins=loot.skins, perks=window.MuseumPerks, levels=window.MuseumLevels, exhibits=window.MuseumExhibits, weapons=window.MuseumWeapons, cardsApi=window.MuseumCards, hallApi=window.MuseumHall, cloud=window.MuseumCloud;
  let profile=loot.migrate(null);
  try { profile=loot.migrate(JSON.parse(localStorage.getItem('museum-night-v1')||'null')); } catch(_){}
  let selectedCrateId=profile.pendingCrateId||'gallery';
@@ -2297,10 +2425,13 @@
  function perkText(perk){return `${perk.title}: ${perk.summary}`;}
  function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),weapon=weapons.get(profile.weapon),card=cardsApi.get(profile.card);const up=loot.upgradeLevel(profile,skin.id),wup=loot.upgradeLevel(profile,weapon.id);const text=`${skin.name}${up?` +${up}`:''} — ${perkText(perks.get(skin.id))} · ${weapon.name}${wup?` +${wup}`:''}${card?` · ${card.name}: ${card.summary}`:''}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
  function updateActivePerk(perk){const target=$('activePerk');if(target.dataset.perk===perk.id)return;const title=document.createElement('strong'),summary=document.createElement('span');title.textContent=perk.title;summary.textContent=perk.summary;target.replaceChildren(title,summary);target.dataset.perk=perk.id;target.setAttribute('aria-label',perkText(perk));}
- function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();}
+ let pushTimer=null,pushing=false;
+ function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
+ async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),2500);return null;}if(pushing)return null;pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
+ function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();pushCloud();}
  function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
  function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
- function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
+ function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab','rankTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
  function renderLevelStrip(){
   const strip=$('levelStrip');strip.replaceChildren();const chosen=currentLevel();
   for(const level of levels.all()){const b=document.createElement('button');const cleared=profile.cleared.includes(level.id),open=isUnlocked(level);b.type='button';b.className=`level-pip ${cleared?'cleared':''} ${level.id===chosen.id?'chosen':''} ${open?'':'locked'}`;b.disabled=!open;b.innerHTML=`<span>${String(level.number).padStart(2,'0')}</span><strong>${level.title}</strong><small>${cleared?'✓ POKONANY':open?level.yearLabel:'◇ ZAMKNIĘTE'}</small>`;b.setAttribute('aria-label',`Poziom ${level.number}: ${level.title}, ${levelExhibit(level).name}${cleared?', pokonany':open?'':', zamknięty'}`);b.setAttribute('aria-pressed',String(level.id===chosen.id));
@@ -2351,7 +2482,7 @@
  function startTimeJump(from,to){screen='timejump';jumpTime=0;jumpFrom=from;jumpTo=to;night.levelId=to.id;show('hud',false);show('stageMeta',false);show('timejump');$('jumpLevel').textContent=`SALA ${String(to.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('jumpFrom').textContent=from.yearLabel;$('jumpTo').textContent=`→ ${to.yearLabel}`;$('jumpYear').textContent=from.yearLabel;$('jumpLabel').textContent=`${to.title} / ${to.hall}`;$('jumpText').textContent=to.card;$('jumpFoe').textContent=levelExhibit(to).name;$('jumpProgress').style.width='0%';$('topStatus').textContent=`PRZESKOK W CZASIE / ${to.yearLabel}`;stageState();}
  function updateTimeJump(){const k=Math.min(1,jumpTime/(totalJump*.72)),eased=1-Math.pow(1-k,3);const year=Math.round(jumpFrom.year+(jumpTo.year-jumpFrom.year)*eased);$('jumpYear').textContent=k>=1?jumpTo.yearLabel:yearText(year);$('jumpProgress').style.width=(jumpTime/totalJump*100)+'%';$('timejump').classList.toggle('arrived',k>=1);}
  function startEnding(){screen='ending';window.MuseumGame?.setScene('external');show('hud',false);show('stageMeta',false);show('ending');show('results',false);const won=endData?.win&&!levels.next(night.levelId);$('dreamTitle').textContent=won?'ŚWIT. MUZEUM OCALONE.':'TO BYŁ TYLKO SEN.';$('dreamText').innerHTML=won?'Stróż otwiera oczy o 06:00. Wszystkie sale są ciche. Wszystkie eksponaty stoją tam, gdzie powinny.<br>„Dobra zmiana.”':'„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.';stageState();}
- function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
+ function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);profile.records=profile.records||{fastestNight:null,nightCoins:0};if(night.coins>profile.records.nightCoins)profile.records.nightCoins=night.coins;if(endData?.win&&!next&&night.wins===levels.count&&(profile.records.fastestNight===null||night.time<profile.records.fastestNight))profile.records.fastestNight=Math.round(night.time*10)/10;persist();pushCloud(true);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
  function renderHall(){
   const shown=hallApi.exhibition(profile),sum=hallApi.summary(profile),name=profile.hall?.name||hallApi.DEFAULT_NAME;
   if($('hallName').value!==name&&document.activeElement!==$('hallName'))$('hallName').value=name;
@@ -2379,8 +2510,50 @@
   }));
  }
  function hall(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Swoją salę urządzisz przed następnym pojedynkiem.');return;}closeModal();renderHall();openModal('hall');}
+ let accountMode='login';
+ function setAccountStatus(text,error=false){$('accountMsg').textContent=text;$('accountMsg').classList.toggle('error',!!error);}
+ function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;
+  $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
+ function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
+ function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();}
+ function saveLooksEmpty(save){return !save||typeof save!=='object'||!Object.keys(save).length||(!(save.cleared||[]).length&&(Number(save.coins)||0)<100&&(save.owned||[]).length<=2);}
+ function localLooksEmpty(){return !profile.cleared.length&&profile.coins<100&&profile.owned.length<=2;}
+ async function afterLogin(){
+  const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
+  const remote=r.data;
+  if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+  else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
+  await claimServerDaily();renderAccount();
+ }
+ async function claimServerDaily(){
+  if(!cloud.user())return;const r=await cloud.claimDaily();if(!r.ok||!r.data||r.data.error)return;
+  const d=r.data;if(d.claimed){profile.coins+=d.bonus;profile.login={last:d.today,streak:d.streak};persist();renderDaily();toast(d.reset?`Seria przerwana. Bonus z serwera za dziś: +${d.bonus} ✦.`:`Bonus z serwera za ${d.streak}. dzień z rzędu: +${d.bonus} ✦`);}
+  else if(profile.login?.streak!==d.streak){profile.login={last:d.today,streak:d.streak};persist();renderDaily();}
+ }
+ async function submitAccount(event){
+  event.preventDefault();if(!cloud.enabled())return;const email=$('accountEmail').value.trim(),password=$('accountPassword').value,nickname=$('accountNickname').value.trim();
+  if(!email||password.length<6){setAccountStatus('Podaj e-mail i hasło (co najmniej 6 znaków).',true);return;}
+  $('accountSubmit').disabled=true;setAccountStatus(accountMode==='register'?'Zakładam konto…':'Loguję…');
+  try{
+   if(accountMode==='register'){
+    if(nickname.length<3||nickname.length>20){setAccountStatus('Pseudonim: 3–20 znaków.',true);return;}
+    const taken=await cloud.nicknameTaken(nickname);if(taken){setAccountStatus('Ten pseudonim jest zajęty.',true);return;}
+    const r=await cloud.signUp(email,password,nickname);if(!r.ok){setAccountStatus(r.error,true);return;}
+    if(r.data.confirmEmail){setAccountStatus('Konto założone. Potwierdź e-mail linkiem z wiadomości, potem zaloguj się.');accountMode='login';renderAccount();return;}
+    renderAccount();await afterLogin();
+   }else{const r=await cloud.signIn(email,password);if(!r.ok){setAccountStatus(r.error,true);return;}renderAccount();await afterLogin();}
+  }finally{$('accountSubmit').disabled=!cloud.enabled();}
+ }
+ function formatNight(seconds){return seconds==null?'—':formatTime(Number(seconds));}
+ async function renderRanking(){
+  $('rankMsg').textContent=cloud.enabled()?'Pobieram…':'Chmura nie jest skonfigurowana. Ranking pojawi się po podaniu kluczy w dist/config.js.';$('rankList').replaceChildren();if(!cloud.enabled())return;
+  const r=await cloud.leaderboard(50);if(!r.ok){$('rankMsg').textContent=`Nie udało się pobrać rankingu: ${r.error}`;return;}
+  const rows=Array.isArray(r.data)?r.data:[],me=cloud.user();$('rankMsg').textContent=rows.length?'':'Ranking jest jeszcze pusty. Zaloguj się i przejdź pierwszą salę.';
+  $('rankList').replaceChildren(...rows.map((row,i)=>{const li=document.createElement('li');li.className=`rank-row ${me&&row.nickname===me.nickname?'me':''}`;const no=document.createElement('span');no.className='rank-no';no.textContent=String(i+1).padStart(2,'0');const name=document.createElement('strong');name.textContent=row.nickname;const halls=document.createElement('span');halls.textContent=`${row.halls_cleared} / ${levels.count}`;const prestige=document.createElement('span');prestige.textContent=String(row.prestige);const time=document.createElement('span');time.textContent=formatNight(row.fastest_night);li.append(no,name,halls,prestige,time);return li;}));
+ }
+ function ranking(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Ranking sprawdzisz przed następnym pojedynkiem.');return;}closeModal();openModal('ranking');renderRanking();}
  function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}
- function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
+ function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall','account','ranking'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
  function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
  function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
@@ -2478,7 +2651,7 @@
  $('categoryFilter').value='all';
  $('crateType').addEventListener('change',()=>{if(crateBusy||!['menu','result'].includes(screen))return;const crate=loot.getCrate($('crateType').value);if(crate)selectedCrateId=crate.id;renderSkins();});
  window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,notify:toast});
- $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
+ $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
  $('secretCoinsBtn').addEventListener('click',()=>{if(!canOpenShop())return;profile.coins+=2137;persist();if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();toast('Sekret stróża odkryty. +2137 monet ✦');});
  $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);
  $('newSkinsOnly').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=!collectionFilters.newOnly;collectionPage=0;renderSkins();});
@@ -2512,9 +2685,10 @@
    else if(screen==='ko'){endingTime+=dt;if(endingTime>=1.8){const level=levels.get(night.levelId),next=endData?.win?levels.next(level.id):null;if(next)startTimeJump(level,next);else startEnding();}}
    else if(screen==='ending'){endingTime+=dt;if(endingTime>=7.8)revealResults();}
    if(['menu','intro','card','timejump','ending','result'].includes(screen))renderScene(now/1000);}requestAnimationFrame(loop);}
- const daily=loot.dailyBonus(profile);if(daily){profile=daily.profile;}
+ const daily=cloud.user()?null:loot.dailyBonus(profile);if(daily){profile=daily.profile;}
  function renderDaily(){const streak=profile.login?.streak||0;$('dailyLine').textContent=streak?`SERIA LOGOWAŃ: ${streak} ${streak===1?'DZIEŃ':'DNI'} · JUTRO +${Math.min(300,50+streak*25)} ✦`:'';show('dailyLine',streak>0);}
- persist();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
+ persist();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
+ renderAccount();cloud.restore().then(async me=>{renderAccount();if(me)await claimServerDaily();});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
 })();
 </script>
 </body></html>

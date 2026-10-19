@@ -116,3 +116,23 @@ Zakładka **04 MOJA SALA** otwiera prywatną salę gracza (`dist/hall.js`, `wind
 - Rysowanie: `art.js` ma motyw `hall` (bez reklamy sponsora i bez reliefów), `drawHall(ctx, w, h, t, ekspozycja, {name})` i `drawTrophy`. Panel sali: pole nazwy, podgląd na canvasie, lista miejsc z wyborem, siatka trofeów (nieodkryte jako „???" z nazwą sali do pokonania).
 - Kolejność skryptów: `hall.js` po `cards.js`, przed `art.js` i `loot.js`.
 - Testy: `tests/hall.js` (8 testów), łącznie 52.
+
+## Faza 4 — konto, zapis w chmurze, ranking (2026-10-19, strona kliencka)
+
+Backend: Supabase (logowanie e-mail + hasło, Postgres z Row Level Security). Gra działa jako gość bez żadnej konfiguracji; konto jest opcjonalne.
+
+- `dist/config.js` — `supabaseUrl` i `supabaseAnonKey`. Puste = chmura wyłączona (przycisk konta i ranking mówią o tym wprost). Klucz anon jest publiczny z założenia; o dostępie decydują polityki RLS.
+- `dist/cloud.js` — `window.MuseumCloud`: klient bez biblioteki, czysty `fetch` do Auth (`/auth/v1/signup`, `token?grant_type=password|refresh_token`, `logout`) i PostgREST (`/rest/v1/...`). Sesja w `localStorage` (`museum-night-session`), odświeżana automatycznie przed wygaśnięciem. Każde wywołanie zwraca `{ok, data|error}`, błędy po polsku (`messageFor`).
+- `supabase/schema.sql` — tabela `profiles` (pseudonim, zapis gry `save` jsonb, statystyki, stan bonusu dziennego), widok `leaderboard` (tylko publiczne kolumny), trigger tworzący profil przy rejestracji, RPC `nickname_taken(name)` i `claim_daily_bonus()` (data serwera w Europe/Warsaw, więc zmiana zegara w systemie nic nie daje).
+- UI: przycisk **KONTO** w górnym pasku (modal z logowaniem/rejestracją; po zalogowaniu: zapisz/wczytaj z chmury, wyloguj), zakładka **05 RANKING** (działa też dla gości, tylko odczyt).
+- Zapis w chmurze: każde `persist()` odkłada wysyłkę o 2,5 s (`pushCloud`), koniec nocy wysyła od razu. Przy logowaniu: jeśli w chmurze jest niepusty zapis, a lokalny jest świeży, gra wczytuje chmurę; w przeciwnym razie pyta (`confirm`) albo wysyła lokalny postęp.
+- Ranking: `halls_cleared` (pokonane sale), `prestige` (prestiż sali), `fastest_night` (najszybsza pełna noc, tylko po przejściu wszystkich sal), `night_coins`. Rekordy nocy w `profile.records`.
+- Bonus dzienny: zalogowani dostają go z RPC (serwer), goście lokalnie jak w fazie 2.
+- Testy: `tests/cloud.js` (6 testów z podstawionym `fetch`), łącznie 58. Runner obsługuje testy asynchroniczne.
+
+### Uruchomienie chmury (raz)
+1. Konto na supabase.com, nowy projekt (region EU), hasło do bazy zapisz w menedżerze haseł.
+2. SQL Editor → wklej `supabase/schema.sql` → Run.
+3. Authentication → Providers → Email: włączone. Dla wygody testów wyłącz „Confirm email" (albo zostaw, gra obsługuje potwierdzenie linkiem).
+4. Project Settings → API: skopiuj Project URL i klucz `anon public` do `dist/config.js`.
+5. Przebuduj `outputs/Noc-Eksponatow.html` skryptem `work/build-offline.py`.

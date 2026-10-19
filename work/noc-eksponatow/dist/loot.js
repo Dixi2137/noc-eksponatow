@@ -135,7 +135,8 @@
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
-   hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}}
+   hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
+   records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
  }
  function remaining(profile,crateId='gallery') {

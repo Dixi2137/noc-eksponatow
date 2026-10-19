@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza3">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="stylesheet" href="style.css?v=faza4">
 </head>
 <body>
  <div class="app">
   <header class="topbar">
    <div class="brand-area"><a class="brand" href="#" aria-label="Noc Eksponatów — strona główna"><span class="brand-mark">N<span>↗</span></span><span>NOC<br>EKSPONATÓW<span class="brand-sub">MUZEUM PO GODZINACH</span></span></a><button id="secretCoinsBtn" class="secret-coins" aria-label="Sekret stróża: dodaj 2137 monet">✦</button></div>
-   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button><button id="hallTab" class="nav-tab">04 <span>MOJA SALA</span></button></nav>
-   <div class="top-actions"><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
+   <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button><button id="hallTab" class="nav-tab">04 <span>MOJA SALA</span></button><button id="rankTab" class="nav-tab">05 <span>RANKING</span></button></nav>
+   <div class="top-actions"><button id="accountBtn" class="account-btn" aria-label="Konto gracza"><span class="account-dot"></span><span id="accountLabel">GOŚĆ</span></button><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
   </header>
   <main>
    <div class="section-line"><div><span class="status-dot"></span>MUZEUM HISTORII NIEZBYT NATURALNEJ</div><span id="topStatus">ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI</span></div>
@@ -121,6 +121,37 @@
    <p class="collection-footnote">Prestiż liczy się z rzadkości wystawionych przedmiotów, ich ulepszeń i trofeów; pełna sala daje +20. Sprzedany przedmiot znika z ekspozycji.</p>
   </div>
  </div>
+ <div id="account" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+  <div class="account-panel">
+   <div class="modal-heading"><div><span class="eyebrow">KONTO / ZAPIS W CHMURZE</span><h2 id="accountTitle">KSIĘGA GOŚCI.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij konto">✕</button></div>
+   <div id="accountGuest">
+    <p class="modal-lead">Grasz jako gość, wszystko zapisuje się w tej przeglądarce. Konto jest opcjonalne: daje miejsce w rankingu, zapis w chmurze i bonus dzienny liczony po stronie serwera.</p>
+    <div class="account-modes"><button id="accountModeLogin" class="kind-tab" aria-pressed="true">LOGOWANIE</button><button id="accountModeRegister" class="kind-tab" aria-pressed="false">REJESTRACJA</button></div>
+    <form id="accountForm" class="account-form" novalidate>
+     <label><span>E-MAIL</span><input id="accountEmail" type="email" autocomplete="email" required></label>
+     <label><span>HASŁO</span><input id="accountPassword" type="password" autocomplete="current-password" minlength="6" required></label>
+     <label id="accountNicknameLabel" class="hidden"><span>PSEUDONIM W RANKINGU</span><input id="accountNickname" type="text" autocomplete="nickname" minlength="3" maxlength="20"></label>
+     <button id="accountSubmit" type="submit" class="primary-btn">ZALOGUJ <span>↗</span></button>
+    </form>
+   </div>
+   <div id="accountUser" class="hidden">
+    <p class="modal-lead">Zalogowano jako <strong id="accountWho"></strong>. Postęp zapisuje się w chmurze po każdej zmianie.</p>
+    <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button></div>
+   </div>
+   <p id="accountMsg" class="account-msg" aria-live="polite"></p>
+   <p id="accountOffline" class="collection-footnote hidden">Chmura nie jest jeszcze skonfigurowana (dist/config.js). Gra działa w trybie gościa.</p>
+  </div>
+ </div>
+ <div id="ranking" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rankingTitle">
+  <div class="ranking-panel">
+   <div class="modal-heading"><div><span class="eyebrow">RANKING / NOCNI STRÓŻE</span><h2 id="rankingTitle">TABLICA WYNIKÓW.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij ranking">✕</button></div>
+   <p class="modal-lead">Kolejność: pokonane sale, potem prestiż sali, potem najszybsza pełna noc. Twój wynik trafia tu po zalogowaniu.</p>
+   <div class="ranking-head"><span>#</span><span>STRÓŻ</span><span>SALE</span><span>PRESTIŻ</span><span>NAJSZYBSZA NOC</span></div>
+   <ol id="rankList" class="rank-list" aria-live="polite"></ol>
+   <p id="rankMsg" class="account-msg"></p>
+   <div class="account-actions"><button id="rankRefresh" class="secondary-btn">ODŚWIEŻ</button></div>
+  </div>
+ </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="knights.js?v=faza3"></script><script src="perks.js?v=faza3"></script><script src="weapons.js?v=faza3"></script><script src="exhibits.js?v=faza3"></script><script src="levels.js?v=faza3"></script><script src="cards.js?v=faza3"></script><script src="hall.js?v=faza3"></script><script src="art.js?v=faza3"></script><script src="game.js?v=faza3"></script><script src="loot.js?v=faza3"></script><script src="shop.js?v=faza3"></script><script src="loot-show.js?v=faza3"></script><script src="ui.js?v=faza3"></script>
+ <script src="config.js?v=faza4"></script><script src="cloud.js?v=faza4"></script><script src="knights.js?v=faza4"></script><script src="perks.js?v=faza4"></script><script src="weapons.js?v=faza4"></script><script src="exhibits.js?v=faza4"></script><script src="levels.js?v=faza4"></script><script src="cards.js?v=faza4"></script><script src="hall.js?v=faza4"></script><script src="art.js?v=faza4"></script><script src="game.js?v=faza4"></script><script src="loot.js?v=faza4"></script><script src="shop.js?v=faza4"></script><script src="loot-show.js?v=faza4"></script><script src="ui.js?v=faza4"></script>
 </body></html>
