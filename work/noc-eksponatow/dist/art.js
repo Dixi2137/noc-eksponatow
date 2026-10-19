@@ -438,5 +438,8 @@
     rr(c,516,724,299,30,3,'#b9b195','#d3c5a0',1);txt(c,'NOCNA ZMIANA · RAPORT STRÓŻA',665,744,12,'#364c49','center','Arial');
     let vig=c.createRadialGradient(720,430,200,720,430,850);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,8,16,.85)');c.fillStyle=vig;c.fillRect(0,0,1440,810);c.restore();
   }
-  window.MuseumArt={drawArena,drawKnight,drawRex,drawGuardScene};
+  // Opponents are drawn by key so a new exhibit is one entry here plus one in exhibits.js.
+  const fighters={rex:drawRex};
+  function drawExhibit(c,key,x,y,o={}){(fighters[key]||drawRex)(c,x,y,o)}
+  window.MuseumArt={drawArena,drawKnight,drawRex,drawExhibit,fighters,drawGuardScene};
 })();

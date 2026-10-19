@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Noc Eksponatów — testy</title>
+<style>
+  body{margin:0;padding:24px;background:#10120f;color:#e8e2cf;font:15px/1.5 system-ui,sans-serif}
+  h1{font-size:20px;margin:0 0 4px}#summary{font-weight:700;margin-bottom:16px}
+  #summary.ok{color:#b5e07a}#summary.fail{color:#ff8f7a}
+  ol{padding-left:28px}li{margin:3px 0}li.pass::marker{color:#b5e07a}li.fail{color:#ff8f7a}
+  li.fail pre{margin:4px 0 0;white-space:pre-wrap;font-size:12px;color:#ffb8a8;background:#1c1512;padding:8px;border-radius:6px}
+  canvas{position:absolute;left:-9999px;top:0}
+</style>
+</head>
+<body>
+<h1>Noc Eksponatów — testy walki</h1>
+<div id="summary">Ładowanie…</div>
+<ol id="results"></ol>
+<canvas id="arena" width="1440" height="810"></canvas>
+<script>window.__MUSEUM_TEST__ = true;</script>
+<script src="../dist/knights.js"></script>
+<script src="../dist/perks.js"></script>
+<script src="../dist/weapons.js"></script>
+<script src="../dist/exhibits.js"></script>
+<script src="../dist/art.js"></script>
+<script src="../dist/game.js"></script>
+<script src="runner.js"></script>
+<script src="combat.js"></script>
+<script>MuseumTests.run();</script>
+</body>
+</html>

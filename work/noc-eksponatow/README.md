@@ -51,3 +51,19 @@ Otwarcie trwa około 8,2 sekundy: pieczęć (0,9 s), przewijanie z wyhamowaniem 
 ## Stachu Jones
 
 58. strój, specjalny prezent dostępny od razu w kolekcji. Inspirowany zdjęciem przekazanym przez użytkownika: siwe włosy i wąs, granatowy płaszcz, bordowa tunika, zużyta zbroja i kosa na drewnianym trzonie. Zdolność UPÓR STACHA daje +30 maks. HP (150 HP). Prezent nie zmienia istniejącego wyboru stroju ani szans skrzyń.
+
+## Faza 0 — fundament (2026-10-19)
+
+Przeciwnik i broń są danymi, nie kodem walki:
+
+- `dist/exhibits.js` — `window.MuseumExhibits`: każdy eksponat to wpis z HP, rytmem walki (`combat`: zamach, cios, odpoczynek, dystanse) i obrażeniami (`damage`). T-rex jest pierwszym wpisem o id `trex`. Klucz `art` wskazuje funkcję rysującą w `MuseumArt.fighters`.
+- `dist/weapons.js` — `window.MuseumWeapons`: broń rycerza z zasięgiem, kosztem energii, czasem zamachu, obrażeniami w słabą gardę, bonusem serii i tym, ile odbija perfekcyjna parada. Miecz (`sword`) jest pierwszym wpisem.
+- `game.js` czyta oba moduły. Przeciwnik w stanie gry nazywa się `foe` (dawniej `rex`); migawka `getState()` ma `foeHP`, `foeState`, `foe`, `exhibit` i `weapon`. `MuseumGame.start({skin, exhibit, weapon, sound})`.
+- Zdarzenie `game:end` niesie `exhibit`, `weapon` i `skin`.
+- `art.js` ma `drawExhibit(ctx, key, x, y, opcje)` i mapę `fighters`; nowy przeciwnik to jeden wpis tam i jeden w `exhibits.js`.
+
+Kolejność skryptów: `knights.js`, `perks.js`, `weapons.js`, `exhibits.js`, `art.js`, `game.js`, `loot.js`, `shop.js`, `loot-show.js`, `ui.js`.
+
+### Testy bez Node
+
+`tests/index.html` uruchamia testy walki w przeglądarce. Odpal dowolny serwer HTTP w folderze `work/noc-eksponatow` i otwórz `/tests/`. Wynik jest w tytule strony, na stronie i w `window.__results`. Testy odpowiadają dawnemu `work/qa-suite.cjs`, ale sprawdzają liczby z obecnej gry (zapisane w `work/qa-results.json` „16/16” pochodziło ze starszej wersji bez perków i bez obecnych czasów ciosu).
