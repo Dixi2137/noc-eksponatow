@@ -3014,12 +3014,12 @@ window.MuseumConfig = Object.freeze({
    description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
-  {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'finish',family:'finishes',group:'finishes',
-   description:'Osiem limitowanych wykończeń broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Wykończenie nakładasz na dowolną broń.',
-   guarantee:'1 nowe wykończenie · mityczne, limitowane',color:'#7ff0e0',glyph:'◆',
-   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:0,mythic:100})}
+  {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'any',family:'finishes',group:'finishes',
+   description:'Stroje, bronie i karty wymieszane z ośmioma limitowanymi wykończeniami broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Najwyższa szansa na mityczne w całym muzeum, ale wciąż tylko 3%.',
+   guarantee:'1 nowy przedmiot · 3% na mityczne wykończenie',color:'#7ff0e0',glyph:'◆',
+   rarityWeights:Object.freeze({common:40,rare:30,epic:20,legendary:7,mythic:3})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
-  rarityWeights:Object.freeze(crate.pool==='finish'?crate.rarityWeights:{...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
+  rarityWeights:Object.freeze({...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
  // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
  const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
@@ -3235,7 +3235,7 @@ window.MuseumConfig = Object.freeze({
    const price=node('span','shop-product-price');price.append(node('strong','',currency.format(crate.pricePLN)),node('small','shop-product-planned','PLANOWANA CENA'));
    button.append(heading,art,node('h3','',crate.name),node('p','shop-product-guarantee',crate.guarantee));
    if(category&&crate.pool==='skin'){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
-   else if(crate.pool==='finish'){const pool=loot.items.filter(item=>item.kind==='finish'),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} WYKOŃCZEŃ LIMITOWANYCH`));}
+   else if(crate.id==='collector'){const pool=loot.items.filter(item=>item.kind==='finish'),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} WYKOŃCZEŃ LIMITOWANYCH`));}
    else if(crate.pool==='weapon'&&(crate.weaponType||category)){const pool=loot.items.filter(item=>item.kind==='weapon'&&item.weight>0&&(!crate.weaponType||item.type===crate.weaponType)&&(!category||item.categoryId===category.id)),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} BRONI W PULI`));}
    else if(crate.pool!=='skin'){const pool=loot.items.filter(item=>(crate.pool==='any'||item.kind===crate.pool)&&item.weight>0&&crate.rarityWeights[item.rarity]>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} ${crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':'PRZEDMIOTÓW'} W PULI`));}
    else button.append(node('span','shop-product-progress','WSZYSTKIE KATEGORIE STROJÓW'));
@@ -3649,7 +3649,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   }
   const crate=loot.getCrate(selectedCrateId)||loot.getCrate('gallery');selectedCrateId=crate.id;
   const entries=loot.entries(profile,crate.id),all=!entries.length,free=crate.id==='gallery'&&profile.freeCrates>0,odds=loot.odds(profile,crate.id);
-  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='finish'?'Limitowane wykończenia broni · mityczne':crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?(crate.weaponType?`Broń · ${weapons.types[crate.weaponType].name}`:crate.categoryId?`Broń · ${loot.getCategory(crate.categoryId)?.name}`:'Cała zbrojownia'):crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
+  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.id==='collector'?'Skrzynia mieszana · najwyższa szansa na mityczne wykończenie':crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?(crate.weaponType?`Broń · ${weapons.types[crate.weaponType].name}`:crate.categoryId?`Broń · ${loot.getCategory(crate.categoryId)?.name}`:'Cała zbrojownia'):crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
   $('crateContentsSummary').textContent=`ZAWARTOŚĆ I SZANSE · ${itemCount(entries.length,crate.pool)}`;renderDropContents($('crateContentsList'),entries);
   $('crateBtn').disabled=all||crateBusy||!!profile.pendingReward||(!free&&profile.coins<crate.cost);
   $('crateBtn').innerHTML=all?'ZAWARTOŚĆ ZEBRANA <span>✓</span>':free?'OTWÓRZ GRATIS <span>◇</span>':`OTWÓRZ SKRZYNIĘ <span>${number(crate.cost)} ✦</span>`;

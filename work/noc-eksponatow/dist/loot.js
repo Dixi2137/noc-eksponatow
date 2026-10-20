@@ -141,12 +141,12 @@
    description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
-  {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'finish',family:'finishes',group:'finishes',
-   description:'Osiem limitowanych wykończeń broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Wykończenie nakładasz na dowolną broń.',
-   guarantee:'1 nowe wykończenie · mityczne, limitowane',color:'#7ff0e0',glyph:'◆',
-   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:0,mythic:100})}
+  {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'any',family:'finishes',group:'finishes',
+   description:'Stroje, bronie i karty wymieszane z ośmioma limitowanymi wykończeniami broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Najwyższa szansa na mityczne w całym muzeum, ale wciąż tylko 3%.',
+   guarantee:'1 nowy przedmiot · 3% na mityczne wykończenie',color:'#7ff0e0',glyph:'◆',
+   rarityWeights:Object.freeze({common:40,rare:30,epic:20,legendary:7,mythic:3})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
-  rarityWeights:Object.freeze(crate.pool==='finish'?crate.rarityWeights:{...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
+  rarityWeights:Object.freeze({...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
  // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
  const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }

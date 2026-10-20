@@ -138,11 +138,12 @@
   });
   test('Sejf Kolekcjonera: 8 mitycznych wykończeń, nakładanie na dowolną broń, sprzedaż za 6000, nic nie wypada z innych skrzyń', () => {
     const fin = window.MuseumFinishes; assert.equal(fin.count, 8); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
-    const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.length, 8); assert.ok(pool.every(i => i.kind === 'finish' && i.rarity === 'mythic'));
+    const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.filter(i => i.kind === 'finish').length, 8); assert.ok(pool.some(i => i.kind === 'skin') && pool.some(i => i.kind === 'weapon') && pool.some(i => i.kind === 'card'), 'sejf miesza mityczne ze zwykłymi');
+    assert.ok(Math.abs(loot.odds(p, 'collector').mythic - 3) < .01, 'sejf: 3 % na mityczne');
     for (const id of ['gallery', 'legends', 'armory', 'night']) { const o = loot.odds(p, id).mythic; assert.ok(o > 0 && o < 1.5, `${id}: mityczne ${o}%`); assert.ok(loot.remaining(p, id).some(i => i.kind === 'finish'), id); }
-    assert.ok(loot.odds(p, 'gallery').mythic < .4 && loot.odds(p, 'legends').mythic > 1, 'tanie ~0,35 %, legendy ~1,2 %');
+    assert.ok(loot.odds(p, 'gallery').mythic < .4 && loot.odds(p, 'legends').mythic > 1 && loot.odds(p, 'collector').mythic > loot.odds(p, 'legends').mythic, 'tanie ~0,35 %, legendy ~1,2 %, sejf 3 %');
     assert.ok(loot.remaining(ownAll(p), 'gallery').every(i => i.kind !== 'finish'), 'po zebraniu wszystkich nic mitycznego nie zostaje');
-    const r = loot.reserve(p, () => .5, 'collector'); assert.ok(r && r.reward.kind === 'finish'); assert.equal(r.cost, 12000); p = loot.claim(r.profile, { equip: true });
+    const r = loot.reserve(p, () => .995, 'collector'); assert.ok(r && r.reward.kind === 'finish', 'górne 3 % losowania to wykończenie'); assert.equal(loot.reserve(p, () => .5, 'collector').reward.kind !== 'finish', true, 'środek losowania to zwykły przedmiot'); assert.equal(r.cost, 12000); p = loot.claim(r.profile, { equip: true });
     assert.equal(p.finish, r.reward.id); assert.ok(loot.has(p, r.reward.id)); assert.ok(loot.equipped(p, r.reward.id));
     p = loot.equip(p, r.reward.id); assert.equal(p.finish, null, 'drugie kliknięcie zdejmuje'); assert.equal(loot.value(r.reward), 15000); assert.equal(loot.sellPrice(r.reward), 6000);
     assert.ok(loot.canSell(p, r.reward.id)); const sold = loot.sell(p, r.reward.id); assert.equal(sold.price, 6000); assert.equal(sold.profile.finishes.length, 0);
