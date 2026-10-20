@@ -229,7 +229,7 @@ Gra: po zalogowaniu `fetchProfile` zwraca rolę i ban; zbanowany dostaje komunik
 
 ## Dopasowanie do okna (2026-10-21)
 
-Ramka gry ma szerokość `clamp(58%, (100vh − --chrome) × 16/9, 100%)`: `fitStage()` w `ui.js` mierzy pasek górny, linię sekcji i pasek sterowania (`--chrome`), więc arena razem z nimi mieści się w wysokości okna bez przewijania. Gdy ramka jest przez to węższa niż strona, wszystko w ramce poza canvasem dostaje `zoom: var(--ui-zoom)` równy stosunkowi szerokości ramki do pełnej szerokości treści, więc menu, HUD i sceny skalują się proporcjonalnie zamiast się ucinać. Poniżej 1180 px nawigacja paska górnego schodzi do drugiego rzędu.
+Ramka gry ma szerokość `clamp(58%, (100vh − --chrome) × 16/9, 100%)`: `fitStage()` w `ui.js` mierzy pasek górny, linię sekcji i pasek sterowania (`--chrome`), więc arena razem z nimi mieści się w wysokości okna bez przewijania. Gdy ramka jest przez to węższa niż strona, wszystko w ramce poza canvasem dostaje `zoom: var(--ui-zoom)` równy stosunkowi szerokości ramki do pełnej szerokości treści, więc menu, HUD i sceny skalują się proporcjonalnie zamiast się ucinać. Poniżej 1280 px nawigacja paska górnego schodzi do drugiego rzędu; powyżej pasek się nie zawija.
 
 ## Publikacja online (2026-10-21)
 

@@ -128,11 +128,11 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 
 .mod-panel{width:min(980px,96vw)}.mod-search{display:flex;gap:8px;margin:0 0 12px}.mod-search input{flex:1;padding:10px 12px;background:#0f140d;border:1px solid var(--line);color:var(--cream);font:inherit}.mod-head,.mod-row{display:grid;grid-template-columns:1.6fr .8fr .5fr .8fr .8fr 1.2fr;gap:8px;align-items:center}.mod-head{font-size:7px;letter-spacing:2px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}.mod-row{padding:10px;border-bottom:1px solid #22281e;font-size:12px}.mod-row strong{display:block;color:var(--cream)}.mod-row small{display:block;color:var(--muted);font-size:9px;letter-spacing:.5px}.mod-row .mod-banned{color:#ff8c9a}.mod-row .mod-ok{color:#9ad28b}.mod-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding-top:6px}.mod-actions button{padding:6px 9px;background:transparent;border:1px solid var(--line);color:var(--cream);font-size:9px;letter-spacing:1px;cursor:pointer}.mod-actions button:hover:not(:disabled){border-color:var(--lime);color:var(--lime)}.mod-actions button.danger:hover:not(:disabled){border-color:#ff8c9a;color:#ff8c9a}.mod-actions button:disabled{opacity:.4;cursor:default}.mod-role{text-transform:uppercase;letter-spacing:1px;font-size:10px}.mod-role.admin{color:var(--gold)}.mod-role.moderator{color:#7ff0e0}@media(max-width:800px){.mod-head{display:none}.mod-row{grid-template-columns:1fr 1fr}}
 /* ── Responsywność (2026-10-21): pasek górny zawija się zamiast wystawać, menu nigdy nie ucina paska sal ── */
-.topbar{flex-wrap:wrap;row-gap:0}
+.topbar{flex-wrap:nowrap;row-gap:0}
 #accountLabel{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
 .top-actions{margin-left:auto;flex-wrap:nowrap}
-@media(max-width:1180px){
- .topbar{height:auto;min-height:0;padding:0}
+@media(max-width:1280px){
+ .topbar{flex-wrap:wrap;height:auto;min-height:0;padding:0}
  .topbar nav{order:3;flex-basis:100%;justify-content:center;margin:0;gap:28px;border-top:1px solid var(--line)}
  .nav-tab{padding:15px 0}
  .brand-area{padding:14px 0}
