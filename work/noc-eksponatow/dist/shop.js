@@ -60,6 +60,7 @@
    return button;
   });
   $('shopOffers').replaceChildren(...products);
+  renderFinishes(current);
   if(focused)products.find(product=>product.dataset.crateId===focused)?.focus({preventScroll:true});
   for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed']])$(id).setAttribute('aria-pressed',String(familyFilter===filter));
   $('shopOffersCount').textContent=`${products.length} / ${loot.crates.length} SKRZYŃ`;
@@ -82,6 +83,25 @@
   tokenButton.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':free?'WYBIERZ DARMOWĄ SKRZYNIĘ':coins<cost?`ZOBACZ ZA ${number.format(cost)} ✦`:`WYBIERZ ZA ${number.format(cost)} ✦`;
   const paymentButton=$('shopPaymentBtn');paymentButton.disabled=true;paymentButton.textContent='PŁATNOŚCI WKRÓTCE';
   $('shopTokenHint').textContent=!available?'Masz już wszystko, co może wypaść z tej skrzyni.':current.pendingReward?'Odbierz zapisaną nagrodę w kolekcji, aby otworzyć następną skrzynię.':free?'Masz 1 darmową skrzynię Galerii na start. Otworzysz ją w kolekcji.':coins<cost?`Masz ${number.format(coins)} / ${number.format(cost)} żetonów. Do zdobycia ${number.format(cost-coins)}. Żetony zdobywasz w walkach.`:`Masz ${number.format(coins)} / ${number.format(cost)} żetonów. Potwierdzisz otwarcie w kolekcji.`;
+ }
+ // Direct sale of the eight limited finishes: planned PLN price each, payments not live yet; owned ones are marked.
+ const plain=new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN',maximumFractionDigits:0});
+ function renderFinishes(current){
+  const root=$('shopFinishes');if(!root||!window.MuseumFinishes)return;
+  const list=loot.items.filter(item=>item.kind==='finish');
+  const cards=list.map((item,index)=>{
+   const owned=loot.has(current,item),equipped=current.finish===item.id,card=node('article',`shop-product shop-finish${owned?' is-owned':''}`);
+   card.style.setProperty('--crate-color',item.colors?.steel||'#7ff0e0');
+   const heading=node('span','shop-product-head');heading.append(node('span','shop-product-number',String(index+1).padStart(2,'0')),node('small','shop-product-tag','MITYCZNE'));
+   const art=node('span','shop-product-art');const canvas=document.createElement('canvas');canvas.width=canvas.height=96;art.append(canvas);
+   const ctx=canvas.getContext('2d');if(ctx){const pix=window.MuseumPixel,weapon=window.MuseumWeapons.get(current.weapon)||window.MuseumWeapons.get('sword');if(pix){ctx.imageSmoothingEnabled=false;ctx.fillStyle='#10180e';ctx.fillRect(0,0,96,96);pix.drawWeaponIcon(ctx,weapon,16,16,4,{finish:item.id,time:1});}}
+   card.append(heading,art,node('h3','',item.name),node('p','shop-product-guarantee',item.description||''));
+   const price=node('span','shop-finish-price');price.append(node('strong','',plain.format(item.pricePLN||0)),node('small','','PLANOWANA CENA · PŁATNOŚCI WKRÓTCE'));card.append(price);
+   if(owned)card.append(node('span','shop-finish-state',equipped?'● NAŁOŻONE NA TWOJĄ BROŃ':'✓ MASZ W KOLEKCJI'));
+   return card;
+  });
+  root.replaceChildren(...cards);
+  const owned=list.filter(item=>loot.has(current,item)).length;$('shopFinishesCount').textContent=`${owned} / ${list.length} W KOLEKCJI · OD ${plain.format(Math.min(...list.map(i=>i.pricePLN)))} DO ${plain.format(Math.max(...list.map(i=>i.pricePLN)))}`;
  }
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];

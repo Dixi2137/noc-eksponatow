@@ -2,7 +2,9 @@
    Mythic rarity, dropped only by the Sejf Kolekcjonera crate. Colours: steel body, edge highlight, dark steel, fittings (gold), haft (wood). */
 (() => {
   'use strict';
-  const f = (id, name, era, flavour, colors, fx) => Object.freeze({ id, name, era, flavour, rarity: 'mythic', fx, colors: Object.freeze(colors) });
+  const f = (id, name, era, flavour, colors, fx) => Object.freeze({ id, name, era, flavour, rarity: 'mythic', fx, colors: Object.freeze(colors), pricePLN: PRICES[id] });
+  // Planned direct-sale prices in PLN (payments are not live yet): a few hundred to a few thousand zł.
+  const PRICES = Object.freeze({'diamond-emerald': 2499, 'gold-marble': 1499, 'titanium': 499, 'holo': 3499, 'obsidian-ruby': 1199, 'damascus': 699, 'rose-gold': 899, 'void': 1999});
   const finishes = Object.freeze([
     f('diamond-emerald', 'DIAMENTOWY SZMARAGD', 'SZMARAGD I DIAMENT · WYKOŃCZENIE LIMITOWANE', 'Szlifowany szmaragd oprawiony w diament. Każde ostrze rzuca zielone iskry.',
       { steel: '#5fd9b4', edge: '#eafff8', dark: '#1d6f58', gold: '#d6fff2', wood: '#1a4a3a' }, 'sparkle'),

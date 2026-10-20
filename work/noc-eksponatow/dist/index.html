@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="style.css?v=faza22">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="style.css?v=faza23">
 </head>
 <body>
  <div class="app">
@@ -101,6 +101,9 @@
    <p class="shop-notice"><span>◷</span><span><strong>ZAPOWIEDŹ SKLEPU</strong> Ceny w złotówkach są planowane. Płatności nie są jeszcze dostępne. Skrzynki za żetony zdobyte w grze możesz otwierać już teraz.</span></p>
    <div class="shop-browse"><div class="shop-filters" aria-label="Rodzaje skrzyń"><button id="shopFilterAll" aria-pressed="true">WSZYSTKIE</button><button id="shopFilterClassic" aria-pressed="false">KLASYCZNE</button><button id="shopFilterThemed" aria-pressed="false">TEMATYCZNE</button><button id="shopFilterWeapons" aria-pressed="false">BROŃ</button><button id="shopFilterCards" aria-pressed="false">KARTY</button><button id="shopFilterMixed" aria-pressed="false">MIESZANE</button></div><span id="shopOffersCount" aria-live="polite"></span></div>
    <div id="shopOffers" class="shop-offers" aria-label="Oferty skrzyń"></div>
+   <div class="shop-section-head"><div><span class="eyebrow">SPRZEDAŻ BEZPOŚREDNIA / LIMITOWANE</span><h3>Wykończenia broni.</h3></div><span id="shopFinishesCount" class="shop-offers-count"></span></div>
+   <p class="shop-finishes-lead">Osiem limitowanych powłok do kupienia bez losowania. Każda nakłada się na dowolną broń. Ceny planowane; płatności wkrótce.</p>
+   <div id="shopFinishes" class="shop-offers shop-finishes" aria-label="Wykończenia broni na sprzedaż"></div>
    <div id="shopSummary" class="shop-summary" tabindex="-1">
     <div><span class="eyebrow">WYBRANA SKRZYNIA</span><h3 id="shopSelectedName"></h3><span id="shopSelectedCategory" class="shop-family-label"></span><p id="shopSelectedGuarantee"></p><div id="shopSelectedOdds" class="shop-odds" aria-label="Szanse na rzadkości"></div><p class="shop-odds-note">Szanse dotyczą twojej obecnej kolekcji. Po zebraniu całej rzadkości są przeliczane dla pozostałych strojów.</p><details id="shopContents" class="drop-contents"><summary id="shopContentsSummary">ZAWARTOŚĆ I SZANSE NA SKINY</summary><ul id="shopContentsList" class="drop-list"></ul></details></div>
     <div class="shop-checkout"><div class="shop-total"><span>PLANOWANA CENA</span><strong id="shopSelectedPrice"></strong></div><button id="shopPaymentBtn" class="primary-btn" disabled aria-describedby="shopPaymentHint">PŁATNOŚCI WKRÓTCE</button><p id="shopPaymentHint" class="shop-payment-note">Zakup za złotówki będzie dostępny po uruchomieniu płatności.</p><button id="shopTokenBtn" class="secondary-btn"></button><p id="shopTokenHint" class="shop-token-hint" aria-live="polite"></p></div>
@@ -155,5 +158,5 @@
   </div>
  </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="config.js?v=faza22"></script><script src="cloud.js?v=faza22"></script><script src="knights.js?v=faza22"></script><script src="perks.js?v=faza22"></script><script src="weapons.js?v=faza22"></script><script src="finishes.js?v=faza22"></script><script src="exhibits.js?v=faza22"></script><script src="levels.js?v=faza22"></script><script src="cards.js?v=faza22"></script><script src="hall.js?v=faza22"></script><script src="art.js?v=faza22"></script><script src="pixel.js?v=faza22"></script><script src="game.js?v=faza22"></script><script src="loot.js?v=faza22"></script><script src="shop.js?v=faza22"></script><script src="loot-show.js?v=faza22"></script><script src="ui.js?v=faza22"></script>
+ <script src="config.js?v=faza23"></script><script src="cloud.js?v=faza23"></script><script src="knights.js?v=faza23"></script><script src="perks.js?v=faza23"></script><script src="weapons.js?v=faza23"></script><script src="finishes.js?v=faza23"></script><script src="exhibits.js?v=faza23"></script><script src="levels.js?v=faza23"></script><script src="cards.js?v=faza23"></script><script src="hall.js?v=faza23"></script><script src="art.js?v=faza23"></script><script src="pixel.js?v=faza23"></script><script src="game.js?v=faza23"></script><script src="loot.js?v=faza23"></script><script src="shop.js?v=faza23"></script><script src="loot-show.js?v=faza23"></script><script src="ui.js?v=faza23"></script>
 </body></html>

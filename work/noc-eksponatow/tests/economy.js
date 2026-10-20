@@ -137,7 +137,7 @@
     assert.equal(loot.crates.length, 30); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
   });
   test('Sejf Kolekcjonera: 8 mitycznych wykończeń, nakładanie na dowolną broń, sprzedaż za 6000, nic nie wypada z innych skrzyń', () => {
-    const fin = window.MuseumFinishes; assert.equal(fin.count, 8); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
+    const fin = window.MuseumFinishes; assert.equal(fin.count, 8); assert.ok(fin.all().every(f => f.pricePLN >= 400 && f.pricePLN <= 4000), 'ceny od kilkuset do kilku tysięcy zł'); assert.equal(fin.get('gold-marble').pricePLN, 1499); assert.equal(loot.getItem('gold-marble').pricePLN, 1499); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
     const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.filter(i => i.kind === 'finish').length, 8); assert.ok(pool.some(i => i.kind === 'skin') && pool.some(i => i.kind === 'weapon') && pool.some(i => i.kind === 'card'), 'sejf miesza mityczne ze zwykłymi');
     assert.ok(Math.abs(loot.odds(p, 'collector').mythic - 3) < .01, 'sejf: 3 % na mityczne');
     for (const id of ['gallery', 'legends', 'armory', 'night']) { const o = loot.odds(p, id).mythic; assert.ok(o > 0 && o < 1.5, `${id}: mityczne ${o}%`); assert.ok(loot.remaining(p, id).some(i => i.kind === 'finish'), id); }

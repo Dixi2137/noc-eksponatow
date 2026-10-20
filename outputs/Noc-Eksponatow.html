@@ -124,6 +124,8 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 @media(max-width:1000px){body.pixel .menu-screen h1{font-size:6vw}}
 
 .choice{pointer-events:auto;background:linear-gradient(180deg,#000b,#0009 40%,#000e)}.choice-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,86%);padding:26px 28px 22px;background:var(--panel);border:1px solid var(--line);box-shadow:0 30px 80px #000c;text-align:center}.choice-box h2{font-family:'Barlow Condensed',Impact,sans-serif;font-size:clamp(26px,3.6vw,48px);line-height:1;margin:10px 0 8px;color:var(--lime)}.choice-box p{margin:0 0 18px;color:var(--muted);font-size:14px}.choice-box .result-actions{justify-content:center}.choice-hint{display:block;margin-top:14px;color:var(--muted);font-size:10px;letter-spacing:1.5px;text-transform:uppercase}body.pixel .choice-box h2{font-family:'Pixelify Sans',monospace;font-size:34px}
+
+.shop-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:34px 0 6px;padding-top:22px;border-top:1px solid var(--line)}.shop-section-head h3{font-family:'Barlow Condensed',Impact,sans-serif;font-size:30px;line-height:1;margin:6px 0 0;color:var(--cream)}.shop-finishes-lead{margin:0 0 14px;color:var(--muted);font-size:13px}.shop-finishes{grid-template-columns:repeat(4,minmax(0,1fr))}.shop-finish{cursor:default}.shop-finish .shop-product-art{width:120px;height:120px}.shop-finish .shop-product-art canvas{width:120px;height:120px;image-rendering:pixelated}.shop-finish-price{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:auto;padding-top:10px}.shop-finish-price strong{font-family:'Barlow Condensed',Impact,sans-serif;font-size:30px;line-height:1;color:var(--gold)}.shop-finish-price small{font-size:9px;letter-spacing:1.5px;color:var(--muted)}.shop-finish-state{font-size:10px;letter-spacing:1.5px;color:#7ff0e0;margin-top:8px}.shop-finish.is-owned{border-color:#7ff0e0}body.pixel .shop-section-head h3,body.pixel .shop-finish-price strong{font-family:'Pixelify Sans',monospace}@media(max-width:900px){.shop-finishes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -222,6 +224,9 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
    <p class="shop-notice"><span>◷</span><span><strong>ZAPOWIEDŹ SKLEPU</strong> Ceny w złotówkach są planowane. Płatności nie są jeszcze dostępne. Skrzynki za żetony zdobyte w grze możesz otwierać już teraz.</span></p>
    <div class="shop-browse"><div class="shop-filters" aria-label="Rodzaje skrzyń"><button id="shopFilterAll" aria-pressed="true">WSZYSTKIE</button><button id="shopFilterClassic" aria-pressed="false">KLASYCZNE</button><button id="shopFilterThemed" aria-pressed="false">TEMATYCZNE</button><button id="shopFilterWeapons" aria-pressed="false">BROŃ</button><button id="shopFilterCards" aria-pressed="false">KARTY</button><button id="shopFilterMixed" aria-pressed="false">MIESZANE</button></div><span id="shopOffersCount" aria-live="polite"></span></div>
    <div id="shopOffers" class="shop-offers" aria-label="Oferty skrzyń"></div>
+   <div class="shop-section-head"><div><span class="eyebrow">SPRZEDAŻ BEZPOŚREDNIA / LIMITOWANE</span><h3>Wykończenia broni.</h3></div><span id="shopFinishesCount" class="shop-offers-count"></span></div>
+   <p class="shop-finishes-lead">Osiem limitowanych powłok do kupienia bez losowania. Każda nakłada się na dowolną broń. Ceny planowane; płatności wkrótce.</p>
+   <div id="shopFinishes" class="shop-offers shop-finishes" aria-label="Wykończenia broni na sprzedaż"></div>
    <div id="shopSummary" class="shop-summary" tabindex="-1">
     <div><span class="eyebrow">WYBRANA SKRZYNIA</span><h3 id="shopSelectedName"></h3><span id="shopSelectedCategory" class="shop-family-label"></span><p id="shopSelectedGuarantee"></p><div id="shopSelectedOdds" class="shop-odds" aria-label="Szanse na rzadkości"></div><p class="shop-odds-note">Szanse dotyczą twojej obecnej kolekcji. Po zebraniu całej rzadkości są przeliczane dla pozostałych strojów.</p><details id="shopContents" class="drop-contents"><summary id="shopContentsSummary">ZAWARTOŚĆ I SZANSE NA SKINY</summary><ul id="shopContentsList" class="drop-list"></ul></details></div>
     <div class="shop-checkout"><div class="shop-total"><span>PLANOWANA CENA</span><strong id="shopSelectedPrice"></strong></div><button id="shopPaymentBtn" class="primary-btn" disabled aria-describedby="shopPaymentHint">PŁATNOŚCI WKRÓTCE</button><p id="shopPaymentHint" class="shop-payment-note">Zakup za złotówki będzie dostępny po uruchomieniu płatności.</p><button id="shopTokenBtn" class="secondary-btn"></button><p id="shopTokenHint" class="shop-token-hint" aria-live="polite"></p></div>
@@ -681,7 +686,9 @@ window.MuseumConfig = Object.freeze({
    Mythic rarity, dropped only by the Sejf Kolekcjonera crate. Colours: steel body, edge highlight, dark steel, fittings (gold), haft (wood). */
 (() => {
   'use strict';
-  const f = (id, name, era, flavour, colors, fx) => Object.freeze({ id, name, era, flavour, rarity: 'mythic', fx, colors: Object.freeze(colors) });
+  const f = (id, name, era, flavour, colors, fx) => Object.freeze({ id, name, era, flavour, rarity: 'mythic', fx, colors: Object.freeze(colors), pricePLN: PRICES[id] });
+  // Planned direct-sale prices in PLN (payments are not live yet): a few hundred to a few thousand zł.
+  const PRICES = Object.freeze({'diamond-emerald': 2499, 'gold-marble': 1499, 'titanium': 499, 'holo': 3499, 'obsidian-ruby': 1199, 'damascus': 699, 'rose-gold': 899, 'void': 1999});
   const finishes = Object.freeze([
     f('diamond-emerald', 'DIAMENTOWY SZMARAGD', 'SZMARAGD I DIAMENT · WYKOŃCZENIE LIMITOWANE', 'Szlifowany szmaragd oprawiony w diament. Każde ostrze rzuca zielone iskry.',
       { steel: '#5fd9b4', edge: '#eafff8', dark: '#1d6f58', gold: '#d6fff2', wood: '#1a4a3a' }, 'sparkle'),
@@ -3068,7 +3075,7 @@ window.MuseumConfig = Object.freeze({
   ...skins.map(skin=>({kind:'skin',...skin})),
   ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
-  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:'mythic',summary:'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors}))
+  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:'mythic',summary:'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
  ].map(Object.freeze));
  const itemsById=new Map(items.map(item=>[item.id,item]));
  function getItem(id){return itemsById.get(id)||null;}
@@ -3266,6 +3273,7 @@ window.MuseumConfig = Object.freeze({
    return button;
   });
   $('shopOffers').replaceChildren(...products);
+  renderFinishes(current);
   if(focused)products.find(product=>product.dataset.crateId===focused)?.focus({preventScroll:true});
   for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed']])$(id).setAttribute('aria-pressed',String(familyFilter===filter));
   $('shopOffersCount').textContent=`${products.length} / ${loot.crates.length} SKRZYŃ`;
@@ -3288,6 +3296,25 @@ window.MuseumConfig = Object.freeze({
   tokenButton.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':free?'WYBIERZ DARMOWĄ SKRZYNIĘ':coins<cost?`ZOBACZ ZA ${number.format(cost)} ✦`:`WYBIERZ ZA ${number.format(cost)} ✦`;
   const paymentButton=$('shopPaymentBtn');paymentButton.disabled=true;paymentButton.textContent='PŁATNOŚCI WKRÓTCE';
   $('shopTokenHint').textContent=!available?'Masz już wszystko, co może wypaść z tej skrzyni.':current.pendingReward?'Odbierz zapisaną nagrodę w kolekcji, aby otworzyć następną skrzynię.':free?'Masz 1 darmową skrzynię Galerii na start. Otworzysz ją w kolekcji.':coins<cost?`Masz ${number.format(coins)} / ${number.format(cost)} żetonów. Do zdobycia ${number.format(cost-coins)}. Żetony zdobywasz w walkach.`:`Masz ${number.format(coins)} / ${number.format(cost)} żetonów. Potwierdzisz otwarcie w kolekcji.`;
+ }
+ // Direct sale of the eight limited finishes: planned PLN price each, payments not live yet; owned ones are marked.
+ const plain=new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN',maximumFractionDigits:0});
+ function renderFinishes(current){
+  const root=$('shopFinishes');if(!root||!window.MuseumFinishes)return;
+  const list=loot.items.filter(item=>item.kind==='finish');
+  const cards=list.map((item,index)=>{
+   const owned=loot.has(current,item),equipped=current.finish===item.id,card=node('article',`shop-product shop-finish${owned?' is-owned':''}`);
+   card.style.setProperty('--crate-color',item.colors?.steel||'#7ff0e0');
+   const heading=node('span','shop-product-head');heading.append(node('span','shop-product-number',String(index+1).padStart(2,'0')),node('small','shop-product-tag','MITYCZNE'));
+   const art=node('span','shop-product-art');const canvas=document.createElement('canvas');canvas.width=canvas.height=96;art.append(canvas);
+   const ctx=canvas.getContext('2d');if(ctx){const pix=window.MuseumPixel,weapon=window.MuseumWeapons.get(current.weapon)||window.MuseumWeapons.get('sword');if(pix){ctx.imageSmoothingEnabled=false;ctx.fillStyle='#10180e';ctx.fillRect(0,0,96,96);pix.drawWeaponIcon(ctx,weapon,16,16,4,{finish:item.id,time:1});}}
+   card.append(heading,art,node('h3','',item.name),node('p','shop-product-guarantee',item.description||''));
+   const price=node('span','shop-finish-price');price.append(node('strong','',plain.format(item.pricePLN||0)),node('small','','PLANOWANA CENA · PŁATNOŚCI WKRÓTCE'));card.append(price);
+   if(owned)card.append(node('span','shop-finish-state',equipped?'● NAŁOŻONE NA TWOJĄ BROŃ':'✓ MASZ W KOLEKCJI'));
+   return card;
+  });
+  root.replaceChildren(...cards);
+  const owned=list.filter(item=>loot.has(current,item)).length;$('shopFinishesCount').textContent=`${owned} / ${list.length} W KOLEKCJI · OD ${plain.format(Math.min(...list.map(i=>i.pricePLN)))} DO ${plain.format(Math.max(...list.map(i=>i.pricePLN)))}`;
  }
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];
@@ -3650,7 +3677,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
    const badge=s.number?`<span class="skin-number">${String(s.number).padStart(2,'0')} / 50</span>`:s.gift?'<span class="skin-number">★ SPECJALNY</span>':level?`<span class="skin-number">ULEPSZENIE +${level}</span>`:'';
    b.innerHTML=`${badge}<canvas width="360" height="360" aria-hidden="true"></canvas><small>${s.era}</small><strong>${s.name}</strong><span class="skin-category"></span><span class="skin-perk"><strong></strong><span></span></span><span class="skin-state">${owned?equipLabel(s,selected):'◇ DO ODKRYCIA'}</span>`;
    b.querySelector('.skin-category').textContent=loot.getCategory(s.categoryId)?.name||'';
-   const perkTitle=s.kind==='skin'?perks.get(s.id).title:s.kind==='card'?cardsApi.get(s.id).era:(s.typeName||s.era),perkSummary=s.kind==='skin'?perks.get(s.id).summary:s.summary;
+   const perkTitle=s.kind==='skin'?perks.get(s.id).title:s.kind==='card'?cardsApi.get(s.id).era:s.kind==='finish'?`${s.era} · WARTOŚĆ ${new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN',maximumFractionDigits:0}).format(s.pricePLN||0)}`:(s.typeName||s.era),perkSummary=s.kind==='skin'?perks.get(s.id).summary:s.summary;
    b.querySelector('.skin-perk strong').textContent=perkTitle;b.querySelector('.skin-perk span').textContent=level&&s.kind!=='card'?`${perkSummary} · ${loot.upgradeEffect(s,level)}`:perkSummary;
    b.addEventListener('click',()=>{if(busy())return;if(!owned){$('collectionMessage').textContent=`${s.name} czeka w muzealnej skrzyni. ${itemSummary(s)}`;return;}const next=loot.equip(profile,s.id);if(!next){$('collectionMessage').textContent=`${s.name} działa automatycznie, kiedy masz założoną pasującą broń.`;return;}profile=next;persist();renderSkins();$('collectionMessage').textContent=s.kind==='card'&&profile.card!==s.id?`Karta ${s.name} odłożona.`:`Wybrano ${s.name}. ${itemSummary(s)}`;});
    cell.append(b);
