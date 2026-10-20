@@ -278,14 +278,14 @@ create policy "announcements read" on public.announcements for select using (exp
 grant select on public.announcements to anon, authenticated;
 
 -- Wysyłka i wycofanie: tylko moderator, przez funkcje sprawdzające rolę.
-create or replace function public.mod_announce(body text, kind text default 'info', hours int default 24) returns jsonb
+create or replace function public.mod_announce(body text, kind text default 'info', seconds int default 60) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare row_out public.announcements%rowtype; who text;
 begin
   if not public.is_mod() then raise exception 'forbidden'; end if;
   select nickname into who from public.profiles where id = auth.uid();
   insert into public.announcements (body, kind, author, expires_at)
-  values (trim(body), coalesce(nullif(kind, ''), 'info'), who, now() + make_interval(hours => greatest(1, least(hours, 24 * 30))))
+  values (trim(body), coalesce(nullif(kind, ''), 'info'), who, now() + make_interval(secs => greatest(10, least(seconds, 2592000))))
   returning * into row_out;
   return to_jsonb(row_out);
 end $$;
@@ -298,6 +298,7 @@ begin
 end $$;
 grant execute on function public.mod_announce(text, text, int) to authenticated;
 grant execute on function public.mod_unannounce(bigint) to authenticated;
+alter table public.announcements replica identity full;
 
 -- Realtime: nowe wiersze lecą do przeglądarek przez WebSocket (gra ma też odpytywanie co 15 s na wypadek braku połączenia).
 do $$

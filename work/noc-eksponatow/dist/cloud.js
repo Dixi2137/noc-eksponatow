@@ -94,7 +94,7 @@
     reset: target => rpc('mod_reset', { target }),
     setRole: (target, role) => rpc('mod_set_role', { target, new_role: role }),
     setTitle: (target, title) => rpc('mod_set_title', { target, new_title: title || '' }),
-    announce: (body, kind = 'info', hours = 24) => rpc('mod_announce', { body, kind, hours }),
+    announce: (body, kind = 'info', seconds = 60) => rpc('mod_announce', { body, kind, seconds }),
     unannounce: id => rpc('mod_unannounce', { target: id })
   });
   // Announcements for everyone: a public table, read without login. Live delivery over Supabase Realtime (Phoenix protocol
@@ -102,15 +102,15 @@
   const announcements = (() => {
     const handlers = new Set(); const seen = new Set(); let socket = null, timer = null, poll = null, ref = 0, backoff = 2000;
     const list = () => request('/rest/v1/announcements?select=*&order=created_at.desc&limit=10', { auth: false });
-    const deliver = row => { if (!row || seen.has(row.id)) return; seen.add(row.id); for (const fn of handlers) { try { fn(row); } catch (_) {} } };
-    async function sweep() { const r = await list(); if (r.ok && Array.isArray(r.data)) for (const row of [...r.data].reverse()) if (new Date(row.expires_at) > new Date()) deliver(row); }
+    const deliver = (row, changed = false) => { if (!row) return; if (!changed) { if (seen.has(row.id)) return; seen.add(row.id); } for (const fn of handlers) { try { fn(row, changed); } catch (_) {} } };
+    async function sweep() { const r = await list(); if (r.ok && Array.isArray(r.data)) for (const row of [...r.data].reverse()) { if (new Date(row.expires_at) > new Date()) deliver(row); else if (seen.has(row.id)) deliver(row, true); } }
     function connect() {
       if (!enabled() || typeof WebSocket === 'undefined' || socket) return;
       const url = `${config().supabaseUrl.replace(/^http/, 'ws').replace(/\/$/, '')}/realtime/v1/websocket?apikey=${encodeURIComponent(config().supabaseAnonKey)}&vsn=1.0.0`;
       try { socket = new WebSocket(url); } catch (_) { socket = null; return; }
       const send = msg => { try { socket.send(JSON.stringify({ ...msg, ref: String(++ref) })); } catch (_) {} };
-      socket.onopen = () => { backoff = 2000; send({ topic: 'realtime:announcements', event: 'phx_join', payload: { config: { broadcast: { self: false }, presence: { key: '' }, postgres_changes: [{ event: 'INSERT', schema: 'public', table: 'announcements' }] }, access_token: session?.access_token || config().supabaseAnonKey } }); timer = setInterval(() => send({ topic: 'phoenix', event: 'heartbeat', payload: {} }), 25000); };
-      socket.onmessage = e => { let m = null; try { m = JSON.parse(e.data); } catch (_) { return; } if (m?.event === 'postgres_changes') { const row = m.payload?.data?.record || m.payload?.record; if (row) deliver(row); } };
+      socket.onopen = () => { backoff = 2000; send({ topic: 'realtime:announcements', event: 'phx_join', payload: { config: { broadcast: { self: false }, presence: { key: '' }, postgres_changes: [{ event: 'INSERT', schema: 'public', table: 'announcements' }, { event: 'UPDATE', schema: 'public', table: 'announcements' }] }, access_token: session?.access_token || config().supabaseAnonKey } }); timer = setInterval(() => send({ topic: 'phoenix', event: 'heartbeat', payload: {} }), 25000); };
+      socket.onmessage = e => { let m = null; try { m = JSON.parse(e.data); } catch (_) { return; } if (m?.event === 'postgres_changes') { const row = m.payload?.data?.record || m.payload?.record, type = m.payload?.data?.type || m.payload?.type; if (row) deliver(row, type === 'UPDATE'); } };
       socket.onclose = socket.onerror = () => { clearInterval(timer); timer = null; if (socket) { socket.onclose = socket.onerror = null; socket = null; } setTimeout(connect, backoff); backoff = Math.min(60000, backoff * 2); };
     }
     function subscribe(fn) { handlers.add(fn); if (!poll) { sweep(); poll = setInterval(sweep, 15000); connect(); document.addEventListener('visibilitychange', () => { if (!document.hidden) sweep(); }); } return () => handlers.delete(fn); }
