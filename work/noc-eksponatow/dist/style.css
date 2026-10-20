@@ -254,3 +254,5 @@ body.pixel .exhibit-tag #exhibitTagName{font-family:var(--pixel-head);font-weigh
 @keyframes boot-leave{to{opacity:0;transform:translateY(-18px)}}
 @keyframes boot-stamp{0%{opacity:0;transform:scale(2.4) rotate(-8deg)}70%{opacity:1;transform:scale(.96) rotate(1deg)}100%{transform:scale(1) rotate(0)}}
 @media(prefers-reduced-motion:reduce){.boot *{animation:none!important}}
+
+.coin-icon{display:inline-flex;align-items:center}.coin-icon .coin-svg{width:20px;height:20px;image-rendering:pixelated;filter:drop-shadow(0 0 6px rgba(242,207,74,.35))}@media(max-width:650px){.coin-icon .coin-svg{width:16px;height:16px}}
