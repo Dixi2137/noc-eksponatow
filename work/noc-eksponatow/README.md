@@ -293,4 +293,4 @@ Przycisk ▦ w górnym pasku przełącza grę w prawdziwy pixel art (`profile.pi
 - Galerie do podglądu: `tests/pixel-gallery.html?pose=attack`, `tests/pixel-swing.html` (fazy zamachu) (wszyscy bossowie) i `tests/pixel-weapons.html` (ikony broni oraz rycerz z każdym typem broni).
 - Napisy walki, pierścień zamachu z wykrzyknikiem, PRZEŁADOWANIE i PAUZA są w trybie ▦ rysowane osobnym przejściem (`drawOverlay` w `game.js`) w pełnej rozdzielczości nad powiększoną sceną, więc pozostają czytelne.
 - Po każdej wygranej sali pojawia się panel wyboru (`#choice`): KOLEJNA SALA (Enter) rusza przeskok w czasie, MENU GŁÓWNE (Esc) kończy noc, zapisując rekord żetonów; postęp i żetony są już wtedy zapisane.
-- HUD, tytuły i przyciski w tym trybie używają fontu Pixelify Sans (Google Fonts, z polskimi znakami).
+- Czcionki trybu ▦: duże nagłówki, HUD, napisy w walce i tabliczki w sali używają **Jersey 10** (Google Fonts, Latin Extended, wyraźne H/C/W), Pixelify Sans został tylko jako zapas; drobne etykiety i ticker ogłoszeń są w Manrope, bo pikselowe kroje poniżej 16 px zlewają litery.

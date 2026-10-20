@@ -406,7 +406,7 @@
       ctx.strokeStyle = fraction > .94 ? '#fff1b6' : '#e7a360'; ctx.lineWidth = 5;
       ctx.beginPath(); ctx.arc(x, y, 30, -Math.PI / 2, -Math.PI / 2 + fraction * Math.PI * 2); ctx.stroke();
       ctx.fillStyle = fraction > .94 ? '#fff1b6' : '#f0a579';
-      ctx.font = `700 28px ${uiFont}`; ctx.textAlign = 'center'; ctx.fillText('!', x, y + 10);
+      ctx.font = `${uiFont.includes('Jersey') ? 400 : 700} ${uiFont.includes('Jersey') ? 36 : 28}px ${uiFont}`; ctx.textAlign = 'center'; ctx.fillText('!', x, y + 10);
       if (fraction > .7) {
         ctx.globalAlpha = .07 + (fraction - .7) * .16; ctx.fillStyle = '#ffc47a';
         ctx.beginPath(); ctx.ellipse(r.x - 150, FLOOR + 6, 240, 30, 0, 0, Math.PI * 2); ctx.fill();
@@ -414,7 +414,7 @@
       ctx.restore();
     } else if (r.state === 'recover') {
       ctx.save(); ctx.globalAlpha = .6 + Math.sin(state.elapsed * 8) * .15;
-      ctx.textAlign = 'center'; ctx.font = `600 17px ${uiFont}`; ctx.fillStyle = '#b6e3c6';
+      ctx.textAlign = 'center'; ctx.font = `${uiFont.includes('Jersey') ? '400 22px' : '600 17px'} ${uiFont}`; ctx.fillStyle = '#b6e3c6';
       ctx.fillText('SŁABA GARDA', r.x - 25, FLOOR - 350); ctx.restore();
     }
   }
@@ -447,18 +447,18 @@
     }
     labels.forEach(l => {
       ctx.save(); ctx.globalAlpha = clamp(l.life / .25, 0, 1); ctx.textAlign = 'center';
-      ctx.font = `${uiFont.includes('Pixelify') ? 700 : 800} ${l.size}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
+      ctx.font = `${uiFont.includes('Jersey') ? 400 : 800} ${Math.round(l.size * (uiFont.includes('Jersey') ? 1.3 : 1))}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
       ctx.fillStyle = l.color; ctx.fillText(l.text, clamp(l.x, 185, W - 185), l.y); ctx.restore();
     });
     ctx.restore();
     if (state.status === 'paused') {
       ctx.fillStyle = '#061018b8'; ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.fillStyle = '#f3e2bd'; ctx.font = `600 48px ${uiFont}`; ctx.fillText('PAUZA', W / 2, H / 2);
+      ctx.textAlign = 'center'; ctx.fillStyle = '#f3e2bd'; ctx.font = `${uiFont.includes('Jersey') ? '400 64px' : '600 48px'} ${uiFont}`; ctx.fillText('PAUZA', W / 2, H / 2);
     }
   }
   let uiFont = 'system-ui, sans-serif';
   function drawScene(withOverlay) {
-    uiFont = window.MuseumArt?.pixelFactor ? "'Pixelify Sans', monospace" : 'system-ui, sans-serif';
+    uiFont = window.MuseumArt?.pixelFactor ? "'Jersey 10', 'Pixelify Sans', monospace" : 'system-ui, sans-serif';
     ctx.save();
     if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
     const art = window.MuseumArt;

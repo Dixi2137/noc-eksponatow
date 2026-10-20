@@ -206,3 +206,10 @@ body.pixel .health-numbers{font-size:10px;font-weight:800}body.pixel .hero-level
 body.pixel .fighter-label strong{font-size:19px;letter-spacing:1px}body.pixel #fightTime{font-size:18px}body.pixel .announce-bar{font-size:18px}
 /* Ticker zawsze w Manrope: tu czytelność jest ważniejsza niż styl (Pixelify zlewa C/O i H/W). */
 body.pixel .announce-bar{font-family:Manrope,Arial,sans-serif;font-weight:800;font-size:16px;letter-spacing:.6px}body.pixel .announce-kind{font-family:Manrope,Arial,sans-serif}
+
+/* Nagłówki pikselowe w Jersey 10 (wyraźne H, C, W; ma polskie znaki). Pixelify zostaje tylko jako zapas, gdyby Jersey się nie wczytał. */
+:root{--pixel-head:'Jersey 10','Pixelify Sans',monospace}
+body.pixel .menu-screen h1,body.pixel .dream-caption h2,body.pixel .choice-box h2,body.pixel .maintenance-box h2,body.pixel .modal-heading h2,body.pixel .timejump .jump-center strong,body.pixel .fighter-label strong,body.pixel #fightTime,body.pixel .center-hud .vs,body.pixel .shop-product h3,body.pixel .shop-section-head h3,body.pixel .shop-wallet-balance strong,body.pixel .cinema-bottom p,body.pixel .card-foe strong,body.pixel .timejump .jump-center .eyebrow{font-family:var(--pixel-head);font-weight:400;letter-spacing:.5px}
+body.pixel .menu-screen h1{font-size:96px;line-height:.86}@media(max-width:1000px){body.pixel .menu-screen h1{font-size:7vw}}@media(max-width:650px){body.pixel .menu-screen h1{font-size:9.5vw}}
+body.pixel .dream-caption h2{font-size:52px}body.pixel .choice-box h2{font-size:46px}body.pixel .maintenance-box h2{font-size:72px}body.pixel .modal-heading h2{font-size:44px}body.pixel .timejump .jump-center strong{font-size:84px}body.pixel .fighter-label strong{font-size:26px}body.pixel #fightTime{font-size:24px}body.pixel .center-hud .vs{font-size:26px}body.pixel .shop-product h3{font-size:32px}body.pixel .cinema-bottom p{font-size:24px}
+@media(max-width:1000px){body.pixel .fighter-label strong{font-size:22px}body.pixel .dream-caption h2{font-size:40px}body.pixel .timejump .jump-center strong{font-size:48px}}

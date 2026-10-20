@@ -559,7 +559,7 @@
   function drawTexts(c, texts, scale = PX) {
     c.save(); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
     for (const t of texts) {
-      const size = Math.round(t.size * scale * .95); c.font = `600 ${size}px 'Pixelify Sans', monospace`;
+      const size = Math.round(t.size * scale * 1.15); c.font = `400 ${size}px 'Jersey 10', 'Pixelify Sans', monospace`;
       const x = t.x * scale, y = t.y * scale, w = c.measureText(t.text).width;
       if (t.plaque) { c.fillStyle = '#120f0b'; c.fillRect(x - w / 2 - scale * 1.5, y - size * .95, w + scale * 3, size * 1.35); c.fillStyle = '#3b352a'; c.fillRect(x - w / 2 - scale * 1.5, y - size * .95, w + scale * 3, scale * .4); }
       else { c.fillStyle = 'rgba(0,0,0,.55)'; c.fillText(t.text, x + scale * .4, y + scale * .4); }
