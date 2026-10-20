@@ -170,3 +170,5 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 .game-frame{width:clamp(58%,calc((100vh - var(--chrome,270px)) * 16 / 9),100%);margin-left:auto;margin-right:auto}
 @media(max-width:650px){.game-frame{width:clamp(58%,calc((100vh - var(--chrome,270px)) * 4 / 3),100%)}}
 .game-frame>:not(canvas){zoom:var(--ui-zoom,1)}
+
+.rank-title{display:inline-block;margin-left:8px;padding:2px 6px;border:1px solid currentColor;border-radius:2px;font-size:7px;letter-spacing:1.5px;vertical-align:middle;white-space:nowrap}.account-title{margin:10px 0 0;font-size:11px;letter-spacing:1.5px;font-weight:700}

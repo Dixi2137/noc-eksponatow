@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Rangi honorowe (2026-10-21)
+
+Kolumna `profiles.title` (first-to-arrive, founder, veteran, patron; katalog nazw i kolorów w `MuseumCloud.titles`). Nadaje moderator przyciskiem RANGA w panelu (`mod_set_title`); „first-to-arrive” jest unikalna w bazie (indeks częściowy), więc dostanie ją tylko jedna osoba. Ranga pokazuje się jako plakietka przy pseudonimie w rankingu, w liście moderatora i w KONCIE właściciela. Dla istniejącego projektu Supabase: `supabase/2026-10-21-rangi.sql`.
+
 ## Moderacja (2026-10-21)
 
 Supabase: `supabase/schema.sql` ma sekcję „Moderacja”: kolumny `role` (player/moderator/admin), `banned_until`, `ban_reason`, `mod_note` w `profiles`; funkcje `is_mod()`/`is_admin()`; trigger `protect_mod_fields` (gracz nie zmieni sobie roli ani bana, rolę zmienia tylko admin albo SQL Editor); polityka odczytu wszystkich profili dla moderatorów; zbanowany nie zapisze w chmurze. RPC `mod_stats`, `mod_list(q, lim)`, `mod_ban(target, hours, reason)` (0 h = bezterminowo), `mod_unban`, `mod_note`, `mod_adjust(target, coins_delta, balance_delta)` (grosze), `mod_reset`, `mod_set_role` (tylko admin, nie sobie). Rolę admina nadaje się raz w SQL Editorze: `update public.profiles set role = 'admin' where nickname = '…';`.

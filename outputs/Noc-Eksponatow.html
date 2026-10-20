@@ -175,6 +175,8 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 .game-frame{width:clamp(58%,calc((100vh - var(--chrome,270px)) * 16 / 9),100%);margin-left:auto;margin-right:auto}
 @media(max-width:650px){.game-frame{width:clamp(58%,calc((100vh - var(--chrome,270px)) * 4 / 3),100%)}}
 .game-frame>:not(canvas){zoom:var(--ui-zoom,1)}
+
+.rank-title{display:inline-block;margin-left:8px;padding:2px 6px;border:1px solid currentColor;border-radius:2px;font-size:7px;letter-spacing:1.5px;vertical-align:middle;white-space:nowrap}.account-title{margin:10px 0 0;font-size:11px;letter-spacing:1.5px;font-weight:700}
 </style>
 </head>
 <body>
@@ -316,6 +318,7 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
    <div id="accountUser" class="hidden">
     <p class="modal-lead">Zalogowano jako <strong id="accountWho"></strong>. Postęp zapisuje się w chmurze po każdej zmianie.</p>
     <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button><button id="accountModBtn" class="primary-btn hidden">PODGLĄD MODERATORA <span>↗</span></button></div>
+    <p id="accountTitle" class="account-title hidden"></p>
     <p id="accountRole" class="collection-footnote hidden"></p>
    </div>
    <p id="accountMsg" class="account-msg" aria-live="polite"></p>
@@ -416,7 +419,7 @@ window.MuseumConfig = Object.freeze({
   async function nicknameTaken(nickname) { const r = await request('/rest/v1/rpc/nickname_taken', { method: 'POST', body: { name: nickname }, auth: false }); return r.ok ? !!r.data : null; }
   async function fetchProfile() {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
-    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at,role,banned_until,ban_reason`);
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at,role,banned_until,ban_reason,title`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
   }
   // The profile row is created by a database trigger at sign-up, so saving is an UPDATE. (An upsert without the nickname
@@ -430,7 +433,7 @@ window.MuseumConfig = Object.freeze({
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
   // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.
-  function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
+  function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/title_taken|profiles_first_to_arrive/i.test(t)) return { ...r, error: 'Rangę FIRST TO ARRIVE ma już ktoś inny. Najpierw ją zdejmij.' }; if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
   const rpc = async (name, body) => modMessage(await request(`/rest/v1/rpc/${name}`, { method: 'POST', body }));
   const mod = Object.freeze({
     stats: () => rpc('mod_stats', {}),
@@ -440,10 +443,18 @@ window.MuseumConfig = Object.freeze({
     note: (target, note) => rpc('mod_note', { target, note }),
     adjust: (target, coinsDelta = 0, balanceDelta = 0) => rpc('mod_adjust', { target, coins_delta: coinsDelta, balance_delta: balanceDelta }),
     reset: target => rpc('mod_reset', { target }),
-    setRole: (target, role) => rpc('mod_set_role', { target, new_role: role })
+    setRole: (target, role) => rpc('mod_set_role', { target, new_role: role }),
+    setTitle: (target, title) => rpc('mod_set_title', { target, new_title: title || '' })
+  });
+  // Honorary titles a moderator can grant; 'first-to-arrive' is unique on the server.
+  const titles = Object.freeze({
+    'first-to-arrive': { name: 'FIRST TO ARRIVE', color: '#f0ca72', note: 'Pierwsza osoba, która zalogowała się po założycielu.' },
+    founder: { name: 'ZAŁOŻYCIEL', color: '#7ff0e0', note: 'Twórca muzeum.' },
+    veteran: { name: 'WETERAN', color: '#c4a1f0', note: 'Przeszedł całą noc.' },
+    patron: { name: 'MECENAS', color: '#9ad28b', note: 'Wsparł muzeum.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();
@@ -3775,7 +3786,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function hall(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Swoją salę urządzisz przed następnym pojedynkiem.');return;}closeModal();renderHall();openModal('hall');}
  let accountMode='login';
  function setAccountStatus(text,error=false){$('accountMsg').textContent=text;$('accountMsg').classList.toggle('error',!!error);}
- function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me)cloudRole='player';
+ function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me){cloudRole='player';cloudTitle=null;}const tt=cloud.titles?.[cloudTitle];show('accountTitle',!!me&&!!tt);if(me&&tt){$('accountTitle').textContent=`${tt.name} · ${tt.note}`;$('accountTitle').style.color=tt.color;}
   $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
  function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
  function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();}
@@ -3793,7 +3804,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
    const row=document.createElement('div');row.className='mod-row';row.dataset.id=p.id;
    const banned=p.banned_until&&new Date(p.banned_until)>new Date(),perm=banned&&new Date(p.banned_until).getFullYear()-new Date().getFullYear()>50;
    row.innerHTML=`<div><strong></strong><small></small></div><span class="mod-role ${p.role}">${p.role}</span><span>${p.halls_cleared} / ${levels.count}</span><span>${number(p.coins)} ✦</span><span>${plnText(p.balance)}</span><span class="${banned?'mod-banned':'mod-ok'}"></span>`;
-   row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');row.querySelector('small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
+   row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');if(cloud.titles?.[p.title]){const badge=document.createElement('small');badge.className='rank-title';badge.textContent=cloud.titles[p.title].name;badge.style.color=cloud.titles[p.title].color;row.querySelector('strong').append(badge);}row.querySelector('small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
    row.querySelector('.mod-ok,.mod-banned').textContent=banned?`BAN ${perm?'∞':'do '+new Date(p.banned_until).toLocaleDateString('pl-PL')}${p.ban_reason?' · '+p.ban_reason:''}`:'AKTYWNY';
    const actions=document.createElement('div');actions.className='mod-actions';const self=p.id===me?.id;
    const act=(label,fn,danger=false,disabled=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;if(danger)b.className='danger';b.disabled=disabled;b.addEventListener('click',async()=>{const r=await fn();if(r===undefined)return;modMessage(r.ok?`${p.nickname}: zrobione.`:r.error||'Nie udało się.',!r.ok);if(r.ok)renderModeration();});actions.append(b);};
@@ -3802,6 +3813,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
    act('NOTATKA',()=>{const v=window.prompt(`Notatka moderatora o ${p.nickname}:`,p.mod_note||'');if(v===null)return;return cloud.mod.note(p.id,v);});
    if(banned)act('ODBANUJ',()=>cloud.mod.unban(p.id),false,self);
    else act('BAN',()=>{const h=window.prompt(`Ban dla ${p.nickname}: na ile godzin? (0 = bezterminowo)`,'24');if(h===null||!Number.isFinite(Number(h)))return;const reason=window.prompt('Powód (widoczny dla gracza):','')||'';return cloud.mod.ban(p.id,Math.trunc(Number(h)),reason);},true,self);
+   act('RANGA',()=>{const keys=Object.keys(cloud.titles||{});const v=window.prompt(`Ranga dla ${p.nickname}: ${keys.join(', ')} albo puste, żeby zdjąć.`,p.title||'first-to-arrive');if(v===null)return;const t=v.trim();if(t&&!keys.includes(t)){modMessage(`Nieznana ranga. Dostępne: ${keys.join(', ')}.`,true);return;}return cloud.mod.setTitle(p.id,t);});
    act('RESET ZAPISU',()=>{if(!window.confirm(`Wyzerować zapis gry ${p.nickname}? Konto i pseudonim zostają.`))return;return cloud.mod.reset(p.id);},true);
    if(cloudRole==='admin')act('ROLA',()=>{const v=window.prompt(`Nowa rola dla ${p.nickname}: player, moderator albo admin`,p.role);if(v===null)return;if(!['player','moderator','admin'].includes(v.trim())){modMessage('Rola musi być: player, moderator albo admin.',true);return;}return cloud.mod.setRole(p.id,v.trim());},false,self);
    row.append(actions);return row;}));
@@ -3809,11 +3821,11 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  }
  function saveLooksEmpty(save){return !save||typeof save!=='object'||!Object.keys(save).length||(!(save.cleared||[]).length&&(Number(save.coins)||0)<100&&(save.owned||[]).length<=2);}
  function localLooksEmpty(){return !profile.cleared.length&&profile.coins<100&&profile.owned.length<=2;}
- let cloudRole='player';
+ let cloudRole='player',cloudTitle=null;
  const isMod=()=>cloudRole==='moderator'||cloudRole==='admin';
  async function afterLogin(){
   const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
-  const remote=r.data;cloudRole=remote?.role||'player';renderAccount();
+  const remote=r.data;cloudRole=remote?.role||'player';cloudTitle=remote?.title||null;renderAccount();
   if(remote?.banned_until&&new Date(remote.banned_until)>new Date()){const until=new Date(remote.banned_until);const perm=until.getFullYear()-new Date().getFullYear()>50;await cloud.signOut();cloudRole='player';renderAccount();setAccountStatus(`Konto zablokowane ${perm?'bezterminowo':'do '+until.toLocaleString('pl-PL')}${remote.ban_reason?`. Powód: ${remote.ban_reason}`:''}.`,true);return;}
   if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
   else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
@@ -3843,7 +3855,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   $('rankMsg').textContent=cloud.enabled()?'Pobieram…':'Chmura nie jest skonfigurowana. Ranking pojawi się po podaniu kluczy w dist/config.js.';$('rankList').replaceChildren();if(!cloud.enabled())return;
   const r=await cloud.leaderboard(50);if(!r.ok){$('rankMsg').textContent=`Nie udało się pobrać rankingu: ${r.error}`;return;}
   const rows=Array.isArray(r.data)?r.data:[],me=cloud.user();$('rankMsg').textContent=rows.length?'':'Ranking jest jeszcze pusty. Zaloguj się i przejdź pierwszą salę.';
-  $('rankList').replaceChildren(...rows.map((row,i)=>{const li=document.createElement('li');li.className=`rank-row ${me&&row.nickname===me.nickname?'me':''}`;const no=document.createElement('span');no.className='rank-no';no.textContent=String(i+1).padStart(2,'0');const name=document.createElement('strong');name.textContent=row.nickname;const halls=document.createElement('span');halls.textContent=`${row.halls_cleared} / ${levels.count}`;const prestige=document.createElement('span');prestige.textContent=String(row.prestige);const time=document.createElement('span');time.textContent=formatNight(row.fastest_night);li.append(no,name,halls,prestige,time);return li;}));
+  $('rankList').replaceChildren(...rows.map((row,i)=>{const li=document.createElement('li');li.className=`rank-row ${me&&row.nickname===me.nickname?'me':''}`;const no=document.createElement('span');no.className='rank-no';no.textContent=String(i+1).padStart(2,'0');const name=document.createElement('strong');name.textContent=row.nickname;const tt=cloud.titles?.[row.title];if(tt){const badge=document.createElement('small');badge.className='rank-title';badge.textContent=tt.name;badge.style.color=tt.color;badge.title=tt.note;name.append(badge);}const halls=document.createElement('span');halls.textContent=`${row.halls_cleared} / ${levels.count}`;const prestige=document.createElement('span');prestige.textContent=String(row.prestige);const time=document.createElement('span');time.textContent=formatNight(row.fastest_night);li.append(no,name,halls,prestige,time);return li;}));
  }
  function ranking(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Ranking sprawdzisz przed następnym pojedynkiem.');return;}closeModal();openModal('ranking');renderRanking();}
  function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}
