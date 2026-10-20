@@ -24,7 +24,8 @@
  const outfitCount=n=>`${n} ${n===1?'strój':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'stroje':'strojów'}`;
  const normalizeSkinText=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ł/gi,'l').toLocaleLowerCase('pl-PL').trim();
  function itemSummary(item){return item.kind==='skin'?perkText(perks.get(item.id)):item.summary||'';}
- function matchingItems(){const query=normalizeSkinText(collectionFilters.search);return loot.items.filter(s=>{if(s.kind!==collectionKind)return false;const owned=loot.has(profile,s);return (!collectionFilters.newOnly||/^knight-\d{2}$/.test(s.id))&&(collectionFilters.category==='all'||s.categoryId===collectionFilters.category)&&(collectionFilters.rarity==='all'||s.rarity===collectionFilters.rarity)&&(collectionFilters.ownership==='all'||(collectionFilters.ownership==='owned'?owned:!owned))&&(!query||normalizeSkinText([s.name,s.description||'',s.motif||'',loot.getCategory(s.categoryId)?.name||'',itemSummary(s)].join(' ')).includes(query));});}
+ function itemSearchText(item){return [item.name,item.description||'',item.motif||'',item.typeName||'',loot.getCategory(item.categoryId)?.name||'',itemSummary(item)].join(' ');}
+ function matchingItems(){const query=normalizeSkinText(collectionFilters.search);return loot.items.filter(s=>{if(s.kind!==collectionKind)return false;const owned=loot.has(profile,s);return (!collectionFilters.newOnly||/^knight-\d{2}$/.test(s.id))&&(collectionFilters.category==='all'||s.categoryId===collectionFilters.category)&&(collectionFilters.rarity==='all'||s.rarity===collectionFilters.rarity)&&(collectionFilters.ownership==='all'||(collectionFilters.ownership==='owned'?owned:!owned))&&(!query||normalizeSkinText(itemSearchText(s)).includes(query));});}
  const matchingSkins=matchingItems;
  function perkText(perk){return `${perk.title}: ${perk.summary}`;}
  function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),weapon=weapons.get(profile.weapon),card=cardsApi.get(profile.card);const up=loot.upgradeLevel(profile,skin.id),wup=loot.upgradeLevel(profile,weapon.id);const text=`${skin.name}${up?` +${up}`:''} — ${perkText(perks.get(skin.id))} · ${weapon.name}${wup?` +${wup}`:''}${card?` · ${card.name}: ${card.summary}`:''}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
@@ -175,8 +176,8 @@
  function itemCount(n,kind){const forms={skin:['strój','stroje','strojów'],weapon:['broń','bronie','broni'],card:['karta','karty','kart'],any:['przedmiot','przedmioty','przedmiotów']}[kind]||['przedmiot','przedmioty','przedmiotów'];return `${n} ${n===1?forms[0]:n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?forms[1]:forms[2]}`;}
  function drawCrate(canvas,crate){const ctx=canvas.getContext('2d');if(!ctx||!window.MuseumArt?.drawCrate)return;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);window.MuseumArt.drawCrate(ctx,crate,canvas.width,canvas.height,{time:1.3});}
  function renderCrateCards(selectedId){
-  const row=$('crateCards');const busy=()=>crateBusy||!['menu','result'].includes(screen);
-  row.replaceChildren(...loot.crates.map(crate=>{
+  const root=$('crateCards');const busy=()=>crateBusy||!['menu','result'].includes(screen);
+  const card=crate=>{
    const left=loot.remaining(profile,crate.id).length,free=crate.id==='gallery'&&profile.freeCrates>0,done=left===0,b=document.createElement('button');
    b.type='button';b.className=`crate-card ${crate.id===selectedId?'is-selected':''} ${done?'is-done':''}`;b.style.setProperty('--crate-color',crate.color);b.dataset.crateId=crate.id;
    b.setAttribute('aria-pressed',String(crate.id===selectedId));b.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. ${done?'Zawartość zebrana.':free?'Darmowa.':`${number(crate.cost)} żetonów.`}`);
@@ -186,14 +187,15 @@
    const name=document.createElement('strong');name.textContent=crate.name;const tag=document.createElement('small');tag.textContent=crate.tag;const price=document.createElement('span');price.className='crate-price';price.textContent=free?'GRATIS':done?'—':`${number(crate.cost)} ✦`;
    b.append(name,tag,price);
    b.addEventListener('click',()=>{if(busy())return;selectedCrateId=crate.id;renderSkins();b.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});});
-   return b;}));
-  $('crateCount').textContent=`${loot.crates.length} RODZAJÓW`;
+   return b;};
+  root.replaceChildren(...loot.crateGroups.map(group=>{const crates=loot.crates.filter(c=>c.group===group.id);if(!crates.length)return null;const section=document.createElement('div');section.className='crate-group';const head=document.createElement('div');head.className='crate-group-head';head.innerHTML=`<span>${group.name}</span><small>${crates.length}</small>`;const row=document.createElement('div');row.className='crate-row';row.append(...crates.map(card));section.append(head,row);return section;}).filter(Boolean));
+  $('crateCount').textContent=`${loot.crates.length} RODZAJÓW W ${loot.crateGroups.length} GRUPACH`;
  }
  function equipLabel(item,selected){if(item.kind==='card')return cardsApi.get(item.id)?.type==='hero'?(selected?'● AKTYWNA':'AKTYWUJ KARTĘ ↗'):'✓ DZIAŁA Z BRONIĄ';return selected?'● WYBRANY':item.kind==='weapon'?'ZAŁÓŻ BROŃ ↗':'WYBIERZ SKIN ↗';}
  function renderSkins(){
   const grid=$('skinGrid');grid.replaceChildren();
   for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card']])$(id).setAttribute('aria-pressed',String(collectionKind===kind));
-  show('newSkinsOnly',collectionKind==='skin');$('categoryFilter').disabled=collectionKind!=='skin';
+  show('newSkinsOnly',collectionKind==='skin');$('categoryFilter').disabled=collectionKind==='card';
   const matches=matchingItems(),pages=Math.max(1,Math.ceil(matches.length/SKINS_PER_PAGE));collectionPage=Math.max(0,Math.min(collectionPage,pages-1));const page=matches.slice(collectionPage*SKINS_PER_PAGE,(collectionPage+1)*SKINS_PER_PAGE);
   $('skinResultsCount').textContent=matches.length?`${itemCount(matches.length,collectionKind)} · ${collectionPage*SKINS_PER_PAGE+1}–${Math.min((collectionPage+1)*SKINS_PER_PAGE,matches.length)} na stronie`:itemCount(0,collectionKind);
   $('skinPageInfo').textContent=`Strona ${collectionPage+1} / ${pages}`;$('skinPagePrev').disabled=collectionPage===0;$('skinPageNext').disabled=collectionPage>=pages-1;show('skinPagination',matches.length>SKINS_PER_PAGE);show('skinEmpty',!matches.length);$('newSkinsOnly').setAttribute('aria-pressed',String(collectionFilters.newOnly));
@@ -206,7 +208,7 @@
    const badge=s.number?`<span class="skin-number">${String(s.number).padStart(2,'0')} / 50</span>`:s.gift?'<span class="skin-number">★ SPECJALNY</span>':level?`<span class="skin-number">ULEPSZENIE +${level}</span>`:'';
    b.innerHTML=`${badge}<canvas width="360" height="360" aria-hidden="true"></canvas><small>${s.era}</small><strong>${s.name}</strong><span class="skin-category"></span><span class="skin-perk"><strong></strong><span></span></span><span class="skin-state">${owned?equipLabel(s,selected):'◇ DO ODKRYCIA'}</span>`;
    b.querySelector('.skin-category').textContent=loot.getCategory(s.categoryId)?.name||'';
-   const perkTitle=s.kind==='skin'?perks.get(s.id).title:s.kind==='card'?cardsApi.get(s.id).era:s.era,perkSummary=s.kind==='skin'?perks.get(s.id).summary:s.summary;
+   const perkTitle=s.kind==='skin'?perks.get(s.id).title:s.kind==='card'?cardsApi.get(s.id).era:(s.typeName||s.era),perkSummary=s.kind==='skin'?perks.get(s.id).summary:s.summary;
    b.querySelector('.skin-perk strong').textContent=perkTitle;b.querySelector('.skin-perk span').textContent=level&&s.kind!=='card'?`${perkSummary} · ${loot.upgradeEffect(s,level)}`:perkSummary;
    b.addEventListener('click',()=>{if(busy())return;if(!owned){$('collectionMessage').textContent=`${s.name} czeka w muzealnej skrzyni. ${itemSummary(s)}`;return;}const next=loot.equip(profile,s.id);if(!next){$('collectionMessage').textContent=`${s.name} działa automatycznie, kiedy masz założoną pasującą broń.`;return;}profile=next;persist();renderSkins();$('collectionMessage').textContent=s.kind==='card'&&profile.card!==s.id?`Karta ${s.name} odłożona.`:`Wybrano ${s.name}. ${itemSummary(s)}`;});
    cell.append(b);
@@ -223,7 +225,7 @@
   }
   const crate=loot.getCrate(selectedCrateId)||loot.getCrate('gallery');selectedCrateId=crate.id;
   const entries=loot.entries(profile,crate.id),all=!entries.length,free=crate.id==='gallery'&&profile.freeCrates>0,odds=loot.odds(profile,crate.id);
-  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?'Skrzynia broni':crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
+  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?(crate.weaponType?`Broń · ${weapons.types[crate.weaponType].name}`:crate.categoryId?`Broń · ${loot.getCategory(crate.categoryId)?.name}`:'Cała zbrojownia'):crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
   $('crateContentsSummary').textContent=`ZAWARTOŚĆ I SZANSE · ${itemCount(entries.length,crate.pool)}`;renderDropContents($('crateContentsList'),entries);
   $('crateBtn').disabled=all||crateBusy||!!profile.pendingReward||(!free&&profile.coins<crate.cost);
   $('crateBtn').innerHTML=all?'ZAWARTOŚĆ ZEBRANA <span>✓</span>':free?'OTWÓRZ GRATIS <span>◇</span>':`OTWÓRZ SKRZYNIĘ <span>${number(crate.cost)} ✦</span>`;

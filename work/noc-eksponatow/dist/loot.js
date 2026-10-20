@@ -6,6 +6,10 @@
  const categories=Object.freeze([
   {id:'arsenal',name:'Arsenał',color:'#c9b37a'},
   {id:'heroes',name:'Bohaterowie',color:'#d9a0c6'},
+  {id:'antiquity',name:'Starożytność',color:'#d8ba86'},
+  {id:'medieval',name:'Średniowiecze',color:'#9fb8c9'},
+  {id:'renaissance',name:'Nowożytność',color:'#c9a65a'},
+  {id:'modern',name:'Wiek XIX i XX',color:'#8a9aa8'},
   {id:'elements',name:'Smoki i Żywioły',color:'#f69b55'},
   {id:'shadow',name:'Mrok i Widma',color:'#b997ee'},
   {id:'nature',name:'Dzika Natura',color:'#84ca91'},
@@ -30,76 +34,104 @@
   return Object.keys(categoryNumbers).find(category=>categoryNumbers[category].includes(number));
  }
  const crates = Object.freeze([
-  {id:'gallery',name:'Skrzynia Galerii',title:'Skrzynia Galerii',tag:'KLASYK',cost:600,pricePLN:19.99,
+  {id:'gallery',name:'Skrzynia Galerii',title:'Skrzynia Galerii',tag:'KLASYK',cost:900,pricePLN:29.99,
    description:'Nowy strój z całej kolekcji muzealnej. Od klasycznej stali po legendarny blask.',
    guarantee:'1 nowy skin · wszystkie rzadkości',glyph:'✦',color:'#90cce8',
    rarityWeights:Object.freeze({common:55,rare:28,epic:14,legendary:3})},
-  {id:'treasury',name:'Skarbiec Królów',title:'Skarbiec Królów',tag:'EPICKA+',cost:1800,pricePLN:49.99,
+  {id:'treasury',name:'Skarbiec Królów',title:'Skarbiec Królów',tag:'EPICKA+',cost:3000,pricePLN:79.99,
    description:'Królewski wybór wyłącznie spośród epickich i legendarnych zbroi.',
    guarantee:'1 nowy skin · minimum epicki',glyph:'♜',color:'#c4a1f0',
    rarityWeights:Object.freeze({common:0,rare:0,epic:85,legendary:15})},
-  {id:'relic',name:'Relikwiarz Legend',title:'Relikwiarz Legend',tag:'LEGENDA',cost:4500,pricePLN:99.99,
+  {id:'relic',name:'Relikwiarz Legend',title:'Relikwiarz Legend',tag:'LEGENDA',cost:7500,pricePLN:149.99,
    description:'Najrzadsze eksponaty w jednym relikwiarzu. Każde otwarcie to nowa legenda.',
    guarantee:'1 nowy skin · gwarantowany legendarny',glyph:'✪',color:'#f0ca72',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
-  {id:'elements',categoryId:'elements',name:'Archiwum Żywiołów',title:'Archiwum Żywiołów',tag:'ŻYWIOŁY',cost:1200,pricePLN:34.99,
+  {id:'elements',categoryId:'elements',name:'Archiwum Żywiołów',title:'Archiwum Żywiołów',tag:'ŻYWIOŁY',cost:1800,pricePLN:44.99,
    description:'Smoczy ogień, lodowe pancerze i potęga burzy. Zbroje władające siłami natury.',
    guarantee:'1 nowy skin · tylko smoki i żywioły',glyph:'⚡',color:'#f69b55',
    rarityWeights:Object.freeze({common:35,rare:38,epic:22,legendary:5})},
-  {id:'shadow',categoryId:'shadow',name:'Sarkofag Cieni',title:'Sarkofag Cieni',tag:'MROK',cost:1000,pricePLN:29.99,
+  {id:'shadow',categoryId:'shadow',name:'Sarkofag Cieni',title:'Sarkofag Cieni',tag:'MROK',cost:1500,pricePLN:39.99,
    description:'Widmowe pancerze, krucze płaszcze i tajemnice nocnej straży.',
    guarantee:'1 nowy skin · tylko mrok i widma',glyph:'☾',color:'#b997ee',
    rarityWeights:Object.freeze({common:40,rare:42,epic:18,legendary:0})},
-  {id:'nature',categoryId:'nature',name:'Skrzynia Pradawnej Puszczy',title:'Skrzynia Pradawnej Puszczy',tag:'NATURA',cost:1100,pricePLN:32.99,
+  {id:'nature',categoryId:'nature',name:'Skrzynia Pradawnej Puszczy',title:'Skrzynia Pradawnej Puszczy',tag:'NATURA',cost:1600,pricePLN:42.99,
    description:'Leśni obrońcy, dzikie bestie i zbroje z najdalszych zakątków puszczy.',
    guarantee:'1 nowy skin · tylko dzika natura',glyph:'✿',color:'#84ca91',
    rarityWeights:Object.freeze({common:38,rare:40,epic:18,legendary:4})},
-  {id:'royal',categoryId:'royal',name:'Królewski Arsenał',title:'Królewski Arsenał',tag:'KORONA',cost:1500,pricePLN:44.99,
+  {id:'royal',categoryId:'royal',name:'Królewski Arsenał',title:'Królewski Arsenał',tag:'KORONA',cost:2200,pricePLN:54.99,
    description:'Herby wielkich rodów, królewskie płaszcze i stal zaprzysiężonej gwardii.',
    guarantee:'1 nowy skin · tylko korona i honor',glyph:'♛',color:'#eccd76',
    rarityWeights:Object.freeze({common:30,rare:40,epic:24,legendary:6})},
-  {id:'forge',categoryId:'forge',name:'Warsztat Mechanika',title:'Warsztat Mechanika',tag:'KUŹNIA',cost:1300,pricePLN:39.99,
+  {id:'forge',categoryId:'forge',name:'Warsztat Mechanika',title:'Warsztat Mechanika',tag:'KUŹNIA',cost:1900,pricePLN:47.99,
    description:'Miedź, kryształ i maszyny. Pancerze wykute z pomysłowości muzealnych mistrzów.',
    guarantee:'1 nowy skin · tylko kuźnia i technika',glyph:'⚙',color:'#d99c7b',
    rarityWeights:Object.freeze({common:30,rare:42,epic:23,legendary:5})},
-  {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1000,pricePLN:29.99,
+  {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1500,pricePLN:39.99,
    description:'Wędrowcy, błędni rycerze i złote skorpiony ze szlaków poza horyzontem.',
    guarantee:'1 nowy skin · tylko piaski i szlaki',glyph:'✧',color:'#d8ba86',
    rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
 ,
-  {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:900,pricePLN:24.99,
+  {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:1500,pricePLN:39.99,
    description:'Topór, włócznia, rapier albo rewolwer. Każda broń zmienia rytm walki.',
    guarantee:'1 nowa broń · wszystkie rzadkości',glyph:'⚔',color:'#c9b37a',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
-  {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:800,pricePLN:22.99,
+  {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:1200,pricePLN:34.99,
    description:'Karty prawdziwych bohaterów historii z pasywnym bonusem oraz karty broni.',
    guarantee:'1 nowa karta · bohaterowie i broń',color:'#d9a0c6',glyph:'♞',
    rarityWeights:Object.freeze({common:40,rare:35,epic:19,legendary:6})},
-  {id:'pantheon',family:'cards',pool:'card',categoryId:'heroes',name:'Panteon Bohaterów',title:'Panteon Bohaterów',tag:'KARTY',cost:1000,pricePLN:27.99,
+  {id:'pantheon',family:'cards',pool:'card',categoryId:'heroes',name:'Panteon Bohaterów',title:'Panteon Bohaterów',tag:'KARTY',cost:1500,pricePLN:39.99,
    description:'Tylko karty bohaterów: Sobieski, Joanna d\u2019Arc, Chrobry i reszta panteonu. Każda z pasywnym bonusem.',
    guarantee:'1 nowa karta · tylko bohaterowie',color:'#e8a0c8',glyph:'♚',
    rarityWeights:Object.freeze({common:35,rare:35,epic:22,legendary:8})},
-  {id:'blueprints',family:'cards',pool:'card',categoryId:'arsenal',name:'Plany Broni',title:'Plany Broni',tag:'KARTY',cost:500,pricePLN:14.99,
+  {id:'blueprints',family:'cards',pool:'card',categoryId:'arsenal',name:'Plany Broni',title:'Plany Broni',tag:'KARTY',cost:800,pricePLN:22.99,
    description:'Karty broni: +10% obrażeń do pasującej broni, rewolwer dostaje dodatkowe naboje.',
    guarantee:'1 nowa karta broni',color:'#9fb8c9',glyph:'✎',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
-  {id:'starter',family:'mixed',pool:'any',name:'Skrzynia Startowa',title:'Skrzynia Startowa',tag:'START',cost:300,pricePLN:9.99,
+  {id:'blades',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'blade',name:'Zbrojownia Ostrzy',title:'Zbrojownia Ostrzy',tag:'OSTRZA',cost:1800,pricePLN:44.99,
+   description:'Gladius, claymore, szabla husarska, katana. Wszystko, co tnie.',guarantee:'1 nowa broń · tylko ostrza',color:'#c9d6dc',glyph:'⚔',
+   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+  {id:'heavy',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'heavy',name:'Kuźnia Ciężka',title:'Kuźnia Ciężka',tag:'CIĘŻKA',cost:1800,pricePLN:44.99,
+   description:'Topory, młoty, morgensztern. Wolne, ale po jednym ciosie nikt nie wstaje.',guarantee:'1 nowa broń · tylko ciężka',color:'#a8a8b0',glyph:'⚒',
+   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+  {id:'polearms',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'polearm',name:'Sala Drzewcowa',title:'Sala Drzewcowa',tag:'DRZEWCOWA',cost:1600,pricePLN:39.99,
+   description:'Włócznie, trójząb, halabarda, pika. Trafiają, zanim przeciwnik dojdzie.',guarantee:'1 nowa broń · tylko drzewcowa',color:'#b89a6a',glyph:'↑',
+   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+  {id:'light',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'light',name:'Gabinet Sztyletów',title:'Gabinet Sztyletów',tag:'LEKKA',cost:1600,pricePLN:39.99,
+   description:'Rapier, stylet, bagnet, sztylet. Szybko, blisko, w serii.',guarantee:'1 nowa broń · tylko lekka',color:'#9ab0c0',glyph:'/',
+   rarityWeights:Object.freeze({common:40,rare:36,epic:24,legendary:0})},
+  {id:'ranged',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'ranged',name:'Strzelnica Kustosza',title:'Strzelnica Kustosza',tag:'DYSTANSOWA',cost:2600,pricePLN:64.99,
+   description:'Łuk, kusza, muszkiet, strzelba i rewolwer. Jedyne bronie, które działają z drugiego końca areny.',guarantee:'1 nowa broń · tylko dystansowa',color:'#d8a060',glyph:'◎',
+   rarityWeights:Object.freeze({common:0,rare:45,epic:40,legendary:15})},
+  {id:'era-antiquity',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'antiquity',name:'Arsenał Antyku',title:'Arsenał Antyku',tag:'STAROŻYTNOŚĆ',cost:1700,pricePLN:42.99,
+   description:'Gladius, labrys, włócznia hoplity, trójząb, sztylet. Brąz i żelazo.',guarantee:'1 nowa broń · starożytność',color:'#d8ba86',glyph:'Λ',
+   rarityWeights:Object.freeze({common:55,rare:45,epic:0,legendary:0})},
+  {id:'era-medieval',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'medieval',name:'Arsenał Średniowiecza',title:'Arsenał Średniowiecza',tag:'ŚREDNIOWIECZE',cost:2000,pricePLN:49.99,
+   description:'Claymore, młot, morgensztern, halabarda, łuk, kusza. Pełna zbrojownia zamku.',guarantee:'1 nowa broń · średniowiecze',color:'#9fb8c9',glyph:'♜',
+   rarityWeights:Object.freeze({common:40,rare:35,epic:25,legendary:0})},
+  {id:'era-renaissance',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'renaissance',name:'Arsenał Nowożytny',title:'Arsenał Nowożytny',tag:'NOWOŻYTNOŚĆ',cost:2000,pricePLN:49.99,
+   description:'Szabla husarska, katana, berdysz, pika, rapier, stylet, muszkiet.',guarantee:'1 nowa broń · nowożytność',color:'#c9a65a',glyph:'♛',
+   rarityWeights:Object.freeze({common:35,rare:40,epic:25,legendary:0})},
+  {id:'era-modern',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'modern',name:'Arsenał XX Wieku',title:'Arsenał XX Wieku',tag:'XIX–XX W.',cost:2800,pricePLN:69.99,
+   description:'Bagnet, strzelba i Rewolwer Kustosza. Proch zamiast stali.',guarantee:'1 nowa broń · XIX i XX wiek',color:'#8a9aa8',glyph:'●',
+   rarityWeights:Object.freeze({common:0,rare:40,epic:40,legendary:20})},
+  {id:'starter',family:'mixed',pool:'any',name:'Skrzynia Startowa',title:'Skrzynia Startowa',tag:'START',cost:400,pricePLN:9.99,
    description:'Strój, broń albo karta na dobry początek. Tanio i bez niespodzianek.',
    guarantee:'1 nowy przedmiot · zwykły lub rzadki',color:'#a8d08d',glyph:'●',
    rarityWeights:Object.freeze({common:70,rare:30,epic:0,legendary:0})},
-  {id:'night',family:'mixed',pool:'any',name:'Skrzynia Nocnej Zmiany',title:'Skrzynia Nocnej Zmiany',tag:'MIESZANA',cost:700,pricePLN:19.99,
+  {id:'night',family:'mixed',pool:'any',name:'Skrzynia Nocnej Zmiany',title:'Skrzynia Nocnej Zmiany',tag:'MIESZANA',cost:1200,pricePLN:29.99,
    description:'Wszystko, co może wypaść w muzeum po zmroku: stroje, bronie i karty w jednej skrzyni.',
    guarantee:'1 nowy przedmiot · wszystkie rodzaje i rzadkości',color:'#d5ed71',glyph:'☆',
    rarityWeights:Object.freeze({common:50,rare:30,epic:15,legendary:5})},
-  {id:'vault',family:'mixed',pool:'any',name:'Skarbiec Kustosza',title:'Skarbiec Kustosza',tag:'EPICKA+',cost:2500,pricePLN:59.99,
+  {id:'vault',family:'mixed',pool:'any',name:'Skarbiec Kustosza',title:'Skarbiec Kustosza',tag:'EPICKA+',cost:4000,pricePLN:89.99,
    description:'Epickie i legendarne przedmioty każdego rodzaju. Klucz ma tylko kustosz.',
    guarantee:'1 nowy przedmiot · minimum epicki',color:'#c4a1f0',glyph:'◆',
    rarityWeights:Object.freeze({common:0,rare:0,epic:80,legendary:20})},
-  {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:6000,pricePLN:129.99,
+  {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:9000,pricePLN:199.99,
    description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})}
- ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',...crate})));
+ ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic')})));
+ const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -122,11 +154,11 @@
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
  ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
  // One catalogue for everything a crate can drop or a player can sell.
- const values=Object.freeze({basic:0,common:150,rare:400,epic:1000,legendary:2500});
+ const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500});
  const SELL_RATE=.4, UPGRADE_MAX=5;
  const items=Object.freeze([
   ...skins.map(skin=>({kind:'skin',...skin})),
-  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,summary:w.summary,description:w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:'arsenal'})),
+  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'}))
  ].map(Object.freeze));
  const itemsById=new Map(items.map(item=>[item.id,item]));
@@ -165,7 +197,7 @@
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && !has(profile,s)) : [];
+  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType) && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);
@@ -232,7 +264,7 @@
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
  const upgradeKey=(kind,id)=>`${kind}:${id}`;
  function upgradeLevel(profile,id){const item=getItem(id);return item?integer(profile.upgrades?.[upgradeKey(item.kind,item.id)]):0;}
- function upgradeCost(level){return level>=UPGRADE_MAX?null:250+level*350;}
+ function upgradeCost(level){return level>=UPGRADE_MAX?null:400+level*600;}
  function upgradeEffect(item,level){const it=typeof item==='string'?getItem(item):item;if(!it||!level)return null;return it.kind==='skin'?`+${6*level} maks. HP`:it.kind==='weapon'?`+${8*level}% obrażeń`:null;}
  function canUpgrade(profile,id){const item=getItem(id);if(!item||!has(profile,item)||!(item.kind==='skin'||item.kind==='weapon'))return false;const cost=upgradeCost(upgradeLevel(profile,id));return cost!==null&&profile.coins>=cost;}
  function upgrade(profile,id){
@@ -254,8 +286,8 @@
   const today=dateKey(now);if(profile.login?.last===today)return null;
   const yesterday=dateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1));
   const streak=profile.login?.last===yesterday?integer(profile.login.streak)+1:1;
-  const bonus=Math.min(300,50+(streak-1)*25);
+  const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
 })();

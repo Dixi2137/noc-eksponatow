@@ -25,7 +25,7 @@
   });
   test('Sprzedany przedmiot znika z ekspozycji, a wartość i prestiż się przeliczają', () => {
     let p = base(); p = hall.setSlot(p, 'weapon-1', 'axe'); p = hall.setSlot(p, 'trophy-1', 'trophy-rex'); p = hall.setSlot(p, 'armor-1', 'brass');
-    let sum = hall.summary(p); assert.equal(sum.filled, 3); assert.equal(sum.value, 150, 'topór 150, trofeum i strój podstawowy 0'); assert.equal(sum.prestige, 2 + 12 + 1);
+    let sum = hall.summary(p); assert.equal(sum.filled, 3); assert.equal(sum.value, 240, 'topór 240, trofeum i strój podstawowy 0'); assert.equal(sum.prestige, 2 + 12 + 1);
     p = loot.sell(p, 'axe').profile; sum = hall.summary(p); assert.equal(sum.filled, 2); assert.equal(sum.value, 0); assert.equal(hall.exhibition(p).find(e => e.slot.id === 'weapon-1').item, null);
   });
   test('Ulepszenia i pełna sala podbijają prestiż', () => {

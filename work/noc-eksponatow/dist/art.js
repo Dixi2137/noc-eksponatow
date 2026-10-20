@@ -551,14 +551,38 @@
   }
   // Collection thumbnails for weapons and cards. Centered on (0,0), roughly 200 units tall.
   function drawWeaponIcon(c,weapon,o={}){
-    const key=weapon?.icon||weapon?.id||'sword',col=o.color||'#d8e2dc';
-    c.save();c.lineCap='round';c.lineJoin='round';c.rotate(-.65);
+    const key=weapon?.icon||weapon?.id||'sword';
+    c.save();c.lineCap='round';c.lineJoin='round';
     const steel=grad(c,-10,0,10,0,[[0,'#627d85'],[.46,'#d8e8de'],[.52,'#eff8df'],[.6,'#8ca9ac'],[1,'#3c555f']]);
-    if(key==='sword'){rr(c,-5,60,10,40,2,'#372d25','#a68b56',1);ellipse(c,0,100,7,7,'#a58e57','#dfc58b');poly(c,[[-28,60],[-27,52],[-7,50],[0,44],[7,50],[27,52],[28,60],[6,56],[-6,56]],'#a18d59','#e2c68c',1);poly(c,[[-7,50],[-9,-100],[0,-125],[9,-100],[7,50]],steel,'#b6d9cc',1);line(c,0,-105,0,40,'#f5f6d3',1)}
-    else if(key==='axe'){line(c,0,-110,0,110,'#4a3420',11);line(c,0,-110,0,110,'#8a6a42',6);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(55,-110,95,-70,90,-10);q.bezierCurveTo(60,-30,30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(-55,-110,-95,-70,-90,-10);q.bezierCurveTo(-60,-30,-30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);line(c,-80,-15,80,-15,'#f5f6d3',1)}
-    else if(key==='spear'){line(c,0,-70,0,130,'#4a3420',8);line(c,0,-70,0,130,'#8a6a42',4);poly(c,[[-12,-70],[0,-135],[12,-70],[0,-60]],steel,'#b6d9cc',1.5);rr(c,-8,-72,16,10,2,'#8f7a3e','#d4af37',1);line(c,0,-125,0,-70,'#f5f6d3',1)}
-    else if(key==='rapier'){rr(c,-3,55,6,45,2,'#2b2420','#8f7a3e',1);ellipse(c,0,100,6,6,'#c9a94a','#e7d08a');ellipse(c,0,50,22,10,null,'#d4af37',3);path(c,q=>{q.moveTo(-18,50);q.bezierCurveTo(-30,20,30,20,18,50)},null,'#d4af37',2);poly(c,[[-3,40],[-3,-110],[0,-130],[3,-110],[3,40]],steel,'#b6d9cc',1)}
-    else if(key==='revolver'){c.rotate(.65);rr(c,-60,-18,120,22,6,'#2b2b2b','#6b6b6b',1.5);rr(c,-20,-28,40,36,5,'#1f1f1f','#7a7a7a',1.5);for(let k=0;k<3;k++)ellipse(c,-8+k*8,-10,3,3,'#3a3a3a','#8a8a8a',1);poly(c,[[-22,4],[-2,4],[6,52],[-20,58]],'#5a3a22','#8a6a42',1.5);path(c,q=>{q.moveTo(-6,10);q.bezierCurveTo(-2,24,8,28,12,20)},null,'#8a8a8a',3);rr(c,52,-20,12,10,2,'#444','#888',1);line(c,-55,-12,50,-12,'#9a9a9a',1)}
+    const wood=(y0,y1,wdt=8)=>{line(c,0,y0,0,y1,'#4a3420',wdt+3);line(c,0,y0,0,y1,'#8a6a42',wdt-2)};
+    const grip=(y,len=40)=>{rr(c,-5,y,10,len,2,'#372d25','#a68b56',1);for(let z=y+4;z<y+len-2;z+=5)line(c,-4,z,4,z-3,'#8f7950',1);ellipse(c,0,y+len+4,7,7,'#a58e57','#dfc58b')};
+    const guard=(y,wd=28)=>poly(c,[[-wd,y],[-wd+1,y-6],[-7,y-8],[0,y-13],[7,y-8],[wd-1,y-6],[wd,y],[6,y-3],[-6,y-3]],'#a18d59','#e2c68c',1);
+    const blade=(len,wd=9,curve=0)=>{path(c,q=>{q.moveTo(-wd,0);q.bezierCurveTo(-wd-curve,-len*.5,-wd*.4-curve*1.6,-len*.95,-curve*2,-len);q.lineTo(wd*.9-curve*2,-len*.92);q.bezierCurveTo(wd-curve,-len*.5,wd,-len*.3,wd,0);q.closePath()},steel,'#b6d9cc',1);line(c,-curve*.3,-8,-curve*1.4,-len*.85,'#f5f6d3',1)};
+    const gun=(len,stock=true,barrels=1)=>{c.rotate(.65);if(stock)poly(c,[[-60,-4],[-30,-4],[-30,14],[-50,30],[-70,26],[-72,8]],'#5a3a22','#8a6a42',1.5);rr(c,-34,-18,len,14,3,'#2b2b2b','#6b6b6b',1.5);if(barrels>1)rr(c,-34,-30,len,12,3,'#2b2b2b','#6b6b6b',1.5);rr(c,-28,-6,22,22,3,'#1f1f1f','#7a7a7a',1.5);path(c,q=>{q.moveTo(-14,8);q.bezierCurveTo(-10,22,0,26,4,18)},null,'#8a8a8a',3);rr(c,len-44,-22,10,8,2,'#444','#888',1);line(c,-30,-12,len-40,-12,'#9a9a9a',1)};
+    c.rotate(-.65);
+    switch(key){
+      case 'sword':grip(60,40);guard(55,28);c.translate(0,48);blade(145,8);break;
+      case 'shortsword':grip(50,34);guard(46,24);c.translate(0,40);blade(100,10);break;
+      case 'greatsword':grip(70,58);guard(66,34);c.translate(0,58);blade(165,11);break;
+      case 'curved':grip(60,40);poly(c,[[-20,56],[-18,50],[14,48],[18,56],[6,53],[-6,53]],'#a18d59','#e2c68c',1);c.translate(0,48);blade(140,7,10);break;
+      case 'rapier':rr(c,-3,55,6,45,2,'#2b2420','#8f7a3e',1);ellipse(c,0,100,6,6,'#c9a94a','#e7d08a');ellipse(c,0,50,22,10,null,'#d4af37',3);path(c,q=>{q.moveTo(-18,50);q.bezierCurveTo(-30,20,30,20,18,50)},null,'#d4af37',2);poly(c,[[-3,40],[-3,-110],[0,-130],[3,-110],[3,40]],steel,'#b6d9cc',1);break;
+      case 'dagger':grip(20,28);guard(16,16);c.translate(0,10);blade(70,9);break;
+      case 'axe':wood(-110,110,11);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(55,-110,95,-70,90,-10);q.bezierCurveTo(60,-30,30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(-55,-110,-95,-70,-90,-10);q.bezierCurveTo(-60,-30,-30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);line(c,-80,-15,80,-15,'#f5f6d3',1);break;
+      case 'doubleaxe':wood(-100,110,10);[-1,1].forEach(sgn=>path(c,q=>{q.moveTo(0,-80);q.bezierCurveTo(sgn*60,-96,sgn*92,-40,sgn*60,10);q.bezierCurveTo(sgn*30,-10,sgn*20,-20,0,-20);q.closePath()},steel,'#b6d9cc',1.5));ellipse(c,0,-50,8,8,'#a18d59','#e2c68c',1);break;
+      case 'hammer':wood(-80,115,10);rr(c,-44,-110,88,44,4,grad(c,-44,-110,44,-66,[[0,'#9aa3ad'],[.5,'#5a6470'],[1,'#2e3640']]),'#1e2430',2);poly(c,[[44,-100],[80,-88],[44,-76]],'#8ca9ac','#3c555f',1.5);for(let k=0;k<3;k++)line(c,-30+k*20,-104,-30+k*20,-72,'#2e3640',1.5);break;
+      case 'mace':wood(-30,115,9);line(c,0,-30,0,-70,'#555',4);for(let k=0;k<6;k++)ellipse(c,0,-36-k*7,3,3,'#8a8a8a','#333',1);ellipse(c,0,-100,26,26,grad(c,-26,-126,26,-74,[[0,'#8a94a0'],[1,'#2e3640']]),'#1e2430',2);for(let k=0;k<8;k++){const a=k*Math.PI/4;poly(c,[[Math.cos(a)*22,-100+Math.sin(a)*22],[Math.cos(a)*40,-100+Math.sin(a)*40],[Math.cos(a+.35)*22,-100+Math.sin(a+.35)*22]],'#c0c6cc','#3c555f',1)}break;
+      case 'poleaxe':wood(-120,120,8);path(c,q=>{q.moveTo(0,-110);q.bezierCurveTo(50,-125,80,-80,66,-30);q.bezierCurveTo(44,-50,20,-52,0,-40);q.closePath()},steel,'#b6d9cc',1.5);rr(c,-8,-114,16,10,2,'#8f7a3e','#d4af37',1);break;
+      case 'spear':wood(-70,130,8);poly(c,[[-12,-70],[0,-135],[12,-70],[0,-60]],steel,'#b6d9cc',1.5);rr(c,-8,-72,16,10,2,'#8f7a3e','#d4af37',1);line(c,0,-125,0,-70,'#f5f6d3',1);break;
+      case 'pike':wood(-120,140,6);poly(c,[[-7,-120],[0,-150],[7,-120],[0,-114]],steel,'#b6d9cc',1.2);rr(c,-6,-122,12,8,1,'#8f7a3e','#d4af37',1);break;
+      case 'trident':wood(-70,130,8);rr(c,-26,-78,52,8,2,'#8f7a3e','#d4af37',1);[-22,0,22].forEach(x=>poly(c,[[x-6,-78],[x,-130],[x+6,-78]],steel,'#b6d9cc',1.2));break;
+      case 'halberd':wood(-120,130,8);poly(c,[[-6,-110],[0,-150],[6,-110]],steel,'#b6d9cc',1.2);path(c,q=>{q.moveTo(4,-108);q.bezierCurveTo(50,-116,70,-70,54,-40);q.bezierCurveTo(36,-56,18,-56,4,-50);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(-4,-100);q.lineTo(-40,-90);q.lineTo(-30,-60);q.lineTo(-4,-62);q.closePath()},steel,'#b6d9cc',1.5);rr(c,-8,-112,16,8,2,'#8f7a3e','#d4af37',1);break;
+      case 'bow':path(c,q=>{q.moveTo(0,110);q.bezierCurveTo(-60,50,-60,-50,0,-110)},null,'#5a3a22',9);path(c,q=>{q.moveTo(0,110);q.bezierCurveTo(-60,50,-60,-50,0,-110)},null,'#9a7a4a',5);line(c,0,110,0,-110,'#e8e2d0',1.5);rr(c,-7,-14,14,28,3,'#3a2416');line(c,-40,0,70,0,'#4a3420',3);poly(c,[[70,-5],[86,0],[70,5]],'#b6c0b5','#5b6660',1);poly(c,[[-40,-6],[-28,0],[-40,6]],'#c9643a');break;
+      case 'crossbow':rr(c,-10,-20,20,130,3,'#5a3a22','#8a6a42',1.5);path(c,q=>{q.moveTo(-90,-30);q.bezierCurveTo(-60,-60,60,-60,90,-30)},null,'#3c555f',9);path(c,q=>{q.moveTo(-90,-30);q.bezierCurveTo(-60,-60,60,-60,90,-30)},null,'#8ca9ac',5);line(c,-90,-30,90,-30,'#e8e2d0',1.5);rr(c,-4,-60,8,80,2,'#2b2b2b','#6b6b6b',1);poly(c,[[-6,-62],[0,-78],[6,-62]],'#c0c6cc','#3c555f',1);rr(c,-18,40,36,12,3,'#2b2b2b','#6b6b6b',1);break;
+      case 'revolver':c.scale(1.7,1.7);gun(72,false);break;
+      case 'musket':gun(190,true);rr(c,120,-10,10,6,1,'#c9a94a');break;
+      case 'shotgun':gun(150,true,2);break;
+      default:grip(60,40);guard(55,28);c.translate(0,48);blade(145,8);
+    }
     c.restore();
   }
   function drawCardArt(c,card,w=360,h=360){

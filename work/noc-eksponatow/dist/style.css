@@ -96,7 +96,9 @@
 @media(max-width:650px){.ranking-head,.rank-row{grid-template-columns:26px 1fr 44px 54px 80px;font-size:9px}.account-btn #accountLabel{display:none}}
 
 /* Faza 6: witryna skrzyń */
-.crate-cards{display:flex;gap:10px;overflow-x:auto;padding:14px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.crate-cards{display:flex;flex-direction:column;gap:6px;padding:8px 0 4px}
+.crate-group-head{display:flex;justify-content:space-between;align-items:baseline;font-size:8px;letter-spacing:3px;color:var(--gold);padding:10px 2px 2px;border-bottom:1px solid #2a3324}.crate-group-head small{font-size:8px;color:var(--muted)}
+.crate-row{display:flex;gap:10px;overflow-x:auto;padding:14px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin}
 .crate-card{position:relative;flex:0 0 150px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 10px 12px;background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--crate-color) 16%,transparent),transparent 62%),#10160f;border:1px solid #35402d;color:var(--cream);font:inherit;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
 .crate-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--crate-color) 60%,#35402d)}
 .crate-card.is-selected{border-color:var(--crate-color);box-shadow:0 0 0 1px var(--crate-color) inset,0 10px 30px color-mix(in srgb,var(--crate-color) 25%,transparent)}

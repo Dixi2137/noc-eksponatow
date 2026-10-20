@@ -180,3 +180,23 @@ Z areny zniknął plakat reklamowy piwa Kustosz i napis o sponsorze walki; usuni
 - **Grafika skrzyń** jest rysowana na canvasie (`MuseumArt.drawCrate`): materiał zależy od rodziny (drewno, lakier w kolorze kategorii, stal dla broni, ozdobna szkatuła dla kart, ciemna z poświatą dla mieszanych), okucia i emblemat w kolorze skrzyni (`glyph` w danych), iskry. Ta sama grafika w sklepie i w kolekcji.
 - **Witryna w kolekcji** zastępuje listę rozwijaną: przewijany rząd kart skrzyń z nazwą, ceną i plakietką (DARMOWA, NAJLEPSZA OFERTA, TYLKO LEGENDY, NOWOŚĆ, ZEBRANA). Kliknięcie wybiera skrzynię, a duży rysunek i szczegóły pod spodem się aktualizują.
 - Testy: 60.
+
+## Faza 7 — zbrojownia na serio i nowy cennik (2026-10-21)
+
+**24 bronie w pięciu typach i czterech epokach** (`dist/weapons.js`). Typ ustala rytm (`types`), epoka trafia do skrzyń (`categoryId`), rzadkość dodaje obrażeń (+1 rzadki, +2 epicki, +3 legendarny).
+
+| Typ | Bronie |
+| --- | --- |
+| Ostrza | miecz rycerski (podstawowy), gladius, szabla damasceńska, claymore, szabla husarska, katana |
+| Broń ciężka | topór bojowy, młot bojowy, morgensztern, berdysz, labrys |
+| Broń drzewcowa | włócznia hoplity, trójząb retiariusa, halabarda, pika |
+| Broń lekka | rapier szlachecki, sztylet, bagnet, stylet |
+| Broń dystansowa | rewolwer Kustosza, łuk refleksyjny, kusza, muszkiet, strzelba Kustosza |
+
+Epoki: starożytność, średniowiecze, nowożytność, wiek XIX i XX. Każda broń ma własną ikonę (`drawWeaponIcon`, 20 kształtów). Podgląd: `tests/weapons.html`.
+
+**Skrzynie: 26 w siedmiu grupach** (`crateGroups`): klasyczne, stroje według motywu, cała zbrojownia, broń według typu (Zbrojownia Ostrzy, Kuźnia Ciężka, Sala Drzewcowa, Gabinet Sztyletów, Strzelnica Kustosza), broń według epoki (Arsenał Antyku, Średniowiecza, Nowożytny, XX Wieku), karty, mieszane. Witryna w kolekcji pokazuje każdą grupę jako osobny, przewijany rząd z nagłówkiem. Skrzynie broni filtrują po `weaponType` i `categoryId`.
+
+**Cennik.** Żetony za salę: 120–645 plus 20 za paradę, więc pełna noc daje kilkanaście tysięcy. Ceny skrzyń podniesione mniej więcej półtora do dwóch razy: Galeria 900 (29,99 zł), tematyczne 1500–2200, Skarbiec Królów 3000 (79,99 zł), Relikwiarz 7500 (149,99 zł), broń według typu 1600–2600, według epoki 1700–2800, karty 800–1500, startowa 400, Nocnej Zmiany 1200, Skarbiec Kustosza 4000, Legend 9000 (199,99 zł). Reguła: około 40 żetonów za złotówkę. Wartości przedmiotów: zwykły 240, rzadki 700, epicki 1800, legendarny 4500 (sprzedaż 40%). Ulepszenia 400 + 600·poziom. Bonus dzienny 80 + 40 za dzień serii, do 500.
+
+Testy: 64.

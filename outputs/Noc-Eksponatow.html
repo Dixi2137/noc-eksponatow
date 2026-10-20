@@ -101,7 +101,9 @@
 @media(max-width:650px){.ranking-head,.rank-row{grid-template-columns:26px 1fr 44px 54px 80px;font-size:9px}.account-btn #accountLabel{display:none}}
 
 /* Faza 6: witryna skrzyń */
-.crate-cards{display:flex;gap:10px;overflow-x:auto;padding:14px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.crate-cards{display:flex;flex-direction:column;gap:6px;padding:8px 0 4px}
+.crate-group-head{display:flex;justify-content:space-between;align-items:baseline;font-size:8px;letter-spacing:3px;color:var(--gold);padding:10px 2px 2px;border-bottom:1px solid #2a3324}.crate-group-head small{font-size:8px;color:var(--muted)}
+.crate-row{display:flex;gap:10px;overflow-x:auto;padding:14px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin}
 .crate-card{position:relative;flex:0 0 150px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 10px 12px;background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--crate-color) 16%,transparent),transparent 62%),#10160f;border:1px solid #35402d;color:var(--cream);font:inherit;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
 .crate-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--crate-color) 60%,#35402d)}
 .crate-card.is-selected{border-color:var(--crate-color);box-shadow:0 0 0 1px var(--crate-color) inset,0 10px 30px color-mix(in srgb,var(--crate-color) 25%,transparent)}
@@ -491,67 +493,72 @@ window.MuseumConfig = Object.freeze({
     all() { return perks; }
   });
 })();
-</script><script>/* Weapons are data. One entry describes how the knight strikes, what a parry reflects and what the item is worth. */
+</script><script>/* Weapons are data. Five types set the rhythm (blade, heavy, polearm, light, ranged), four eras sort them into crates,
+   rarity nudges the damage. Each entry: how the knight strikes, what a parry reflects, what the item is worth. */
 (() => {
   'use strict';
   const baseline = Object.freeze({
-    kind: 'melee',            // melee | ranged
-    range: 410,               // max distance between fighters for a hit to connect
-    staminaCost: 12,          // stamina spent per swing or shot
-    swing: .36,               // seconds the attack animation lasts
-    contact: .23,             // remaining swing time at which the blow lands
-    cooldown: .46,            // seconds before the next swing
-    weakGuardDamage: 9,       // damage against a recovering foe
-    comboBonus: 3,            // extra damage from the comboAt-th consecutive hit
-    comboAt: 3,
-    parryDrain: 10,           // stamina lost when the foe parries this weapon
-    parryReflect: Object.freeze({ light: 20, heavy: 25 }), // damage a perfect parry sends back
-    ammo: null,               // ranged only: shots per fight before a reload
-    reload: 0                 // ranged only: seconds a reload takes (no attacks, guard allowed)
+    kind: 'melee', range: 410, staminaCost: 12, swing: .36, contact: .23, cooldown: .46,
+    weakGuardDamage: 9, comboBonus: 3, comboAt: 3, parryDrain: 10,
+    parryReflect: Object.freeze({ light: 20, heavy: 25 }), ammo: null, reload: 0
   });
+  const types = Object.freeze({
+    blade:   { name: 'Ostrza', stats: {} },
+    heavy:   { name: 'Broń ciężka', stats: { staminaCost: 16, swing: .46, contact: .3, cooldown: .6, weakGuardDamage: 13, comboBonus: 2, parryReflect: { light: 24, heavy: 30 } } },
+    polearm: { name: 'Broń drzewcowa', stats: { range: 470, weakGuardDamage: 8, comboBonus: 2, parryDrain: 6, parryReflect: { light: 18, heavy: 23 } } },
+    light:   { name: 'Broń lekka', stats: { staminaCost: 9, swing: .28, contact: .17, cooldown: .34, weakGuardDamage: 7, comboBonus: 5, comboAt: 2, parryReflect: { light: 18, heavy: 22 } } },
+    ranged:  { name: 'Broń dystansowa', stats: { kind: 'ranged', range: 900, staminaCost: 6, swing: .42, contact: .2, cooldown: .55, weakGuardDamage: 14, comboBonus: 0, comboAt: 99, parryDrain: 4, parryReflect: { light: 14, heavy: 18 }, ammo: 6, reload: 1.6 } }
+  });
+  const eras = Object.freeze({ antiquity: 'Starożytność', medieval: 'Średniowiecze', renaissance: 'Nowożytność', modern: 'Wiek XIX i XX' });
+  const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3 };
+  // weapon(id, name, era, type, rarity, icon, flavour, overrides)
+  function w(id, name, era, type, rarity, icon, flavour, overrides = {}) {
+    return { id, name, era: `${eras[era].toUpperCase()} · ${({ basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT' })[rarity]}`,
+      categoryId: era, type, rarity, icon, flavour, overrides };
+  }
   const definitions = [
-    {
-      id: 'sword', name: 'MIECZ RYCERSKI', era: 'STAL · KOLEKCJA PODSTAWOWA', rarity: 'basic', icon: 'sword',
-      summary: '9 obrażeń w słabą gardę, 12 od trzeciego ciosu w serii.',
-      details: ['Klasyczne ostrze muzealnego rycerza. Perfekcyjna parada odbija 20 obrażeń, 25 przy ciężkim ataku.'],
-      stats: {}
-    },
-    {
-      id: 'axe', name: 'TOPÓR BOJOWY', era: 'ŻELAZO · ZWYKŁY EKSPONAT', rarity: 'common', icon: 'axe',
-      summary: 'Wolny, ale 13 obrażeń w słabą gardę i mocniejsze odbicie parady.',
-      details: ['Zamach trwa dłużej i kosztuje 16 energii.', 'Perfekcyjna parada odbija 24 obrażenia, 30 przy ciężkim ataku.'],
-      stats: { staminaCost: 16, swing: .46, contact: .3, cooldown: .6, weakGuardDamage: 13, comboBonus: 2, parryReflect: { light: 24, heavy: 30 } }
-    },
-    {
-      id: 'spear', name: 'WŁÓCZNIA HOPLITY', era: 'BRĄZ · RZADKI EKSPONAT', rarity: 'rare', icon: 'spear',
-      summary: 'Zasięg 470 zamiast 410. 8 obrażeń, mniejsza strata energii przy parowaniu.',
-      details: ['Trafia przeciwnika, zanim ten wejdzie w zasięg własnego ciosu.', 'Sparowana włócznia kosztuje tylko 6 energii.'],
-      stats: { range: 470, weakGuardDamage: 8, comboBonus: 2, parryDrain: 6, parryReflect: { light: 18, heavy: 23 } }
-    },
-    {
-      id: 'rapier', name: 'RAPIER SZLACHECKI', era: 'STAL · EPICKI EKSPONAT', rarity: 'epic', icon: 'rapier',
-      summary: 'Bardzo szybkie pchnięcia: 7 obrażeń, +5 już od drugiego trafienia.',
-      details: ['Zamach 0,28 s i przerwa 0,34 s zamiast 0,36 s i 0,46 s.', 'Kosztuje 9 energii za pchnięcie.'],
-      stats: { staminaCost: 9, swing: .28, contact: .17, cooldown: .34, weakGuardDamage: 7, comboBonus: 5, comboAt: 2, parryReflect: { light: 18, heavy: 22 } }
-    },
-    {
-      id: 'revolver', name: 'REWOLWER KUSTOSZA', era: 'PROCH · LEGENDARNY EKSPONAT', rarity: 'legendary', icon: 'revolver', kind: 'ranged',
-      summary: 'Strzał z dystansu w słabą gardę: 14 obrażeń. 6 naboi na walkę, przeładowanie 1,6 s.',
-      details: ['Działa z całej areny, ale tylko w osłabioną gardę. Zamach i cios przeciwnik odbija, w ruchu robi unik.',
-        'Po 6 strzałach rycerz przeładowuje przez 1,6 s: nie strzela, ale może parować.', 'Perfekcyjna parada odbija tylko 14 obrażeń.'],
-      stats: { kind: 'ranged', range: 900, staminaCost: 6, swing: .42, contact: .2, cooldown: .55, weakGuardDamage: 14, comboBonus: 0, comboAt: 99,
-        parryDrain: 4, parryReflect: { light: 14, heavy: 18 }, ammo: 6, reload: 1.6 }
-    }
+    // Blades
+    w('sword', 'MIECZ RYCERSKI', 'medieval', 'blade', 'basic', 'sword', 'Klasyczne ostrze muzealnego rycerza. Wszystko w nim jest średnie, i o to chodzi.'),
+    w('gladius', 'GLADIUS', 'antiquity', 'blade', 'common', 'shortsword', 'Krótki miecz legionisty. Szybszy od rycerskiego, ale sięga bliżej.', { swing: .32, contact: .2, cooldown: .42, range: 380 }),
+    w('scimitar', 'SZABLA DAMASCEŃSKA', 'medieval', 'blade', 'common', 'curved', 'Zakrzywiona klinga z damastu. Tnie w serii.', { comboBonus: 4 }),
+    w('claymore', 'CLAYMORE', 'medieval', 'blade', 'rare', 'greatsword', 'Dwuręczny miecz Highlandów. Wolniejszy, ale mocniejszy i dłuższy.', { staminaCost: 14, swing: .4, contact: .26, cooldown: .52, range: 440, weakGuardDamage: 11 }),
+    w('husaria', 'SZABLA HUSARSKA', 'renaissance', 'blade', 'rare', 'curved', 'Szabla skrzydlatej jazdy. Perfekcyjna parada odbija mocniej niż u miecza.', { parryReflect: { light: 24, heavy: 29 } }),
+    w('katana', 'KATANA', 'renaissance', 'blade', 'epic', 'curved', 'Stal składana tysiąc razy. Szybkie cięcia i wysoki bonus serii.', { swing: .3, contact: .19, cooldown: .38, comboBonus: 5, comboAt: 2 }),
+    // Heavy
+    w('axe', 'TOPÓR BOJOWY', 'medieval', 'heavy', 'common', 'axe', 'Wolny, ale 13 obrażeń w słabą gardę i mocniejsze odbicie parady.'),
+    w('warhammer', 'MŁOT BOJOWY', 'medieval', 'heavy', 'rare', 'hammer', 'Młot na zbroje. Ciężkie, rzadkie uderzenia, odbicie parady jak od ściany.', { parryReflect: { light: 28, heavy: 34 }, cooldown: .66 }),
+    w('morningstar', 'MORGENSZTERN', 'medieval', 'heavy', 'epic', 'mace', 'Kolczasta kula na łańcuchu. Największe obrażenia w słabą gardę wśród broni wręcz.', { weakGuardDamage: 15, comboBonus: 3 }),
+    w('berdysz', 'BERDYSZ', 'renaissance', 'heavy', 'rare', 'poleaxe', 'Topór na długim drzewcu. Zasięg drzewca, siła topora.', { range: 450, weakGuardDamage: 12 }),
+    w('labrys', 'LABRYS', 'antiquity', 'heavy', 'common', 'doubleaxe', 'Dwusieczny topór z Krety. Dwa ostrza, dwa razy więcej powodów, żeby się nie zbliżać.', { comboBonus: 3 }),
+    // Polearms
+    w('spear', 'WŁÓCZNIA HOPLITY', 'antiquity', 'polearm', 'rare', 'spear', 'Trafia przeciwnika, zanim ten wejdzie w zasięg własnego ciosu.'),
+    w('trident', 'TRÓJZĄB RETIARIUSA', 'antiquity', 'polearm', 'common', 'trident', 'Trzy groty gladiatora z siecią. Trochę krótszy od włóczni, ale tnie szerzej.', { range: 450, weakGuardDamage: 9 }),
+    w('halberd', 'HALABARDA', 'medieval', 'polearm', 'epic', 'halberd', 'Ostrze, hak i grot na jednym drzewcu. Daleko i boleśnie.', { range: 480, weakGuardDamage: 10, comboBonus: 3, parryReflect: { light: 21, heavy: 26 } }),
+    w('pike', 'PIKA', 'renaissance', 'polearm', 'common', 'pike', 'Najdłuższa broń w muzeum. Sięga najdalej, zadaje najmniej.', { range: 520, weakGuardDamage: 7 }),
+    // Light
+    w('rapier', 'RAPIER SZLACHECKI', 'renaissance', 'light', 'epic', 'rapier', 'Bardzo szybkie pchnięcia: 7 obrażeń, +5 już od drugiego trafienia.'),
+    w('dagger', 'SZTYLET', 'antiquity', 'light', 'common', 'dagger', 'Krótki i podstępny. Prawie nie kosztuje energii, ale musisz podejść bardzo blisko.', { staminaCost: 7, range: 340, cooldown: .3 }),
+    w('bayonet', 'BAGNET', 'modern', 'light', 'rare', 'dagger', 'Bagnet z okopów. Szybki jak sztylet, sięga jak miecz.', { range: 410 }),
+    w('stiletto', 'STYLET', 'renaissance', 'light', 'rare', 'dagger', 'Wąskie ostrze między płytami zbroi. Bonus serii od pierwszego powtórzenia.', { comboBonus: 6, comboAt: 2, range: 350 }),
+    // Ranged
+    w('revolver', 'REWOLWER KUSTOSZA', 'modern', 'ranged', 'legendary', 'revolver', 'Strzał z dystansu w słabą gardę: 17 obrażeń. 6 naboi na walkę, przeładowanie 1,6 s.'),
+    w('bow', 'ŁUK REFLEKSYJNY', 'medieval', 'ranged', 'rare', 'bow', 'Łuk ze stepu. Dużo strzał, mniejsze obrażenia, szybkie przeładowanie kołczanu.', { ammo: 10, reload: 1.0, weakGuardDamage: 10, swing: .5, contact: .25 }),
+    w('crossbow', 'KUSZA', 'medieval', 'ranged', 'epic', 'crossbow', 'Bełt przebija wszystko. Trzy strzały, długie naciąganie, największe obrażenia na dystans.', { ammo: 3, reload: 2.4, weakGuardDamage: 18 }),
+    w('musket', 'MUSZKIET', 'renaissance', 'ranged', 'rare', 'musket', 'Jeden strzał, chmura dymu i długie ładowanie przez lufę.', { ammo: 1, reload: 3.0, weakGuardDamage: 20 }),
+    w('shotgun', 'STRZELBA KUSTOSZA', 'modern', 'ranged', 'epic', 'shotgun', 'Dwie lufy. Z bliska bardzo boli, z daleka nie ma sensu.', { ammo: 2, reload: 1.3, weakGuardDamage: 17, range: 520 })
   ];
-  const weapons = Object.freeze(definitions.map(definition => Object.freeze({
-    ...definition,
-    details: Object.freeze([...(definition.details || [])]),
-    stats: Object.freeze({ ...baseline, ...definition.stats,
-      parryReflect: Object.freeze({ ...baseline.parryReflect, ...(definition.stats.parryReflect || {}) }) })
-  })));
+  const weapons = Object.freeze(definitions.map(d => {
+    const type = types[d.type], merged = { ...baseline, ...type.stats, ...d.overrides };
+    merged.parryReflect = Object.freeze({ ...baseline.parryReflect, ...(type.stats.parryReflect || {}), ...(d.overrides.parryReflect || {}) });
+    merged.weakGuardDamage += rarityBonus[d.rarity] || 0;
+    const r = merged.kind === 'ranged' ? `${merged.ammo} ${merged.ammo === 1 ? 'strzał' : merged.ammo < 5 ? 'strzały' : 'strzałów'}, przeładowanie ${merged.reload.toLocaleString('pl-PL')} s. ` : '';
+    const summary = `${type.name}. ${merged.weakGuardDamage} obrażeń w słabą gardę${merged.comboBonus ? `, +${merged.comboBonus} od ${merged.comboAt}. ciosu` : ''}. ${r}Zasięg ${merged.range}.`;
+    return Object.freeze({ id: d.id, name: d.name, era: d.era, categoryId: d.categoryId, type: d.type, typeName: type.name, rarity: d.rarity, icon: d.icon,
+      summary, details: Object.freeze([d.flavour]), stats: Object.freeze(merged) });
+  }));
   const byId = new Map(weapons.map(weapon => [weapon.id, weapon]));
   window.MuseumWeapons = Object.freeze({
-    baseline,
+    baseline, types, eras,
     get(id) { return byId.get(id) || weapons[0]; },
     has(id) { return byId.has(id); },
     all() { return weapons; }
@@ -1527,14 +1534,38 @@ window.MuseumConfig = Object.freeze({
   }
   // Collection thumbnails for weapons and cards. Centered on (0,0), roughly 200 units tall.
   function drawWeaponIcon(c,weapon,o={}){
-    const key=weapon?.icon||weapon?.id||'sword',col=o.color||'#d8e2dc';
-    c.save();c.lineCap='round';c.lineJoin='round';c.rotate(-.65);
+    const key=weapon?.icon||weapon?.id||'sword';
+    c.save();c.lineCap='round';c.lineJoin='round';
     const steel=grad(c,-10,0,10,0,[[0,'#627d85'],[.46,'#d8e8de'],[.52,'#eff8df'],[.6,'#8ca9ac'],[1,'#3c555f']]);
-    if(key==='sword'){rr(c,-5,60,10,40,2,'#372d25','#a68b56',1);ellipse(c,0,100,7,7,'#a58e57','#dfc58b');poly(c,[[-28,60],[-27,52],[-7,50],[0,44],[7,50],[27,52],[28,60],[6,56],[-6,56]],'#a18d59','#e2c68c',1);poly(c,[[-7,50],[-9,-100],[0,-125],[9,-100],[7,50]],steel,'#b6d9cc',1);line(c,0,-105,0,40,'#f5f6d3',1)}
-    else if(key==='axe'){line(c,0,-110,0,110,'#4a3420',11);line(c,0,-110,0,110,'#8a6a42',6);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(55,-110,95,-70,90,-10);q.bezierCurveTo(60,-30,30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(-55,-110,-95,-70,-90,-10);q.bezierCurveTo(-60,-30,-30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);line(c,-80,-15,80,-15,'#f5f6d3',1)}
-    else if(key==='spear'){line(c,0,-70,0,130,'#4a3420',8);line(c,0,-70,0,130,'#8a6a42',4);poly(c,[[-12,-70],[0,-135],[12,-70],[0,-60]],steel,'#b6d9cc',1.5);rr(c,-8,-72,16,10,2,'#8f7a3e','#d4af37',1);line(c,0,-125,0,-70,'#f5f6d3',1)}
-    else if(key==='rapier'){rr(c,-3,55,6,45,2,'#2b2420','#8f7a3e',1);ellipse(c,0,100,6,6,'#c9a94a','#e7d08a');ellipse(c,0,50,22,10,null,'#d4af37',3);path(c,q=>{q.moveTo(-18,50);q.bezierCurveTo(-30,20,30,20,18,50)},null,'#d4af37',2);poly(c,[[-3,40],[-3,-110],[0,-130],[3,-110],[3,40]],steel,'#b6d9cc',1)}
-    else if(key==='revolver'){c.rotate(.65);rr(c,-60,-18,120,22,6,'#2b2b2b','#6b6b6b',1.5);rr(c,-20,-28,40,36,5,'#1f1f1f','#7a7a7a',1.5);for(let k=0;k<3;k++)ellipse(c,-8+k*8,-10,3,3,'#3a3a3a','#8a8a8a',1);poly(c,[[-22,4],[-2,4],[6,52],[-20,58]],'#5a3a22','#8a6a42',1.5);path(c,q=>{q.moveTo(-6,10);q.bezierCurveTo(-2,24,8,28,12,20)},null,'#8a8a8a',3);rr(c,52,-20,12,10,2,'#444','#888',1);line(c,-55,-12,50,-12,'#9a9a9a',1)}
+    const wood=(y0,y1,wdt=8)=>{line(c,0,y0,0,y1,'#4a3420',wdt+3);line(c,0,y0,0,y1,'#8a6a42',wdt-2)};
+    const grip=(y,len=40)=>{rr(c,-5,y,10,len,2,'#372d25','#a68b56',1);for(let z=y+4;z<y+len-2;z+=5)line(c,-4,z,4,z-3,'#8f7950',1);ellipse(c,0,y+len+4,7,7,'#a58e57','#dfc58b')};
+    const guard=(y,wd=28)=>poly(c,[[-wd,y],[-wd+1,y-6],[-7,y-8],[0,y-13],[7,y-8],[wd-1,y-6],[wd,y],[6,y-3],[-6,y-3]],'#a18d59','#e2c68c',1);
+    const blade=(len,wd=9,curve=0)=>{path(c,q=>{q.moveTo(-wd,0);q.bezierCurveTo(-wd-curve,-len*.5,-wd*.4-curve*1.6,-len*.95,-curve*2,-len);q.lineTo(wd*.9-curve*2,-len*.92);q.bezierCurveTo(wd-curve,-len*.5,wd,-len*.3,wd,0);q.closePath()},steel,'#b6d9cc',1);line(c,-curve*.3,-8,-curve*1.4,-len*.85,'#f5f6d3',1)};
+    const gun=(len,stock=true,barrels=1)=>{c.rotate(.65);if(stock)poly(c,[[-60,-4],[-30,-4],[-30,14],[-50,30],[-70,26],[-72,8]],'#5a3a22','#8a6a42',1.5);rr(c,-34,-18,len,14,3,'#2b2b2b','#6b6b6b',1.5);if(barrels>1)rr(c,-34,-30,len,12,3,'#2b2b2b','#6b6b6b',1.5);rr(c,-28,-6,22,22,3,'#1f1f1f','#7a7a7a',1.5);path(c,q=>{q.moveTo(-14,8);q.bezierCurveTo(-10,22,0,26,4,18)},null,'#8a8a8a',3);rr(c,len-44,-22,10,8,2,'#444','#888',1);line(c,-30,-12,len-40,-12,'#9a9a9a',1)};
+    c.rotate(-.65);
+    switch(key){
+      case 'sword':grip(60,40);guard(55,28);c.translate(0,48);blade(145,8);break;
+      case 'shortsword':grip(50,34);guard(46,24);c.translate(0,40);blade(100,10);break;
+      case 'greatsword':grip(70,58);guard(66,34);c.translate(0,58);blade(165,11);break;
+      case 'curved':grip(60,40);poly(c,[[-20,56],[-18,50],[14,48],[18,56],[6,53],[-6,53]],'#a18d59','#e2c68c',1);c.translate(0,48);blade(140,7,10);break;
+      case 'rapier':rr(c,-3,55,6,45,2,'#2b2420','#8f7a3e',1);ellipse(c,0,100,6,6,'#c9a94a','#e7d08a');ellipse(c,0,50,22,10,null,'#d4af37',3);path(c,q=>{q.moveTo(-18,50);q.bezierCurveTo(-30,20,30,20,18,50)},null,'#d4af37',2);poly(c,[[-3,40],[-3,-110],[0,-130],[3,-110],[3,40]],steel,'#b6d9cc',1);break;
+      case 'dagger':grip(20,28);guard(16,16);c.translate(0,10);blade(70,9);break;
+      case 'axe':wood(-110,110,11);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(55,-110,95,-70,90,-10);q.bezierCurveTo(60,-30,30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(0,-95);q.bezierCurveTo(-55,-110,-95,-70,-90,-10);q.bezierCurveTo(-60,-30,-30,-30,0,-20);q.closePath()},steel,'#b6d9cc',1.5);line(c,-80,-15,80,-15,'#f5f6d3',1);break;
+      case 'doubleaxe':wood(-100,110,10);[-1,1].forEach(sgn=>path(c,q=>{q.moveTo(0,-80);q.bezierCurveTo(sgn*60,-96,sgn*92,-40,sgn*60,10);q.bezierCurveTo(sgn*30,-10,sgn*20,-20,0,-20);q.closePath()},steel,'#b6d9cc',1.5));ellipse(c,0,-50,8,8,'#a18d59','#e2c68c',1);break;
+      case 'hammer':wood(-80,115,10);rr(c,-44,-110,88,44,4,grad(c,-44,-110,44,-66,[[0,'#9aa3ad'],[.5,'#5a6470'],[1,'#2e3640']]),'#1e2430',2);poly(c,[[44,-100],[80,-88],[44,-76]],'#8ca9ac','#3c555f',1.5);for(let k=0;k<3;k++)line(c,-30+k*20,-104,-30+k*20,-72,'#2e3640',1.5);break;
+      case 'mace':wood(-30,115,9);line(c,0,-30,0,-70,'#555',4);for(let k=0;k<6;k++)ellipse(c,0,-36-k*7,3,3,'#8a8a8a','#333',1);ellipse(c,0,-100,26,26,grad(c,-26,-126,26,-74,[[0,'#8a94a0'],[1,'#2e3640']]),'#1e2430',2);for(let k=0;k<8;k++){const a=k*Math.PI/4;poly(c,[[Math.cos(a)*22,-100+Math.sin(a)*22],[Math.cos(a)*40,-100+Math.sin(a)*40],[Math.cos(a+.35)*22,-100+Math.sin(a+.35)*22]],'#c0c6cc','#3c555f',1)}break;
+      case 'poleaxe':wood(-120,120,8);path(c,q=>{q.moveTo(0,-110);q.bezierCurveTo(50,-125,80,-80,66,-30);q.bezierCurveTo(44,-50,20,-52,0,-40);q.closePath()},steel,'#b6d9cc',1.5);rr(c,-8,-114,16,10,2,'#8f7a3e','#d4af37',1);break;
+      case 'spear':wood(-70,130,8);poly(c,[[-12,-70],[0,-135],[12,-70],[0,-60]],steel,'#b6d9cc',1.5);rr(c,-8,-72,16,10,2,'#8f7a3e','#d4af37',1);line(c,0,-125,0,-70,'#f5f6d3',1);break;
+      case 'pike':wood(-120,140,6);poly(c,[[-7,-120],[0,-150],[7,-120],[0,-114]],steel,'#b6d9cc',1.2);rr(c,-6,-122,12,8,1,'#8f7a3e','#d4af37',1);break;
+      case 'trident':wood(-70,130,8);rr(c,-26,-78,52,8,2,'#8f7a3e','#d4af37',1);[-22,0,22].forEach(x=>poly(c,[[x-6,-78],[x,-130],[x+6,-78]],steel,'#b6d9cc',1.2));break;
+      case 'halberd':wood(-120,130,8);poly(c,[[-6,-110],[0,-150],[6,-110]],steel,'#b6d9cc',1.2);path(c,q=>{q.moveTo(4,-108);q.bezierCurveTo(50,-116,70,-70,54,-40);q.bezierCurveTo(36,-56,18,-56,4,-50);q.closePath()},steel,'#b6d9cc',1.5);path(c,q=>{q.moveTo(-4,-100);q.lineTo(-40,-90);q.lineTo(-30,-60);q.lineTo(-4,-62);q.closePath()},steel,'#b6d9cc',1.5);rr(c,-8,-112,16,8,2,'#8f7a3e','#d4af37',1);break;
+      case 'bow':path(c,q=>{q.moveTo(0,110);q.bezierCurveTo(-60,50,-60,-50,0,-110)},null,'#5a3a22',9);path(c,q=>{q.moveTo(0,110);q.bezierCurveTo(-60,50,-60,-50,0,-110)},null,'#9a7a4a',5);line(c,0,110,0,-110,'#e8e2d0',1.5);rr(c,-7,-14,14,28,3,'#3a2416');line(c,-40,0,70,0,'#4a3420',3);poly(c,[[70,-5],[86,0],[70,5]],'#b6c0b5','#5b6660',1);poly(c,[[-40,-6],[-28,0],[-40,6]],'#c9643a');break;
+      case 'crossbow':rr(c,-10,-20,20,130,3,'#5a3a22','#8a6a42',1.5);path(c,q=>{q.moveTo(-90,-30);q.bezierCurveTo(-60,-60,60,-60,90,-30)},null,'#3c555f',9);path(c,q=>{q.moveTo(-90,-30);q.bezierCurveTo(-60,-60,60,-60,90,-30)},null,'#8ca9ac',5);line(c,-90,-30,90,-30,'#e8e2d0',1.5);rr(c,-4,-60,8,80,2,'#2b2b2b','#6b6b6b',1);poly(c,[[-6,-62],[0,-78],[6,-62]],'#c0c6cc','#3c555f',1);rr(c,-18,40,36,12,3,'#2b2b2b','#6b6b6b',1);break;
+      case 'revolver':c.scale(1.7,1.7);gun(72,false);break;
+      case 'musket':gun(190,true);rr(c,120,-10,10,6,1,'#c9a94a');break;
+      case 'shotgun':gun(150,true,2);break;
+      default:grip(60,40);guard(55,28);c.translate(0,48);blade(145,8);
+    }
     c.restore();
   }
   function drawCardArt(c,card,w=360,h=360){
@@ -2158,6 +2189,10 @@ window.MuseumConfig = Object.freeze({
  const categories=Object.freeze([
   {id:'arsenal',name:'Arsenał',color:'#c9b37a'},
   {id:'heroes',name:'Bohaterowie',color:'#d9a0c6'},
+  {id:'antiquity',name:'Starożytność',color:'#d8ba86'},
+  {id:'medieval',name:'Średniowiecze',color:'#9fb8c9'},
+  {id:'renaissance',name:'Nowożytność',color:'#c9a65a'},
+  {id:'modern',name:'Wiek XIX i XX',color:'#8a9aa8'},
   {id:'elements',name:'Smoki i Żywioły',color:'#f69b55'},
   {id:'shadow',name:'Mrok i Widma',color:'#b997ee'},
   {id:'nature',name:'Dzika Natura',color:'#84ca91'},
@@ -2182,76 +2217,104 @@ window.MuseumConfig = Object.freeze({
   return Object.keys(categoryNumbers).find(category=>categoryNumbers[category].includes(number));
  }
  const crates = Object.freeze([
-  {id:'gallery',name:'Skrzynia Galerii',title:'Skrzynia Galerii',tag:'KLASYK',cost:600,pricePLN:19.99,
+  {id:'gallery',name:'Skrzynia Galerii',title:'Skrzynia Galerii',tag:'KLASYK',cost:900,pricePLN:29.99,
    description:'Nowy strój z całej kolekcji muzealnej. Od klasycznej stali po legendarny blask.',
    guarantee:'1 nowy skin · wszystkie rzadkości',glyph:'✦',color:'#90cce8',
    rarityWeights:Object.freeze({common:55,rare:28,epic:14,legendary:3})},
-  {id:'treasury',name:'Skarbiec Królów',title:'Skarbiec Królów',tag:'EPICKA+',cost:1800,pricePLN:49.99,
+  {id:'treasury',name:'Skarbiec Królów',title:'Skarbiec Królów',tag:'EPICKA+',cost:3000,pricePLN:79.99,
    description:'Królewski wybór wyłącznie spośród epickich i legendarnych zbroi.',
    guarantee:'1 nowy skin · minimum epicki',glyph:'♜',color:'#c4a1f0',
    rarityWeights:Object.freeze({common:0,rare:0,epic:85,legendary:15})},
-  {id:'relic',name:'Relikwiarz Legend',title:'Relikwiarz Legend',tag:'LEGENDA',cost:4500,pricePLN:99.99,
+  {id:'relic',name:'Relikwiarz Legend',title:'Relikwiarz Legend',tag:'LEGENDA',cost:7500,pricePLN:149.99,
    description:'Najrzadsze eksponaty w jednym relikwiarzu. Każde otwarcie to nowa legenda.',
    guarantee:'1 nowy skin · gwarantowany legendarny',glyph:'✪',color:'#f0ca72',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
-  {id:'elements',categoryId:'elements',name:'Archiwum Żywiołów',title:'Archiwum Żywiołów',tag:'ŻYWIOŁY',cost:1200,pricePLN:34.99,
+  {id:'elements',categoryId:'elements',name:'Archiwum Żywiołów',title:'Archiwum Żywiołów',tag:'ŻYWIOŁY',cost:1800,pricePLN:44.99,
    description:'Smoczy ogień, lodowe pancerze i potęga burzy. Zbroje władające siłami natury.',
    guarantee:'1 nowy skin · tylko smoki i żywioły',glyph:'⚡',color:'#f69b55',
    rarityWeights:Object.freeze({common:35,rare:38,epic:22,legendary:5})},
-  {id:'shadow',categoryId:'shadow',name:'Sarkofag Cieni',title:'Sarkofag Cieni',tag:'MROK',cost:1000,pricePLN:29.99,
+  {id:'shadow',categoryId:'shadow',name:'Sarkofag Cieni',title:'Sarkofag Cieni',tag:'MROK',cost:1500,pricePLN:39.99,
    description:'Widmowe pancerze, krucze płaszcze i tajemnice nocnej straży.',
    guarantee:'1 nowy skin · tylko mrok i widma',glyph:'☾',color:'#b997ee',
    rarityWeights:Object.freeze({common:40,rare:42,epic:18,legendary:0})},
-  {id:'nature',categoryId:'nature',name:'Skrzynia Pradawnej Puszczy',title:'Skrzynia Pradawnej Puszczy',tag:'NATURA',cost:1100,pricePLN:32.99,
+  {id:'nature',categoryId:'nature',name:'Skrzynia Pradawnej Puszczy',title:'Skrzynia Pradawnej Puszczy',tag:'NATURA',cost:1600,pricePLN:42.99,
    description:'Leśni obrońcy, dzikie bestie i zbroje z najdalszych zakątków puszczy.',
    guarantee:'1 nowy skin · tylko dzika natura',glyph:'✿',color:'#84ca91',
    rarityWeights:Object.freeze({common:38,rare:40,epic:18,legendary:4})},
-  {id:'royal',categoryId:'royal',name:'Królewski Arsenał',title:'Królewski Arsenał',tag:'KORONA',cost:1500,pricePLN:44.99,
+  {id:'royal',categoryId:'royal',name:'Królewski Arsenał',title:'Królewski Arsenał',tag:'KORONA',cost:2200,pricePLN:54.99,
    description:'Herby wielkich rodów, królewskie płaszcze i stal zaprzysiężonej gwardii.',
    guarantee:'1 nowy skin · tylko korona i honor',glyph:'♛',color:'#eccd76',
    rarityWeights:Object.freeze({common:30,rare:40,epic:24,legendary:6})},
-  {id:'forge',categoryId:'forge',name:'Warsztat Mechanika',title:'Warsztat Mechanika',tag:'KUŹNIA',cost:1300,pricePLN:39.99,
+  {id:'forge',categoryId:'forge',name:'Warsztat Mechanika',title:'Warsztat Mechanika',tag:'KUŹNIA',cost:1900,pricePLN:47.99,
    description:'Miedź, kryształ i maszyny. Pancerze wykute z pomysłowości muzealnych mistrzów.',
    guarantee:'1 nowy skin · tylko kuźnia i technika',glyph:'⚙',color:'#d99c7b',
    rarityWeights:Object.freeze({common:30,rare:42,epic:23,legendary:5})},
-  {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1000,pricePLN:29.99,
+  {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1500,pricePLN:39.99,
    description:'Wędrowcy, błędni rycerze i złote skorpiony ze szlaków poza horyzontem.',
    guarantee:'1 nowy skin · tylko piaski i szlaki',glyph:'✧',color:'#d8ba86',
    rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
 ,
-  {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:900,pricePLN:24.99,
+  {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:1500,pricePLN:39.99,
    description:'Topór, włócznia, rapier albo rewolwer. Każda broń zmienia rytm walki.',
    guarantee:'1 nowa broń · wszystkie rzadkości',glyph:'⚔',color:'#c9b37a',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
-  {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:800,pricePLN:22.99,
+  {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:1200,pricePLN:34.99,
    description:'Karty prawdziwych bohaterów historii z pasywnym bonusem oraz karty broni.',
    guarantee:'1 nowa karta · bohaterowie i broń',color:'#d9a0c6',glyph:'♞',
    rarityWeights:Object.freeze({common:40,rare:35,epic:19,legendary:6})},
-  {id:'pantheon',family:'cards',pool:'card',categoryId:'heroes',name:'Panteon Bohaterów',title:'Panteon Bohaterów',tag:'KARTY',cost:1000,pricePLN:27.99,
+  {id:'pantheon',family:'cards',pool:'card',categoryId:'heroes',name:'Panteon Bohaterów',title:'Panteon Bohaterów',tag:'KARTY',cost:1500,pricePLN:39.99,
    description:'Tylko karty bohaterów: Sobieski, Joanna d\u2019Arc, Chrobry i reszta panteonu. Każda z pasywnym bonusem.',
    guarantee:'1 nowa karta · tylko bohaterowie',color:'#e8a0c8',glyph:'♚',
    rarityWeights:Object.freeze({common:35,rare:35,epic:22,legendary:8})},
-  {id:'blueprints',family:'cards',pool:'card',categoryId:'arsenal',name:'Plany Broni',title:'Plany Broni',tag:'KARTY',cost:500,pricePLN:14.99,
+  {id:'blueprints',family:'cards',pool:'card',categoryId:'arsenal',name:'Plany Broni',title:'Plany Broni',tag:'KARTY',cost:800,pricePLN:22.99,
    description:'Karty broni: +10% obrażeń do pasującej broni, rewolwer dostaje dodatkowe naboje.',
    guarantee:'1 nowa karta broni',color:'#9fb8c9',glyph:'✎',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
-  {id:'starter',family:'mixed',pool:'any',name:'Skrzynia Startowa',title:'Skrzynia Startowa',tag:'START',cost:300,pricePLN:9.99,
+  {id:'blades',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'blade',name:'Zbrojownia Ostrzy',title:'Zbrojownia Ostrzy',tag:'OSTRZA',cost:1800,pricePLN:44.99,
+   description:'Gladius, claymore, szabla husarska, katana. Wszystko, co tnie.',guarantee:'1 nowa broń · tylko ostrza',color:'#c9d6dc',glyph:'⚔',
+   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+  {id:'heavy',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'heavy',name:'Kuźnia Ciężka',title:'Kuźnia Ciężka',tag:'CIĘŻKA',cost:1800,pricePLN:44.99,
+   description:'Topory, młoty, morgensztern. Wolne, ale po jednym ciosie nikt nie wstaje.',guarantee:'1 nowa broń · tylko ciężka',color:'#a8a8b0',glyph:'⚒',
+   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+  {id:'polearms',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'polearm',name:'Sala Drzewcowa',title:'Sala Drzewcowa',tag:'DRZEWCOWA',cost:1600,pricePLN:39.99,
+   description:'Włócznie, trójząb, halabarda, pika. Trafiają, zanim przeciwnik dojdzie.',guarantee:'1 nowa broń · tylko drzewcowa',color:'#b89a6a',glyph:'↑',
+   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+  {id:'light',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'light',name:'Gabinet Sztyletów',title:'Gabinet Sztyletów',tag:'LEKKA',cost:1600,pricePLN:39.99,
+   description:'Rapier, stylet, bagnet, sztylet. Szybko, blisko, w serii.',guarantee:'1 nowa broń · tylko lekka',color:'#9ab0c0',glyph:'/',
+   rarityWeights:Object.freeze({common:40,rare:36,epic:24,legendary:0})},
+  {id:'ranged',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'ranged',name:'Strzelnica Kustosza',title:'Strzelnica Kustosza',tag:'DYSTANSOWA',cost:2600,pricePLN:64.99,
+   description:'Łuk, kusza, muszkiet, strzelba i rewolwer. Jedyne bronie, które działają z drugiego końca areny.',guarantee:'1 nowa broń · tylko dystansowa',color:'#d8a060',glyph:'◎',
+   rarityWeights:Object.freeze({common:0,rare:45,epic:40,legendary:15})},
+  {id:'era-antiquity',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'antiquity',name:'Arsenał Antyku',title:'Arsenał Antyku',tag:'STAROŻYTNOŚĆ',cost:1700,pricePLN:42.99,
+   description:'Gladius, labrys, włócznia hoplity, trójząb, sztylet. Brąz i żelazo.',guarantee:'1 nowa broń · starożytność',color:'#d8ba86',glyph:'Λ',
+   rarityWeights:Object.freeze({common:55,rare:45,epic:0,legendary:0})},
+  {id:'era-medieval',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'medieval',name:'Arsenał Średniowiecza',title:'Arsenał Średniowiecza',tag:'ŚREDNIOWIECZE',cost:2000,pricePLN:49.99,
+   description:'Claymore, młot, morgensztern, halabarda, łuk, kusza. Pełna zbrojownia zamku.',guarantee:'1 nowa broń · średniowiecze',color:'#9fb8c9',glyph:'♜',
+   rarityWeights:Object.freeze({common:40,rare:35,epic:25,legendary:0})},
+  {id:'era-renaissance',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'renaissance',name:'Arsenał Nowożytny',title:'Arsenał Nowożytny',tag:'NOWOŻYTNOŚĆ',cost:2000,pricePLN:49.99,
+   description:'Szabla husarska, katana, berdysz, pika, rapier, stylet, muszkiet.',guarantee:'1 nowa broń · nowożytność',color:'#c9a65a',glyph:'♛',
+   rarityWeights:Object.freeze({common:35,rare:40,epic:25,legendary:0})},
+  {id:'era-modern',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'modern',name:'Arsenał XX Wieku',title:'Arsenał XX Wieku',tag:'XIX–XX W.',cost:2800,pricePLN:69.99,
+   description:'Bagnet, strzelba i Rewolwer Kustosza. Proch zamiast stali.',guarantee:'1 nowa broń · XIX i XX wiek',color:'#8a9aa8',glyph:'●',
+   rarityWeights:Object.freeze({common:0,rare:40,epic:40,legendary:20})},
+  {id:'starter',family:'mixed',pool:'any',name:'Skrzynia Startowa',title:'Skrzynia Startowa',tag:'START',cost:400,pricePLN:9.99,
    description:'Strój, broń albo karta na dobry początek. Tanio i bez niespodzianek.',
    guarantee:'1 nowy przedmiot · zwykły lub rzadki',color:'#a8d08d',glyph:'●',
    rarityWeights:Object.freeze({common:70,rare:30,epic:0,legendary:0})},
-  {id:'night',family:'mixed',pool:'any',name:'Skrzynia Nocnej Zmiany',title:'Skrzynia Nocnej Zmiany',tag:'MIESZANA',cost:700,pricePLN:19.99,
+  {id:'night',family:'mixed',pool:'any',name:'Skrzynia Nocnej Zmiany',title:'Skrzynia Nocnej Zmiany',tag:'MIESZANA',cost:1200,pricePLN:29.99,
    description:'Wszystko, co może wypaść w muzeum po zmroku: stroje, bronie i karty w jednej skrzyni.',
    guarantee:'1 nowy przedmiot · wszystkie rodzaje i rzadkości',color:'#d5ed71',glyph:'☆',
    rarityWeights:Object.freeze({common:50,rare:30,epic:15,legendary:5})},
-  {id:'vault',family:'mixed',pool:'any',name:'Skarbiec Kustosza',title:'Skarbiec Kustosza',tag:'EPICKA+',cost:2500,pricePLN:59.99,
+  {id:'vault',family:'mixed',pool:'any',name:'Skarbiec Kustosza',title:'Skarbiec Kustosza',tag:'EPICKA+',cost:4000,pricePLN:89.99,
    description:'Epickie i legendarne przedmioty każdego rodzaju. Klucz ma tylko kustosz.',
    guarantee:'1 nowy przedmiot · minimum epicki',color:'#c4a1f0',glyph:'◆',
    rarityWeights:Object.freeze({common:0,rare:0,epic:80,legendary:20})},
-  {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:6000,pricePLN:129.99,
+  {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:9000,pricePLN:199.99,
    description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})}
- ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',...crate})));
+ ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic')})));
+ const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -2274,11 +2337,11 @@ window.MuseumConfig = Object.freeze({
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
  ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
  // One catalogue for everything a crate can drop or a player can sell.
- const values=Object.freeze({basic:0,common:150,rare:400,epic:1000,legendary:2500});
+ const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500});
  const SELL_RATE=.4, UPGRADE_MAX=5;
  const items=Object.freeze([
   ...skins.map(skin=>({kind:'skin',...skin})),
-  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,summary:w.summary,description:w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:'arsenal'})),
+  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'}))
  ].map(Object.freeze));
  const itemsById=new Map(items.map(item=>[item.id,item]));
@@ -2317,7 +2380,7 @@ window.MuseumConfig = Object.freeze({
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && !has(profile,s)) : [];
+  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType) && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);
@@ -2384,7 +2447,7 @@ window.MuseumConfig = Object.freeze({
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
  const upgradeKey=(kind,id)=>`${kind}:${id}`;
  function upgradeLevel(profile,id){const item=getItem(id);return item?integer(profile.upgrades?.[upgradeKey(item.kind,item.id)]):0;}
- function upgradeCost(level){return level>=UPGRADE_MAX?null:250+level*350;}
+ function upgradeCost(level){return level>=UPGRADE_MAX?null:400+level*600;}
  function upgradeEffect(item,level){const it=typeof item==='string'?getItem(item):item;if(!it||!level)return null;return it.kind==='skin'?`+${6*level} maks. HP`:it.kind==='weapon'?`+${8*level}% obrażeń`:null;}
  function canUpgrade(profile,id){const item=getItem(id);if(!item||!has(profile,item)||!(item.kind==='skin'||item.kind==='weapon'))return false;const cost=upgradeCost(upgradeLevel(profile,id));return cost!==null&&profile.coins>=cost;}
  function upgrade(profile,id){
@@ -2406,10 +2469,10 @@ window.MuseumConfig = Object.freeze({
   const today=dateKey(now);if(profile.login?.last===today)return null;
   const yesterday=dateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1));
   const streak=profile.login?.last===yesterday?integer(profile.login.streak)+1:1;
-  const bonus=Math.min(300,50+(streak-1)*25);
+  const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
 })();
 </script><script>/* Store preview. PLN prices are a catalogue only; earned tokens open crates in the collection. */
 (() => {
@@ -2447,18 +2510,19 @@ window.MuseumConfig = Object.freeze({
   const current=profile(),coins=Math.max(0,Number(current.coins)||0);
   const focused=document.activeElement?.closest?.('.shop-product')?.dataset.crateId;
   const products=visible.map(crate=>{
-   const index=loot.crates.indexOf(crate),category=loot.getCategory(crate.categoryId);
+   const index=loot.crates.indexOf(crate),category=loot.getCategory(crate.categoryId),typeName=crate.weaponType?window.MuseumWeapons.types[crate.weaponType].name:null;
    const available=loot.remaining(current,crate.id).length>0;
    const button=node('button',`shop-product${crate.id===selectedId?' is-selected':''}`);
    button.type='button';button.dataset.crateId=crate.id;button.style.setProperty('--crate-color',crate.color);
    if(crate.id==='treasury'){button.classList.add('is-best-offer');button.append(node('span','shop-best-offer','NAJLEPSZA OFERTA'));}
    button.setAttribute('aria-pressed',String(crate.id===selectedId));
    button.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. Planowana cena ${currency.format(crate.pricePLN)}. Wybierz szczegóły.`);
-   const heading=node('span','shop-product-head');heading.append(node('span','shop-product-number',String(index+1).padStart(2,'0')),node('small','shop-product-tag',category?.name||crate.tag||crate.title||'MUZEALNA KOLEKCJA'));
+   const heading=node('span','shop-product-head');heading.append(node('span','shop-product-number',String(index+1).padStart(2,'0')),node('small','shop-product-tag',typeName||category?.name||crate.tag||crate.title||'MUZEALNA KOLEKCJA'));
    const art=node('span','shop-product-art');const canvas=document.createElement('canvas');canvas.width=284;canvas.height=240;art.append(canvas);const ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawCrate)window.MuseumArt.drawCrate(ctx,crate,canvas.width,canvas.height,{time:1.3});
    const price=node('span','shop-product-price');price.append(node('strong','',currency.format(crate.pricePLN)),node('small','shop-product-planned','PLANOWANA CENA'));
    button.append(heading,art,node('h3','',crate.name),node('p','shop-product-guarantee',crate.guarantee));
-   if(category){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
+   if(category&&crate.pool==='skin'){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
+   else if(crate.pool==='weapon'&&(crate.weaponType||category)){const pool=loot.items.filter(item=>item.kind==='weapon'&&item.weight>0&&(!crate.weaponType||item.type===crate.weaponType)&&(!category||item.categoryId===category.id)),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} BRONI W PULI`));}
    else if(crate.pool!=='skin'){const pool=loot.items.filter(item=>(crate.pool==='any'||item.kind===crate.pool)&&item.weight>0&&crate.rarityWeights[item.rarity]>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} ${crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':'PRZEDMIOTÓW'} W PULI`));}
    else button.append(node('span','shop-product-progress','WSZYSTKIE KATEGORIE STROJÓW'));
    button.append(price,node('span','shop-product-tokens',`LUB ${number.format(crate.cost)} ✦ Z GRY`),node('span','shop-inspect',crate.id===selectedId?'● WYBRANA SKRZYNIA':'ZOBACZ ZAWARTOŚĆ ↗'));
@@ -2658,7 +2722,8 @@ window.MuseumConfig = Object.freeze({
  const outfitCount=n=>`${n} ${n===1?'strój':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'stroje':'strojów'}`;
  const normalizeSkinText=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ł/gi,'l').toLocaleLowerCase('pl-PL').trim();
  function itemSummary(item){return item.kind==='skin'?perkText(perks.get(item.id)):item.summary||'';}
- function matchingItems(){const query=normalizeSkinText(collectionFilters.search);return loot.items.filter(s=>{if(s.kind!==collectionKind)return false;const owned=loot.has(profile,s);return (!collectionFilters.newOnly||/^knight-\d{2}$/.test(s.id))&&(collectionFilters.category==='all'||s.categoryId===collectionFilters.category)&&(collectionFilters.rarity==='all'||s.rarity===collectionFilters.rarity)&&(collectionFilters.ownership==='all'||(collectionFilters.ownership==='owned'?owned:!owned))&&(!query||normalizeSkinText([s.name,s.description||'',s.motif||'',loot.getCategory(s.categoryId)?.name||'',itemSummary(s)].join(' ')).includes(query));});}
+ function itemSearchText(item){return [item.name,item.description||'',item.motif||'',item.typeName||'',loot.getCategory(item.categoryId)?.name||'',itemSummary(item)].join(' ');}
+ function matchingItems(){const query=normalizeSkinText(collectionFilters.search);return loot.items.filter(s=>{if(s.kind!==collectionKind)return false;const owned=loot.has(profile,s);return (!collectionFilters.newOnly||/^knight-\d{2}$/.test(s.id))&&(collectionFilters.category==='all'||s.categoryId===collectionFilters.category)&&(collectionFilters.rarity==='all'||s.rarity===collectionFilters.rarity)&&(collectionFilters.ownership==='all'||(collectionFilters.ownership==='owned'?owned:!owned))&&(!query||normalizeSkinText(itemSearchText(s)).includes(query));});}
  const matchingSkins=matchingItems;
  function perkText(perk){return `${perk.title}: ${perk.summary}`;}
  function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),weapon=weapons.get(profile.weapon),card=cardsApi.get(profile.card);const up=loot.upgradeLevel(profile,skin.id),wup=loot.upgradeLevel(profile,weapon.id);const text=`${skin.name}${up?` +${up}`:''} — ${perkText(perks.get(skin.id))} · ${weapon.name}${wup?` +${wup}`:''}${card?` · ${card.name}: ${card.summary}`:''}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
@@ -2809,8 +2874,8 @@ window.MuseumConfig = Object.freeze({
  function itemCount(n,kind){const forms={skin:['strój','stroje','strojów'],weapon:['broń','bronie','broni'],card:['karta','karty','kart'],any:['przedmiot','przedmioty','przedmiotów']}[kind]||['przedmiot','przedmioty','przedmiotów'];return `${n} ${n===1?forms[0]:n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?forms[1]:forms[2]}`;}
  function drawCrate(canvas,crate){const ctx=canvas.getContext('2d');if(!ctx||!window.MuseumArt?.drawCrate)return;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);window.MuseumArt.drawCrate(ctx,crate,canvas.width,canvas.height,{time:1.3});}
  function renderCrateCards(selectedId){
-  const row=$('crateCards');const busy=()=>crateBusy||!['menu','result'].includes(screen);
-  row.replaceChildren(...loot.crates.map(crate=>{
+  const root=$('crateCards');const busy=()=>crateBusy||!['menu','result'].includes(screen);
+  const card=crate=>{
    const left=loot.remaining(profile,crate.id).length,free=crate.id==='gallery'&&profile.freeCrates>0,done=left===0,b=document.createElement('button');
    b.type='button';b.className=`crate-card ${crate.id===selectedId?'is-selected':''} ${done?'is-done':''}`;b.style.setProperty('--crate-color',crate.color);b.dataset.crateId=crate.id;
    b.setAttribute('aria-pressed',String(crate.id===selectedId));b.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. ${done?'Zawartość zebrana.':free?'Darmowa.':`${number(crate.cost)} żetonów.`}`);
@@ -2820,14 +2885,15 @@ window.MuseumConfig = Object.freeze({
    const name=document.createElement('strong');name.textContent=crate.name;const tag=document.createElement('small');tag.textContent=crate.tag;const price=document.createElement('span');price.className='crate-price';price.textContent=free?'GRATIS':done?'—':`${number(crate.cost)} ✦`;
    b.append(name,tag,price);
    b.addEventListener('click',()=>{if(busy())return;selectedCrateId=crate.id;renderSkins();b.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});});
-   return b;}));
-  $('crateCount').textContent=`${loot.crates.length} RODZAJÓW`;
+   return b;};
+  root.replaceChildren(...loot.crateGroups.map(group=>{const crates=loot.crates.filter(c=>c.group===group.id);if(!crates.length)return null;const section=document.createElement('div');section.className='crate-group';const head=document.createElement('div');head.className='crate-group-head';head.innerHTML=`<span>${group.name}</span><small>${crates.length}</small>`;const row=document.createElement('div');row.className='crate-row';row.append(...crates.map(card));section.append(head,row);return section;}).filter(Boolean));
+  $('crateCount').textContent=`${loot.crates.length} RODZAJÓW W ${loot.crateGroups.length} GRUPACH`;
  }
  function equipLabel(item,selected){if(item.kind==='card')return cardsApi.get(item.id)?.type==='hero'?(selected?'● AKTYWNA':'AKTYWUJ KARTĘ ↗'):'✓ DZIAŁA Z BRONIĄ';return selected?'● WYBRANY':item.kind==='weapon'?'ZAŁÓŻ BROŃ ↗':'WYBIERZ SKIN ↗';}
  function renderSkins(){
   const grid=$('skinGrid');grid.replaceChildren();
   for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card']])$(id).setAttribute('aria-pressed',String(collectionKind===kind));
-  show('newSkinsOnly',collectionKind==='skin');$('categoryFilter').disabled=collectionKind!=='skin';
+  show('newSkinsOnly',collectionKind==='skin');$('categoryFilter').disabled=collectionKind==='card';
   const matches=matchingItems(),pages=Math.max(1,Math.ceil(matches.length/SKINS_PER_PAGE));collectionPage=Math.max(0,Math.min(collectionPage,pages-1));const page=matches.slice(collectionPage*SKINS_PER_PAGE,(collectionPage+1)*SKINS_PER_PAGE);
   $('skinResultsCount').textContent=matches.length?`${itemCount(matches.length,collectionKind)} · ${collectionPage*SKINS_PER_PAGE+1}–${Math.min((collectionPage+1)*SKINS_PER_PAGE,matches.length)} na stronie`:itemCount(0,collectionKind);
   $('skinPageInfo').textContent=`Strona ${collectionPage+1} / ${pages}`;$('skinPagePrev').disabled=collectionPage===0;$('skinPageNext').disabled=collectionPage>=pages-1;show('skinPagination',matches.length>SKINS_PER_PAGE);show('skinEmpty',!matches.length);$('newSkinsOnly').setAttribute('aria-pressed',String(collectionFilters.newOnly));
@@ -2840,7 +2906,7 @@ window.MuseumConfig = Object.freeze({
    const badge=s.number?`<span class="skin-number">${String(s.number).padStart(2,'0')} / 50</span>`:s.gift?'<span class="skin-number">★ SPECJALNY</span>':level?`<span class="skin-number">ULEPSZENIE +${level}</span>`:'';
    b.innerHTML=`${badge}<canvas width="360" height="360" aria-hidden="true"></canvas><small>${s.era}</small><strong>${s.name}</strong><span class="skin-category"></span><span class="skin-perk"><strong></strong><span></span></span><span class="skin-state">${owned?equipLabel(s,selected):'◇ DO ODKRYCIA'}</span>`;
    b.querySelector('.skin-category').textContent=loot.getCategory(s.categoryId)?.name||'';
-   const perkTitle=s.kind==='skin'?perks.get(s.id).title:s.kind==='card'?cardsApi.get(s.id).era:s.era,perkSummary=s.kind==='skin'?perks.get(s.id).summary:s.summary;
+   const perkTitle=s.kind==='skin'?perks.get(s.id).title:s.kind==='card'?cardsApi.get(s.id).era:(s.typeName||s.era),perkSummary=s.kind==='skin'?perks.get(s.id).summary:s.summary;
    b.querySelector('.skin-perk strong').textContent=perkTitle;b.querySelector('.skin-perk span').textContent=level&&s.kind!=='card'?`${perkSummary} · ${loot.upgradeEffect(s,level)}`:perkSummary;
    b.addEventListener('click',()=>{if(busy())return;if(!owned){$('collectionMessage').textContent=`${s.name} czeka w muzealnej skrzyni. ${itemSummary(s)}`;return;}const next=loot.equip(profile,s.id);if(!next){$('collectionMessage').textContent=`${s.name} działa automatycznie, kiedy masz założoną pasującą broń.`;return;}profile=next;persist();renderSkins();$('collectionMessage').textContent=s.kind==='card'&&profile.card!==s.id?`Karta ${s.name} odłożona.`:`Wybrano ${s.name}. ${itemSummary(s)}`;});
    cell.append(b);
@@ -2857,7 +2923,7 @@ window.MuseumConfig = Object.freeze({
   }
   const crate=loot.getCrate(selectedCrateId)||loot.getCrate('gallery');selectedCrateId=crate.id;
   const entries=loot.entries(profile,crate.id),all=!entries.length,free=crate.id==='gallery'&&profile.freeCrates>0,odds=loot.odds(profile,crate.id);
-  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?'Skrzynia broni':crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
+  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?(crate.weaponType?`Broń · ${weapons.types[crate.weaponType].name}`:crate.categoryId?`Broń · ${loot.getCategory(crate.categoryId)?.name}`:'Cała zbrojownia'):crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
   $('crateContentsSummary').textContent=`ZAWARTOŚĆ I SZANSE · ${itemCount(entries.length,crate.pool)}`;renderDropContents($('crateContentsList'),entries);
   $('crateBtn').disabled=all||crateBusy||!!profile.pendingReward||(!free&&profile.coins<crate.cost);
   $('crateBtn').innerHTML=all?'ZAWARTOŚĆ ZEBRANA <span>✓</span>':free?'OTWÓRZ GRATIS <span>◇</span>':`OTWÓRZ SKRZYNIĘ <span>${number(crate.cost)} ✦</span>`;

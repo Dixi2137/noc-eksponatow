@@ -34,18 +34,19 @@
   const current=profile(),coins=Math.max(0,Number(current.coins)||0);
   const focused=document.activeElement?.closest?.('.shop-product')?.dataset.crateId;
   const products=visible.map(crate=>{
-   const index=loot.crates.indexOf(crate),category=loot.getCategory(crate.categoryId);
+   const index=loot.crates.indexOf(crate),category=loot.getCategory(crate.categoryId),typeName=crate.weaponType?window.MuseumWeapons.types[crate.weaponType].name:null;
    const available=loot.remaining(current,crate.id).length>0;
    const button=node('button',`shop-product${crate.id===selectedId?' is-selected':''}`);
    button.type='button';button.dataset.crateId=crate.id;button.style.setProperty('--crate-color',crate.color);
    if(crate.id==='treasury'){button.classList.add('is-best-offer');button.append(node('span','shop-best-offer','NAJLEPSZA OFERTA'));}
    button.setAttribute('aria-pressed',String(crate.id===selectedId));
    button.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. Planowana cena ${currency.format(crate.pricePLN)}. Wybierz szczegóły.`);
-   const heading=node('span','shop-product-head');heading.append(node('span','shop-product-number',String(index+1).padStart(2,'0')),node('small','shop-product-tag',category?.name||crate.tag||crate.title||'MUZEALNA KOLEKCJA'));
+   const heading=node('span','shop-product-head');heading.append(node('span','shop-product-number',String(index+1).padStart(2,'0')),node('small','shop-product-tag',typeName||category?.name||crate.tag||crate.title||'MUZEALNA KOLEKCJA'));
    const art=node('span','shop-product-art');const canvas=document.createElement('canvas');canvas.width=284;canvas.height=240;art.append(canvas);const ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawCrate)window.MuseumArt.drawCrate(ctx,crate,canvas.width,canvas.height,{time:1.3});
    const price=node('span','shop-product-price');price.append(node('strong','',currency.format(crate.pricePLN)),node('small','shop-product-planned','PLANOWANA CENA'));
    button.append(heading,art,node('h3','',crate.name),node('p','shop-product-guarantee',crate.guarantee));
-   if(category){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
+   if(category&&crate.pool==='skin'){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
+   else if(crate.pool==='weapon'&&(crate.weaponType||category)){const pool=loot.items.filter(item=>item.kind==='weapon'&&item.weight>0&&(!crate.weaponType||item.type===crate.weaponType)&&(!category||item.categoryId===category.id)),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} BRONI W PULI`));}
    else if(crate.pool!=='skin'){const pool=loot.items.filter(item=>(crate.pool==='any'||item.kind===crate.pool)&&item.weight>0&&crate.rarityWeights[item.rarity]>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} ${crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':'PRZEDMIOTÓW'} W PULI`));}
    else button.append(node('span','shop-product-progress','WSZYSTKIE KATEGORIE STROJÓW'));
    button.append(price,node('span','shop-product-tokens',`LUB ${number.format(crate.cost)} ✦ Z GRY`),node('span','shop-inspect',crate.id===selectedId?'● WYBRANA SKRZYNIA':'ZOBACZ ZAWARTOŚĆ ↗'));
