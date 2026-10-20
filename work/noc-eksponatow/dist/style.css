@@ -221,3 +221,5 @@ body.pixel .dream-caption h2{font-size:52px}body.pixel .choice-box h2{font-size:
 body.pixel .exhibit-tag #exhibitTagName{font-family:var(--pixel-head);font-weight:400;font-size:28px;letter-spacing:.5px}
 @media(max-width:1000px){.exhibit-tag{font-size:12px;padding:8px 10px}body.pixel .exhibit-tag #exhibitTagName{font-size:22px}.exhibit-tag small{font-size:8px}}
 @media(max-width:650px){.exhibit-tag{font-size:10px;max-width:52%;bottom:12%}body.pixel .exhibit-tag #exhibitTagName{font-size:18px}.exhibit-tag small{font-size:7px}}
+
+.brand-seal{border:0;width:44px;height:44px;padding:0}.brand-seal svg{width:44px;height:44px;display:block}@media(max-width:650px){.brand-seal,.brand-seal svg{width:36px;height:36px}}
