@@ -82,7 +82,8 @@
     // Sign plaque above the door (drawn after the pillars so long names never hide behind them).
     const sign = String(o.sign || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
     px(c, 144 - sw / 2 - 1, 16, '#3b352a', sw + 2, 12); px(c, 144 - sw / 2, 17, '#1a1612', sw, 10);
-    c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25);
+    if (o.texts) o.texts.push({ x: 144, y: 25, text: sign, size: 7, color: '#e2cf8f' });
+    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25); }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.
@@ -441,25 +442,41 @@
     pixelGlyph(c, crate?.glyph || '✦', mix(col, '#ffffff', .55), cx, cy - 1 * sc, sc);
     [[-13, -12], [14, -9], [-11, 11], [13, 12], [0, -17]].forEach(([dx, dy], i) => { px(c, cx + dx * sc, cy + dy * sc, mix(col, '#ffffff', .45), sc, sc); if (i % 2) px(c, cx + dx * sc - sc, cy + dy * sc, mix(col, '#ffffff', .2), 3 * sc, sc); });
   }
-  function drawCardArt(c, card, w, h) {
+  function drawCardArt(c, card, w, h, o = {}) {
     const col = card?.color || '#777', sc = Math.max(1, Math.floor(Math.min(w, h) / 32));
-    const x0 = Math.round((w - 20 * sc) / 2), y0 = Math.round((h - 28 * sc) / 2);
+    const x0 = Math.round((w - 20 * sc) / 2), y0 = Math.round((h - 28 * sc) / 2), T = o.texts, ox = o.ox || 0, oy = o.oy || 0;
     px(c, x0, y0, '#141216', 20 * sc, 28 * sc); px(c, x0 + sc, y0 + sc, mix(col, '#000', .6), 18 * sc, 26 * sc); px(c, x0 + 2 * sc, y0 + 2 * sc, mix(col, '#000', .4), 16 * sc, 12 * sc);
     px(c, x0 + 6 * sc, y0 + 4 * sc, mix(col, '#fff', .3), 8 * sc, 8 * sc); px(c, x0 + 7 * sc, y0 + 5 * sc, col, 6 * sc, 6 * sc);
-    c.fillStyle = '#f6efd8'; c.font = `${5 * sc}px monospace`; c.textAlign = 'center'; c.fillText(card?.initials || '?', x0 + 10 * sc, y0 + 10 * sc);
+    const name = (card?.name || '').replace('KARTA: ', '').split(' ');
     px(c, x0 + 2 * sc, y0 + 16 * sc, '#0d110e', 16 * sc, 9 * sc);
-    c.fillStyle = '#f3e9cf'; c.font = `${3 * sc}px monospace`; const name = (card?.name || '').replace('KARTA: ', '').split(' ');
-    name.slice(0, 2).forEach((wd, i) => c.fillText(wd.slice(0, 9), x0 + 10 * sc, y0 + (19 + i * 4) * sc));
+    if (T) { T.push({ x: ox + x0 + 10 * sc, y: oy + y0 + 10 * sc, text: card?.initials || '?', size: 5 * sc, color: '#f6efd8' }); name.slice(0, 2).forEach((wd, i) => T.push({ x: ox + x0 + 10 * sc, y: oy + y0 + (19 + i * 4) * sc, text: wd.slice(0, 9), size: 3.2 * sc, color: '#f3e9cf' })); }
+    else {
+      c.fillStyle = '#f6efd8'; c.font = `${5 * sc}px monospace`; c.textAlign = 'center'; c.fillText(card?.initials || '?', x0 + 10 * sc, y0 + 10 * sc);
+      c.fillStyle = '#f3e9cf'; c.font = `${3 * sc}px monospace`; name.slice(0, 2).forEach((wd, i) => c.fillText(wd.slice(0, 9), x0 + 10 * sc, y0 + (19 + i * 4) * sc));
+    }
     for (let k = 0; k < ({ basic: 0, common: 1, rare: 2, epic: 3, legendary: 4 })[card?.rarity] || 0; k++) px(c, x0 + (4 + k * 3) * sc, y0 + 26 * sc, mix(col, '#fff', .6), 2 * sc, sc);
   }
   function drawHall(c, t, shown, o = {}) {
-    drawArena(c, t, 'hall', { sign: (o.name || 'SALA').slice(0, 18) });
+    const T = o.texts;
+    drawArena(c, t, 'hall', { sign: (o.name || 'SALA').slice(0, 18), texts: T });
     const at = id => shown.find(e => e.slot.id === id)?.item || null;
-    const label = (x, y, text) => { px(c, x - 14, y, '#120f0b', 28, 7); c.fillStyle = '#d9c89a'; c.font = '5px monospace'; c.textAlign = 'center'; c.fillText(String(text).slice(0, 9), x, y + 5); };
+    const label = (x, y, text) => { if (T) { T.push({ x, y: y + 5, text: String(text).slice(0, 18), size: 5, color: '#d9c89a', plaque: true }); return; } px(c, x - 14, y, '#120f0b', 28, 7); c.fillStyle = '#d9c89a'; c.font = '5px monospace'; c.textAlign = 'center'; c.fillText(String(text).slice(0, 9), x, y + 5); };
     [['armor-1', 56], ['armor-2', 232]].forEach(([id, x], i) => { const item = at(id); px(c, x - 14, 124, '#4a3b2a', 28, 4); px(c, x - 16, 128, '#241c13', 32, 3); if (item) drawKnight(c, x, 124, { pose: 'idle', facing: i ? -1 : 1, time: t, skin: item.id }); label(x, 118 - (item ? 46 : 0), item ? item.name : 'POSTUMENT'); });
     [['weapon-1', 24], ['weapon-2', 264]].forEach(([id, x]) => { const item = at(id); px(c, x - 10, 40, '#1d1710', 20, 44); if (item) drawWeaponIcon(c, window.MuseumWeapons?.get(item.id), x - 8, 54, 1); label(x, 86, item ? item.name : 'BROŃ'); });
-    [['card-1', 84], ['card-2', 182]].forEach(([id, x]) => { const item = at(id); if (item) drawCardArt(c, window.MuseumCards?.get(item.id), x + 22, 90); else label(x + 11, 56, 'KARTA'); });
-    [['trophy-1', 132], ['trophy-2', 156]].forEach(([id, x]) => { const item = at(id); px(c, x - 9, 76, '#2a2219', 18, 30); px(c, x - 8, 78, 'rgba(154,208,232,.18)', 16, 24); if (item) { c.fillStyle = item.color || '#c9b37a'; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText(item.glyph || '?', x, 94); } else label(x, 86, 'GABLOTA'); });
+    [['card-1', 84], ['card-2', 182]].forEach(([id, x]) => { const item = at(id); if (item) { c.save(); c.translate(x, 30); drawCardArt(c, window.MuseumCards?.get(item.id), 22, 60, { texts: T, ox: x, oy: 30 }); c.restore(); } else label(x + 11, 56, 'KARTA'); });
+    [['trophy-1', 132], ['trophy-2', 156]].forEach(([id, x]) => { const item = at(id); px(c, x - 9, 76, '#2a2219', 18, 30); px(c, x - 8, 78, 'rgba(154,208,232,.18)', 16, 24); if (item) { if (T) T.push({ x, y: 94, text: item.glyph || '?', size: 10, color: item.color || '#c9b37a' }); else { c.fillStyle = item.color || '#c9b37a'; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText(item.glyph || '?', x, 94); } } else label(x, 86, 'GABLOTA'); });
   }
-  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
+  // Draws texts collected in low-res coordinates on a full-resolution context (scale PX), crisp, in the pixel UI font.
+  function drawTexts(c, texts, scale = PX) {
+    c.save(); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    for (const t of texts) {
+      const size = Math.round(t.size * scale * .95); c.font = `600 ${size}px 'Pixelify Sans', monospace`;
+      const x = t.x * scale, y = t.y * scale, w = c.measureText(t.text).width;
+      if (t.plaque) { c.fillStyle = '#120f0b'; c.fillRect(x - w / 2 - scale * 1.5, y - size * .95, w + scale * 3, size * 1.35); c.fillStyle = '#3b352a'; c.fillRect(x - w / 2 - scale * 1.5, y - size * .95, w + scale * 3, scale * .4); }
+      else { c.fillStyle = 'rgba(0,0,0,.55)'; c.fillText(t.text, x + scale * .4, y + scale * .4); }
+      c.fillStyle = t.color; c.fillText(t.text, x, y);
+    }
+    c.restore();
+  }
+  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();

@@ -1913,7 +1913,8 @@ window.MuseumConfig = Object.freeze({
     // Sign plaque above the door (drawn after the pillars so long names never hide behind them).
     const sign = String(o.sign || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
     px(c, 144 - sw / 2 - 1, 16, '#3b352a', sw + 2, 12); px(c, 144 - sw / 2, 17, '#1a1612', sw, 10);
-    c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25);
+    if (o.texts) o.texts.push({ x: 144, y: 25, text: sign, size: 7, color: '#e2cf8f' });
+    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25); }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.
@@ -2272,27 +2273,43 @@ window.MuseumConfig = Object.freeze({
     pixelGlyph(c, crate?.glyph || '✦', mix(col, '#ffffff', .55), cx, cy - 1 * sc, sc);
     [[-13, -12], [14, -9], [-11, 11], [13, 12], [0, -17]].forEach(([dx, dy], i) => { px(c, cx + dx * sc, cy + dy * sc, mix(col, '#ffffff', .45), sc, sc); if (i % 2) px(c, cx + dx * sc - sc, cy + dy * sc, mix(col, '#ffffff', .2), 3 * sc, sc); });
   }
-  function drawCardArt(c, card, w, h) {
+  function drawCardArt(c, card, w, h, o = {}) {
     const col = card?.color || '#777', sc = Math.max(1, Math.floor(Math.min(w, h) / 32));
-    const x0 = Math.round((w - 20 * sc) / 2), y0 = Math.round((h - 28 * sc) / 2);
+    const x0 = Math.round((w - 20 * sc) / 2), y0 = Math.round((h - 28 * sc) / 2), T = o.texts, ox = o.ox || 0, oy = o.oy || 0;
     px(c, x0, y0, '#141216', 20 * sc, 28 * sc); px(c, x0 + sc, y0 + sc, mix(col, '#000', .6), 18 * sc, 26 * sc); px(c, x0 + 2 * sc, y0 + 2 * sc, mix(col, '#000', .4), 16 * sc, 12 * sc);
     px(c, x0 + 6 * sc, y0 + 4 * sc, mix(col, '#fff', .3), 8 * sc, 8 * sc); px(c, x0 + 7 * sc, y0 + 5 * sc, col, 6 * sc, 6 * sc);
-    c.fillStyle = '#f6efd8'; c.font = `${5 * sc}px monospace`; c.textAlign = 'center'; c.fillText(card?.initials || '?', x0 + 10 * sc, y0 + 10 * sc);
+    const name = (card?.name || '').replace('KARTA: ', '').split(' ');
     px(c, x0 + 2 * sc, y0 + 16 * sc, '#0d110e', 16 * sc, 9 * sc);
-    c.fillStyle = '#f3e9cf'; c.font = `${3 * sc}px monospace`; const name = (card?.name || '').replace('KARTA: ', '').split(' ');
-    name.slice(0, 2).forEach((wd, i) => c.fillText(wd.slice(0, 9), x0 + 10 * sc, y0 + (19 + i * 4) * sc));
+    if (T) { T.push({ x: ox + x0 + 10 * sc, y: oy + y0 + 10 * sc, text: card?.initials || '?', size: 5 * sc, color: '#f6efd8' }); name.slice(0, 2).forEach((wd, i) => T.push({ x: ox + x0 + 10 * sc, y: oy + y0 + (19 + i * 4) * sc, text: wd.slice(0, 9), size: 3.2 * sc, color: '#f3e9cf' })); }
+    else {
+      c.fillStyle = '#f6efd8'; c.font = `${5 * sc}px monospace`; c.textAlign = 'center'; c.fillText(card?.initials || '?', x0 + 10 * sc, y0 + 10 * sc);
+      c.fillStyle = '#f3e9cf'; c.font = `${3 * sc}px monospace`; name.slice(0, 2).forEach((wd, i) => c.fillText(wd.slice(0, 9), x0 + 10 * sc, y0 + (19 + i * 4) * sc));
+    }
     for (let k = 0; k < ({ basic: 0, common: 1, rare: 2, epic: 3, legendary: 4 })[card?.rarity] || 0; k++) px(c, x0 + (4 + k * 3) * sc, y0 + 26 * sc, mix(col, '#fff', .6), 2 * sc, sc);
   }
   function drawHall(c, t, shown, o = {}) {
-    drawArena(c, t, 'hall', { sign: (o.name || 'SALA').slice(0, 18) });
+    const T = o.texts;
+    drawArena(c, t, 'hall', { sign: (o.name || 'SALA').slice(0, 18), texts: T });
     const at = id => shown.find(e => e.slot.id === id)?.item || null;
-    const label = (x, y, text) => { px(c, x - 14, y, '#120f0b', 28, 7); c.fillStyle = '#d9c89a'; c.font = '5px monospace'; c.textAlign = 'center'; c.fillText(String(text).slice(0, 9), x, y + 5); };
+    const label = (x, y, text) => { if (T) { T.push({ x, y: y + 5, text: String(text).slice(0, 18), size: 5, color: '#d9c89a', plaque: true }); return; } px(c, x - 14, y, '#120f0b', 28, 7); c.fillStyle = '#d9c89a'; c.font = '5px monospace'; c.textAlign = 'center'; c.fillText(String(text).slice(0, 9), x, y + 5); };
     [['armor-1', 56], ['armor-2', 232]].forEach(([id, x], i) => { const item = at(id); px(c, x - 14, 124, '#4a3b2a', 28, 4); px(c, x - 16, 128, '#241c13', 32, 3); if (item) drawKnight(c, x, 124, { pose: 'idle', facing: i ? -1 : 1, time: t, skin: item.id }); label(x, 118 - (item ? 46 : 0), item ? item.name : 'POSTUMENT'); });
     [['weapon-1', 24], ['weapon-2', 264]].forEach(([id, x]) => { const item = at(id); px(c, x - 10, 40, '#1d1710', 20, 44); if (item) drawWeaponIcon(c, window.MuseumWeapons?.get(item.id), x - 8, 54, 1); label(x, 86, item ? item.name : 'BROŃ'); });
-    [['card-1', 84], ['card-2', 182]].forEach(([id, x]) => { const item = at(id); if (item) drawCardArt(c, window.MuseumCards?.get(item.id), x + 22, 90); else label(x + 11, 56, 'KARTA'); });
-    [['trophy-1', 132], ['trophy-2', 156]].forEach(([id, x]) => { const item = at(id); px(c, x - 9, 76, '#2a2219', 18, 30); px(c, x - 8, 78, 'rgba(154,208,232,.18)', 16, 24); if (item) { c.fillStyle = item.color || '#c9b37a'; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText(item.glyph || '?', x, 94); } else label(x, 86, 'GABLOTA'); });
+    [['card-1', 84], ['card-2', 182]].forEach(([id, x]) => { const item = at(id); if (item) { c.save(); c.translate(x, 30); drawCardArt(c, window.MuseumCards?.get(item.id), 22, 60, { texts: T, ox: x, oy: 30 }); c.restore(); } else label(x + 11, 56, 'KARTA'); });
+    [['trophy-1', 132], ['trophy-2', 156]].forEach(([id, x]) => { const item = at(id); px(c, x - 9, 76, '#2a2219', 18, 30); px(c, x - 8, 78, 'rgba(154,208,232,.18)', 16, 24); if (item) { if (T) T.push({ x, y: 94, text: item.glyph || '?', size: 10, color: item.color || '#c9b37a' }); else { c.fillStyle = item.color || '#c9b37a'; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText(item.glyph || '?', x, 94); } } else label(x, 86, 'GABLOTA'); });
   }
-  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
+  // Draws texts collected in low-res coordinates on a full-resolution context (scale PX), crisp, in the pixel UI font.
+  function drawTexts(c, texts, scale = PX) {
+    c.save(); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    for (const t of texts) {
+      const size = Math.round(t.size * scale * .95); c.font = `600 ${size}px 'Pixelify Sans', monospace`;
+      const x = t.x * scale, y = t.y * scale, w = c.measureText(t.text).width;
+      if (t.plaque) { c.fillStyle = '#120f0b'; c.fillRect(x - w / 2 - scale * 1.5, y - size * .95, w + scale * 3, size * 1.35); c.fillStyle = '#3b352a'; c.fillRect(x - w / 2 - scale * 1.5, y - size * .95, w + scale * 3, scale * .4); }
+      else { c.fillStyle = 'rgba(0,0,0,.55)'; c.fillText(t.text, x + scale * .4, y + scale * .4); }
+      c.fillStyle = t.color; c.fillText(t.text, x, y);
+    }
+    c.restore();
+  }
+  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();
 </script><script>/* Noc Eksponatów — two-fighter canvas combat. No external runtime.
    The knight's weapon (MuseumWeapons) and the opponent (MuseumExhibits) are data; this file is the rhythm. */
@@ -3509,7 +3526,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function renderHall(){
   const shown=hallApi.exhibition(profile),sum=hallApi.summary(profile),name=profile.hall?.name||hallApi.DEFAULT_NAME;
   if($('hallName').value!==name&&document.activeElement!==$('hallName'))$('hallName').value=name;
-  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);const pix=window.MuseumArt.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;window.MuseumArt.pixelFrame(ctx,1440,810,c=>{if(pix){c.save();c.setTransform(1,0,0,1,0,0);pix.drawHall(c,0,shown,{name});c.restore();}else window.MuseumArt.drawHall(c,1440,810,0,shown,{name});});}
+  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);const pix=window.MuseumArt.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;const texts=[];window.MuseumArt.pixelFrame(ctx,1440,810,c=>{if(pix){c.save();c.setTransform(1,0,0,1,0,0);pix.drawHall(c,0,shown,{name,texts});c.restore();}else window.MuseumArt.drawHall(c,1440,810,0,shown,{name});});if(pix&&texts.length)pix.drawTexts(ctx,texts,pix.PX);}
   $('hallSummary').replaceChildren(...[['PRESTIŻ',String(sum.prestige)],['WARTOŚĆ EKSPOZYCJI',`${number(sum.value)} ✦`],['TROFEA',`${sum.trophies} / ${sum.trophiesTotal}`]].map(([k,v])=>{const span=document.createElement('span'),strong=document.createElement('strong');strong.textContent=v;span.append(k,strong);return span;}));
   $('hallFilled').textContent=`${sum.filled} / ${sum.total}${sum.fullBonus?' · PEŁNA SALA +20':''}`;
   const busy=()=>crateBusy||!['menu','result'].includes(screen);
@@ -3582,15 +3599,16 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
  function chooseShopCrate(id){if(!canOpenShop()||!loot.getCrate(id))return;closeModal();selectedCrateId=id;collection();}
  function drawItem(canvas,item){
-  const ctx0=canvas.getContext('2d'),d=canvas.width/360;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
+  const ctx0=canvas.getContext('2d'),d=canvas.width/360;let cardTexts=null;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
   const g=ctx.createRadialGradient(180,175,15,180,180,230);g.addColorStop(0,loot.rarities[item.rarity].color+'30');g.addColorStop(1,'#10180e');if(canvas.id!=='lootCanvas'){ctx.fillStyle=g;ctx.fillRect(0,0,360,360);}
   const a=window.MuseumArt;if(!a)return;const pix=a.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;
-  if(pix){ctx.save();ctx.setTransform(1,0,0,1,0,0);const sz=Math.round(360/pix.PX);if(item.kind==='weapon')pix.drawWeaponIcon(ctx,weapons.get(item.id),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:loot.equipped(profile,item)&&profile.finish?profile.finish:null,time:performance.now()/1000});else if(item.kind==='finish')pix.drawWeaponIcon(ctx,weapons.get(profile.weapon)||weapons.get('sword'),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:item.id,time:performance.now()/1000});else if(item.kind==='card')pix.drawCardArt(ctx,cardsApi.get(item.id),sz,sz);else pix.drawKnight(ctx,sz/2,sz-6,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();return;}
+  if(pix){ctx.save();ctx.setTransform(1,0,0,1,0,0);const sz=Math.round(360/pix.PX);if(item.kind==='weapon')pix.drawWeaponIcon(ctx,weapons.get(item.id),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:loot.equipped(profile,item)&&profile.finish?profile.finish:null,time:performance.now()/1000});else if(item.kind==='finish')pix.drawWeaponIcon(ctx,weapons.get(profile.weapon)||weapons.get('sword'),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:item.id,time:performance.now()/1000});else if(item.kind==='card'){cardTexts=[];pix.drawCardArt(ctx,cardsApi.get(item.id),sz,sz,{texts:cardTexts});}else pix.drawKnight(ctx,sz/2,sz-6,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();return;}
   if(item.kind==='weapon'){ctx.save();ctx.translate(180,185);ctx.scale(1.05,1.05);a.drawWeaponIcon(ctx,weapons.get(item.id));ctx.restore();}
   else if(item.kind==='finish'){drawFinishVector(ctx,weapons.get(profile.weapon)||weapons.get('sword'),item);}
   else if(item.kind==='card'){a.drawCardArt(ctx,cardsApi.get(item.id),360,360);}
   else{ctx.save();ctx.translate(180,320);ctx.scale(.95,.95);a.drawKnight(ctx,0,0,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();}
   });
+  if(cardTexts&&cardTexts.length){ctx0.setTransform(d,0,0,d,0,0);window.MuseumPixel.drawTexts(ctx0,cardTexts,window.MuseumPixel.PX);}
  }
  // Vector fallback for finishes: draw the weapon on a layer, tint it source-atop with the finish colours, add a few sparks.
  const finishLayer=document.createElement('canvas');finishLayer.width=finishLayer.height=360;

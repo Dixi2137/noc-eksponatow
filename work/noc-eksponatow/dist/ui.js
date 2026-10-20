@@ -97,7 +97,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function renderHall(){
   const shown=hallApi.exhibition(profile),sum=hallApi.summary(profile),name=profile.hall?.name||hallApi.DEFAULT_NAME;
   if($('hallName').value!==name&&document.activeElement!==$('hallName'))$('hallName').value=name;
-  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);const pix=window.MuseumArt.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;window.MuseumArt.pixelFrame(ctx,1440,810,c=>{if(pix){c.save();c.setTransform(1,0,0,1,0,0);pix.drawHall(c,0,shown,{name});c.restore();}else window.MuseumArt.drawHall(c,1440,810,0,shown,{name});});}
+  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);const pix=window.MuseumArt.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;const texts=[];window.MuseumArt.pixelFrame(ctx,1440,810,c=>{if(pix){c.save();c.setTransform(1,0,0,1,0,0);pix.drawHall(c,0,shown,{name,texts});c.restore();}else window.MuseumArt.drawHall(c,1440,810,0,shown,{name});});if(pix&&texts.length)pix.drawTexts(ctx,texts,pix.PX);}
   $('hallSummary').replaceChildren(...[['PRESTIŻ',String(sum.prestige)],['WARTOŚĆ EKSPOZYCJI',`${number(sum.value)} ✦`],['TROFEA',`${sum.trophies} / ${sum.trophiesTotal}`]].map(([k,v])=>{const span=document.createElement('span'),strong=document.createElement('strong');strong.textContent=v;span.append(k,strong);return span;}));
   $('hallFilled').textContent=`${sum.filled} / ${sum.total}${sum.fullBonus?' · PEŁNA SALA +20':''}`;
   const busy=()=>crateBusy||!['menu','result'].includes(screen);
@@ -170,15 +170,16 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
  function chooseShopCrate(id){if(!canOpenShop()||!loot.getCrate(id))return;closeModal();selectedCrateId=id;collection();}
  function drawItem(canvas,item){
-  const ctx0=canvas.getContext('2d'),d=canvas.width/360;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
+  const ctx0=canvas.getContext('2d'),d=canvas.width/360;let cardTexts=null;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
   const g=ctx.createRadialGradient(180,175,15,180,180,230);g.addColorStop(0,loot.rarities[item.rarity].color+'30');g.addColorStop(1,'#10180e');if(canvas.id!=='lootCanvas'){ctx.fillStyle=g;ctx.fillRect(0,0,360,360);}
   const a=window.MuseumArt;if(!a)return;const pix=a.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;
-  if(pix){ctx.save();ctx.setTransform(1,0,0,1,0,0);const sz=Math.round(360/pix.PX);if(item.kind==='weapon')pix.drawWeaponIcon(ctx,weapons.get(item.id),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:loot.equipped(profile,item)&&profile.finish?profile.finish:null,time:performance.now()/1000});else if(item.kind==='finish')pix.drawWeaponIcon(ctx,weapons.get(profile.weapon)||weapons.get('sword'),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:item.id,time:performance.now()/1000});else if(item.kind==='card')pix.drawCardArt(ctx,cardsApi.get(item.id),sz,sz);else pix.drawKnight(ctx,sz/2,sz-6,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();return;}
+  if(pix){ctx.save();ctx.setTransform(1,0,0,1,0,0);const sz=Math.round(360/pix.PX);if(item.kind==='weapon')pix.drawWeaponIcon(ctx,weapons.get(item.id),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:loot.equipped(profile,item)&&profile.finish?profile.finish:null,time:performance.now()/1000});else if(item.kind==='finish')pix.drawWeaponIcon(ctx,weapons.get(profile.weapon)||weapons.get('sword'),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:item.id,time:performance.now()/1000});else if(item.kind==='card'){cardTexts=[];pix.drawCardArt(ctx,cardsApi.get(item.id),sz,sz,{texts:cardTexts});}else pix.drawKnight(ctx,sz/2,sz-6,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();return;}
   if(item.kind==='weapon'){ctx.save();ctx.translate(180,185);ctx.scale(1.05,1.05);a.drawWeaponIcon(ctx,weapons.get(item.id));ctx.restore();}
   else if(item.kind==='finish'){drawFinishVector(ctx,weapons.get(profile.weapon)||weapons.get('sword'),item);}
   else if(item.kind==='card'){a.drawCardArt(ctx,cardsApi.get(item.id),360,360);}
   else{ctx.save();ctx.translate(180,320);ctx.scale(.95,.95);a.drawKnight(ctx,0,0,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();}
   });
+  if(cardTexts&&cardTexts.length){ctx0.setTransform(d,0,0,d,0,0);window.MuseumPixel.drawTexts(ctx0,cardTexts,window.MuseumPixel.PX);}
  }
  // Vector fallback for finishes: draw the weapon on a layer, tint it source-atop with the finish colours, add a few sparks.
  const finishLayer=document.createElement('canvas');finishLayer.width=finishLayer.height=360;
