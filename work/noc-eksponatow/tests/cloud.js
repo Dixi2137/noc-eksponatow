@@ -8,7 +8,7 @@
   function fakeFetch(handler) { const calls = []; window.fetch = async (url, init) => { calls.push({ url, init }); const r = handler(url, init) || { status: 200, body: {} }; return { ok: r.status < 400, status: r.status, text: async () => JSON.stringify(r.body) }; }; return calls; }
 
   test('Bez konfiguracji chmura jest wyłączona i każde wywołanie kończy się offline', async () => {
-    const old = window.MuseumConfig; window.MuseumConfig = {}; localStorage.removeItem('museum-night-session');
+    const old = window.MuseumConfig; window.MuseumConfig = {}; cloud._test.store(null);   // forget any session left by manual testing in this browser
     try {
       assert.equal(cloud.enabled(), false); const r = await cloud.leaderboard(); assert.equal(r.ok, false); assert.equal(r.offline, true);
       assert.equal(cloud.user(), null); assert.equal(await cloud.restore(), null);
