@@ -120,3 +120,22 @@
     } finally { window.fetch = realFetch; window.MuseumConfig = old; }
   });
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const cloud = window.MuseumCloud, realFetch = window.fetch;
+  test('Ogłoszenia: lista bez logowania, wysyłka i wycofanie przez RPC moderatora, dostarczenie bez duplikatów', async () => {
+    const old = window.MuseumConfig; window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'sb_publishable_t' }; const calls = [];
+    window.fetch = async (url, init) => { calls.push({ url, init }); return { ok: true, status: 200, text: async () => url.includes('/announcements') ? JSON.stringify([{ id: 7, body: 'Turniej o 20:00', kind: 'event', expires_at: new Date(Date.now() + 3600e3).toISOString() }]) : JSON.stringify({ id: 8 }) }; };
+    try {
+      const l = await cloud.announcements.list(); assert.equal(l.ok, true); assert.equal(l.data[0].body, 'Turniej o 20:00'); assert.ok(calls.at(-1).url.includes('order=created_at.desc')); assert.equal(calls.at(-1).init.headers.Authorization, undefined, 'publicznie, bez tokena');
+      cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl' } });
+      await cloud.mod.announce('Hej', 'warning', 6); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_announce')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { body: 'Hej', kind: 'warning', hours: 6 });
+      await cloud.mod.unannounce(7); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 7 });
+      let got = 0; const un = cloud.announcements.subscribe(() => got++);
+      cloud.announcements._test.deliver({ id: 901, body: 'a' }); cloud.announcements._test.deliver({ id: 901, body: 'a' }); cloud.announcements._test.deliver({ id: 902, body: 'b' });
+      assert.equal(got, 2, 'ten sam id tylko raz'); un();
+      await cloud.signOut();
+    } finally { window.fetch = realFetch; window.MuseumConfig = old; }
+  });
+})();

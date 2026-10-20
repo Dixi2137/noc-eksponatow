@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Ogłoszenia dla wszystkich (2026-10-21)
+
+Tabela `announcements` (treść do 300 znaków, rodzaj info/event/warning, autor, wygaśnięcie), publiczna do odczytu, dodana do publikacji `supabase_realtime`. Moderator wysyła z panelu (`mod_announce(body, kind, hours)`) i wycofuje (`mod_unannounce`). Klient (`MuseumCloud.announcements`) łączy się z Supabase Realtime po WebSocket ręcznie mówionym protokołem Phoenix (join na `postgres_changes` INSERT, heartbeat co 25 s, reconnect z backoffem) i dodatkowo odpytuje tabelę co 15 s oraz po powrocie karty, więc nic nie ginie. Nowe ogłoszenie pojawia się w pasku nad areną (`#announceBar`, zamknięcie zapamiętane w localStorage) i jako toast w menu. Migracja dla istniejącego projektu: `supabase/2026-10-21-ogloszenia.sql`.
+
 ## Seria ciosów bronią białą (2026-10-21)
 
 Jakub chciał atakować mieczem ciągiem. Trzymanie J już powtarzało ciosy, ale hamowało tempo i energia. Teraz broń biała ma krótszy odstęp po ciosie (ostrza 0,26 s zamiast 0,46; ciężka 0,4; noże 0,18) i tańsze ciosy (ostrza 7 energii zamiast 12; ciężka 10; noże 5), a w trakcie serii energia wraca 6/s zamiast 2/s. Broń dystansowa bez zmian.
