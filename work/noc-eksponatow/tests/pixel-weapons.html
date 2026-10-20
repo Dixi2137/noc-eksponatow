@@ -9,6 +9,6 @@ for(const w of window.MuseumWeapons.all()){if(seen.has(w.icon))continue;seen.add
 </script></body></html>
 <div class="row" id="row2"></div>
 <script>
-const ids=['sword','axe','spear','dagger','bow','revolver','musket','hammer','flintlock'];
+const ids=['sword','axe','spear','dagger','bow','revolver','musket','flintlock','derringer','thompson'];
 for(const pose of ['idle','attack']) for(const id of ids){const w=window.MuseumWeapons.get(id);if(!w)continue;const f=document.createElement('figure'),c=document.createElement('canvas');c.width=48;c.height=48;c.style.width='144px';c.style.height='144px';const x=c.getContext('2d');x.fillStyle='#2a3a3a';x.fillRect(0,0,48,48);P.drawKnight(x,20,42,{pose,facing:1,time:pose==='attack'?.25:0,skin:'verdigris',weapon:id});f.append(c);const cap=document.createElement('figcaption');cap.textContent=pose+' · '+w.name+' ('+w.type+')';f.append(cap);row2.append(f);}
 </script>
