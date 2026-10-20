@@ -301,11 +301,11 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
   </div>
  </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script>/* Cloud configuration. The anon key is public by design: Row Level Security on the server decides what it may touch.
+ <script>/* Cloud configuration. The publishable (anon) key is public by design: Row Level Security on the server decides what it may touch.
    Leave both empty to run fully offline (guest mode only). */
 window.MuseumConfig = Object.freeze({
-  supabaseUrl: '',
-  supabaseAnonKey: ''
+  supabaseUrl: 'https://dtkmxjltovqjcrwnhobf.supabase.co',
+  supabaseAnonKey: 'sb_publishable_dG-qoLrdC5L6Lf_j3rSyqA_Ix51JZDM'
 });
 </script><script>/* Supabase without a client library: auth and PostgREST over fetch. Session lives in localStorage.
    Every call resolves to {ok, data|error}; the game keeps working offline when the cloud is off or unreachable. */
