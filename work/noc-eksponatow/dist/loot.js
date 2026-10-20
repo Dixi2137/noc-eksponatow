@@ -210,6 +210,7 @@
    weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
    finishes,finish:finishes.includes(source.finish) ? source.finish : null,
+   balance:Math.min(100000000,integer(source.balance)),   // PLN wallet in grosze (demo: no real payments yet)
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
@@ -284,6 +285,20 @@
   if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else if(item.kind==='finish')next.finishes=(profile.finishes||[]).filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
   return {profile:next,price,item};
  }
+ // PLN wallet (grosze). Deposits are simulated until payments go live; finishes are bought at pricePLN and bought back at SELL_RATE_PLN.
+ const SELL_RATE_PLN=.75;
+ function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;return {...profile,balance:Math.min(100000000,integer(profile.balance)+gr)};}
+ function pricePLN(item){const it=typeof item==='string'?getItem(item):item;return it&&it.kind==='finish'?Math.round((it.pricePLN||0)*100):0;}
+ function sellPricePLN(item){return Math.round(pricePLN(item)*SELL_RATE_PLN);}
+ function canBuyFinish(profile,id){const item=getItem(id);return !!item&&item.kind==='finish'&&!has(profile,item)&&integer(profile.balance)>=pricePLN(item)&&pricePLN(item)>0;}
+ function buyFinish(profile,id){
+  if(!canBuyFinish(profile,id))return null;const item=getItem(id),price=pricePLN(item);
+  return {profile:{...profile,balance:integer(profile.balance)-price,finishes:[...(profile.finishes||[]),item.id]},item,price};
+ }
+ function sellFinish(profile,id){
+  const item=getItem(id);if(!item||item.kind!=='finish'||!canSell(profile,id))return null;const price=sellPricePLN(item);
+  return {profile:{...profile,balance:Math.min(100000000,integer(profile.balance)+price),finishes:(profile.finishes||[]).filter(x=>x!==item.id)},item,price};
+ }
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
  const upgradeKey=(kind,id)=>`${kind}:${id}`;
  function upgradeLevel(profile,id){const item=getItem(id);return item?integer(profile.upgrades?.[upgradeKey(item.kind,item.id)]):0;}
@@ -312,5 +327,5 @@
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();

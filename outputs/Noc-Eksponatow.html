@@ -126,6 +126,8 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 .choice{pointer-events:auto;background:linear-gradient(180deg,#000b,#0009 40%,#000e)}.choice-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,86%);padding:26px 28px 22px;background:var(--panel);border:1px solid var(--line);box-shadow:0 30px 80px #000c;text-align:center}.choice-box h2{font-family:'Barlow Condensed',Impact,sans-serif;font-size:clamp(26px,3.6vw,48px);line-height:1;margin:10px 0 8px;color:var(--lime)}.choice-box p{margin:0 0 18px;color:var(--muted);font-size:14px}.choice-box .result-actions{justify-content:center}.choice-hint{display:block;margin-top:14px;color:var(--muted);font-size:10px;letter-spacing:1.5px;text-transform:uppercase}body.pixel .choice-box h2{font-family:'Pixelify Sans',monospace;font-size:34px}
 
 .shop-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:34px 0 6px;padding-top:22px;border-top:1px solid var(--line)}.shop-section-head h3{font-family:'Barlow Condensed',Impact,sans-serif;font-size:30px;line-height:1;margin:6px 0 0;color:var(--cream)}.shop-finishes-lead{margin:0 0 14px;color:var(--muted);font-size:13px}.shop-finishes{grid-template-columns:repeat(4,minmax(0,1fr))}.shop-finish{cursor:default}.shop-finish .shop-product-art{width:120px;height:120px}.shop-finish .shop-product-art canvas{width:120px;height:120px;image-rendering:pixelated}.shop-finish-price{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:auto;padding-top:10px}.shop-finish-price strong{font-family:'Barlow Condensed',Impact,sans-serif;font-size:30px;line-height:1;color:var(--gold)}.shop-finish-price small{font-size:9px;letter-spacing:1.5px;color:var(--muted)}.shop-finish-state{font-size:10px;letter-spacing:1.5px;color:#7ff0e0;margin-top:8px}.shop-finish.is-owned{border-color:#7ff0e0}body.pixel .shop-section-head h3,body.pixel .shop-finish-price strong{font-family:'Pixelify Sans',monospace}@media(max-width:900px){.shop-finishes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.cash-count{position:relative;color:var(--gold)}.secret-cash{position:absolute;top:100%;left:0;width:100%;height:14px;border:0;padding:0;background:transparent;color:var(--gold);opacity:0;font-size:9px;line-height:14px;cursor:pointer}.secret-cash:hover:not(:disabled),.secret-cash:focus-visible{opacity:1;background:#d5b8780a}.secret-cash:disabled{opacity:0}.shop-wallet-panel{display:flex;flex-wrap:wrap;align-items:center;gap:18px;padding:18px 20px;background:#121810;border:1px solid var(--line)}.shop-wallet-balance{display:flex;flex-direction:column;gap:4px;min-width:150px}.shop-wallet-balance span{font-size:9px;letter-spacing:2px;color:var(--muted)}.shop-wallet-balance strong{font-family:'Barlow Condensed',Impact,sans-serif;font-size:34px;line-height:1;color:var(--gold)}.shop-deposit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1}.shop-deposit-btn{padding:9px 12px;background:transparent;border:1px solid var(--line);color:var(--cream);font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer}.shop-deposit-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}.shop-deposit-btn:disabled{opacity:.4;cursor:default}.shop-deposit-custom{display:flex;align-items:center;gap:8px;margin-left:auto}.shop-deposit-custom span{font-size:9px;letter-spacing:2px;color:var(--muted)}.shop-deposit-custom input{width:96px;padding:8px 10px;background:#0f140d;border:1px solid var(--line);color:var(--cream);font:inherit;font-size:13px}.shop-wallet-note{width:100%;margin:0;color:var(--muted);font-size:12px}.shop-finish-buy{margin-top:10px;width:100%}.shop-finish-missing{font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:6px}body.pixel .shop-wallet-balance strong{font-family:'Pixelify Sans',monospace}@media(max-width:700px){.shop-deposit-custom{margin-left:0;width:100%}}
 </style>
 </head>
 <body>
@@ -133,7 +135,7 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
   <header class="topbar">
    <div class="brand-area"><a class="brand" href="#" aria-label="Noc Eksponatów — strona główna"><span class="brand-mark">N<span>↗</span></span><span>NOC<br>EKSPONATÓW<span class="brand-sub">MUZEUM PO GODZINACH</span></span></a><button id="secretCoinsBtn" class="secret-coins" aria-label="Sekret stróża: dodaj 2137 monet">✦</button></div>
    <nav aria-label="Menu główne"><button id="arenaTab" class="nav-tab active">01 <span>ARENA</span></button><button id="collectionTab" class="nav-tab">02 <span>SKRZYNKI</span><span class="nav-dot"></span></button><button id="shopTab" class="nav-tab">03 <span>SKLEP</span></button><button id="hallTab" class="nav-tab">04 <span>MOJA SALA</span></button><button id="rankTab" class="nav-tab">05 <span>RANKING</span></button></nav>
-   <div class="top-actions"><button id="accountBtn" class="account-btn" aria-label="Konto gracza"><span class="account-dot"></span><span id="accountLabel">GOŚĆ</span></button><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><button id="pixelBtn" class="icon-btn pixel-btn" aria-label="Grafika pikselowa" aria-pressed="false" title="Grafika pikselowa">▦</button><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
+   <div class="top-actions"><button id="accountBtn" class="account-btn" aria-label="Konto gracza"><span class="account-dot"></span><span id="accountLabel">GOŚĆ</span></button><span class="coin-count" title="Żetony muzealne"><span class="coin-icon">✦</span><span id="coins">0</span></span><span class="coin-count cash-count" title="Saldo w złotówkach"><span id="balance">0,00 zł</span><button id="secretCashBtn" class="secret-cash" aria-label="Sekret kasjera: dodaj 213,70 zł">zł</button></span><button id="pixelBtn" class="icon-btn pixel-btn" aria-label="Grafika pikselowa" aria-pressed="false" title="Grafika pikselowa">▦</button><button id="soundBtn" class="icon-btn" aria-label="Włącz dźwięk" title="Dźwięk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg></button><button id="helpBtn" class="icon-btn help-btn" aria-label="Sterowanie i zasady">?</button></div>
   </header>
   <main>
    <div class="section-line"><div><span class="status-dot"></span>MUZEUM HISTORII NIEZBYT NATURALNEJ</div><span id="topStatus">ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI</span></div>
@@ -224,6 +226,8 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
    <p class="shop-notice"><span>◷</span><span><strong>ZAPOWIEDŹ SKLEPU</strong> Ceny w złotówkach są planowane. Płatności nie są jeszcze dostępne. Skrzynki za żetony zdobyte w grze możesz otwierać już teraz.</span></p>
    <div class="shop-browse"><div class="shop-filters" aria-label="Rodzaje skrzyń"><button id="shopFilterAll" aria-pressed="true">WSZYSTKIE</button><button id="shopFilterClassic" aria-pressed="false">KLASYCZNE</button><button id="shopFilterThemed" aria-pressed="false">TEMATYCZNE</button><button id="shopFilterWeapons" aria-pressed="false">BROŃ</button><button id="shopFilterCards" aria-pressed="false">KARTY</button><button id="shopFilterMixed" aria-pressed="false">MIESZANE</button></div><span id="shopOffersCount" aria-live="polite"></span></div>
    <div id="shopOffers" class="shop-offers" aria-label="Oferty skrzyń"></div>
+   <div class="shop-section-head"><div><span class="eyebrow">PORTFEL / ZŁOTÓWKI</span><h3>Saldo i wpłaty.</h3></div><span class="shop-offers-count">TRYB DEMO · WPŁATA SYMULOWANA</span></div>
+   <div class="shop-wallet-panel"><div class="shop-wallet-balance"><span>TWOJE SALDO</span><strong id="shopBalancePLN">0,00 zł</strong></div><div class="shop-deposit" role="group" aria-label="Wpłać na saldo"><button type="button" class="shop-deposit-btn" data-amount="2000">+20 zł</button><button type="button" class="shop-deposit-btn" data-amount="5000">+50 zł</button><button type="button" class="shop-deposit-btn" data-amount="10000">+100 zł</button><button type="button" class="shop-deposit-btn" data-amount="25000">+250 zł</button><button type="button" class="shop-deposit-btn" data-amount="50000">+500 zł</button><label class="shop-deposit-custom"><span>INNA KWOTA</span><input id="shopDepositInput" type="number" min="1" max="100000" step="1" placeholder="np. 1499"><button id="shopDepositBtn" type="button" class="secondary-btn">WPŁAĆ</button></label></div><p class="shop-wallet-note">Płatności nie są jeszcze podpięte: wpłata od razu zasila saldo, żeby dało się przetestować kupno i sprzedaż wykończeń. Odkup przez muzeum: 75% ceny.</p></div>
    <div class="shop-section-head"><div><span class="eyebrow">SPRZEDAŻ BEZPOŚREDNIA / LIMITOWANE</span><h3>Wykończenia broni.</h3></div><span id="shopFinishesCount" class="shop-offers-count"></span></div>
    <p class="shop-finishes-lead">Osiem limitowanych powłok do kupienia bez losowania. Każda nakłada się na dowolną broń. Ceny planowane; płatności wkrótce.</p>
    <div id="shopFinishes" class="shop-offers shop-finishes" aria-label="Wykończenia broni na sprzedaż"></div>
@@ -3107,6 +3111,7 @@ window.MuseumConfig = Object.freeze({
    weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
    finishes,finish:finishes.includes(source.finish) ? source.finish : null,
+   balance:Math.min(100000000,integer(source.balance)),   // PLN wallet in grosze (demo: no real payments yet)
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
@@ -3181,6 +3186,20 @@ window.MuseumConfig = Object.freeze({
   if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else if(item.kind==='finish')next.finishes=(profile.finishes||[]).filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
   return {profile:next,price,item};
  }
+ // PLN wallet (grosze). Deposits are simulated until payments go live; finishes are bought at pricePLN and bought back at SELL_RATE_PLN.
+ const SELL_RATE_PLN=.75;
+ function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;return {...profile,balance:Math.min(100000000,integer(profile.balance)+gr)};}
+ function pricePLN(item){const it=typeof item==='string'?getItem(item):item;return it&&it.kind==='finish'?Math.round((it.pricePLN||0)*100):0;}
+ function sellPricePLN(item){return Math.round(pricePLN(item)*SELL_RATE_PLN);}
+ function canBuyFinish(profile,id){const item=getItem(id);return !!item&&item.kind==='finish'&&!has(profile,item)&&integer(profile.balance)>=pricePLN(item)&&pricePLN(item)>0;}
+ function buyFinish(profile,id){
+  if(!canBuyFinish(profile,id))return null;const item=getItem(id),price=pricePLN(item);
+  return {profile:{...profile,balance:integer(profile.balance)-price,finishes:[...(profile.finishes||[]),item.id]},item,price};
+ }
+ function sellFinish(profile,id){
+  const item=getItem(id);if(!item||item.kind!=='finish'||!canSell(profile,id))return null;const price=sellPricePLN(item);
+  return {profile:{...profile,balance:Math.min(100000000,integer(profile.balance)+price),finishes:(profile.finishes||[]).filter(x=>x!==item.id)},item,price};
+ }
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
  const upgradeKey=(kind,id)=>`${kind}:${id}`;
  function upgradeLevel(profile,id){const item=getItem(id);return item?integer(profile.upgrades?.[upgradeKey(item.kind,item.id)]):0;}
@@ -3209,7 +3228,7 @@ window.MuseumConfig = Object.freeze({
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();
 </script><script>/* Store preview. PLN prices are a catalogue only; earned tokens open crates in the collection. */
 (() => {
@@ -3220,7 +3239,8 @@ window.MuseumConfig = Object.freeze({
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onDeposit:()=>{},onBuyFinish:()=>{},notify:()=>{}};
+ const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
   elements:'<path d="M0-24C8-8 23-5 18 12 14 31-17 31-21 12-25-3-9-13-8-20-4-13-4-6 0-3 6-11 2-16 0-24Z" fill="currentColor"/><path d="M1 1C8 12 13 14 8 22 2 29-9 23-8 15-7 9-2 7 1 1Z" fill="#1b241d"/>',
@@ -3309,17 +3329,21 @@ window.MuseumConfig = Object.freeze({
    const art=node('span','shop-product-art');const canvas=document.createElement('canvas');canvas.width=canvas.height=96;art.append(canvas);
    const ctx=canvas.getContext('2d');if(ctx){const pix=window.MuseumPixel,weapon=window.MuseumWeapons.get(current.weapon)||window.MuseumWeapons.get('sword');if(pix){ctx.imageSmoothingEnabled=false;ctx.fillStyle='#10180e';ctx.fillRect(0,0,96,96);pix.drawWeaponIcon(ctx,weapon,16,16,4,{finish:item.id,time:1});}}
    card.append(heading,art,node('h3','',item.name),node('p','shop-product-guarantee',item.description||''));
-   const price=node('span','shop-finish-price');price.append(node('strong','',plain.format(item.pricePLN||0)),node('small','','PLANOWANA CENA · PŁATNOŚCI WKRÓTCE'));card.append(price);
+   const price=node('span','shop-finish-price');price.append(node('strong','',plain.format(item.pricePLN||0)),node('small','',owned?'CENA KATALOGOWA':'CENA · PŁATNE Z SALDA'));card.append(price);
    if(owned)card.append(node('span','shop-finish-state',equipped?'● NAŁOŻONE NA TWOJĄ BROŃ':'✓ MASZ W KOLEKCJI'));
+   else{const cost=loot.pricePLN(item),missing=cost-(Number(current.balance)||0),buy=node('button','primary-btn shop-finish-buy',`KUP ZA ${pln(cost)}`);buy.type='button';buy.disabled=missing>0;buy.addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}callbacks.onBuyFinish(item.id);});card.append(buy);if(missing>0)card.append(node('span','shop-finish-missing',`BRAKUJE ${pln(missing)} · WPŁAĆ WYŻEJ`));}
    return card;
   });
   root.replaceChildren(...cards);
+  $('shopBalancePLN').textContent=pln(current.balance);
   const owned=list.filter(item=>loot.has(current,item)).length;$('shopFinishesCount').textContent=`${owned} / ${list.length} W KOLEKCJI · OD ${plain.format(Math.min(...list.map(i=>i.pricePLN)))} DO ${plain.format(Math.max(...list.map(i=>i.pricePLN)))}`;
  }
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];
   if(!mounted){
    for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed']])$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
+   for(const b of document.querySelectorAll('.shop-deposit-btn'))b.addEventListener('click',()=>{if(!callbacks.canOpen())return;callbacks.onDeposit(Number(b.dataset.amount)||0);});
+   $('shopDepositBtn')?.addEventListener('click',()=>{if(!callbacks.canOpen())return;const zl=Number($('shopDepositInput').value);if(!(zl>0&&zl<=100000)){callbacks.notify('Podaj kwotę od 1 do 100 000 zł.');return;}$('shopDepositInput').value='';callbacks.onDeposit(Math.round(zl*100));});
    $('shopTokenBtn')?.addEventListener('click',()=>{
     const selected=validCrate(selectedId),current=profile();
     if(!selected||!callbacks.canOpen()||current.pendingReward||!loot.remaining(current,selected.id).length)return;
@@ -3489,7 +3513,11 @@ window.MuseumConfig = Object.freeze({
  let pushTimer=null,pushing=false;
  function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
  async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),2500);return null;}if(pushing)return null;pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
- function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();pushCloud();}
+ const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
+ function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);updateLoadout();pushCloud();}
+ function refreshStores(){if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();}
+ function depositPLN(grosze){const next=loot.deposit(profile,grosze);if(!next)return;profile=next;persist();refreshStores();toast(`Wpłata ${pln(grosze)} zaksięgowana (demo). Saldo: ${pln(profile.balance)}.`);}
+ function buyFinish(id){const result=loot.buyFinish(profile,id);if(!result){toast('Za mało na saldzie. Wpłać najpierw złotówki.');return;}profile=result.profile;persist();refreshStores();toast(`Kupiono ${result.item.name} za ${pln(result.price)}. Nałóż je w kolekcji, zakładka WYKOŃCZENIA.`);}
 function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?(window.MuseumPixel?.PX||5):0);document.body.classList.toggle('pixel',on);$('pixelBtn').setAttribute('aria-pressed',String(on));$('pixelBtn').title=on?'Grafika pikselowa: włączona':'Grafika pikselowa: wyłączona';}
  function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
  function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
@@ -3686,9 +3714,12 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
     const cost=loot.upgradeCost(level),up=document.createElement('button');up.type='button';up.className='skin-action';up.disabled=cost===null||profile.coins<cost;up.textContent=cost===null?`MAKS. +${level}`:`ULEPSZ +${level+1} · ${number(cost)} ✦`;up.title=cost===null?'Maksymalny poziom ulepszenia.':`${s.kind==='skin'?'+6 maks. HP':'+8% obrażeń'} za poziom.`;
     up.addEventListener('click',()=>{if(busy())return;const result=loot.upgrade(profile,s.id);if(!result){toast(`Brakuje żetonów na ulepszenie. Koszt: ${number(cost)} ✦.`);return;}profile=result.profile;persist();renderSkins();toast(`${s.name} ulepszono do +${result.level}: ${loot.upgradeEffect(s,result.level)}.`);});
     if(s.kind!=='finish')actions.append(up);
-    const price=loot.sellPrice(s),sellable=loot.canSell(profile,s.id),sell=document.createElement('button');sell.type='button';sell.className='skin-action sell';sell.disabled=!sellable;sell.textContent=price?`SPRZEDAJ · ${number(price)} ✦`:'NIE NA SPRZEDAŻ';sell.title=selected?'Zdejmij przedmiot, żeby go sprzedać.':price?`Wartość ${number(loot.value(s))} ✦, sprzedaż za 40%.`:'Przedmiotów podstawowych i prezentów nie da się sprzedać.';
+    if(s.kind==='finish'){const cash=loot.sellPricePLN(s),sellable=loot.canSell(profile,s.id),sell=document.createElement('button');sell.type='button';sell.className='skin-action sell';sell.disabled=!sellable;sell.textContent=`SPRZEDAJ · ${pln(cash)}`;sell.title=selected?'Zdejmij wykończenie, żeby je sprzedać.':`Cena ${pln(loot.pricePLN(s))}, odkup przez muzeum za 75%.`;
+     sell.addEventListener('click',()=>{if(busy()||!loot.canSell(profile,s.id))return;if(!window.confirm(`Sprzedać ${s.name} za ${pln(cash)} na saldo?`))return;const result=loot.sellFinish(profile,s.id);if(!result)return;profile=result.profile;persist();renderSkins();toast(`Sprzedano ${result.item.name} za ${pln(result.price)}. Saldo: ${pln(profile.balance)}.`);});
+     actions.append(sell);cell.append(actions);}
+    else{const price=loot.sellPrice(s),sellable=loot.canSell(profile,s.id),sell=document.createElement('button');sell.type='button';sell.className='skin-action sell';sell.disabled=!sellable;sell.textContent=price?`SPRZEDAJ · ${number(price)} ✦`:'NIE NA SPRZEDAŻ';sell.title=selected?'Zdejmij przedmiot, żeby go sprzedać.':price?`Wartość ${number(loot.value(s))} ✦, sprzedaż za 40%.`:'Przedmiotów podstawowych i prezentów nie da się sprzedać.';
     sell.addEventListener('click',()=>{if(busy()||!loot.canSell(profile,s.id))return;if(!window.confirm(`Sprzedać ${s.name} za ${number(price)} ✦? Ulepszenia przepadną.`))return;const result=loot.sell(profile,s.id);if(!result)return;profile=result.profile;persist();renderSkins();toast(`Sprzedano ${result.item.name} za ${number(result.price)} ✦.`);});
-    actions.append(sell);cell.append(actions);
+    actions.append(sell);cell.append(actions);}
    }
    grid.appendChild(cell);drawItem(b.querySelector('canvas'),s);
   }
@@ -3739,8 +3770,9 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card'],['kindFinishes','finish']])$(id).addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionKind=kind;collectionPage=0;collectionFilters.newOnly=false;renderSkins();});
  for(const category of [{id:'all',name:'Wszystkie kategorie'},...loot.categories]){const option=document.createElement('option');option.value=category.id;option.textContent=category.name;$('categoryFilter').append(option);}
  $('categoryFilter').value='all';
- window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,notify:toast});
+ window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,onDeposit:depositPLN,onBuyFinish:buyFinish,notify:toast});
  $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
+ $('secretCashBtn').addEventListener('click',()=>{if(!canOpenShop())return;depositPLN(21370);});
  $('secretCoinsBtn').addEventListener('click',()=>{if(!canOpenShop())return;profile.coins+=2137;persist();if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();toast('Sekret stróża odkryty. +2137 monet ✦');});
  $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);
  $('newSkinsOnly').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=!collectionFilters.newOnly;collectionPage=0;renderSkins();});

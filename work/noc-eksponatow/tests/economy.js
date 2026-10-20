@@ -191,3 +191,19 @@
     for (const c of loot.crates) assert.ok(Math.abs(c.cost / c.pricePLN - 40) < 25, `${c.id}: ${Math.round(c.cost / c.pricePLN)} ✦ za 1 zł`);
   });
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const loot = window.MuseumLoot;
+  test('Portfel PLN: wpłaty w groszach, kupno wykończenia z salda, odkup za 75%, nałożonego nie da się sprzedać', () => {
+    let p = loot.migrate(null); assert.equal(p.balance, 0);
+    p = loot.deposit(p, 21370); assert.equal(p.balance, 21370); assert.equal(loot.deposit(p, 0), null);
+    assert.equal(loot.pricePLN('gold-marble'), 149900); assert.equal(loot.sellPricePLN('gold-marble'), 112425);
+    assert.equal(loot.canBuyFinish(p, 'gold-marble'), false, 'za mało'); assert.equal(loot.buyFinish(p, 'gold-marble'), null);
+    p = loot.deposit(p, 150000); const bought = loot.buyFinish(p, 'gold-marble'); assert.ok(bought); p = bought.profile;
+    assert.equal(p.balance, 21370 + 150000 - 149900); assert.deepEqual(p.finishes, ['gold-marble']); assert.equal(loot.canBuyFinish(p, 'gold-marble'), false, 'już masz');
+    p = loot.equip(p, 'gold-marble'); assert.equal(loot.sellFinish(p, 'gold-marble'), null, 'nałożone'); p = loot.equip(p, 'gold-marble');
+    const sold = loot.sellFinish(p, 'gold-marble'); assert.ok(sold); assert.equal(sold.price, 112425); assert.equal(sold.profile.balance, 21470 + 112425); assert.deepEqual(sold.profile.finishes, []);
+    assert.equal(loot.sellFinish(p, 'sword'), null, 'tylko wykończenia'); assert.equal(loot.migrate({ balance: '12.7' }).balance, 12); assert.equal(loot.migrate({ balance: -5 }).balance, 0);
+  });
+})();
