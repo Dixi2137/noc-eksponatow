@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Otwórz ponownie (2026-10-21)
+
+Po odsłonięciu nagrody okno losowania ma trzeci przycisk **OTWÓRZ PONOWNIE** (`lootAgainBtn`, `openAgain` w `ui.js`): zachowuje nagrodę w kolekcji (bez zakładania), pobiera cenę tej samej skrzyni i od razu kręci następne losowanie, bez zamykania okna. Etykieta pokazuje koszt albo GRATIS (darmowa skrzynia Galerii), a przy braku żetonów lub wyczerpanej puli przycisk jest wyłączony z informacją ile brakuje.
+
 ## Limitowane wykończenia broni (2026-10-21)
 
 Osiem mitycznych wykończeń (`dist/finishes.js`, `window.MuseumFinishes`): Diamentowy Szmaragd, Złoty Marmur, Tytan, Hologram, Obsydian i Rubin, Stal Damasceńska, Różowe Złoto, Nocna Pustka. Wykończenie to osobny rodzaj przedmiotu (`kind:'finish'`, rzadkość `mythic`, wartość 15 000 ✦, sprzedaż 6 000 ✦), nakładany na dowolną broń: przebarwia stal, krawędź, okucia i trzonek w walce, w menu i w kolekcji (zakładka WYKOŃCZENIA; drugie kliknięcie zdejmuje).

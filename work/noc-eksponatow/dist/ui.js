@@ -263,13 +263,28 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   const s=loot.getItem(profile.pendingReward);if(!s)return;
   if(recovered)window.MuseumLootShow.cancel();setLootBusy(false);delete $('lootPanel').dataset.lootPhase;$('lootPanel').classList.remove('is-rolling');$('lootPanel').classList.add('is-revealed');$('lootPanel').dataset.rarity=s.rarity;$('lootPanel').style.setProperty('--rarity',loot.rarities[s.rarity].color);
   $('lootEyebrow').textContent=recovered?'TWOJA SKRZYNIA NIE PRZEPADŁA':'PIECZĘĆ ZERWANA / NOWE ODKRYCIE';$('lootTitle').textContent='NOWY EKSPONAT.';$('lootSubtitle').textContent=recovered?'Odzyskano odkryty wygląd. Czeka bezpiecznie w twojej kolekcji.':'Ten wygląd już należy do ciebie. Załóż go na kolejny pojedynek.';
-  show('lootWindow',false);show('lootSuspense',false);show('lootReward');show('lootActions');$('lootRarity').textContent=loot.rarities[s.rarity].name;$('lootName').textContent=s.name;$('lootEra').textContent=s.era;$('lootPerk').textContent=itemSummary(s);drawItem($('lootCanvas'),s);const weaponCard=s.kind==='card'&&cardsApi.get(s.id)?.type==='weapon';show('lootEquipBtn',!weaponCard);$('lootEquipBtn').innerHTML=s.kind==='weapon'?'ZAŁÓŻ BROŃ <span>↗</span>':s.kind==='card'?'AKTYWUJ KARTĘ <span>↗</span>':s.kind==='finish'?'NAŁÓŻ NA BROŃ <span>↗</span>':'ZAŁÓŻ SKIN <span>↗</span>';(weaponCard?$('lootKeepBtn'):$('lootEquipBtn')).focus({preventScroll:true});renderSkins();
+  show('lootWindow',false);show('lootSuspense',false);show('lootReward');show('lootActions');$('lootRarity').textContent=loot.rarities[s.rarity].name;$('lootName').textContent=s.name;$('lootEra').textContent=s.era;$('lootPerk').textContent=itemSummary(s);drawItem($('lootCanvas'),s);const weaponCard=s.kind==='card'&&cardsApi.get(s.id)?.type==='weapon';show('lootEquipBtn',!weaponCard);$('lootEquipBtn').innerHTML=s.kind==='weapon'?'ZAŁÓŻ BROŃ <span>↗</span>':s.kind==='card'?'AKTYWUJ KARTĘ <span>↗</span>':s.kind==='finish'?'NAŁÓŻ NA BROŃ <span>↗</span>':'ZAŁÓŻ SKIN <span>↗</span>';(weaponCard?$('lootKeepBtn'):$('lootEquipBtn')).focus({preventScroll:true});renderSkins();updateAgainBtn();
  }
  function claimReward(equip){
   if(crateBusy||!['menu','result'].includes(screen))return;
   if(profile.pendingReward){profile=loot.claim(profile,{equip});persist();}
   show('loot',false);$('collection').inert=false;renderSkins();if(lootReturnFocus?.isConnected&&lootReturnFocus!==document.body&&!lootReturnFocus.disabled)lootReturnFocus.focus({preventScroll:true});else $('collection').querySelector('button:not(:disabled)')?.focus({preventScroll:true});
   $('collectionMessage').textContent=equip?`Założono. ${updateLoadout()||$('loadoutPerk').textContent}`:'Nowy przedmiot zachowany w kolekcji. Możesz go założyć przed walką.';
+ }
+ // "Open again": keeps the reward in the collection and rolls the same crate without leaving the loot window.
+ function updateAgainBtn(){
+  const btn=$('lootAgainBtn'),crate=loot.getCrate(profile.pendingCrateId||selectedCrateId);if(!btn||!crate)return;
+  const after=profile.pendingReward?loot.claim(profile,{equip:false}):profile;const left=loot.remaining(after,crate.id).length,free=crate.id==='gallery'&&after.freeCrates>0,cost=free?0:crate.cost;
+  btn.disabled=!left||(!free&&after.coins<cost);
+  btn.innerHTML=!left?'SKRZYNIA WYCZERPANA':free?'OTWÓRZ PONOWNIE · GRATIS <span>↻</span>':after.coins<cost?`OTWÓRZ PONOWNIE · BRAKUJE ${number(cost-after.coins)} ✦`:`OTWÓRZ PONOWNIE · ${number(cost)} ✦ <span>↻</span>`;
+  btn.title=!left?'Zebrano wszystko z tej skrzyni.':`${crate.name}: ${crate.guarantee}.`;
+ }
+ function openAgain(){
+  if(crateBusy||!['menu','result'].includes(screen)||!profile.pendingReward)return;
+  const crate=loot.getCrate(profile.pendingCrateId||selectedCrateId);if(!crate)return;selectedCrateId=crate.id;
+  const keepFocus=lootReturnFocus;profile=loot.claim(profile,{equip:false});persist();
+  if(!loot.remaining(profile,crate.id).length){toast('Zebrano wszystko z tej skrzyni.');updateAgainBtn();renderSkins();return;}
+  openCrate();lootReturnFocus=keepFocus;
  }
  function openCrate(){
   if(crateBusy||!['menu','result'].includes(screen))return;
@@ -299,7 +314,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  $('resetSkinFilters').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=false;$('skinSearch').value='';$('categoryFilter').value='all';$('rarityFilter').value='all';$('ownershipFilter').value='all';changeCollectionFilter();});
  $('skinPagePrev').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen)||collectionPage<=0)return;collectionPage--;renderSkins();$('skinResultsCount').scrollIntoView({block:'nearest'});});
  $('skinPageNext').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen)||collectionPage>=Math.ceil(matchingSkins().length/SKINS_PER_PAGE)-1)return;collectionPage++;renderSkins();$('skinResultsCount').scrollIntoView({block:'nearest'});});
- $('startBtn').addEventListener('click',beginNight);$('retryBtn').addEventListener('click',beginNight);$('menuBtn').addEventListener('click',menu);$('nextBtn').addEventListener('click',chooseNext);$('choiceMenuBtn').addEventListener('click',chooseMenu);$('pauseBtn').addEventListener('click',pause);$('resumeBtn').addEventListener('click',resume);$('collectionTab').addEventListener('click',collection);$('crateBtn').addEventListener('click',openCrate);$('lootEquipBtn').addEventListener('click',()=>claimReward(true));$('lootKeepBtn').addEventListener('click',()=>claimReward(false));
+ $('startBtn').addEventListener('click',beginNight);$('retryBtn').addEventListener('click',beginNight);$('menuBtn').addEventListener('click',menu);$('nextBtn').addEventListener('click',chooseNext);$('choiceMenuBtn').addEventListener('click',chooseMenu);$('pauseBtn').addEventListener('click',pause);$('resumeBtn').addEventListener('click',resume);$('collectionTab').addEventListener('click',collection);$('crateBtn').addEventListener('click',openCrate);$('lootEquipBtn').addEventListener('click',()=>claimReward(true));$('lootAgainBtn').addEventListener('click',openAgain);$('lootKeepBtn').addEventListener('click',()=>claimReward(false));
  $('arenaTab').addEventListener('click',()=>{if(screen==='menu')$('gameFrame').scrollIntoView({behavior:'smooth',block:'center'});});
  document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();if(screen==='menu')window.scrollTo({top:0,behavior:'smooth'});});
 $('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist();pixelUI();window.MuseumGame?.setScene(window.MuseumGame.getState().scene);renderMenuLevel();toast(profile.pixel?'Grafika pikselowa włączona.':'Grafika pikselowa wyłączona.');});
