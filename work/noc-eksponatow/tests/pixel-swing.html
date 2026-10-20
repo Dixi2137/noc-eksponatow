@@ -1,0 +1,11 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Zamach</title>
+<style>body{margin:0;background:#10120f;color:#aaa;font:11px system-ui}.row{display:flex;flex-wrap:wrap;gap:4px;padding:8px}figure{margin:0;text-align:center}canvas{image-rendering:pixelated;width:120px;height:120px;background:#2a3a3a}figcaption{font-size:9px}</style></head>
+<body><div class="row" id="row"></div>
+<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/cards.js"></script><script src="../dist/hall.js"></script><script src="../dist/art.js"></script><script src="../dist/pixel.js"></script>
+<script>
+const P=window.MuseumPixel,ph=[0,.3,.5,.7,.9];
+const add=(label,draw)=>{for(const p of ph){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=60;c.height=60;const x=c.getContext('2d');draw(x,p);f.append(c);const cap=document.createElement('figcaption');cap.textContent=label+' p='+p;f.append(cap);row.append(f);}};
+for(const id of ['sword','axe','spear','revolver'])add('rycerz '+id,(x,p)=>P.drawKnight(x,22,56,{pose:p?'attack':'idle',progress:p,facing:1,skin:'verdigris',weapon:id}));
+const ex=window.MuseumExhibits.all().filter(e=>e.stats.figure);
+for(const e of ex.slice(0,6))add(e.name,(x,p)=>P.drawFigure(x,36,56,{pose:p?'attack':'idle',progress:p,facing:-1,figure:e.stats.figure}));
+</script></body></html>

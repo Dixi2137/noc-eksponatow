@@ -1870,6 +1870,16 @@ window.MuseumConfig = Object.freeze({
     const g = c.createRadialGradient(144, 80, 60, 144, 80, 190); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,4,10,.6)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
   }
 
+  // Attack swing shared by the knight and the human rig. `hold` is the vertical sprite (grip at the bottom),
+  // `fwd` the horizontal thrust sprite (grip on the left). The front arm is drawn by the same call so the hand stays on the grip.
+  // Phases: wind-up (arm up, blade over the head), strike (arm and blade thrust forward), follow-through (lowered).
+  function swing(B, p, arms, hold, fwd, wpal) {
+    if (p < .45) { B(arms.raised, 2, 6); B(hold, 3, 9 - hold.length, wpal); }
+    else if (p < .75) { B(arms.fwd, 2, 13); B(fwd, 8, 15 - Math.floor(fwd.length / 2), wpal); }
+    else { B(arms.fwd, 2, 15); B(fwd, 8, 17 - Math.floor(fwd.length / 2), wpal); }
+  }
+  const lunge = p => p < .45 ? -1 : p < .75 ? 2 : 1;   // body lean during the swing, in pixels along the facing direction
+
   // ── The knight: 28 x 40 pixels, facing right, assembled from parts ───────
   const knightParts = {
     head: [
@@ -1903,6 +1913,8 @@ window.MuseumConfig = Object.freeze({
     ],
     armBack: ["OOOO", "OBBO", "OBBO", "ODBO", "ODBO", "ODDO", ".OO."],
     armFront: ["OOOOO", "OLBBO", "OBBBO", "OBBBO", "ODBBO", "ODDBO", "ODDBO", ".OOO."],
+    armRaised: [".OOO.", "ODDDO", "ODDBO", "OBBBO", "OBBBO", "OLBBO", "OBBBO", "OOOOO"],
+    armFwd: ["OOOOOOOO.", "OLBBBBDDO", "OBBBBBDDO", "OBBBBDDDO", ".OOOOOOO."],
     legA: ["OBBBBO", "OBBBBO", "ODBBDO", "ODBBDO", "ODBBDO", "OBBBBO", "ODDDDO", "ODDDDO", "OOOOOO"],
     legB: ["OBBBBO", "ODBBDO", "ODBBDO", "ODDDDO", ".OBBO.", "OBBBBO", "ODDDDO", "OOOOOO"],
     boot: ["OLLLLO", "ODDDDO", "OOOOOO"],
@@ -1939,15 +1951,15 @@ window.MuseumConfig = Object.freeze({
     const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
     const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a' };                         // weapon colours (steel, edge, wood, brass)
     const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
-    if (pose === 'attack' && p < .45) { if (held) Wb(held.hold, 6, 8 - held.hold.length); else B(knightParts.sword, 6, -14); }   // raised behind the head
+    const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
+    if (pose === 'attack') c.translate(lunge(p), 0);
     B(walk > 0 ? knightParts.legB : knightParts.legA, -6, 23); B(walk < 0 ? knightParts.legB : knightParts.legA, 0, 23);
     B(knightParts.boot, -6, 32); B(knightParts.boot, 0, 32);
     B(knightParts.torso, -7, 11);
     B(knightParts.head, -6, 0); B(knightParts.plume, -10, -3);
     if (pose === 'guard') B(knightParts.shield, 4, 10); else B(knightParts.shield, -11, 14);
-    B(knightParts.armFront, 2, 13);
-    if (pose === 'attack' && p >= .45) { if (held) Wb(held.fwd, 4, 16 - Math.floor(held.fwd.length / 2)); else B(knightParts.swordFwd, 4, 14); }
-    else if (pose !== 'attack') { if (held) Wb(held.hold, 7, 17 - held.hold.length); else B(knightParts.sword, 7, -6); }
+    if (pose === 'attack') swing(B, p, { raised: knightParts.armRaised, fwd: knightParts.armFwd }, hold, fwd, wpal);
+    else { B(knightParts.armFront, 2, 13); Wb(hold, 7, 20 - hold.length); }
     c.restore();
   }
 
@@ -2047,6 +2059,10 @@ window.MuseumConfig = Object.freeze({
     armBack: ["OOOO", "OCCO", "OCCO", "OcCO", "OcCO", "OccO", "OSSO", ".OO."],
     armFront: ["OOOOO", "OCCCO", "OCCCO", "OCCCO", "OcCCO", "OccCO", "OSSSO", ".OOO."],
     armBare: ["OOOO", "OSSO", "OSSO", "OSSO", "OSSO", "OSSO", "OSSO", ".OO."],
+    armRaised: [".OOO.", "OSSSO", "OccCO", "OcCCO", "OCCCO", "OCCCO", "OCCCO", "OOOOO"],
+    armFwd: ["OOOOOOOO.", "OCCCCCcSO", "OCCCCCcSO", "OCCCCccSO", ".OOOOOOO."],
+    armRaisedBare: [".OOO.", "OSSSO", "OSSSO", "OSSSO", "OSSSO", "OSSSO", "OSSSO", "OOOOO"],
+    armFwdBare: ["OOOOOOOO.", "OSSSSSSSO", "OSSSSSSSO", "OSSSSSSSO", ".OOOOOOO."],
     legA: ["OTTTTO", "OTTTTO", "OTtTTO", "OTtTTO", "OTtTTO", "OTTTTO", "OtTTtO", "OtTTtO"],
     legB: ["OTTTTO", "OTtTTO", "OTtTTO", "OtTTtO", ".OTTO.", "OTTTTO", "OtTTtO", "OtTTtO"],
     legBare: ["OSSSSO", "OSSSSO", "OSsSSO", "OSsSSO", "OSsSSO", "OSSSSO", "OsSSsO", "OsSSsO"],
@@ -2110,7 +2126,7 @@ window.MuseumConfig = Object.freeze({
     if (F.cloak) B(human.cloak, -11, 9);
     const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
     B(bare ? human.armBare : human.armBack, 4, 12);
-    if (attacking && p < .45) B(wp.hold, 6, -12);
+    if (attacking) c.translate(lunge(p), 0);
     if (bare) { B(human.legBare, -6, 22); B(human.legBare, 0, 22); B(human.sandal, -6, 30); B(human.sandal, 0, 30); }
     else { B(walk > 0 ? human.legB : human.legA, -6, 22); B(walk < 0 ? human.legB : human.legA, 0, 22); B(human.boot, -6, 30); B(human.boot, 0, 30); }
     B(human.torso, -7, 11);
@@ -2124,8 +2140,8 @@ window.MuseumConfig = Object.freeze({
     if (F.beard) B(human.hair[F.beard], -3, 7); if (F.mustache) B(human.hair[F.mustache], -3, 7);
     if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
     if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
-    B(bare ? human.armBare : human.armFront, 2, 13);
-    if (attacking && p >= .45) B(wp.fwd, 4, 16); else if (!attacking) B(wp.hold, 7, -4);
+    if (attacking) swing(B, p, { raised: bare ? human.armRaisedBare : human.armRaised, fwd: bare ? human.armFwdBare : human.armFwd }, wp.hold, wp.fwd, pal);
+    else { B(bare ? human.armBare : human.armFront, 2, 13); B(wp.hold, 7, 20 - wp.hold.length); }
     c.restore();
   }
   // ── Weapon icons: 16 x 16 pixel glyphs per icon key, tinted by rarity ─────
