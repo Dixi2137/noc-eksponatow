@@ -379,5 +379,9 @@ $('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist
  const daily=cloud.user()?null:loot.dailyBonus(profile);if(daily){profile=daily.profile;}
  function renderDaily(){const streak=profile.login?.streak||0;$('dailyLine').textContent=streak?`SERIA LOGOWAŃ: ${streak} ${streak===1?'DZIEŃ':'DNI'} · JUTRO +${Math.min(300,50+streak*25)} ✦`:'';show('dailyLine',streak>0);}
  persist();pixelUI();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
+ // Fit the stage to the window: the frame shrinks to the free height (top bar + section line + controls take --chrome),
+ // and the in-frame UI zooms by the ratio of the frame to the full content width, so nothing is ever clipped.
+ function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(1,frame.clientWidth/Math.max(1,parent.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}
+ fitStage();window.addEventListener('resize',fitStage);window.addEventListener('orientationchange',fitStage);if(document.fonts?.ready)document.fonts.ready.then(fitStage);setTimeout(fitStage,300);
  renderAccount();cloud.restore().then(async me=>{renderAccount();if(me)await claimServerDaily();});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
 })();

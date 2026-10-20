@@ -227,6 +227,10 @@ Supabase: `supabase/schema.sql` ma sekcję „Moderacja”: kolumny `role` (play
 
 Gra: po zalogowaniu `fetchProfile` zwraca rolę i ban; zbanowany dostaje komunikat i jest wylogowany. Moderator widzi w KONCIE przycisk PODGLĄD MODERATORA: statystyki, wyszukiwarka graczy, lista z salami, żetonami, saldem i statusem, akcje ŻETONY ±, SALDO ±, NOTATKA, BAN/ODBANUJ, RESET ZAPISU, ROLA (admin). Klient (`MuseumCloud.mod`) tylko formuje wywołania; uprawnienia sprawdza serwer.
 
+## Dopasowanie do okna (2026-10-21)
+
+Ramka gry ma szerokość `clamp(58%, (100vh − --chrome) × 16/9, 100%)`: `fitStage()` w `ui.js` mierzy pasek górny, linię sekcji i pasek sterowania (`--chrome`), więc arena razem z nimi mieści się w wysokości okna bez przewijania. Gdy ramka jest przez to węższa niż strona, wszystko w ramce poza canvasem dostaje `zoom: var(--ui-zoom)` równy stosunkowi szerokości ramki do pełnej szerokości treści, więc menu, HUD i sceny skalują się proporcjonalnie zamiast się ucinać. Poniżej 1180 px nawigacja paska górnego schodzi do drugiego rzędu.
+
 ## Publikacja online (2026-10-21)
 
 Gra jest publikowana na GitHub Pages z folderu `dist/` przez workflow `.github/workflows/pages.yml` przy każdym pushu na `main` (repo `Dixi2137/noc-eksponatow`). Adres: https://dixi2137.github.io/noc-eksponatow/. Bez kluczy w `config.js` działa tryb gościa; po podaniu Supabase dojdą konta i ranking.

@@ -165,3 +165,8 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
  .level-strip{display:none}
 }
 .menu-screen{padding-bottom:2.5%;scrollbar-width:none}.menu-screen::-webkit-scrollbar{display:none}
+/* ── Dopasowanie do okna (2026-10-21): ramka gry mieści się w wysokości okna razem z paskiem górnym i paskiem sterowania;
+      gdy ramka jest przez to węższa niż strona, cały interfejs w ramce skaluje się proporcjonalnie (--ui-zoom). ── */
+.game-frame{width:clamp(58%,calc((100vh - var(--chrome,270px)) * 16 / 9),100%);margin-left:auto;margin-right:auto}
+@media(max-width:650px){.game-frame{width:clamp(58%,calc((100vh - var(--chrome,270px)) * 4 / 3),100%)}}
+.game-frame>:not(canvas){zoom:var(--ui-zoom,1)}
