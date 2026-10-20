@@ -151,7 +151,7 @@
     if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
     else if (pose === 'dodge') c.translate(-4, 2);
     else if (pose === 'hurt') c.translate(-2, 0);
-    const oy = -40 - bob;
+    const oy = -35 - bob;   // boots (legs 23 + 9 rows, boot 32 + 3 rows) end exactly at ground level
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);

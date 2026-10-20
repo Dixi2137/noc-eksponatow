@@ -1929,7 +1929,7 @@ window.MuseumConfig = Object.freeze({
     if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
     else if (pose === 'dodge') c.translate(-4, 2);
     else if (pose === 'hurt') c.translate(-2, 0);
-    const oy = -40 - bob;
+    const oy = -35 - bob;   // boots (legs 23 + 9 rows, boot 32 + 3 rows) end exactly at ground level
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
@@ -2597,7 +2597,7 @@ window.MuseumConfig = Object.freeze({
       ctx.strokeStyle = fraction > .94 ? '#fff1b6' : '#e7a360'; ctx.lineWidth = 5;
       ctx.beginPath(); ctx.arc(x, y, 30, -Math.PI / 2, -Math.PI / 2 + fraction * Math.PI * 2); ctx.stroke();
       ctx.fillStyle = fraction > .94 ? '#fff1b6' : '#f0a579';
-      ctx.font = '700 28px system-ui'; ctx.textAlign = 'center'; ctx.fillText('!', x, y + 10);
+      ctx.font = `700 28px ${uiFont}`; ctx.textAlign = 'center'; ctx.fillText('!', x, y + 10);
       if (fraction > .7) {
         ctx.globalAlpha = .07 + (fraction - .7) * .16; ctx.fillStyle = '#ffc47a';
         ctx.beginPath(); ctx.ellipse(r.x - 150, FLOOR + 6, 240, 30, 0, 0, Math.PI * 2); ctx.fill();
@@ -2605,7 +2605,7 @@ window.MuseumConfig = Object.freeze({
       ctx.restore();
     } else if (r.state === 'recover') {
       ctx.save(); ctx.globalAlpha = .6 + Math.sin(state.elapsed * 8) * .15;
-      ctx.textAlign = 'center'; ctx.font = '600 17px system-ui'; ctx.fillStyle = '#b6e3c6';
+      ctx.textAlign = 'center'; ctx.font = `600 17px ${uiFont}`; ctx.fillStyle = '#b6e3c6';
       ctx.fillText('SŁABA GARDA', r.x - 25, FLOOR - 350); ctx.restore();
     }
   }
@@ -2622,9 +2622,34 @@ window.MuseumConfig = Object.freeze({
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, W, H);
     const real = ctx, art0 = window.MuseumArt;
-    if (art0?.pixelFrame && art0.pixelFactor) { art0.pixelFrame(real, W, H, low => { ctx = low; try { drawScene(); } finally { ctx = real; } }); } else drawScene();
+    if (art0?.pixelFrame && art0.pixelFactor) { art0.pixelFrame(real, W, H, low => { ctx = low; try { drawScene(false); } finally { ctx = real; } }); drawOverlay(); } else drawScene(true);
   }
-  function drawScene() {
+  // Text, telegraph ring and pause veil: in pixel mode these are drawn on the real canvas, after the upscaled scene, so they stay legible.
+  function drawOverlay() {
+    if (scene === 'guard' && state.status !== 'running') return;
+    ctx.save();
+    if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
+    const p = state.player, w = state.weapon.stats;
+    drawTelegraph();
+    if (w.kind === 'ranged' && p.reload > 0) {
+      ctx.save(); ctx.textAlign = 'center'; ctx.font = `700 16px ${uiFont}`; ctx.fillStyle = '#ffd98a';
+      ctx.fillText('PRZEŁADOWANIE', p.x, FLOOR - 300); ctx.strokeStyle = '#ffd98a55'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(p.x, FLOOR - 325, 14, -Math.PI / 2, -Math.PI / 2 + (1 - p.reload / w.reload) * Math.PI * 2); ctx.stroke(); ctx.restore();
+    }
+    labels.forEach(l => {
+      ctx.save(); ctx.globalAlpha = clamp(l.life / .25, 0, 1); ctx.textAlign = 'center';
+      ctx.font = `800 ${l.size}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
+      ctx.fillStyle = l.color; ctx.fillText(l.text, clamp(l.x, 185, W - 185), l.y); ctx.restore();
+    });
+    ctx.restore();
+    if (state.status === 'paused') {
+      ctx.fillStyle = '#061018b8'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.fillStyle = '#f3e2bd'; ctx.font = `600 48px ${uiFont}`; ctx.fillText('PAUZA', W / 2, H / 2);
+    }
+  }
+  let uiFont = 'system-ui, sans-serif';
+  function drawScene(withOverlay) {
+    uiFont = window.MuseumArt?.pixelFactor ? "'Pixelify Sans', monospace" : 'system-ui, sans-serif';
     ctx.save();
     if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
     const art = window.MuseumArt;
@@ -2638,7 +2663,7 @@ window.MuseumConfig = Object.freeze({
     else if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
     if (!pix) { shadow(p.x, 94); shadow(r.x, state.exhibit.stats.shadow); }
-    drawTelegraph();
+    if (withOverlay) drawTelegraph();
     let foePose = r.walk ? 'walk' : 'idle', foeProgress = r.timer;
     if (r.state === 'windup') { foePose = 'guard'; foeProgress = r.timer / (r.heavy ? combat.heavyWindup : combat.windup); }
     if (r.state === 'strike') { foePose = 'attack'; foeProgress = r.timer / combat.strikeDuration; }
@@ -2670,7 +2695,7 @@ window.MuseumConfig = Object.freeze({
         ctx.save(); ctx.strokeStyle = '#fff3c4'; ctx.lineWidth = 3; ctx.globalAlpha = clamp((p.attack - (w.contact - .12)) / .12, 0, 1) * .85;
         ctx.beginPath(); ctx.moveTo(p.x + 70, FLOOR - 168); ctx.lineTo(r.x + rEvadeX - 60, FLOOR - 190); ctx.stroke(); ctx.restore();
       }
-      if (p.reload > 0) {
+      if (withOverlay && p.reload > 0) {
         ctx.save(); ctx.textAlign = 'center'; ctx.font = '700 16px system-ui'; ctx.fillStyle = '#ffd98a';
         ctx.fillText('PRZEŁADOWANIE', p.x, FLOOR - 300); ctx.strokeStyle = '#ffd98a55'; ctx.lineWidth = 4;
         ctx.beginPath(); ctx.arc(p.x, FLOOR - 325, 14, -Math.PI / 2, -Math.PI / 2 + (1 - p.reload / w.reload) * Math.PI * 2); ctx.stroke(); ctx.restore();
@@ -2688,14 +2713,14 @@ window.MuseumConfig = Object.freeze({
       ctx.globalAlpha = 1 - fraction; ctx.strokeStyle = ring.color; ctx.lineWidth = 3 * (1 - fraction);
       ctx.beginPath(); ctx.arc(ring.x, ring.y, 15 + fraction * 70, 0, Math.PI * 2); ctx.stroke();
     }); ctx.globalAlpha = 1;
-    labels.forEach(l => {
+    if (withOverlay) labels.forEach(l => {
       ctx.save(); ctx.globalAlpha = clamp(l.life / .25, 0, 1); ctx.textAlign = 'center';
       ctx.font = `800 ${l.size}px system-ui, sans-serif`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
       ctx.fillStyle = l.color; ctx.fillText(l.text, clamp(l.x, 185, W - 185), l.y); ctx.restore();
     });
     if (flash > 0) { ctx.fillStyle = `rgba(250,225,181,${flash * .35})`; ctx.fillRect(0, 0, W, H); }
     ctx.restore();
-    if (state.status === 'paused') {
+    if (withOverlay && state.status === 'paused') {
       ctx.fillStyle = '#061018b8'; ctx.fillRect(0, 0, W, H);
       ctx.textAlign = 'center'; ctx.fillStyle = '#f3e2bd'; ctx.font = '600 48px Georgia'; ctx.fillText('PAUZA', W / 2, H / 2);
     }
