@@ -9,6 +9,7 @@
 <script src="../dist/hall.js"></script><script src="../dist/art.js"></script>
 <script>
 const A=window.MuseumArt,E=window.MuseumExhibits;
-for(const ex of E.all()){for(const pose of ['idle','guard','attack']){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=260;c.height=320;const x=c.getContext('2d');x.fillStyle='#1a2020';x.fillRect(0,0,260,320);x.save();x.translate(ex.stats.art==='rex'?170:130,300);if(ex.stats.art==='rex')x.scale(.72,.72);A.drawExhibit(x,ex,0,0,{pose,facing:-1,time:1.2,progress:.5,phase:.5});x.restore();f.append(c);const cap=document.createElement('figcaption');cap.textContent=ex.name+' · '+pose;f.append(cap);foes.append(f);}}
+const compact=new URLSearchParams(location.search).has('compact');
+for(const ex of E.all()){for(const pose of (compact?['idle']:['idle','guard','attack'])){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=compact?150:260;c.height=compact?190:320;const x=c.getContext('2d');x.fillStyle='#1a2020';x.fillRect(0,0,c.width,c.height);x.save();if(compact){x.translate(ex.stats.art==='rex'?100:75,180);x.scale(.58,.58);}else{x.translate(ex.stats.art==='rex'?170:130,300);if(ex.stats.art==='rex')x.scale(.72,.72);}A.drawExhibit(x,ex,0,0,{pose,facing:-1,time:1.2,progress:.5,phase:.5});x.restore();f.append(c);const cap=document.createElement('figcaption');cap.textContent=ex.name+' · '+pose;f.append(cap);foes.append(f);}}
 for(const key of Object.keys(A.themes)){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=480;c.height=270;const x=c.getContext('2d');A.drawArena(x,480,270,2,key);f.append(c);const cap=document.createElement('figcaption');cap.textContent=key;f.append(cap);themes.append(f);}
 </script></body></html>

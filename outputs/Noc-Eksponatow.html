@@ -542,7 +542,8 @@ window.MuseumConfig = Object.freeze({
     all() { return weapons; }
   });
 })();
-</script><script>/* Opponents are data. Every exhibit that wakes up at night is one entry: numbers, rhythm and art key. */
+</script><script>/* Opponents are data. Every exhibit that wakes up at night is one entry: numbers, rhythm, costume and art key.
+   The night patrol's bosses are real historical villains; they are enemies to defeat, never collectibles. */
 (() => {
   'use strict';
   const baseline = Object.freeze({
@@ -551,87 +552,155 @@ window.MuseumConfig = Object.freeze({
     art: 'rex',               // key into MuseumArt.fighters
     figure: null,             // costume for the human rig (art: 'figure')
     combat: Object.freeze({
-      minGap: 330,            // the fighters never overlap closer than this
-      preferredGap: 365,      // distance the foe keeps between attacks
-      engageRange: 400,       // closer than this: the foe starts an attack from idle
-      range: 395,             // reach of the foe's strike
-      strikeReach: 110,       // how far the knight may step from the committed target and still be hit
+      minGap: 330, preferredGap: 365, engageRange: 400, range: 395, strikeReach: 110,
       approachSpeed: 82, retreatSpeed: 114,
-      windup: 1.1, heavyWindup: 1.4,
-      strikeDuration: .42, strikeContact: .18,
-      recovery: 1.8, heavyRecovery: 2.1,
-      heavyEvery: 3,          // every n-th attack is heavy
-      idleDelay: .75, retreatTime: .65,
-      repositionGap: 385, repositionTime: 1.05
+      windup: 1.1, heavyWindup: 1.4, strikeDuration: .42, strikeContact: .18,
+      recovery: 1.8, heavyRecovery: 2.1, heavyEvery: 3,
+      idleDelay: .75, retreatTime: .65, repositionGap: 385, repositionTime: 1.05
     }),
-    damage: Object.freeze({
-      light: 16, heavy: 23,                 // late parry
-      lightBlocked: 14, heavyBlocked: 19,   // exhausted block
-      blockCostLight: 18, blockCostHeavy: 23 // stamina a block or automatic dodge costs
-    })
+    damage: Object.freeze({ light: 16, heavy: 23, lightBlocked: 14, heavyBlocked: 19, blockCostLight: 18, blockCostHeavy: 23 })
   });
   // Humans stand closer than a fossil the size of a bus.
   const human = Object.freeze({ shadow: 96, art: 'figure',
     combat: { minGap: 230, preferredGap: 285, engageRange: 330, range: 300, strikeReach: 95, repositionGap: 300 } });
+  // Fighting styles for the historical bosses. Tier 1..6 scales HP and damage along the night.
+  const archetypes = {
+    tyrant:    { windup: 1.0, heavyWindup: 1.3, strikeDuration: .40, strikeContact: .17, recovery: 1.6, heavyRecovery: 2.0, heavyEvery: 3, idleDelay: .7 },
+    brute:     { windup: 1.3, heavyWindup: 1.7, strikeDuration: .50, strikeContact: .22, recovery: 2.0, heavyRecovery: 2.5, heavyEvery: 2, idleDelay: .8, approachSpeed: 70 },
+    duelist:   { windup: .85, heavyWindup: 1.1, strikeDuration: .34, strikeContact: .15, recovery: 1.3, heavyRecovery: 1.6, heavyEvery: 4, idleDelay: .55, approachSpeed: 105, retreatSpeed: 130 },
+    trickster: { windup: .7, heavyWindup: 1.5, strikeDuration: .36, strikeContact: .14, recovery: 1.9, heavyRecovery: 2.3, heavyEvery: 3, idleDelay: .45 },
+    gunman:    { range: 350, engageRange: 380, windup: .8, heavyWindup: 1.5, strikeDuration: .34, strikeContact: .13, recovery: 1.5, heavyRecovery: 2.3, heavyEvery: 3, idleDelay: .5 }
+  };
+  function villain(id, name, alias, aliasGen, tag, era, archetype, tier, figure, description) {
+    const t = tier;
+    return { id, name, alias, aliasGen, tag, era, kind: 'postać historyczna', description,
+      stats: { ...human, hp: 150 + t * 18, combat: { ...human.combat, ...archetypes[archetype] },
+        damage: { light: 13 + t, heavy: Math.round(20 + t * 1.5), lightBlocked: 11 + t, heavyBlocked: 16 + t, blockCostLight: 16 + t, blockCostHeavy: 22 + t },
+        figure } };
+  }
   const definitions = [
-    {
-      id: 'raptor', name: 'VELOCIRAPTOR', alias: 'Raptor',
-      tag: 'KREDA PÓŹNA · NR INW. 075', era: '75 milionów lat temu', kind: 'dinozaur',
+    { id: 'raptor', name: 'VELOCIRAPTOR', alias: 'Raptor', aliasGen: 'Raptora', tag: 'KREDA PÓŹNA · NR INW. 075', era: '75 milionów lat temu', kind: 'dinozaur',
       description: 'Szybki, lekki, nerwowy. Krótkie zamachy, krótki odpoczynek.',
       stats: { hp: 110, shadow: 120, art: 'raptor',
         combat: { minGap: 260, preferredGap: 300, engageRange: 340, range: 310, strikeReach: 100, approachSpeed: 110, retreatSpeed: 140,
           windup: .85, heavyWindup: 1.15, strikeDuration: .36, strikeContact: .15, recovery: 1.3, heavyRecovery: 1.6, heavyEvery: 4, idleDelay: .55, repositionGap: 320, repositionTime: .8 },
-        damage: { light: 11, heavy: 17, lightBlocked: 9, heavyBlocked: 14, blockCostLight: 14, blockCostHeavy: 19 } }
-    },
-    {
-      id: 'trex', name: 'TYRANNOSAURUS REX', alias: 'T-Rex',
-      tag: 'KREDA PÓŹNA · NR INW. 066', era: '66 milionów lat temu', kind: 'dinozaur',
-      description: 'Stal kontra 66 milionów lat furii.',
-      stats: {}
-    },
-    {
-      id: 'leonidas', name: 'LEONIDAS I', alias: 'Leonidas',
-      tag: 'SPARTA · 480 P.N.E.', era: 'Termopile, 480 p.n.e.', kind: 'postać historyczna',
+        damage: { light: 11, heavy: 17, lightBlocked: 9, heavyBlocked: 14, blockCostLight: 14, blockCostHeavy: 19 } } },
+    { id: 'trex', name: 'TYRANNOSAURUS REX', alias: 'T-Rex', aliasGen: 'T-Rexa', tag: 'KREDA PÓŹNA · NR INW. 066', era: '66 milionów lat temu', kind: 'dinozaur',
+      description: 'Stal kontra 66 milionów lat furii.', stats: {} },
+    { id: 'leonidas', name: 'LEONIDAS I', alias: 'Leonidas', aliasGen: 'Leonidasa', tag: 'SPARTA · 480 P.N.E.', era: 'Termopile, 480 p.n.e.', kind: 'postać historyczna',
       description: 'Król Sparty. Włócznia zza tarczy, ciężki cios co drugi raz.',
-      stats: { ...human, hp: 180,
-        combat: { ...human.combat, range: 330, windup: 1.0, heavyWindup: 1.3, recovery: 1.6, heavyRecovery: 2.0, heavyEvery: 2 },
+      stats: { ...human, hp: 180, combat: { ...human.combat, range: 330, windup: 1.0, heavyWindup: 1.3, recovery: 1.6, heavyRecovery: 2.0, heavyEvery: 2 },
         damage: { light: 15, heavy: 24, lightBlocked: 12, heavyBlocked: 20, blockCostLight: 18, blockCostHeavy: 26 },
-        figure: { skin: '#c9956b', hair: '#2b1d14', cloak: '#8b1a1a', tunic: '#7a1616', armor: '#b08a3e', armorDark: '#6e5321', legs: 'bare',
-          boots: '#5a3a22', hat: 'corinthian', hatColor: '#b08a3e', crest: '#b3202a', weapon: 'spear', shield: '#a8792f', shieldGlyph: 'Λ', beard: 'full' } }
-    },
-    {
-      id: 'napoleon', name: 'NAPOLEON BONAPARTE', alias: 'Napoleon',
-      tag: 'CESARSTWO · 1812', era: 'Borodino, 1812', kind: 'postać historyczna',
+        figure: { skin: '#c9956b', hair: '#2b1d14', cloak: '#8b1a1a', tunic: '#7a1616', armor: '#b08a3e', armorDark: '#6e5321', legs: 'bare', boots: '#5a3a22', hat: 'corinthian', hatColor: '#b08a3e', crest: '#b3202a', weapon: 'spear', shield: '#a8792f', shieldGlyph: 'Λ', beard: 'full' } } },
+    villain('xerxes', 'KSERKSES I', 'Kserkses', 'Kserksesa', 'PERSJA · 479 P.N.E.', 'Plateje, 479 p.n.e.', 'tyrant', 1,
+      { skin: '#c8a07a', hair: '#1f1510', coat: '#4a1f6b', coatDark: '#2e1245', trousers: '#3b2a5a', boots: '#3a2616', hat: 'crown', hatColor: '#d4af37', beard: 'full', weapon: 'spear', sash: '#d4af37' },
+      'Król królów. Spalił Ateny i kazał wychłostać morze. Włócznia i tempo tyrana.'),
+    villain('qin', 'QIN SHI HUANG', 'Qin Shi Huang', 'Qin Shi Huanga', 'CHINY · 210 P.N.E.', 'Xianyang, 210 p.n.e.', 'tyrant', 1,
+      { skin: '#e0b892', hair: '#141010', coat: '#141414', coatDark: '#000000', trousers: '#1c1c1c', boots: '#0d0d0d', hat: 'mianguan', hatColor: '#111111', beard: 'goatee', weapon: 'sabre', sash: '#d4af37' },
+      'Pierwszy cesarz. Palił księgi i grzebał uczonych. Miecz jian i spokój człowieka, który chciał żyć wiecznie.'),
+    villain('herod', 'HEROD WIELKI', 'Herod', 'Heroda', 'JUDEA · 4 P.N.E.', 'Jerozolima, 4 p.n.e.', 'trickster', 1,
+      { skin: '#d3a279', hair: '#2a1a12', coat: '#7a1f2e', coatDark: '#4d1220', trousers: '#5a3a2a', boots: '#3a2616', hat: 'crown', hatColor: '#d4af37', beard: 'full', weapon: 'dagger' },
+      'Król z nadania Rzymu, paranoik na tronie. Szybki sztylet i długie chwile bezradności po ciosie.'),
+    villain('caligula', 'KALIGULA', 'Kaligula', 'Kaliguli', 'RZYM · 40', 'Rzym, 40 r.', 'trickster', 1,
+      { skin: '#e3c1a0', hair: '#4a3620', coat: '#f0ead6', coatDark: '#c9bf9f', trousers: '#f0ead6', legs: 'bare', boots: '#7a4e2a', hat: 'laurel', weapon: 'dagger', sash: '#6b1f8a' },
+      'Cesarz, który mianował konia senatorem. Nieprzewidywalny: lekkie ciosy błyskawiczne, ciężkie z opóźnieniem.'),
+    villain('nero', 'NERON', 'Neron', 'Nerona', 'RZYM · 64', 'Rzym, 64 r.', 'tyrant', 1,
+      { skin: '#e8c6a4', hair: '#8a5a2a', coat: '#5a1a6b', coatDark: '#3a1045', trousers: '#5a1a6b', legs: 'bare', boots: '#7a4e2a', hat: 'laurel', hatColor: '#d4af37', beard: 'goatee', weapon: 'staff', sash: '#d4af37' },
+      'Grał na lirze, gdy płonął Rzym. Liry nie ma, została laska. Wyważony rytm.'),
+    villain('commodus', 'KOMMODUS', 'Kommodus', 'Kommodusa', 'KOLOSEUM · 192', 'Koloseum, 192 r.', 'duelist', 2,
+      { skin: '#e0bd98', hair: '#6a4a26', coat: '#8a2a2a', coatDark: '#5a1a1a', trousers: '#8a2a2a', legs: 'bare', boots: '#5a3a22', armor: '#c9a65a', armorDark: '#7a6030', beard: 'full', weapon: 'sabre' },
+      'Cesarz-gladiator. Walczył na arenie z przeciwnikami, którym dawano drewniane miecze. Szybki, rzadko ciężki.'),
+    villain('attila', 'ATTYLA', 'Attyla', 'Attyli', 'HUNOWIE · 451', 'Pola Katalaunijskie, 451 r.', 'brute', 2,
+      { skin: '#d9b48a', hair: '#1a120c', coat: '#6b4a2a', coatDark: '#3f2a16', trousers: '#4a3620', boots: '#2a1a10', hat: 'helmet', hatColor: '#7a7a80', beard: 'goatee', weapon: 'sabre', cloak: '#5a3a1e' },
+      'Bicz Boży. Wolny zamach, ciężki cios co drugi raz, długi odpoczynek. Czekaj i karz.'),
+    villain('genghis', 'CZYNGIS-CHAN', 'Czyngis-chan', 'Czyngis-chana', 'MONGOLIA · 1211', 'Step, 1211 r.', 'duelist', 2,
+      { skin: '#d8b48c', hair: '#1a120c', coat: '#2a4a8a', coatDark: '#182c55', trousers: '#3a3a3a', boots: '#2a1a10', hat: 'furhat', hatColor: '#4a3620', beard: 'goatee', weapon: 'bow', sash: '#c9a040' },
+      'Zjednoczył stepy i zrównał z ziemią pół Azji. Strzela z łuku z bliska, potem odskakuje.'),
+    villain('timur', 'TAMERLAN', 'Tamerlan', 'Tamerlana', 'SAMARKANDA · 1398', 'Samarkanda, 1398 r.', 'tyrant', 3,
+      { skin: '#d2a67e', hair: '#1a120c', coat: '#1f6b4a', coatDark: '#124430', trousers: '#2a2a2a', boots: '#2a1a10', hat: 'turban', hatColor: '#f0e8d0', beard: 'full', weapon: 'sabre', sash: '#d4af37' },
+      'Budował piramidy z czaszek. Kulawy, ale szabla nie kuleje.'),
+    villain('vlad', 'WŁAD PALOWNIK', 'Wład Palownik', 'Włada Palownika', 'WOŁOSZCZYZNA · 1462', 'Târgoviște, 1462 r.', 'trickster', 3,
+      { skin: '#e6c9ae', hair: '#1a120c', coat: '#5a0f1e', coatDark: '#360812', trousers: '#2a1a1a', boots: '#1a1010', hat: 'cap', hatColor: '#7a1020', mustache: 'handlebar', weapon: 'spear', cloak: '#2a0a10' },
+      'Drakula z krwi i kości. Zamiast włóczni pal. Lekkie pchnięcia bez ostrzeżenia, ciężkie z długim zamachem.'),
+    villain('torquemada', 'TORQUEMADA', 'Torquemada', 'Torquemady', 'INKWIZYCJA · 1483', 'Sewilla, 1483 r.', 'tyrant', 3,
+      { skin: '#e2c4a4', hair: '#3a2a1a', coat: '#121212', coatDark: '#000000', trousers: '#121212', boots: '#0d0d0d', hat: 'hood', hatColor: '#121212', weapon: 'staff' },
+      'Wielki inkwizytor. Laska zakończona krzyżem, miarowy rytm przesłuchania.'),
+    villain('cortes', 'HERNÁN CORTÉS', 'Cortés', 'Cortésa', 'KONKWISTA · 1521', 'Tenochtitlan, 1521 r.', 'duelist', 3,
+      { skin: '#dcb594', hair: '#2a1a12', coat: '#3a3a3a', coatDark: '#1e1e1e', trousers: '#2a2a2a', boots: '#1a1010', hat: 'morion', hatColor: '#8a8a90', armor: '#9a9aa0', armorDark: '#5a5a60', beard: 'full', weapon: 'sabre' },
+      'Spalił własne okręty i zburzył Tenochtitlan. Szybki rapier konkwistadora.'),
+    villain('pizarro', 'FRANCISCO PIZARRO', 'Pizarro', 'Pizarra', 'KONKWISTA · 1532', 'Cajamarca, 1532 r.', 'gunman', 3,
+      { skin: '#d8b08c', hair: '#3a2a1a', coat: '#4a3a2a', coatDark: '#2a2016', trousers: '#2a2a2a', boots: '#1a1010', hat: 'morion', hatColor: '#8a8a90', armor: '#8a8a90', armorDark: '#505056', beard: 'full', weapon: 'rifle' },
+      'Pojmał Atahualpę podstępem. Arkebuz z bliska: błysk, dym, długie przeładowanie.'),
+    villain('ivan', 'IWAN GROŹNY', 'Iwan Groźny', 'Iwana Groźnego', 'MOSKWA · 1570', 'Nowogród, 1570 r.', 'brute', 4,
+      { skin: '#e0bd98', hair: '#3a2a1a', coat: '#8a1a1a', coatDark: '#5a1010', trousers: '#2a1a1a', boots: '#1a1010', hat: 'furhat', hatColor: '#d4af37', beard: 'long', weapon: 'staff', sash: '#d4af37' },
+      'Car, który zabił własnego syna. Okuta laska bije ciężko i rzadko.'),
+    villain('bathory', 'ELŻBIETA BATORY', 'Elżbieta Batory', 'Elżbiety Batory', 'WĘGRY · 1610', 'Czachtice, 1610 r.', 'trickster', 3,
+      { skin: '#eed6c2', hair: '#1a120c', coat: '#2a0a2a', coatDark: '#160416', trousers: '#2a0a2a', boots: '#1a1010', hat: 'none', weapon: 'dagger', sash: '#8a1a2a' },
+      'Krwawa hrabina. Sztylet, cisza i pchnięcie, kiedy się najmniej spodziewasz.'),
+    villain('blackbeard', 'CZARNOBRODY', 'Czarnobrody', 'Czarnobrodego', 'PIRACI · 1718', 'Ocracoke, 1718 r.', 'gunman', 4,
+      { skin: '#d0a07a', hair: '#0d0d0d', coat: '#1a1a1a', coatDark: '#000000', trousers: '#2a2a2a', boots: '#0d0d0d', hat: 'tricorn', hatColor: '#111111', beard: 'long', weapon: 'pistol', sash: '#8a1a1a' },
+      'Lonty w brodzie, sześć pistoletów za pasem. Strzela z bliska, potem przeładowuje za długo.'),
+    villain('robespierre', 'ROBESPIERRE', 'Robespierre', 'Robespierre’a', 'TERROR · 1794', 'Paryż, 1794 r.', 'duelist', 4,
+      { skin: '#eacfb6', hair: '#d8d2c4', coat: '#1f3a6b', coatDark: '#13254a', lapel: '#e8e4d8', trousers: '#ece7d8', boots: '#1a1a1a', hat: 'none', weapon: 'sabre', sash: '#c0392b' },
+      'Nieprzekupny. Posłał na gilotynę tysiące, w końcu sam. Szybkie, precyzyjne cięcia.'),
+    villain('leopold', 'LEOPOLD II', 'Leopold II', 'Leopolda II', 'KONGO · 1900', 'Wolne Państwo Kongo, 1900 r.', 'tyrant', 4,
+      { skin: '#e8cdb2', hair: '#d8d8d0', coat: '#1a2a4a', coatDark: '#0f1a30', trousers: '#1a2a4a', boots: '#1a1010', hat: 'peaked', hatColor: '#1a2a4a', beard: 'long', weapon: 'rifle', epaulettes: '#d4af37' },
+      'Król Belgów, prywatny właściciel Konga. Karabin i spokój księgowego.'),
+    villain('rasputin', 'RASPUTIN', 'Rasputin', 'Rasputina', 'PIOTROGRÓD · 1916', 'Piotrogród, 1916 r.', 'brute', 4,
+      { skin: '#dcbfa2', hair: '#2a1a12', coat: '#1a1a1a', coatDark: '#000000', trousers: '#1a1a1a', boots: '#0d0d0d', hat: 'none', beard: 'long', weapon: 'staff' },
+      'Otruty, postrzelony, utopiony. Dużo HP i ciosy jak kłoda. Nie chce upaść.'),
+    villain('capone', 'AL CAPONE', 'Al Capone', 'Ala Capone’a', 'CHICAGO · 1929', 'Chicago, 1929 r.', 'gunman', 5,
+      { skin: '#e6c2a6', hair: '#2a1a12', coat: '#4a4a52', coatDark: '#2a2a30', lapel: '#d8d8d8', trousers: '#4a4a52', boots: '#1a1010', hat: 'fedora', hatColor: '#e8e2d0', weapon: 'rifle', sash: '#8a1a1a' },
+      'Masakra w dniu świętego Walentego. Tommy gun z bliska, potem bęben pusty i garda w dół.'),
+    villain('mussolini', 'MUSSOLINI', 'Mussolini', 'Mussoliniego', 'RZYM · 1940', 'Rzym, 1940 r.', 'brute', 5,
+      { skin: '#e3c1a0', hair: '#2a2a2a', coat: '#1a1a1a', coatDark: '#000000', trousers: '#1a1a1a', boots: '#0d0d0d', hat: 'fez', hatColor: '#111111', weapon: 'sabre', epaulettes: '#d4af37' },
+      'Duce z balkonu. Szabla, wypięta pierś i ciężkie, powolne cięcia.'),
+    villain('tojo', 'HIDEKI TŌJŌ', 'Tōjō', 'Tōjō', 'TOKIO · 1941', 'Tokio, 1941 r.', 'duelist', 5,
+      { skin: '#e8c9a8', hair: '#1a1a1a', coat: '#5a5a3a', coatDark: '#3a3a24', trousers: '#5a5a3a', boots: '#0d0d0d', hat: 'peaked', hatColor: '#5a5a3a', mustache: 'thick', weapon: 'sabre', epaulettes: '#d4af37' },
+      'Generał i premier w jednym. Katana w rytmie szermierza: szybko, rzadko ciężko.'),
+    villain('mao', 'MAO ZEDONG', 'Mao', 'Mao', 'PEKIN · 1966', 'Pekin, 1966 r.', 'tyrant', 5,
+      { skin: '#e6c8a8', hair: '#1a1a1a', coat: '#5a5a5a', coatDark: '#3a3a3a', trousers: '#5a5a5a', boots: '#0d0d0d', hat: 'cap', hatColor: '#5a5a5a', weapon: 'staff', star: '#d33a3a' },
+      'Wielki Skok i rewolucja kulturalna. Laska w miarowym tempie przewodniczącego.'),
+    villain('amin', 'IDI AMIN', 'Idi Amin', 'Idiego Amina', 'KAMPALA · 1976', 'Kampala, 1976 r.', 'brute', 5,
+      { skin: '#6b4a32', hair: '#0d0d0d', coat: '#6b6a4a', coatDark: '#44432e', trousers: '#6b6a4a', boots: '#0d0d0d', hat: 'peaked', hatColor: '#6b6a4a', weapon: 'pistol', epaulettes: '#d4af37', sash: '#d4af37' },
+      'Pierś pełna orderów, które sam sobie nadał. Ciężki, wolny, boli.'),
+    villain('polpot', 'POL POT', 'Pol Pot', 'Pol Pota', 'KAMBODŻA · 1977', 'Phnom Penh, 1977 r.', 'trickster', 5,
+      { skin: '#d8b08c', hair: '#1a1a1a', coat: '#1a1a1a', coatDark: '#000000', trousers: '#1a1a1a', boots: '#0d0d0d', hat: 'cap', hatColor: '#1a1a1a', weapon: 'rifle', sash: '#8a1a1a' },
+      'Rok zero. Nieprzewidywalny rytm, szybkie serie i długie przerwy.'),
+    villain('ceausescu', 'CEAUȘESCU', 'Ceaușescu', 'Ceaușescu', 'BUKARESZT · 1989', 'Bukareszt, 1989 r.', 'tyrant', 5,
+      { skin: '#e3c1a0', hair: '#4a4a4a', coat: '#2a2a2a', coatDark: '#141414', lapel: '#d8d8d8', trousers: '#2a2a2a', boots: '#0d0d0d', hat: 'none', weapon: 'pistol' },
+      'Geniusz Karpat, do ostatniego przemówienia z balkonu. Pistolet i uparty rytm.'),
+    villain('saddam', 'SADDAM HUSAJN', 'Saddam', 'Saddama', 'BAGDAD · 1991', 'Bagdad, 1991 r.', 'gunman', 6,
+      { skin: '#d6ad88', hair: '#1a1a1a', coat: '#4a5a3a', coatDark: '#2e3a24', trousers: '#4a5a3a', boots: '#0d0d0d', hat: 'beret', hatColor: '#1a1a1a', mustache: 'thick', weapon: 'rifle', epaulettes: '#d4af37' },
+      'Strzelał z karabinu z balkonu do tłumu. Tu strzela do ciebie, z bliska i z przerwami.'),
+    villain('escobar', 'PABLO ESCOBAR', 'Escobar', 'Escobara', 'MEDELLÍN · 1993', 'Medellín, 1993 r.', 'trickster', 6,
+      { skin: '#dcb08e', hair: '#1a1a1a', coat: '#2a3a6a', coatDark: '#1a2444', lapel: '#f0f0f0', trousers: '#3a3a3a', boots: '#1a1010', hat: 'none', mustache: 'thick', weapon: 'pistol' },
+      'Plata o plomo. Szybki strzał bez ostrzeżenia, potem długie chowanie się.'),
+    villain('binladen', 'OSAMA BIN LADEN', 'bin Laden', 'bin Ladena', 'TORA BORA · 2001', 'Tora Bora, 2001 r.', 'gunman', 6,
+      { skin: '#d6b08c', hair: '#1a1a1a', coat: '#e8e2d0', coatDark: '#b8b2a0', trousers: '#e8e2d0', boots: '#3a2616', hat: 'turban', hatColor: '#f0ead6', beard: 'long', weapon: 'rifle', cloak: '#5a5a3a' },
+      'Ukryty w jaskiniach. Karabin z dystansu, chwila słabości po każdej serii.'),
+    villain('gaddafi', 'MUAMMAR KADDAFI', 'Kaddafi', 'Kaddafiego', 'SYRTA · 2011', 'Syrta, 2011 r.', 'brute', 6,
+      { skin: '#c89a74', hair: '#1a1a1a', coat: '#6b4a2a', coatDark: '#44301a', trousers: '#6b4a2a', boots: '#1a1010', hat: 'peaked', hatColor: '#6b4a2a', weapon: 'pistol', epaulettes: '#d4af37', sash: '#2a8a4a' },
+      'Ostatni boss nocy. Złoty pistolet, ciężka ręka i najwięcej HP w muzeum.'),
+    { id: 'napoleon', name: 'NAPOLEON BONAPARTE', alias: 'Napoleon', aliasGen: 'Napoleona', tag: 'CESARSTWO · 1812', era: 'Borodino, 1812', kind: 'postać historyczna',
       description: 'Cesarz Francuzów. Szybka szabla, krótkie przerwy między natarciami.',
-      stats: { ...human, hp: 170,
-        combat: { ...human.combat, approachSpeed: 95, windup: .9, heavyWindup: 1.2, strikeDuration: .38, recovery: 1.4, heavyRecovery: 1.8, heavyEvery: 3, idleDelay: .6 },
+      stats: { ...human, hp: 170, combat: { ...human.combat, approachSpeed: 95, windup: .9, heavyWindup: 1.2, strikeDuration: .38, recovery: 1.4, heavyRecovery: 1.8, heavyEvery: 3, idleDelay: .6 },
         damage: { light: 14, heavy: 21, lightBlocked: 12, heavyBlocked: 17, blockCostLight: 16, blockCostHeavy: 22 },
-        figure: { skin: '#e8c3a5', hair: '#3a2a1f', coat: '#1f3a6b', coatDark: '#13254a', lapel: '#e8e4d8', trousers: '#ece7d8', boots: '#1a1a1a',
-          hat: 'bicorne', hatColor: '#15191f', cockade: '#c0392b', sash: '#c0392b', weapon: 'sabre', epaulettes: '#d4af37' } }
-    },
-    {
-      id: 'hitler', name: 'ADOLF HITLER', alias: 'Hitler',
-      tag: 'BERLIN · 1945', era: 'Bunkier, 1945', kind: 'postać historyczna',
+        figure: { skin: '#e8c3a5', hair: '#3a2a1f', coat: '#1f3a6b', coatDark: '#13254a', lapel: '#e8e4d8', trousers: '#ece7d8', boots: '#1a1a1a', hat: 'bicorne', hatColor: '#15191f', cockade: '#c0392b', sash: '#c0392b', weapon: 'sabre', epaulettes: '#d4af37' } } },
+    { id: 'hitler', name: 'ADOLF HITLER', alias: 'Hitler', aliasGen: 'Hitlera', tag: 'BERLIN · 1945', era: 'Bunkier, 1945', kind: 'postać historyczna',
       description: 'Osaczony tyran. Pistolet z bliska, nerwowe, nieregularne natarcia.',
-      stats: { ...human, hp: 150,
-        combat: { ...human.combat, range: 340, engageRange: 360, windup: .8, heavyWindup: 1.5, strikeDuration: .34, strikeContact: .14, recovery: 1.5, heavyRecovery: 2.3, heavyEvery: 3, idleDelay: .5 },
+      stats: { ...human, hp: 150, combat: { ...human.combat, range: 340, engageRange: 360, windup: .8, heavyWindup: 1.5, strikeDuration: .34, strikeContact: .14, recovery: 1.5, heavyRecovery: 2.3, heavyEvery: 3, idleDelay: .5 },
         damage: { light: 17, heavy: 26, lightBlocked: 13, heavyBlocked: 21, blockCostLight: 20, blockCostHeavy: 27 },
-        figure: { skin: '#e6c2a6', hair: '#2a2118', coat: '#6b6349', coatDark: '#4d4634', trousers: '#5a5340', boots: '#1d1a16',
-          hat: 'peaked', hatColor: '#5e5740', mustache: 'toothbrush', armband: '#b3202a', weapon: 'pistol' } }
-    },
-    {
-      id: 'stalin', name: 'JÓZEF STALIN', alias: 'Stalin',
-      tag: 'MOSKWA · 1953', era: 'Kreml, 1953', kind: 'postać historyczna',
-      description: 'Ostatni pojedynek nocy. Najwięcej HP, ciężka szaszka, długie zamachy.',
-      stats: { ...human, hp: 220,
-        combat: { ...human.combat, approachSpeed: 70, windup: 1.2, heavyWindup: 1.6, strikeDuration: .46, strikeContact: .2, recovery: 1.9, heavyRecovery: 2.4, heavyEvery: 2, idleDelay: .8 },
+        figure: { skin: '#e6c2a6', hair: '#2a2118', coat: '#6b6349', coatDark: '#4d4634', trousers: '#5a5340', boots: '#1d1a16', hat: 'peaked', hatColor: '#5e5740', mustache: 'toothbrush', armband: '#b3202a', weapon: 'pistol' } } },
+    { id: 'stalin', name: 'JÓZEF STALIN', alias: 'Stalin', aliasGen: 'Stalina', tag: 'MOSKWA · 1953', era: 'Kreml, 1953', kind: 'postać historyczna',
+      description: 'Najwięcej HP wśród dawnych bossów, ciężka szaszka, długie zamachy.',
+      stats: { ...human, hp: 220, combat: { ...human.combat, approachSpeed: 70, windup: 1.2, heavyWindup: 1.6, strikeDuration: .46, strikeContact: .2, recovery: 1.9, heavyRecovery: 2.4, heavyEvery: 2, idleDelay: .8 },
         damage: { light: 18, heavy: 28, lightBlocked: 15, heavyBlocked: 23, blockCostLight: 21, blockCostHeavy: 30 },
-        figure: { skin: '#e3bd9c', hair: '#3b3028', coat: '#6f7a4e', coatDark: '#4e5736', trousers: '#5f6a45', boots: '#1d1a16',
-          hat: 'peaked', hatColor: '#6f7a4e', star: '#d33a3a', mustache: 'thick', weapon: 'sabre', epaulettes: '#d4af37' } }
-    }
+        figure: { skin: '#e3bd9c', hair: '#3b3028', coat: '#6f7a4e', coatDark: '#4e5736', trousers: '#5f6a45', boots: '#1d1a16', hat: 'peaked', hatColor: '#6f7a4e', star: '#d33a3a', mustache: 'thick', weapon: 'sabre', epaulettes: '#d4af37' } } }
   ];
   const exhibits = Object.freeze(definitions.map(definition => Object.freeze({
     ...definition,
+    aliasGen: definition.aliasGen || definition.alias + 'a',
     stats: Object.freeze({
       ...baseline, ...definition.stats,
       combat: Object.freeze({ ...baseline.combat, ...(definition.stats.combat || {}) }),
@@ -641,58 +710,99 @@ window.MuseumConfig = Object.freeze({
   })));
   const byId = new Map(exhibits.map(exhibit => [exhibit.id, exhibit]));
   window.MuseumExhibits = Object.freeze({
-    baseline,
+    baseline, archetypes,
     get(id) { return byId.get(id) || byId.get('trex'); },
     all() { return exhibits; }
   });
 })();
-</script><script>/* The night patrol: an ordered list of levels. One level is one opponent, one era, one scenery. */
+</script><script>/* The night patrol: an ordered list of levels. One level is one opponent, one era, one scenery.
+   Entries are sorted by year and numbered automatically, so a new era slots in wherever history puts it. */
 (() => {
   'use strict';
   const definitions = [
-    {
-      id: 'cretaceous-raptor', number: 1, year: -75000000, yearLabel: '75 MLN LAT TEMU', title: 'KREDA PÓŹNA', hall: 'SALA PALEONTOLOGII',
-      exhibit: 'raptor', theme: 'museum', reward: 120,
-      tagline: 'Mały szkielet. Szybkie szczęki.<br>Rozgrzewka przed prawdziwą historią.',
-      card: 'Gablota z napisem VELOCIRAPTOR właśnie pękła.',
+    { id: 'cretaceous-raptor', year: -75000000, yearLabel: '75 MLN LAT TEMU', title: 'KREDA PÓŹNA', hall: 'SALA PALEONTOLOGII', exhibit: 'raptor', theme: 'museum',
+      tagline: 'Mały szkielet. Szybkie szczęki.<br>Rozgrzewka przed prawdziwą historią.', card: 'Gablota z napisem VELOCIRAPTOR właśnie pękła.',
       prologue: [
         { label: '23:58 / OSTATNI OBCHÓD', text: 'W muzeum zapada cisza. Stróż kończy swój ostatni obchód.' },
         { label: '00:00 / COŚ SIĘ OBUDZIŁO', text: 'Z sali paleontologii dobiega trzask. Stal porusza się. Kości łapią oddech.' },
         { label: '00:01 / HISTORIA KONTRA HISTORIA', text: 'Jeden rycerz. Jedna noc. Każda sala to inna epoka. Przetrwa tylko jeden.' }
-      ]
-    },
-    {
-      id: 'cretaceous-rex', number: 2, year: -66000000, yearLabel: '66 MLN LAT TEMU', title: 'KONIEC KREDY', hall: 'GŁÓWNA GALERIA',
-      exhibit: 'trex', theme: 'museum', reward: 180,
-      tagline: 'Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.',
-      card: 'Główna galeria. Król kredy schodzi z postumentu.'
-    },
-    {
-      id: 'thermopylae', number: 3, year: -480, yearLabel: '480 P.N.E.', title: 'TERMOPILE', hall: 'SALA ANTYKU',
-      exhibit: 'leonidas', theme: 'sparta', reward: 240,
-      tagline: 'Trzystu już nie ma. Został jeden.<br>Król Sparty nie cofa się o krok.',
-      card: 'Wąwóz Termopil. Leonidas zasłania przejście tarczą.'
-    },
-    {
-      id: 'borodino', number: 4, year: 1812, yearLabel: '1812', title: 'BORODINO', hall: 'SALA EMPIRE',
-      exhibit: 'napoleon', theme: 'napoleon', reward: 300,
-      tagline: 'Cesarz Francuzów w śniegu pod Moskwą.<br>Szabla w dłoni, Europa za plecami.',
-      card: 'Pole pod Borodino. Napoleon wyciąga szablę z pochwy.'
-    },
-    {
-      id: 'berlin', number: 5, year: 1945, yearLabel: '1945', title: 'BERLIN', hall: 'BUNKIER',
-      exhibit: 'hitler', theme: 'bunker', reward: 380,
-      tagline: 'Beton, kurz i koniec wojny.<br>Tyran w bunkrze nie ma już dokąd uciec.',
-      card: 'Bunkier pod Kancelarią Rzeszy. Hitler nie ma już dokąd uciec.'
-    },
-    {
-      id: 'moscow', number: 6, year: 1953, yearLabel: '1953', title: 'MOSKWA', hall: 'KREML',
-      exhibit: 'stalin', theme: 'kremlin', reward: 460,
-      tagline: 'Czerwone mury, czerwona gwiazda.<br>Ostatni pojedynek nocy.',
-      card: 'Kreml. Stalin odkłada fajkę i sięga po szaszkę.'
-    }
+      ] },
+    { id: 'cretaceous-rex', year: -66000000, yearLabel: '66 MLN LAT TEMU', title: 'KONIEC KREDY', hall: 'GŁÓWNA GALERIA', exhibit: 'trex', theme: 'museum',
+      tagline: 'Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.', card: 'Główna galeria. Król kredy schodzi z postumentu.' },
+    { id: 'thermopylae', year: -480, yearLabel: '480 P.N.E.', title: 'TERMOPILE', hall: 'SALA ANTYKU', exhibit: 'leonidas', theme: 'sparta',
+      tagline: 'Trzystu już nie ma. Został jeden.<br>Król Sparty nie cofa się o krok.', card: 'Wąwóz Termopil. Leonidas zasłania przejście tarczą.' },
+    { id: 'plataea', year: -479, yearLabel: '479 P.N.E.', title: 'PLATEJE', hall: 'SALA PERSKA', exhibit: 'xerxes', theme: 'persia',
+      tagline: 'Król królów spalił Ateny.<br>Teraz patrzy na ciebie z tronu.', card: 'Sala perska. Kserkses schodzi z tronu z włócznią.' },
+    { id: 'xianyang', year: -210, yearLabel: '210 P.N.E.', title: 'XIANYANG', hall: 'SALA TERAKOTOWA', exhibit: 'qin', theme: 'china',
+      tagline: 'Pierwszy cesarz chciał żyć wiecznie.<br>Terakotowa armia patrzy.', card: 'Sala terakotowa. Qin Shi Huang wyciąga miecz jian spośród glinianych żołnierzy.' },
+    { id: 'jerusalem', year: -4, yearLabel: '4 P.N.E.', title: 'JEROZOLIMA', hall: 'SALA JUDEI', exhibit: 'herod', theme: 'judea',
+      tagline: 'Król z nadania Rzymu.<br>Ufa tylko sztyletowi.', card: 'Pałac Heroda. Sztylet błyska w świetle lamp oliwnych.' },
+    { id: 'rome-caligula', year: 40, yearLabel: '40 R.', title: 'RZYM', hall: 'SALA CESARSKA', exhibit: 'caligula', theme: 'rome',
+      tagline: 'Mianował konia senatorem.<br>Ciebie mianuje celem.', card: 'Pałac na Palatynie. Kaligula odkłada kielich i chwyta sztylet.' },
+    { id: 'rome-nero', year: 64, yearLabel: '64 R.', title: 'POŻAR RZYMU', hall: 'SALA CESARSKA', exhibit: 'nero', theme: 'rome',
+      tagline: 'Rzym płonie.<br>Neron skończył grać.', card: 'Łuna nad Rzymem. Neron odkłada lirę i bierze laskę.' },
+    { id: 'colosseum', year: 192, yearLabel: '192 R.', title: 'KOLOSEUM', hall: 'ARENA', exhibit: 'commodus', theme: 'rome',
+      tagline: 'Cesarz w zbroi gladiatora.<br>Tym razem przeciwnik ma prawdziwy miecz.', card: 'Piasek Koloseum. Kommodus unosi gladius ku pustym trybunom.' },
+    { id: 'catalaunian', year: 451, yearLabel: '451 R.', title: 'POLA KATALAUNIJSKIE', hall: 'SALA WĘDRÓWKI LUDÓW', exhibit: 'attila', theme: 'steppe',
+      tagline: 'Bicz Boży.<br>Trawa nie rośnie tam, gdzie stanął.', card: 'Step pod Châlons. Attyla zsiada z konia i dobywa szabli.' },
+    { id: 'mongolia', year: 1211, yearLabel: '1211', title: 'STEP', hall: 'SALA MONGOLSKA', exhibit: 'genghis', theme: 'steppe',
+      tagline: 'Zjednoczył stepy.<br>Zrównał z ziemią pół świata.', card: 'Jurta chana. Czyngis-chan napina łuk.' },
+    { id: 'samarkand', year: 1398, yearLabel: '1398', title: 'SAMARKANDA', hall: 'SALA TIMURYDÓW', exhibit: 'timur', theme: 'persia',
+      tagline: 'Piramidy z czaszek.<br>Kulawy, ale szabla nie kuleje.', card: 'Błękitne kopuły Samarkandy. Tamerlan wychodzi z cienia meczetu.' },
+    { id: 'wallachia', year: 1462, yearLabel: '1462', title: 'WOŁOSZCZYZNA', hall: 'SALA DRAKULI', exhibit: 'vlad', theme: 'castle',
+      tagline: 'Las pali pod zamkiem.<br>Drakula z krwi i kości.', card: 'Zamek Poenari. Wład Palownik dobywa pala jak włóczni.' },
+    { id: 'seville', year: 1483, yearLabel: '1483', title: 'SEWILLA', hall: 'SALA INKWIZYCJI', exhibit: 'torquemada', theme: 'church',
+      tagline: 'Nikt nie spodziewa się inkwizycji.<br>Ty też nie.', card: 'Kaplica w Sewilli. Torquemada opuszcza kaptur i unosi laskę.' },
+    { id: 'tenochtitlan', year: 1521, yearLabel: '1521', title: 'TENOCHTITLAN', hall: 'SALA KONKWISTY', exhibit: 'cortes', theme: 'aztec',
+      tagline: 'Spalił własne okręty.<br>Potem miasto na jeziorze.', card: 'Ruiny Tenochtitlanu. Cortés wyciąga rapier w dymie.' },
+    { id: 'cajamarca', year: 1532, yearLabel: '1532', title: 'CAJAMARCA', hall: 'SALA KONKWISTY', exhibit: 'pizarro', theme: 'aztec',
+      tagline: 'Pokój ze złota za życie króla.<br>Pizarro i tak go zabił.', card: 'Plac w Cajamarce. Pizarro zapala lont arkebuza.' },
+    { id: 'novgorod', year: 1570, yearLabel: '1570', title: 'NOWOGRÓD', hall: 'SALA CARÓW', exhibit: 'ivan', theme: 'tsar',
+      tagline: 'Car, który zabił własnego syna.<br>Laska okuta żelazem.', card: 'Nowogród w ogniu. Iwan Groźny unosi okutą laskę.' },
+    { id: 'cachtice', year: 1610, yearLabel: '1610', title: 'CZACHTICE', hall: 'SALA HRABINY', exhibit: 'bathory', theme: 'castle',
+      tagline: 'Krwawa hrabina.<br>Zamurowana na zawsze. Prawie.', card: 'Zamek w Czachticach. Elżbieta Batory wychodzi z zamurowanej komnaty.' },
+    { id: 'ocracoke', year: 1718, yearLabel: '1718', title: 'OCRACOKE', hall: 'SALA PIRATÓW', exhibit: 'blackbeard', theme: 'pirate',
+      tagline: 'Lonty w brodzie, sześć pistoletów.<br>Tylko jeden strzał naraz.', card: 'Pokład Queen Anne’s Revenge. Czarnobrody zapala lonty w brodzie.' },
+    { id: 'paris-1794', year: 1794, yearLabel: '1794', title: 'TERROR', hall: 'SALA REWOLUCJI', exhibit: 'robespierre', theme: 'revolution',
+      tagline: 'Nieprzekupny.<br>Gilotyna czeka na kogoś.', card: 'Plac Rewolucji. Robespierre odkłada akt oskarżenia i chwyta szpadę.' },
+    { id: 'borodino', year: 1812, yearLabel: '1812', title: 'BORODINO', hall: 'SALA EMPIRE', exhibit: 'napoleon', theme: 'napoleon',
+      tagline: 'Cesarz Francuzów w śniegu pod Moskwą.<br>Szabla w dłoni, Europa za plecami.', card: 'Pole pod Borodino. Napoleon wyciąga szablę z pochwy.' },
+    { id: 'congo', year: 1900, yearLabel: '1900', title: 'KONGO', hall: 'SALA KOLONIALNA', exhibit: 'leopold', theme: 'jungle',
+      tagline: 'Król, który kupił sobie kraj.<br>Kauczuk, karabin, cisza.', card: 'Posterunek nad rzeką Kongo. Leopold II ładuje karabin.' },
+    { id: 'petrograd', year: 1916, yearLabel: '1916', title: 'PIOTROGRÓD', hall: 'SALA CARÓW', exhibit: 'rasputin', theme: 'tsar',
+      tagline: 'Otruty, postrzelony, utopiony.<br>Nadal stoi.', card: 'Pałac Jusupowów. Rasputin otrzepuje się z wody Newy.' },
+    { id: 'chicago', year: 1929, yearLabel: '1929', title: 'CHICAGO', hall: 'SALA PROHIBICJI', exhibit: 'capone', theme: 'speakeasy',
+      tagline: 'Walentynki w garażu.<br>Tommy gun gra swoje.', card: 'Zaplecze speakeasy. Al Capone odbezpiecza pistolet maszynowy.' },
+    { id: 'rome-1940', year: 1940, yearLabel: '1940', title: 'RZYM', hall: 'SALA FASZYZMU', exhibit: 'mussolini', theme: 'fascist',
+      tagline: 'Duce z balkonu.<br>Szabla, pierś i marmur.', card: 'Palazzo Venezia. Mussolini schodzi z balkonu z szablą.' },
+    { id: 'tokyo', year: 1941, yearLabel: '1941', title: 'TOKIO', hall: 'SALA PACYFIKU', exhibit: 'tojo', theme: 'japan',
+      tagline: 'Generał i premier.<br>Katana nie pyta.', card: 'Sztab w Tokio. Tōjō dobywa katany.' },
+    { id: 'berlin', year: 1945, yearLabel: '1945', title: 'BERLIN', hall: 'BUNKIER', exhibit: 'hitler', theme: 'bunker',
+      tagline: 'Beton, kurz i koniec wojny.<br>Tyran w bunkrze nie ma już dokąd uciec.', card: 'Bunkier pod Kancelarią Rzeszy. Hitler nie ma już dokąd uciec.' },
+    { id: 'moscow', year: 1953, yearLabel: '1953', title: 'MOSKWA', hall: 'KREML', exhibit: 'stalin', theme: 'kremlin',
+      tagline: 'Czerwone mury, czerwona gwiazda.<br>Ostatni z dawnej szóstki.', card: 'Kreml. Stalin odkłada fajkę i sięga po szaszkę.' },
+    { id: 'beijing', year: 1966, yearLabel: '1966', title: 'PEKIN', hall: 'SALA REWOLUCJI KULTURALNEJ', exhibit: 'mao', theme: 'china',
+      tagline: 'Wielki Skok.<br>Mała czerwona książeczka i laska.', card: 'Plac Tiananmen. Mao odkłada książeczkę i bierze laskę.' },
+    { id: 'kampala', year: 1976, yearLabel: '1976', title: 'KAMPALA', hall: 'SALA DYKTATORÓW', exhibit: 'amin', theme: 'jungle',
+      tagline: 'Ordery nadane sobie samemu.<br>Pięść ciężka jak one wszystkie.', card: 'Pałac w Kampali. Idi Amin poprawia ordery i wyciąga pistolet.' },
+    { id: 'phnom-penh', year: 1977, yearLabel: '1977', title: 'PHNOM PENH', hall: 'SALA DYKTATORÓW', exhibit: 'polpot', theme: 'jungle',
+      tagline: 'Rok zero.<br>Pola śmierci milczą.', card: 'Opuszczone Phnom Penh. Pol Pot wychodzi z dżungli z karabinem.' },
+    { id: 'bucharest', year: 1989, yearLabel: '1989', title: 'BUKARESZT', hall: 'SALA DYKTATORÓW', exhibit: 'ceausescu', theme: 'palace',
+      tagline: 'Ostatnie przemówienie z balkonu.<br>Tłum nie klaszcze.', card: 'Balkon KC w Bukareszcie. Ceaușescu przestaje mówić i sięga po pistolet.' },
+    { id: 'baghdad', year: 1991, yearLabel: '1991', title: 'BAGDAD', hall: 'SALA PUSTYNI', exhibit: 'saddam', theme: 'desert',
+      tagline: 'Strzelał z balkonu do tłumu.<br>Tu tłumu nie ma. Jesteś ty.', card: 'Pałac w Bagdadzie. Saddam ładuje karabin.' },
+    { id: 'medellin', year: 1993, yearLabel: '1993', title: 'MEDELLÍN', hall: 'SALA KARTELI', exhibit: 'escobar', theme: 'cartel',
+      tagline: 'Plata o plomo.<br>Srebra nie ma. Zostaje ołów.', card: 'Dach w Medellín. Escobar odwraca się z pistoletem.' },
+    { id: 'tora-bora', year: 2001, yearLabel: '2001', title: 'TORA BORA', hall: 'SALA PUSTYNI', exhibit: 'binladen', theme: 'desert',
+      tagline: 'Jaskinie w górach.<br>Karabin i echo.', card: 'Jaskinia w Tora Bora. Bin Laden odbezpiecza karabin.' },
+    { id: 'sirte', year: 2011, yearLabel: '2011', title: 'SYRTA', hall: 'OSTATNIA SALA', exhibit: 'gaddafi', theme: 'desert',
+      tagline: 'Ostatni boss nocy.<br>Złoty pistolet i koniec obchodu.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. To ostatnia sala.' }
   ];
-  const levels = Object.freeze(definitions.map(level => Object.freeze({ ...level, prologue: Object.freeze((level.prologue || []).map(Object.freeze)) })));
+  const sorted = [...definitions].sort((a, b) => a.year - b.year);
+  const levels = Object.freeze(sorted.map((level, index) => Object.freeze({
+    ...level, number: index + 1, reward: 120 + index * 15,
+    prologue: Object.freeze((level.prologue || []).map(Object.freeze))
+  })));
   const byId = new Map(levels.map(level => [level.id, level]));
   window.MuseumLevels = Object.freeze({
     all() { return levels; },
@@ -769,9 +879,39 @@ window.MuseumConfig = Object.freeze({
     { id: 'trophy-raptor', level: 'cretaceous-raptor', name: 'PAZUR VELOCIRAPTORA', era: 'TROFEUM · 75 MLN LAT TEMU', glyph: '⟩', color: '#8fa67a', description: 'Sierpowaty pazur z gabloty, która pękła pierwsza.' },
     { id: 'trophy-rex', level: 'cretaceous-rex', name: 'ZĄB TYRANOZAURA', era: 'TROFEUM · 66 MLN LAT TEMU', glyph: '▲', color: '#d8cfa8', description: 'Dwadzieścia centymetrów szkliwa. Król kredy nie oddał go dobrowolnie.' },
     { id: 'trophy-leonidas', level: 'thermopylae', name: 'PIÓROPUSZ LEONIDASA', era: 'TROFEUM · 480 P.N.E.', glyph: 'Λ', color: '#b3202a', description: 'Czerwony grzebień z korynckiego hełmu. Trzystu go nie oddało, król też nie.' },
-    { id: 'trophy-napoleon', level: 'borodino', name: 'DWURÓG CESARZA', era: 'TROFEUM · 1812', glyph: 'N', color: '#1f3a6b', description: 'Kapelusz, który widział Austerlitz. Pod Borodino spadł w śnieg.' },
     { id: 'trophy-hitler', level: 'berlin', name: 'KLUCZ DO BUNKRA', era: 'TROFEUM · 1945', glyph: '⚿', color: '#6b6349', description: 'Ostatni klucz z Kancelarii Rzeszy. Drzwi już nikogo nie chronią.' },
-    { id: 'trophy-stalin', level: 'moscow', name: 'FAJKA Z KREMLA', era: 'TROFEUM · 1953', glyph: '★', color: '#b3202a', description: 'Zgaszona na dobre. Ostatnie trofeum nocy.' }
+    { id: 'trophy-stalin', level: 'moscow', name: 'FAJKA Z KREMLA', era: 'TROFEUM · 1953', glyph: '★', color: '#b3202a', description: 'Zgaszona na dobre.' },
+    { id: 'trophy-xerxes', level: 'plataea', name: 'TIARA KSERKSESA', era: 'TROFEUM · 479 P.N.E.', glyph: '♛', color: '#d4af37', description: 'Złota tiara króla królów. Morze jej nie chciało.' },
+    { id: 'trophy-qin', level: 'xianyang', name: 'TERAKOTOWY ŻOŁNIERZ', era: 'TROFEUM · 210 P.N.E.', glyph: '卒', color: '#b08a5a', description: 'Jeden z ośmiu tysięcy. Ten jeden jest twój.' },
+    { id: 'trophy-herod', level: 'jerusalem', name: 'PIECZĘĆ HERODA', era: 'TROFEUM · 4 P.N.E.', glyph: '✡', color: '#c9a040', description: 'Pieczęć króla, który nie ufał nikomu.' },
+    { id: 'trophy-caligula', level: 'rome-caligula', name: 'PODKOWA INCITATUSA', era: 'TROFEUM · 40', glyph: 'Ω', color: '#c0c0c0', description: 'Podkowa konia-senatora. Jedyny uczciwy senator tamtych czasów.' },
+    { id: 'trophy-nero', level: 'rome-nero', name: 'LIRA NERONA', era: 'TROFEUM · 64', glyph: '♪', color: '#d4af37', description: 'Brakuje jednej struny. Spłonęła.' },
+    { id: 'trophy-commodus', level: 'colosseum', name: 'HEŁM GLADIATORA', era: 'TROFEUM · 192', glyph: '⚔', color: '#c9a65a', description: 'Hełm cesarza, który wolał arenę od senatu.' },
+    { id: 'trophy-attila', level: 'catalaunian', name: 'BICZ ATTYLI', era: 'TROFEUM · 451', glyph: '〰', color: '#8a6a3a', description: 'Bicz Boży. Już nie świszcze.' },
+    { id: 'trophy-genghis', level: 'mongolia', name: 'ŁUK CHANA', era: 'TROFEUM · 1211', glyph: '⟩', color: '#c9a040', description: 'Łuk refleksyjny ze stepu. Cięciwa pękła na tobie.' },
+    { id: 'trophy-timur', level: 'samarkand', name: 'TURBAN TAMERLANA', era: 'TROFEUM · 1398', glyph: '◉', color: '#f0e8d0', description: 'Biały turban z Samarkandy, bez czaszek w zestawie.' },
+    { id: 'trophy-vlad', level: 'wallachia', name: 'PAL DRAKULI', era: 'TROFEUM · 1462', glyph: '†', color: '#8a1a2a', description: 'Pusty. Pierwszy raz od dawna.' },
+    { id: 'trophy-torquemada', level: 'seville', name: 'KAPTUR INKWIZYTORA', era: 'TROFEUM · 1483', glyph: '▲', color: '#444444', description: 'Czarny kaptur. Nikt się go już nie spodziewa.' },
+    { id: 'trophy-cortes', level: 'tenochtitlan', name: 'MORION CORTÉSA', era: 'TROFEUM · 1521', glyph: '⛑', color: '#9a9aa0', description: 'Stalowy hełm z grzebieniem. Okręty i tak spłonęły.' },
+    { id: 'trophy-pizarro', level: 'cajamarca', name: 'ZŁOTO Z CAJAMARKI', era: 'TROFEUM · 1532', glyph: '◆', color: '#d4af37', description: 'Jedna sztabka z pokoju pełnego złota.' },
+    { id: 'trophy-ivan', level: 'novgorod', name: 'OKUTA LASKA CARA', era: 'TROFEUM · 1570', glyph: '┃', color: '#8a8a90', description: 'Laska Iwana. Żelazne okucie wciąż ostre.' },
+    { id: 'trophy-bathory', level: 'cachtice', name: 'LUSTRO HRABINY', era: 'TROFEUM · 1610', glyph: '◯', color: '#c0c0c0', description: 'Lustro z Czachtic. Nie pokazuje nic ciekawego.' },
+    { id: 'trophy-blackbeard', level: 'ocracoke', name: 'KAPELUSZ CZARNOBRODEGO', era: 'TROFEUM · 1718', glyph: '☠', color: '#e8e2d0', description: 'Trójgraniasty, z dziurą po kuli.' },
+    { id: 'trophy-robespierre', level: 'paris-1794', name: 'KOKARDA TERRORU', era: 'TROFEUM · 1794', glyph: '◎', color: '#c0392b', description: 'Trójkolorowa kokarda Nieprzekupnego.' },
+    { id: 'trophy-napoleon', level: 'borodino', name: 'DWURÓG CESARZA', era: 'TROFEUM · 1812', glyph: 'N', color: '#1f3a6b', description: 'Kapelusz, który widział Austerlitz. Pod Borodino spadł w śnieg.' },
+    { id: 'trophy-leopold', level: 'congo', name: 'KORONA LEOPOLDA', era: 'TROFEUM · 1900', glyph: '♔', color: '#d4af37', description: 'Korona króla, który kupił sobie kraj.' },
+    { id: 'trophy-rasputin', level: 'petrograd', name: 'KRZYŻ RASPUTINA', era: 'TROFEUM · 1916', glyph: '☦', color: '#8a8a90', description: 'Srebrny krzyż mnicha, którego nie dało się zabić. Do dziś.' },
+    { id: 'trophy-capone', level: 'chicago', name: 'FEDORA CAPONE\u2019A', era: 'TROFEUM · 1929', glyph: '◗', color: '#e8e2d0', description: 'Biały kapelusz z Chicago. Bez dziur, co ciekawe.' },
+    { id: 'trophy-mussolini', level: 'rome-1940', name: 'FEZ DUCE', era: 'TROFEUM · 1940', glyph: '▬', color: '#222222', description: 'Czarny fez z balkonu Palazzo Venezia.' },
+    { id: 'trophy-tojo', level: 'tokyo', name: 'KATANA TŌJŌ', era: 'TROFEUM · 1941', glyph: '刀', color: '#c0c0c0', description: 'Oficerska katana. Rękojeść owinięta jedwabiem.' },
+    { id: 'trophy-mao', level: 'beijing', name: 'CZERWONA KSIĄŻECZKA', era: 'TROFEUM · 1966', glyph: '▮', color: '#d33a3a', description: 'Mała czerwona książeczka. Strony puste.' },
+    { id: 'trophy-amin', level: 'kampala', name: 'ORDERY AMINA', era: 'TROFEUM · 1976', glyph: '✪', color: '#d4af37', description: 'Garść orderów, które sam sobie nadał.' },
+    { id: 'trophy-polpot', level: 'phnom-penh', name: 'CZARNA CHUSTA', era: 'TROFEUM · 1977', glyph: '▪', color: '#333333', description: 'Chusta z Kambodży. Rok zero się skończył.' },
+    { id: 'trophy-ceausescu', level: 'bucharest', name: 'MIKROFON Z BALKONU', era: 'TROFEUM · 1989', glyph: '♁', color: '#8a8a90', description: 'Mikrofon z ostatniego przemówienia. Wyłączony.' },
+    { id: 'trophy-saddam', level: 'baghdad', name: 'BERET SADDAMA', era: 'TROFEUM · 1991', glyph: '◖', color: '#222222', description: 'Czarny beret z pałacu w Bagdadzie.' },
+    { id: 'trophy-escobar', level: 'medellin', name: 'DACHÓWKA Z MEDELLÍN', era: 'TROFEUM · 1993', glyph: '▰', color: '#c9643a', description: 'Dachówka z dachu, na którym wszystko się skończyło.' },
+    { id: 'trophy-binladen', level: 'tora-bora', name: 'KAMIEŃ Z JASKINI', era: 'TROFEUM · 2001', glyph: '●', color: '#8a7a5a', description: 'Kamień z Tora Bora. Echo ucichło.' },
+    { id: 'trophy-gaddafi', level: 'sirte', name: 'ZŁOTY PISTOLET', era: 'TROFEUM · 2011', glyph: '✦', color: '#d4af37', description: 'Złoty pistolet z Syrty. Ostatnie trofeum nocy. Muzeum ocalone.' }
   ].map(trophy => Object.freeze({ ...trophy, kind: 'trophy', rarity: 'legendary', limited: true })));
   const trophyById = new Map(trophies.map(t => [t.id, t]));
   const prestigePoints = Object.freeze({ basic: 1, common: 2, rare: 4, epic: 8, legendary: 16, trophy: 12 });
@@ -842,6 +982,24 @@ window.MuseumConfig = Object.freeze({
     napoleon:{bg:[[0,'#0a0e15'],[.65,'#27313e'],[1,'#0c1118']],wall:['#1d2531','#1b222d'],sign:['BORODINO','SALA EMPIRE · 1812'],consoles:['GRANDE ARMÉE','1812'],floor:[[0,'#d6dbe0'],[.25,'#b4bcc5'],[1,'#56606b']],window:'snow',particles:'snow',light:'rgba(200,222,255,.10)',banner:{color:'#1f3a6b',edge:'#d4af37',glyph:'N'}},
     bunker:{bg:[[0,'#0f0f0e'],[.65,'#2b2b27'],[1,'#121211']],wall:['#3b3b37','#373733'],sign:['FÜHRERBUNKER','BERLIN · 1945'],consoles:['1945','BERLIN'],floor:[[0,'#3c3b36'],[.25,'#34332f'],[1,'#17171a']],window:'none',particles:'ash',light:'rgba(255,222,160,.07)',banner:{color:'#4d4634',edge:'#8a7f5e',glyph:''}},
     hall:{bg:[[0,'#0c0a06'],[.65,'#2d2416'],[1,'#0e0b07']],wall:['#2a2219','#271f18'],sign:['SALA PRYWATNA','KOLEKCJA NOCNEGO STRÓŻA'],consoles:['ZBROJE','BROŃ'],floor:[[0,'#3a2f1f'],[.25,'#32291c'],[1,'#15100b']],window:'moon',particles:'dust',light:'rgba(255,214,140,.11)',banner:null,sponsor:false},
+    rome:{bg:[[0,'#1a1410'],[.65,'#4a3a2a'],[1,'#171210']],wall:['#4a4238','#453d34'],sign:['SPQR','SALA CESARSKA'],consoles:['ROMA','AVE'],floor:[[0,'#6a5a48'],[.25,'#5a4c3c'],[1,'#241c14']],window:'sun',particles:'dust',light:'rgba(255,200,120,.12)',banner:{color:'#8b1a1a',edge:'#d4af37',glyph:'SPQR'}},
+    persia:{bg:[[0,'#120a1a'],[.65,'#3a2050'],[1,'#120a18']],wall:['#3a2a4a','#352644'],sign:['ΠΕΡΣΙΣ','SALA PERSKA'],consoles:['PARSA','ŠĀH'],floor:[[0,'#5a4a30'],[.25,'#4a3c28'],[1,'#1e180f']],window:'sun',particles:'dust',light:'rgba(255,214,120,.12)',banner:{color:'#4a1f6b',edge:'#d4af37',glyph:'☀'}},
+    china:{bg:[[0,'#1a0808'],[.65,'#4a1414'],[1,'#160606']],wall:['#4a1a1a','#441818'],sign:['秦','SALA TERAKOTOWA'],consoles:['秦','兵'],floor:[[0,'#3a3028'],[.25,'#302820'],[1,'#141010']],window:'none',particles:'dust',light:'rgba(255,180,100,.12)',banner:{color:'#8a1a1a',edge:'#d4af37',glyph:'龍'}},
+    judea:{bg:[[0,'#14100a'],[.65,'#4a3a22'],[1,'#141008']],wall:['#5a4a30','#54452c'],sign:['HIEROSOLYMA','SALA JUDEI'],consoles:['JUDAEA','REX'],floor:[[0,'#7a6a48'],[.25,'#6a5a3c'],[1,'#2a2214']],window:'sun',particles:'dust',light:'rgba(255,220,150,.10)',banner:{color:'#7a1f2e',edge:'#c9a040',glyph:'✡'}},
+    steppe:{bg:[[0,'#0e1420'],[.65,'#3a4a5a'],[1,'#0e1418']],wall:['#4a3a2a','#443424'],sign:['ULUS','SALA STEPU'],consoles:['ORDA','CHAN'],floor:[[0,'#5a6a3a'],[.25,'#4a5a30'],[1,'#1a2010']],window:'sun',particles:'dust',light:'rgba(200,220,255,.10)',banner:{color:'#2a4a8a',edge:'#c9a040',glyph:'ᠮ'}},
+    castle:{bg:[[0,'#0a0a10'],[.65,'#2a2a34'],[1,'#0a0a0e']],wall:['#3a3a44','#34343e'],sign:['POENARI','SALA DRAKULI'],consoles:['VLAD','III'],floor:[[0,'#3a3a44'],[.25,'#30303a'],[1,'#141418']],window:'moon',particles:'dust',light:'rgba(255,120,120,.10)',banner:{color:'#5a0f1e',edge:'#8a8a90',glyph:'†'}},
+    church:{bg:[[0,'#0c0a08'],[.65,'#2a2420'],[1,'#0a0806']],wall:['#2e2824','#2a2420'],sign:['SANCTUM OFFICIUM','SALA INKWIZYCJI'],consoles:['FIDES','IGNIS'],floor:[[0,'#3a3028'],[.25,'#302820'],[1,'#141010']],window:'none',particles:'dust',light:'rgba(255,200,120,.14)',banner:{color:'#121212',edge:'#c9a040',glyph:'✝'}},
+    aztec:{bg:[[0,'#0a140e'],[.65,'#2a4a30'],[1,'#0a120c']],wall:['#4a4a3a','#444434'],sign:['TENOCHTITLAN','SALA KONKWISTY'],consoles:['MEXICA','ORO'],floor:[[0,'#6a6a4a'],[.25,'#5a5a3c'],[1,'#242418']],window:'sun',particles:'dust',light:'rgba(255,220,120,.12)',banner:{color:'#1f6b4a',edge:'#d4af37',glyph:'☉'}},
+    tsar:{bg:[[0,'#0e0a08'],[.65,'#3a2a1a'],[1,'#0e0a06']],wall:['#4a2a1a','#442616'],sign:['ЦАРЬ','SALA CARÓW'],consoles:['МОСКВА','ЦАРЬ'],floor:[[0,'#d8dde2'],[.25,'#b8c0c8'],[1,'#5f6a74']],window:'snow',particles:'snow',light:'rgba(255,214,120,.12)',banner:{color:'#8a1a1a',edge:'#d4af37',glyph:'☦'}},
+    pirate:{bg:[[0,'#06101a'],[.65,'#1a3a4a'],[1,'#06100f']],wall:['#4a3a2a','#443424'],sign:['QUEEN ANNE\u2019S REVENGE','SALA PIRATÓW'],consoles:['RUM','☠'],floor:[[0,'#5a4a30'],[.25,'#4a3c28'],[1,'#1e180f']],window:'moon',particles:'dust',light:'rgba(200,220,255,.10)',banner:{color:'#111111',edge:'#e8e2d0',glyph:'☠'}},
+    revolution:{bg:[[0,'#0a0c14'],[.65,'#2a3040'],[1,'#0a0c10']],wall:['#3a3a4a','#343444'],sign:['LIBERTÉ','SALA REWOLUCJI'],consoles:['1789','1794'],floor:[[0,'#4a4a4a'],[.25,'#3c3c3c'],[1,'#181818']],window:'moon',particles:'dust',light:'rgba(255,220,180,.10)',banner:{color:'#1f3a6b',edge:'#c0392b',glyph:'⚜'}},
+    jungle:{bg:[[0,'#06120a'],[.65,'#1a3a20'],[1,'#06100a']],wall:['#2a4a2a','#264426'],sign:['CONGO','SALA KOLONIALNA'],consoles:['RZEKA','DŻUNGLA'],floor:[[0,'#4a5a30'],[.25,'#3c4a28'],[1,'#141c10']],window:'sun',particles:'dust',light:'rgba(200,255,160,.10)',banner:{color:'#1a2a4a',edge:'#d4af37',glyph:'✶'}},
+    speakeasy:{bg:[[0,'#0e0806'],[.65,'#3a1a10'],[1,'#0e0806']],wall:['#4a2a1a','#442616'],sign:['SPEAKEASY','SALA PROHIBICJI'],consoles:['1929','GIN'],floor:[[0,'#3a2a1a'],[.25,'#302216'],[1,'#140e0a']],window:'none',particles:'ash',light:'rgba(255,160,80,.14)',banner:{color:'#4a4a52',edge:'#d4af37',glyph:'$'}},
+    fascist:{bg:[[0,'#0c0c0c'],[.65,'#2a2a2a'],[1,'#0c0c0c']],wall:['#3a3a3a','#343434'],sign:['PALAZZO VENEZIA','SALA FASZYZMU'],consoles:['DUX','1940'],floor:[[0,'#4a4a4a'],[.25,'#3c3c3c'],[1,'#181818']],window:'none',particles:'ash',light:'rgba(255,220,180,.08)',banner:{color:'#111111',edge:'#8a8a90',glyph:'⚒'}},
+    japan:{bg:[[0,'#140808'],[.65,'#3a1414'],[1,'#120606']],wall:['#e8e2d0','#dcd6c4'],sign:['大本営','SALA PACYFIKU'],consoles:['東京','1941'],floor:[[0,'#4a3a2a'],[.25,'#3c2e22'],[1,'#181210']],window:'sun',particles:'dust',light:'rgba(255,200,200,.10)',banner:{color:'#e8e2d0',edge:'#b3202a',glyph:'●'}},
+    desert:{bg:[[0,'#1a1408'],[.65,'#5a4a28'],[1,'#1a1408']],wall:['#6a5a3a','#645434'],sign:['الصحراء','SALA PUSTYNI'],consoles:['1991','2011'],floor:[[0,'#8a7a50'],[.25,'#7a6a44'],[1,'#2e2816']],window:'sun',particles:'dust',light:'rgba(255,230,160,.12)',banner:{color:'#2a8a4a',edge:'#d4af37',glyph:'☾'}},
+    cartel:{bg:[[0,'#0c0a14'],[.65,'#2a1a3a'],[1,'#0c0a12']],wall:['#3a2a4a','#342644'],sign:['MEDELLÍN','SALA KARTELI'],consoles:['PLATA','PLOMO'],floor:[[0,'#4a3a3a'],[.25,'#3c2e2e'],[1,'#181212']],window:'moon',particles:'dust',light:'rgba(255,120,200,.12)',banner:{color:'#2a3a6a',edge:'#f0f0f0',glyph:'$'}},
+    palace:{bg:[[0,'#0c0c10'],[.65,'#2a2a30'],[1,'#0c0c0e']],wall:['#4a4a4a','#444444'],sign:['CASA POPORULUI','SALA DYKTATORÓW'],consoles:['1989','KC'],floor:[[0,'#5a5a5a'],[.25,'#4a4a4a'],[1,'#1c1c1c']],window:'none',particles:'ash',light:'rgba(255,220,180,.08)',banner:{color:'#8a1a1a',edge:'#d4af37',glyph:'☭'}},
     kremlin:{bg:[[0,'#170808'],[.65,'#3f1414'],[1,'#130606']],wall:['#4b1b1b','#451919'],sign:['КРЕМЛЬ','MOSKWA · 1953'],consoles:['1953','МОСКВА'],floor:[[0,'#5c2323'],[.25,'#4b1d1d'],[1,'#1f0b0b']],window:'moon',particles:'dust',light:'rgba(255,204,124,.10)',banner:{color:'#b3202a',edge:'#e8c547',glyph:'★'}}
   };
   function banner(c,x,y,w,h,b){
@@ -1301,6 +1459,11 @@ window.MuseumConfig = Object.freeze({
     if(F.weapon==='spear'){c.rotate(-1.35+attack*.25);line(c,-8,40,-8,-200,'#5a3a22',6);line(c,-8,40,-8,-200,'#8a6a42',3);poly(c,[[-14,-198],[-8,-238],[-2,-198]],'#b9c0b5','#5b6660',1);rr(c,-13,-202,10,8,1,'#8f7a3e')}
     else if(F.weapon==='sabre'){c.rotate(-.9+attack*.3);rr(c,-4,-8,8,22,2,'#3a2a1a','#8f7a3e',1);ellipse(c,0,-10,9,4,'#c9a94a');path(c,q=>{q.moveTo(-3,-12);q.bezierCurveTo(-6,-60,0,-110,24,-150);q.lineTo(30,-146);q.bezierCurveTo(10,-105,6,-60,4,-12);q.closePath()},grad(c,-6,-80,30,-80,[[0,'#6e8a90'],[.5,'#e5efe8'],[1,'#8aa0a4']]),'#c4d6cf',1)}
     else if(F.weapon==='pistol'){c.rotate(-1.5+attack*.4);rr(c,-5,-6,10,20,2,'#2b2b2b','#6b6b6b',1);rr(c,-6,-16,30,10,2,'#1f1f1f','#7a7a7a',1);rr(c,20,-14,12,5,1,'#3a3a3a');if(attack>.6)glow(c,36,-11,22,'rgba(255,220,120,.7)')}
+    else if(F.weapon==='rifle'){c.rotate(-1.4+attack*.35);rr(c,-6,-4,12,34,3,'#4a3420','#8a6a42',1);rr(c,-5,-70,8,70,2,'#2b2b2b','#6b6b6b',1);rr(c,-7,-30,12,10,2,'#4a3420','#8a6a42',1);if(attack>.6)glow(c,0,-78,22,'rgba(255,220,120,.7)')}
+    else if(F.weapon==='dagger'){c.rotate(-1.2+attack*.5);rr(c,-3,-6,6,18,2,'#3a2a1a','#8f7a3e',1);ellipse(c,0,-8,8,3,'#c9a94a');poly(c,[[-4,-10],[-3,-52],[0,-62],[3,-52],[4,-10]],grad(c,-5,-30,5,-30,[[0,'#6e8a90'],[.5,'#e5efe8'],[1,'#8aa0a4']]),'#c4d6cf',1)}
+    else if(F.weapon==='axe'){c.rotate(-1.3+attack*.3);line(c,0,30,0,-90,'#4a3420',8);line(c,0,30,0,-90,'#8a6a42',4);path(c,q=>{q.moveTo(0,-82);q.bezierCurveTo(30,-96,46,-70,40,-44);q.bezierCurveTo(26,-58,12,-60,0,-54);q.closePath()},grad(c,0,-80,40,-50,[[0,'#d8e8de'],[1,'#627d85']]),'#b6d9cc',1.5)}
+    else if(F.weapon==='staff'){c.rotate(-1.35+attack*.25);line(c,0,40,0,-150,'#3a2416',8);line(c,0,40,0,-150,'#8a6a42',4);ellipse(c,0,-152,7,7,'#c9a94a','#e7d08a',1);if(F.hat==='hood'){line(c,-8,-130,8,-130,'#c9a94a',3)}}
+    else if(F.weapon==='bow'){c.rotate(-1.5+attack*.2);path(c,q=>{q.moveTo(0,70);q.bezierCurveTo(-42,20,-42,-60,0,-110)},null,'#8a6a42',6);line(c,0,70,0,-110,'#e8e2d0',1.2);line(c,0,-20,-60-attack*40,-28,'#4a3420',3);poly(c,[[-60-attack*40,-32],[-72-attack*40,-28],[-60-attack*40,-24]],'#b6c0b5','#5b6660',1)}
     c.restore();
     // Coat and torso.
     poly(c,[[-26,-192],[24,-194],[32,-150],[30,-98],[8,-92],[0,-108],[-8,-92],[-30,-98],[-34,-150]],grad(c,-34,-190,32,-92,[[0,coat],[.5,coatDark],[1,coat]]),mixColor(coat,'#fff',.2),1.3);
@@ -1322,9 +1485,25 @@ window.MuseumConfig = Object.freeze({
     if(F.hat!=='corinthian'){path(c,q=>{q.moveTo(-21,-232);q.bezierCurveTo(-22,-258,22,-258,21,-232);q.lineTo(16,-240);q.bezierCurveTo(6,-250,-8,-250,-16,-240);q.closePath()},hair,mixColor(hair,'#fff',.2),1)}
     ellipse(c,-8,-233,2.6,2.2,'#2a2320');ellipse(c,8,-233,2.6,2.2,'#2a2320');line(c,-12,-240,-4,-241,hair,2);line(c,4,-241,12,-240,hair,2);
     path(c,q=>{q.moveTo(1,-233);q.lineTo(-2,-222);q.quadraticCurveTo(2,-219,6,-222)},null,mixColor(skin,'#000',.35),1.3);
+    if(F.beard==='long'){path(c,q=>{q.moveTo(-20,-226);q.bezierCurveTo(-28,-190,-16,-150,0,-146);q.bezierCurveTo(16,-150,28,-190,20,-226);q.lineTo(12,-218);q.bezierCurveTo(6,-212,-6,-212,-12,-218);q.closePath()},hair,mixColor(hair,'#fff',.15),1);for(let k=0;k<4;k++)line(c,-12+k*8,-200,-13+k*8,-160,mixColor(hair,'#000',.3),1)}
+    else if(F.beard==='goatee'){path(c,q=>{q.moveTo(-8,-216);q.bezierCurveTo(-10,-200,-6,-192,0,-190);q.bezierCurveTo(6,-192,10,-200,8,-216);q.closePath()},hair,mixColor(hair,'#fff',.15),1);line(c,-10,-218,10,-218,hair,2)}
+    if(F.mustache==='handlebar'){path(c,q=>{q.moveTo(-18,-212);q.bezierCurveTo(-10,-224,10,-224,18,-212);q.bezierCurveTo(10,-216,-10,-216,-18,-212)},hair,mixColor(hair,'#fff',.15),1);line(c,-18,-212,-24,-206,hair,2);line(c,18,-212,24,-206,hair,2)}
     if(F.mustache==='toothbrush'){rr(c,-5,-219,10,6,1,hair)}else if(F.mustache==='thick'){path(c,q=>{q.moveTo(-14,-215);q.bezierCurveTo(-8,-223,8,-223,14,-215);q.bezierCurveTo(8,-213,-8,-213,-14,-215)},hair,mixColor(hair,'#fff',.15),1)}else if(F.beard==='full'){path(c,q=>{q.moveTo(-19,-226);q.bezierCurveTo(-24,-200,-10,-192,0,-194);q.bezierCurveTo(10,-192,24,-200,19,-226);q.lineTo(12,-218);q.bezierCurveTo(6,-212,-6,-212,-12,-218);q.closePath()},hair,mixColor(hair,'#fff',.15),1)}else{path(c,q=>{q.moveTo(-7,-214);q.quadraticCurveTo(0,-209,7,-214)},null,mixColor(skin,'#000',.4),1.2)}
     if(F.hat==='peaked'){const hc=F.hatColor||coat;path(c,q=>{q.moveTo(-24,-246);q.bezierCurveTo(-26,-270,26,-270,24,-246);q.lineTo(26,-242);q.lineTo(-26,-242);q.closePath()},hc,mixColor(hc,'#000',.35),1.3);rr(c,-26,-246,52,6,1,mixColor(hc,'#000',.3),'#1a1a1a',1);poly(c,[[-2,-242],[28,-240],[30,-234],[2,-236]],'#1a1a1a','#444',1);if(F.star){txt(c,'★',0,-250,14,F.star,'center','Arial')}else{ellipse(c,0,-254,4,4,'#c9b37a','#6b5a30',1)}}
     else if(F.hat==='bicorne'){const hc=F.hatColor||'#15191f';path(c,q=>{q.moveTo(-44,-252);q.bezierCurveTo(-30,-284,30,-284,44,-252);q.bezierCurveTo(30,-262,-30,-262,-44,-252);q.closePath()},hc,mixColor(hc,'#fff',.25),1.5);path(c,q=>{q.moveTo(-40,-254);q.bezierCurveTo(-26,-274,26,-274,40,-254)},null,'#d4af37',1.2);if(F.cockade){ellipse(c,14,-266,6,6,F.cockade,'#fff',1);ellipse(c,14,-266,2.5,2.5,'#1f3a6b')}}
+    else if(F.hat==='crown'){const hc=F.hatColor||'#d4af37';poly(c,[[-22,-246],[-22,-268],[-14,-256],[-7,-272],[0,-258],[7,-272],[14,-256],[22,-268],[22,-246]],hc,mixColor(hc,'#000',.35),1.2);[-14,0,14].forEach(x=>ellipse(c,x,-250,2.5,2.5,'#b3202a'));rr(c,-22,-248,44,4,1,mixColor(hc,'#fff',.2))}
+    else if(F.hat==='mianguan'){const hc=F.hatColor||'#111';rr(c,-18,-256,36,10,2,hc,'#444',1);rr(c,-30,-262,60,6,1,hc,'#555',1);for(let k=0;k<6;k++){line(c,-26+k*10,-262,-26+k*10,-236,'#c9a94a',1);ellipse(c,-26+k*10,-236,1.5,1.5,'#e7d08a')}}
+    else if(F.hat==='laurel'){const hc=F.hatColor||'#4a8a3a';for(let side=-1;side<=1;side+=2)for(let k=0;k<6;k++){c.save();c.translate(side*(6+k*4),-252+k*1.5);c.rotate(side*(.5+k*.25));ellipse(c,0,0,5,2.5,hc,mixColor(hc,'#000',.3),.8);c.restore()}}
+    else if(F.hat==='turban'){const hc=F.hatColor||'#f0e8d0';path(c,q=>{q.moveTo(-25,-244);q.bezierCurveTo(-28,-276,28,-276,25,-244);q.closePath()},hc,mixColor(hc,'#000',.3),1.2);path(c,q=>{q.moveTo(-24,-250);q.bezierCurveTo(-8,-262,8,-240,24,-252);q.moveTo(-22,-258);q.bezierCurveTo(-4,-268,6,-250,22,-260)},null,mixColor(hc,'#000',.25),1.5);ellipse(c,0,-262,3,3,'#b3202a')}
+    else if(F.hat==='furhat'){const hc=F.hatColor||'#4a3620';rr(c,-26,-256,52,12,4,'#6a4a2a','#3a2616',1.2);path(c,q=>{q.moveTo(-20,-256);q.bezierCurveTo(-18,-280,18,-280,20,-256);q.closePath()},hc,mixColor(hc,'#000',.35),1.2);if(F.hatColor==='#d4af37'){ellipse(c,0,-278,3,3,'#b3202a');line(c,-10,-266,10,-266,'#d4af37',1.5)}}
+    else if(F.hat==='hood'){const hc=F.hatColor||'#121212';path(c,q=>{q.moveTo(-26,-200);q.bezierCurveTo(-30,-250,-10,-290,0,-292);q.bezierCurveTo(10,-290,30,-250,26,-200);q.lineTo(20,-204);q.bezierCurveTo(16,-240,8,-256,0,-258);q.bezierCurveTo(-8,-256,-16,-240,-20,-204);q.closePath()},hc,mixColor(hc,'#fff',.25),1.2)}
+    else if(F.hat==='tricorn'){const hc=F.hatColor||'#111';path(c,q=>{q.moveTo(-40,-250);q.lineTo(0,-284);q.lineTo(40,-250);q.bezierCurveTo(28,-258,-28,-258,-40,-250);q.closePath()},hc,mixColor(hc,'#fff',.3),1.5);line(c,-34,-252,34,-252,'#c9a94a',1.2)}
+    else if(F.hat==='fez'){const hc=F.hatColor||'#8a1a1a';poly(c,[[-18,-246],[-16,-272],[16,-272],[18,-246]],hc,mixColor(hc,'#fff',.25),1.2);line(c,14,-272,20,-258,'#222',2);if(F.star)txt(c,'★',0,-256,10,F.star,'center','Arial');else ellipse(c,0,-260,3,3,'#c9a94a')}
+    else if(F.hat==='cap'){const hc=F.hatColor||coat;path(c,q=>{q.moveTo(-23,-246);q.bezierCurveTo(-24,-266,24,-266,23,-246);q.closePath()},hc,mixColor(hc,'#000',.35),1.2);poly(c,[[-2,-246],[24,-245],[26,-240],[2,-241]],mixColor(hc,'#000',.4),'#222',1);if(F.star)txt(c,'★',0,-250,11,F.star,'center','Arial');else if(hc==='#7a1020')ellipse(c,0,-258,3,4,'#d4af37','#b3202a',1)}
+    else if(F.hat==='beret'){const hc=F.hatColor||'#1a1a1a';path(c,q=>{q.moveTo(-26,-246);q.bezierCurveTo(-30,-262,-8,-270,10,-268);q.bezierCurveTo(26,-266,30,-256,24,-246);q.closePath()},hc,mixColor(hc,'#fff',.25),1.2);rr(c,-22,-248,44,4,1,mixColor(hc,'#fff',.15))}
+    else if(F.hat==='fedora'){const hc=F.hatColor||'#e8e2d0';path(c,q=>{q.moveTo(-22,-248);q.bezierCurveTo(-22,-276,22,-276,22,-248);q.closePath()},hc,mixColor(hc,'#000',.3),1.2);rr(c,-34,-250,68,5,2,hc,mixColor(hc,'#000',.3),1);rr(c,-22,-258,44,5,1,'#1a1a1a')}
+    else if(F.hat==='morion'){const hc=F.hatColor||'#8a8a90';path(c,q=>{q.moveTo(-26,-246);q.bezierCurveTo(-26,-270,26,-270,26,-246);q.closePath()},hc,mixColor(hc,'#000',.4),1.5);path(c,q=>{q.moveTo(-6,-262);q.bezierCurveTo(-4,-286,4,-286,6,-262)},hc,mixColor(hc,'#000',.4),1.2);path(c,q=>{q.moveTo(-34,-244);q.bezierCurveTo(-20,-250,20,-250,34,-244);q.bezierCurveTo(20,-240,-20,-240,-34,-244)},hc,mixColor(hc,'#000',.4),1.2)}
+    else if(F.hat==='helmet'){const hc=F.hatColor||'#7a7a80';path(c,q=>{q.moveTo(-24,-244);q.bezierCurveTo(-26,-272,26,-272,24,-244);q.closePath()},hc,mixColor(hc,'#000',.4),1.5);poly(c,[[-3,-268],[0,-290],[3,-268]],hc,mixColor(hc,'#000',.4),1);rr(c,-26,-246,52,5,1,'#6a4a2a','#3a2616',1)}
     else if(F.hat==='corinthian'){const hc=F.hatColor||'#b08a3e';path(c,q=>{q.moveTo(-23,-236);q.bezierCurveTo(-26,-272,26,-272,23,-236);q.lineTo(23,-214);q.lineTo(12,-214);q.lineTo(9,-226);q.lineTo(3,-226);q.lineTo(0,-212);q.lineTo(-3,-226);q.lineTo(-9,-226);q.lineTo(-12,-214);q.lineTo(-23,-214);q.closePath()},grad(c,-24,-270,24,-214,[[0,mixColor(hc,'#fff',.3)],[.5,hc],[1,mixColor(hc,'#000',.4)]]),mixColor(hc,'#000',.45),1.5);ellipse(c,-8,-232,3,2.5,'#1a140e');ellipse(c,8,-232,3,2.5,'#1a140e');
       path(c,q=>{q.moveTo(-6,-262);q.bezierCurveTo(-10,-290,10,-300,40,-288);q.bezierCurveTo(28,-280,14,-282,8,-272);q.bezierCurveTo(10,-266,6,-262,-6,-262);q.closePath()},F.crest||'#b3202a',mixColor(F.crest||'#b3202a','#000',.35),1.2);for(let k=0;k<6;k++)line(c,-2+k*7,-266-k*2,6+k*7,-282-k*2,mixColor(F.crest||'#b3202a','#fff',.2),1)}
     c.restore();
@@ -1427,7 +1606,7 @@ window.MuseumConfig = Object.freeze({
     const stats = perk.stats, combat = exhibit.stats.combat;
     return {
       status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, theme,
-      hint: `Zbliż się do ${exhibit.alias}a. Obserwuj jego ruchy.`, hintUntil: 0,
+      hint: `Zbliż się do ${exhibit.aliasGen || exhibit.alias + 'a'}. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
         ammo: weapon.stats.ammo, maxAmmo: weapon.stats.ammo, reload: 0, shots: 0 },
@@ -1436,6 +1615,7 @@ window.MuseumConfig = Object.freeze({
     };
   }
   const alias = () => state.exhibit.alias;
+  const gen = () => state.exhibit.aliasGen || alias() + 'a';   // genitive for the hints
   const idleHint = () => 'J / SPACJA — atak  ·  K / SHIFT — garda  ·  A D — ruch';
 
   function emit(name, detail) {
@@ -1609,7 +1789,7 @@ window.MuseumConfig = Object.freeze({
         burst(p.x, FLOOR - 175, '#ffe4a1', 12, .6);
       }
       label('PERFEKCYJNE PAROWANIE', p.x + 130, FLOOR - 305, '#a8fff0', 25);
-      hint(`Perfekcyjne parowanie! Odbity atak rani ${alias()}a.`, 2.1);
+      hint(`Perfekcyjne parowanie! Odbity atak rani ${gen()}.`, 2.1);
     } else if (p.guarding) {
       tone('parry'); burst(p.x + 65, FLOOR - 130, '#b8daef', 16, .7);
       if (p.stamina >= cost) {
@@ -1624,7 +1804,7 @@ window.MuseumConfig = Object.freeze({
     } else if (p.stamina >= cost && p.attack <= 0) {
       p.stamina -= cost; p.evade = .42;
       label('UNIK', p.x, FLOOR - 265, '#9bd9d1', 22); tone('dodge');
-      hint(`Automatyczny unik. Atakuj teraz — garda ${alias()}a jest słaba!`, 1.8);
+      hint(`Automatyczny unik. Atakuj teraz — garda ${gen()} jest słaba!`, 1.8);
     } else {
       // Exhaustion and overcommitting produce an imperfect parry, never an undefended blow.
       p.stamina = Math.max(0, p.stamina - parryCost);

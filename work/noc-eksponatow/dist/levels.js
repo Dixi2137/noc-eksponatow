@@ -1,50 +1,91 @@
-/* The night patrol: an ordered list of levels. One level is one opponent, one era, one scenery. */
+/* The night patrol: an ordered list of levels. One level is one opponent, one era, one scenery.
+   Entries are sorted by year and numbered automatically, so a new era slots in wherever history puts it. */
 (() => {
   'use strict';
   const definitions = [
-    {
-      id: 'cretaceous-raptor', number: 1, year: -75000000, yearLabel: '75 MLN LAT TEMU', title: 'KREDA PÓŹNA', hall: 'SALA PALEONTOLOGII',
-      exhibit: 'raptor', theme: 'museum', reward: 120,
-      tagline: 'Mały szkielet. Szybkie szczęki.<br>Rozgrzewka przed prawdziwą historią.',
-      card: 'Gablota z napisem VELOCIRAPTOR właśnie pękła.',
+    { id: 'cretaceous-raptor', year: -75000000, yearLabel: '75 MLN LAT TEMU', title: 'KREDA PÓŹNA', hall: 'SALA PALEONTOLOGII', exhibit: 'raptor', theme: 'museum',
+      tagline: 'Mały szkielet. Szybkie szczęki.<br>Rozgrzewka przed prawdziwą historią.', card: 'Gablota z napisem VELOCIRAPTOR właśnie pękła.',
       prologue: [
         { label: '23:58 / OSTATNI OBCHÓD', text: 'W muzeum zapada cisza. Stróż kończy swój ostatni obchód.' },
         { label: '00:00 / COŚ SIĘ OBUDZIŁO', text: 'Z sali paleontologii dobiega trzask. Stal porusza się. Kości łapią oddech.' },
         { label: '00:01 / HISTORIA KONTRA HISTORIA', text: 'Jeden rycerz. Jedna noc. Każda sala to inna epoka. Przetrwa tylko jeden.' }
-      ]
-    },
-    {
-      id: 'cretaceous-rex', number: 2, year: -66000000, yearLabel: '66 MLN LAT TEMU', title: 'KONIEC KREDY', hall: 'GŁÓWNA GALERIA',
-      exhibit: 'trex', theme: 'museum', reward: 180,
-      tagline: 'Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.',
-      card: 'Główna galeria. Król kredy schodzi z postumentu.'
-    },
-    {
-      id: 'thermopylae', number: 3, year: -480, yearLabel: '480 P.N.E.', title: 'TERMOPILE', hall: 'SALA ANTYKU',
-      exhibit: 'leonidas', theme: 'sparta', reward: 240,
-      tagline: 'Trzystu już nie ma. Został jeden.<br>Król Sparty nie cofa się o krok.',
-      card: 'Wąwóz Termopil. Leonidas zasłania przejście tarczą.'
-    },
-    {
-      id: 'borodino', number: 4, year: 1812, yearLabel: '1812', title: 'BORODINO', hall: 'SALA EMPIRE',
-      exhibit: 'napoleon', theme: 'napoleon', reward: 300,
-      tagline: 'Cesarz Francuzów w śniegu pod Moskwą.<br>Szabla w dłoni, Europa za plecami.',
-      card: 'Pole pod Borodino. Napoleon wyciąga szablę z pochwy.'
-    },
-    {
-      id: 'berlin', number: 5, year: 1945, yearLabel: '1945', title: 'BERLIN', hall: 'BUNKIER',
-      exhibit: 'hitler', theme: 'bunker', reward: 380,
-      tagline: 'Beton, kurz i koniec wojny.<br>Tyran w bunkrze nie ma już dokąd uciec.',
-      card: 'Bunkier pod Kancelarią Rzeszy. Hitler nie ma już dokąd uciec.'
-    },
-    {
-      id: 'moscow', number: 6, year: 1953, yearLabel: '1953', title: 'MOSKWA', hall: 'KREML',
-      exhibit: 'stalin', theme: 'kremlin', reward: 460,
-      tagline: 'Czerwone mury, czerwona gwiazda.<br>Ostatni pojedynek nocy.',
-      card: 'Kreml. Stalin odkłada fajkę i sięga po szaszkę.'
-    }
+      ] },
+    { id: 'cretaceous-rex', year: -66000000, yearLabel: '66 MLN LAT TEMU', title: 'KONIEC KREDY', hall: 'GŁÓWNA GALERIA', exhibit: 'trex', theme: 'museum',
+      tagline: 'Stal kontra 66 milionów lat furii.<br>Wejdź do muzeum, w którym nie wolno dotykać.<br>Chyba że zadajesz cios.', card: 'Główna galeria. Król kredy schodzi z postumentu.' },
+    { id: 'thermopylae', year: -480, yearLabel: '480 P.N.E.', title: 'TERMOPILE', hall: 'SALA ANTYKU', exhibit: 'leonidas', theme: 'sparta',
+      tagline: 'Trzystu już nie ma. Został jeden.<br>Król Sparty nie cofa się o krok.', card: 'Wąwóz Termopil. Leonidas zasłania przejście tarczą.' },
+    { id: 'plataea', year: -479, yearLabel: '479 P.N.E.', title: 'PLATEJE', hall: 'SALA PERSKA', exhibit: 'xerxes', theme: 'persia',
+      tagline: 'Król królów spalił Ateny.<br>Teraz patrzy na ciebie z tronu.', card: 'Sala perska. Kserkses schodzi z tronu z włócznią.' },
+    { id: 'xianyang', year: -210, yearLabel: '210 P.N.E.', title: 'XIANYANG', hall: 'SALA TERAKOTOWA', exhibit: 'qin', theme: 'china',
+      tagline: 'Pierwszy cesarz chciał żyć wiecznie.<br>Terakotowa armia patrzy.', card: 'Sala terakotowa. Qin Shi Huang wyciąga miecz jian spośród glinianych żołnierzy.' },
+    { id: 'jerusalem', year: -4, yearLabel: '4 P.N.E.', title: 'JEROZOLIMA', hall: 'SALA JUDEI', exhibit: 'herod', theme: 'judea',
+      tagline: 'Król z nadania Rzymu.<br>Ufa tylko sztyletowi.', card: 'Pałac Heroda. Sztylet błyska w świetle lamp oliwnych.' },
+    { id: 'rome-caligula', year: 40, yearLabel: '40 R.', title: 'RZYM', hall: 'SALA CESARSKA', exhibit: 'caligula', theme: 'rome',
+      tagline: 'Mianował konia senatorem.<br>Ciebie mianuje celem.', card: 'Pałac na Palatynie. Kaligula odkłada kielich i chwyta sztylet.' },
+    { id: 'rome-nero', year: 64, yearLabel: '64 R.', title: 'POŻAR RZYMU', hall: 'SALA CESARSKA', exhibit: 'nero', theme: 'rome',
+      tagline: 'Rzym płonie.<br>Neron skończył grać.', card: 'Łuna nad Rzymem. Neron odkłada lirę i bierze laskę.' },
+    { id: 'colosseum', year: 192, yearLabel: '192 R.', title: 'KOLOSEUM', hall: 'ARENA', exhibit: 'commodus', theme: 'rome',
+      tagline: 'Cesarz w zbroi gladiatora.<br>Tym razem przeciwnik ma prawdziwy miecz.', card: 'Piasek Koloseum. Kommodus unosi gladius ku pustym trybunom.' },
+    { id: 'catalaunian', year: 451, yearLabel: '451 R.', title: 'POLA KATALAUNIJSKIE', hall: 'SALA WĘDRÓWKI LUDÓW', exhibit: 'attila', theme: 'steppe',
+      tagline: 'Bicz Boży.<br>Trawa nie rośnie tam, gdzie stanął.', card: 'Step pod Châlons. Attyla zsiada z konia i dobywa szabli.' },
+    { id: 'mongolia', year: 1211, yearLabel: '1211', title: 'STEP', hall: 'SALA MONGOLSKA', exhibit: 'genghis', theme: 'steppe',
+      tagline: 'Zjednoczył stepy.<br>Zrównał z ziemią pół świata.', card: 'Jurta chana. Czyngis-chan napina łuk.' },
+    { id: 'samarkand', year: 1398, yearLabel: '1398', title: 'SAMARKANDA', hall: 'SALA TIMURYDÓW', exhibit: 'timur', theme: 'persia',
+      tagline: 'Piramidy z czaszek.<br>Kulawy, ale szabla nie kuleje.', card: 'Błękitne kopuły Samarkandy. Tamerlan wychodzi z cienia meczetu.' },
+    { id: 'wallachia', year: 1462, yearLabel: '1462', title: 'WOŁOSZCZYZNA', hall: 'SALA DRAKULI', exhibit: 'vlad', theme: 'castle',
+      tagline: 'Las pali pod zamkiem.<br>Drakula z krwi i kości.', card: 'Zamek Poenari. Wład Palownik dobywa pala jak włóczni.' },
+    { id: 'seville', year: 1483, yearLabel: '1483', title: 'SEWILLA', hall: 'SALA INKWIZYCJI', exhibit: 'torquemada', theme: 'church',
+      tagline: 'Nikt nie spodziewa się inkwizycji.<br>Ty też nie.', card: 'Kaplica w Sewilli. Torquemada opuszcza kaptur i unosi laskę.' },
+    { id: 'tenochtitlan', year: 1521, yearLabel: '1521', title: 'TENOCHTITLAN', hall: 'SALA KONKWISTY', exhibit: 'cortes', theme: 'aztec',
+      tagline: 'Spalił własne okręty.<br>Potem miasto na jeziorze.', card: 'Ruiny Tenochtitlanu. Cortés wyciąga rapier w dymie.' },
+    { id: 'cajamarca', year: 1532, yearLabel: '1532', title: 'CAJAMARCA', hall: 'SALA KONKWISTY', exhibit: 'pizarro', theme: 'aztec',
+      tagline: 'Pokój ze złota za życie króla.<br>Pizarro i tak go zabił.', card: 'Plac w Cajamarce. Pizarro zapala lont arkebuza.' },
+    { id: 'novgorod', year: 1570, yearLabel: '1570', title: 'NOWOGRÓD', hall: 'SALA CARÓW', exhibit: 'ivan', theme: 'tsar',
+      tagline: 'Car, który zabił własnego syna.<br>Laska okuta żelazem.', card: 'Nowogród w ogniu. Iwan Groźny unosi okutą laskę.' },
+    { id: 'cachtice', year: 1610, yearLabel: '1610', title: 'CZACHTICE', hall: 'SALA HRABINY', exhibit: 'bathory', theme: 'castle',
+      tagline: 'Krwawa hrabina.<br>Zamurowana na zawsze. Prawie.', card: 'Zamek w Czachticach. Elżbieta Batory wychodzi z zamurowanej komnaty.' },
+    { id: 'ocracoke', year: 1718, yearLabel: '1718', title: 'OCRACOKE', hall: 'SALA PIRATÓW', exhibit: 'blackbeard', theme: 'pirate',
+      tagline: 'Lonty w brodzie, sześć pistoletów.<br>Tylko jeden strzał naraz.', card: 'Pokład Queen Anne’s Revenge. Czarnobrody zapala lonty w brodzie.' },
+    { id: 'paris-1794', year: 1794, yearLabel: '1794', title: 'TERROR', hall: 'SALA REWOLUCJI', exhibit: 'robespierre', theme: 'revolution',
+      tagline: 'Nieprzekupny.<br>Gilotyna czeka na kogoś.', card: 'Plac Rewolucji. Robespierre odkłada akt oskarżenia i chwyta szpadę.' },
+    { id: 'borodino', year: 1812, yearLabel: '1812', title: 'BORODINO', hall: 'SALA EMPIRE', exhibit: 'napoleon', theme: 'napoleon',
+      tagline: 'Cesarz Francuzów w śniegu pod Moskwą.<br>Szabla w dłoni, Europa za plecami.', card: 'Pole pod Borodino. Napoleon wyciąga szablę z pochwy.' },
+    { id: 'congo', year: 1900, yearLabel: '1900', title: 'KONGO', hall: 'SALA KOLONIALNA', exhibit: 'leopold', theme: 'jungle',
+      tagline: 'Król, który kupił sobie kraj.<br>Kauczuk, karabin, cisza.', card: 'Posterunek nad rzeką Kongo. Leopold II ładuje karabin.' },
+    { id: 'petrograd', year: 1916, yearLabel: '1916', title: 'PIOTROGRÓD', hall: 'SALA CARÓW', exhibit: 'rasputin', theme: 'tsar',
+      tagline: 'Otruty, postrzelony, utopiony.<br>Nadal stoi.', card: 'Pałac Jusupowów. Rasputin otrzepuje się z wody Newy.' },
+    { id: 'chicago', year: 1929, yearLabel: '1929', title: 'CHICAGO', hall: 'SALA PROHIBICJI', exhibit: 'capone', theme: 'speakeasy',
+      tagline: 'Walentynki w garażu.<br>Tommy gun gra swoje.', card: 'Zaplecze speakeasy. Al Capone odbezpiecza pistolet maszynowy.' },
+    { id: 'rome-1940', year: 1940, yearLabel: '1940', title: 'RZYM', hall: 'SALA FASZYZMU', exhibit: 'mussolini', theme: 'fascist',
+      tagline: 'Duce z balkonu.<br>Szabla, pierś i marmur.', card: 'Palazzo Venezia. Mussolini schodzi z balkonu z szablą.' },
+    { id: 'tokyo', year: 1941, yearLabel: '1941', title: 'TOKIO', hall: 'SALA PACYFIKU', exhibit: 'tojo', theme: 'japan',
+      tagline: 'Generał i premier.<br>Katana nie pyta.', card: 'Sztab w Tokio. Tōjō dobywa katany.' },
+    { id: 'berlin', year: 1945, yearLabel: '1945', title: 'BERLIN', hall: 'BUNKIER', exhibit: 'hitler', theme: 'bunker',
+      tagline: 'Beton, kurz i koniec wojny.<br>Tyran w bunkrze nie ma już dokąd uciec.', card: 'Bunkier pod Kancelarią Rzeszy. Hitler nie ma już dokąd uciec.' },
+    { id: 'moscow', year: 1953, yearLabel: '1953', title: 'MOSKWA', hall: 'KREML', exhibit: 'stalin', theme: 'kremlin',
+      tagline: 'Czerwone mury, czerwona gwiazda.<br>Ostatni z dawnej szóstki.', card: 'Kreml. Stalin odkłada fajkę i sięga po szaszkę.' },
+    { id: 'beijing', year: 1966, yearLabel: '1966', title: 'PEKIN', hall: 'SALA REWOLUCJI KULTURALNEJ', exhibit: 'mao', theme: 'china',
+      tagline: 'Wielki Skok.<br>Mała czerwona książeczka i laska.', card: 'Plac Tiananmen. Mao odkłada książeczkę i bierze laskę.' },
+    { id: 'kampala', year: 1976, yearLabel: '1976', title: 'KAMPALA', hall: 'SALA DYKTATORÓW', exhibit: 'amin', theme: 'jungle',
+      tagline: 'Ordery nadane sobie samemu.<br>Pięść ciężka jak one wszystkie.', card: 'Pałac w Kampali. Idi Amin poprawia ordery i wyciąga pistolet.' },
+    { id: 'phnom-penh', year: 1977, yearLabel: '1977', title: 'PHNOM PENH', hall: 'SALA DYKTATORÓW', exhibit: 'polpot', theme: 'jungle',
+      tagline: 'Rok zero.<br>Pola śmierci milczą.', card: 'Opuszczone Phnom Penh. Pol Pot wychodzi z dżungli z karabinem.' },
+    { id: 'bucharest', year: 1989, yearLabel: '1989', title: 'BUKARESZT', hall: 'SALA DYKTATORÓW', exhibit: 'ceausescu', theme: 'palace',
+      tagline: 'Ostatnie przemówienie z balkonu.<br>Tłum nie klaszcze.', card: 'Balkon KC w Bukareszcie. Ceaușescu przestaje mówić i sięga po pistolet.' },
+    { id: 'baghdad', year: 1991, yearLabel: '1991', title: 'BAGDAD', hall: 'SALA PUSTYNI', exhibit: 'saddam', theme: 'desert',
+      tagline: 'Strzelał z balkonu do tłumu.<br>Tu tłumu nie ma. Jesteś ty.', card: 'Pałac w Bagdadzie. Saddam ładuje karabin.' },
+    { id: 'medellin', year: 1993, yearLabel: '1993', title: 'MEDELLÍN', hall: 'SALA KARTELI', exhibit: 'escobar', theme: 'cartel',
+      tagline: 'Plata o plomo.<br>Srebra nie ma. Zostaje ołów.', card: 'Dach w Medellín. Escobar odwraca się z pistoletem.' },
+    { id: 'tora-bora', year: 2001, yearLabel: '2001', title: 'TORA BORA', hall: 'SALA PUSTYNI', exhibit: 'binladen', theme: 'desert',
+      tagline: 'Jaskinie w górach.<br>Karabin i echo.', card: 'Jaskinia w Tora Bora. Bin Laden odbezpiecza karabin.' },
+    { id: 'sirte', year: 2011, yearLabel: '2011', title: 'SYRTA', hall: 'OSTATNIA SALA', exhibit: 'gaddafi', theme: 'desert',
+      tagline: 'Ostatni boss nocy.<br>Złoty pistolet i koniec obchodu.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. To ostatnia sala.' }
   ];
-  const levels = Object.freeze(definitions.map(level => Object.freeze({ ...level, prologue: Object.freeze((level.prologue || []).map(Object.freeze)) })));
+  const sorted = [...definitions].sort((a, b) => a.year - b.year);
+  const levels = Object.freeze(sorted.map((level, index) => Object.freeze({
+    ...level, number: index + 1, reward: 120 + index * 15,
+    prologue: Object.freeze((level.prologue || []).map(Object.freeze))
+  })));
   const byId = new Map(levels.map(level => [level.id, level]));
   window.MuseumLevels = Object.freeze({
     all() { return levels; },

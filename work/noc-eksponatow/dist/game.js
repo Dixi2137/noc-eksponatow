@@ -30,7 +30,7 @@
     const stats = perk.stats, combat = exhibit.stats.combat;
     return {
       status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, theme,
-      hint: `Zbliż się do ${exhibit.alias}a. Obserwuj jego ruchy.`, hintUntil: 0,
+      hint: `Zbliż się do ${exhibit.aliasGen || exhibit.alias + 'a'}. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
         ammo: weapon.stats.ammo, maxAmmo: weapon.stats.ammo, reload: 0, shots: 0 },
@@ -39,6 +39,7 @@
     };
   }
   const alias = () => state.exhibit.alias;
+  const gen = () => state.exhibit.aliasGen || alias() + 'a';   // genitive for the hints
   const idleHint = () => 'J / SPACJA — atak  ·  K / SHIFT — garda  ·  A D — ruch';
 
   function emit(name, detail) {
@@ -212,7 +213,7 @@
         burst(p.x, FLOOR - 175, '#ffe4a1', 12, .6);
       }
       label('PERFEKCYJNE PAROWANIE', p.x + 130, FLOOR - 305, '#a8fff0', 25);
-      hint(`Perfekcyjne parowanie! Odbity atak rani ${alias()}a.`, 2.1);
+      hint(`Perfekcyjne parowanie! Odbity atak rani ${gen()}.`, 2.1);
     } else if (p.guarding) {
       tone('parry'); burst(p.x + 65, FLOOR - 130, '#b8daef', 16, .7);
       if (p.stamina >= cost) {
@@ -227,7 +228,7 @@
     } else if (p.stamina >= cost && p.attack <= 0) {
       p.stamina -= cost; p.evade = .42;
       label('UNIK', p.x, FLOOR - 265, '#9bd9d1', 22); tone('dodge');
-      hint(`Automatyczny unik. Atakuj teraz — garda ${alias()}a jest słaba!`, 1.8);
+      hint(`Automatyczny unik. Atakuj teraz — garda ${gen()} jest słaba!`, 1.8);
     } else {
       // Exhaustion and overcommitting produce an imperfect parry, never an undefended blow.
       p.stamina = Math.max(0, p.stamina - parryCost);

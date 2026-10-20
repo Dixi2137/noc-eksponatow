@@ -136,3 +136,36 @@ Backend: Supabase (logowanie e-mail + hasło, Postgres z Row Level Security). Gr
 3. Authentication → Providers → Email: włączone. Dla wygody testów wyłącz „Confirm email" (albo zostaw, gra obsługuje potwierdzenie linkiem).
 4. Project Settings → API: skopiuj Project URL i klucz `anon public` do `dist/config.js`.
 5. Przebuduj `outputs/Noc-Eksponatow.html` skryptem `work/build-offline.py`.
+
+## Faza 5 — 36 sal nocnego obchodu (2026-10-21)
+
+Do sześciu sal doszło trzydzieści nowych z antagonistami z historii, wpiętych chronologicznie. `levels.js` sortuje wpisy po roku i numeruje je automatycznie, nagroda rośnie z numerem sali (120 + 15·indeks).
+
+| # | Rok | Przeciwnik | Styl | # | Rok | Przeciwnik | Styl |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 01 | 75 mln | Velociraptor | — | 19 | 1718 | Czarnobrody | gunman |
+| 02 | 66 mln | T-rex | — | 20 | 1794 | Robespierre | duelist |
+| 03 | 480 p.n.e. | Leonidas | — | 21 | 1812 | Napoleon | — |
+| 04 | 479 p.n.e. | Kserkses I | tyrant | 22 | 1900 | Leopold II | tyrant |
+| 05 | 210 p.n.e. | Qin Shi Huang | tyrant | 23 | 1916 | Rasputin | brute |
+| 06 | 4 p.n.e. | Herod Wielki | trickster | 24 | 1929 | Al Capone | gunman |
+| 07 | 40 | Kaligula | trickster | 25 | 1940 | Mussolini | brute |
+| 08 | 64 | Neron | tyrant | 26 | 1941 | Tōjō | duelist |
+| 09 | 192 | Kommodus | duelist | 27 | 1945 | Hitler | — |
+| 10 | 451 | Attyla | brute | 28 | 1953 | Stalin | — |
+| 11 | 1211 | Czyngis-chan | duelist | 29 | 1966 | Mao | tyrant |
+| 12 | 1398 | Tamerlan | tyrant | 30 | 1976 | Idi Amin | brute |
+| 13 | 1462 | Wład Palownik | trickster | 31 | 1977 | Pol Pot | trickster |
+| 14 | 1483 | Torquemada | tyrant | 32 | 1989 | Ceaușescu | tyrant |
+| 15 | 1521 | Cortés | duelist | 33 | 1991 | Saddam | gunman |
+| 16 | 1532 | Pizarro | gunman | 34 | 1993 | Escobar | trickster |
+| 17 | 1570 | Iwan Groźny | brute | 35 | 2001 | bin Laden | gunman |
+| 18 | 1610 | Elżbieta Batory | trickster | 36 | 2011 | Kaddafi | brute |
+
+- **Archetypy walki** (`MuseumExhibits.archetypes`): tyrant (wyważony), brute (wolny, ciężki co drugi cios, długi odpoczynek), duelist (szybki, rzadko ciężki), trickster (lekkie ciosy bez ostrzeżenia, ciężkie z długim zamachem), gunman (pistolet lub karabin z bliska, krótki kontakt). Helper `villain(id, …, archetyp, tier, kostium)` skaluje HP (150 + 18·tier) i obrażenia po tierze 1–6.
+- **Dopełniacz** (`aliasGen`): podpowiedzi w walce odmieniają imię poprawnie („rani Kaliguli", „garda Robespierre'a").
+- **Rig postaci** dostał nowe nakrycia głowy (korona, mianguan, wieniec laurowy, turban, futrzana czapa, kaptur, tricorn, fez, czapka, beret, fedora, morion, hełm), brody (pełna, długa, kozia) i wąsy podkręcone oraz bronie: karabin, sztylet, topór, laska, łuk.
+- **Scenerie**: 18 nowych motywów w `art.js` (rome, persia, china, judea, steppe, castle, church, aztec, tsar, pirate, revolution, jungle, speakeasy, fascist, japan, desert, cartel, palace).
+- **Trofea**: po jednym za każdą z 36 sal (`hall.js`).
+- Wszyscy nowi są wyłącznie bossami; nie ma ich w skrzynkach ani kartach. Wybrani: postacie historyczne powszechnie uznawane za tyranów, zbrodniarzy lub bandytów, żadna żyjąca.
+- `tests/gallery.html?compact` pokazuje wszystkich 36 w jednej siatce.
