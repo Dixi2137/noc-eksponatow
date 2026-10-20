@@ -83,7 +83,8 @@
   ];
   const sorted = [...definitions].sort((a, b) => a.year - b.year);
   const levels = Object.freeze(sorted.map((level, index) => Object.freeze({
-    ...level, number: index + 1, reward: 120 + index * 15,
+    ...level, number: index + 1, twist: window.MuseumTwists ? window.MuseumTwists.forIndex(index) : null,
+    reward: Math.round((120 + index * 15) * (window.MuseumTwists && window.MuseumTwists.forIndex(index) ? 1.2 : 1)),
     prologue: Object.freeze((level.prologue || []).map(Object.freeze))
   })));
   const byId = new Map(levels.map(level => [level.id, level]));

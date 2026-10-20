@@ -30,7 +30,7 @@
   function villain(id, name, alias, aliasGen, tag, era, archetype, tier, figure, description) {
     const t = tier;
     return { id, name, alias, aliasGen, tag, era, kind: 'postać historyczna', description,
-      stats: { ...human, hp: 150 + t * 18, combat: { ...human.combat, ...archetypes[archetype] },
+      stats: { ...human, archetype, hp: 150 + t * 18, combat: { ...human.combat, ...archetypes[archetype] },
         damage: { light: 13 + t, heavy: Math.round(20 + t * 1.5), lightBlocked: 11 + t, heavyBlocked: 16 + t, blockCostLight: 16 + t, blockCostHeavy: 22 + t },
         figure } };
   }

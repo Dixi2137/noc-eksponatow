@@ -196,6 +196,8 @@ body.pixel .announce-bar{font-family:'Pixelify Sans',monospace;font-size:17px}
 /* Daty i nazwa sali w rogu areny: większe, jaśniejsze, na ciemnej plakietce. */
 .stage-meta{font-size:10px;letter-spacing:1.5px;color:#e8e6d2}.stage-meta>span{background:rgba(8,12,10,.72);padding:5px 9px;border:1px solid #2b3326}body.pixel .stage-meta{font-family:'Pixelify Sans',monospace;font-size:12px;letter-spacing:.5px}@media(max-width:1000px){.stage-meta{font-size:9px}}@media(max-width:650px){.stage-meta{font-size:8px}.stage-meta>span{padding:3px 6px}}
 .pause-info{margin:14px auto 18px;max-width:420px;text-align:left;font-size:11px;line-height:1.6;color:var(--cream);border:1px solid var(--line);padding:12px 14px;background:#0f140d}.pause-info strong{display:block;font-family:'Barlow Condensed',Impact,sans-serif;font-size:22px;letter-spacing:.5px;color:var(--lime);margin-bottom:2px}.pause-info small{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:8px}.pause-info p{margin:0 0 8px}.pause-info ul{margin:0;padding-left:16px;color:#bdc1b2}body.pixel .pause-info strong{font-family:'Pixelify Sans',monospace}
+
+.card-twist{display:flex;align-items:center;gap:10px;margin:10px 0 0;padding:8px 12px;border:1px solid #5b6a44;background:#141a12cc;font-size:11px}.card-twist span{font-size:7px;letter-spacing:2px;color:var(--muted)}.card-twist strong{color:var(--lime);letter-spacing:1px}.card-twist em{font-style:normal;color:#bdc1b2}body.pixel .card-twist strong{font-family:'Pixelify Sans',monospace}@media(max-width:650px){.card-twist{flex-wrap:wrap;font-size:9px}}
 </style>
 </head>
 <body>
@@ -231,8 +233,8 @@ body.pixel .announce-bar{font-family:'Pixelify Sans',monospace;font-size:17px}
     </div>
     <div id="combatHint" class="combat-hint hidden"><span class="hint-icon">!</span><span id="hintText">Wyczuj moment. Paruj tuż przed ciosem.</span></div>
     <div id="intro" class="cinematic hidden" aria-live="polite"><div class="cinema-top"><span>NOC EKSPONATÓW</span><span id="introChapter">PROLOG / 01</span></div><div class="cinema-bottom"><span class="scene-label" id="sceneLabel">23:58 / OSTATNI OBCHÓD</span><p id="sceneText">W muzeum zapada cisza. Stróż kończy swoją zmianę.</p><div class="scene-progress"><div id="introProgress"></div></div><span class="cinema-note">SCENKA WSTĘPNA · <span id="introRemaining">18</span> S</span></div></div>
-    <div id="card" class="cinematic level-card hidden" aria-live="polite"><div class="cinema-top"><span>NOC EKSPONATÓW</span><span id="cardLevel">SALA 02 / 06</span></div><div class="cinema-bottom"><span class="scene-label" id="cardLabel">66 MLN LAT TEMU / GŁÓWNA GALERIA</span><p id="cardText">Główna galeria. Król kredy schodzi z postumentu.</p><div class="card-foe"><span>PRZECIWNIK</span><strong id="cardFoe">TYRANNOSAURUS REX</strong></div><div class="scene-progress"><div id="cardProgress"></div></div></div></div>
-    <div id="timejump" class="cinematic timejump hidden" aria-live="polite"><div class="cinema-top"><span>PRZESKOK W CZASIE</span><span id="jumpLevel">SALA 03 / 06</span></div><div class="jump-center"><span class="eyebrow" id="jumpFrom">66 MLN LAT TEMU</span><strong id="jumpYear">480 P.N.E.</strong><span class="eyebrow jump-to" id="jumpTo">→ 480 P.N.E.</span></div><div class="cinema-bottom"><span class="scene-label" id="jumpLabel">TERMOPILE / SALA ANTYKU</span><p id="jumpText">Wąwóz Termopil.</p><div class="card-foe"><span>NASTĘPNY PRZECIWNIK</span><strong id="jumpFoe">LEONIDAS I</strong></div><div class="scene-progress"><div id="jumpProgress"></div></div></div></div>
+    <div id="card" class="cinematic level-card hidden" aria-live="polite"><div class="cinema-top"><span>NOC EKSPONATÓW</span><span id="cardLevel">SALA 02 / 06</span></div><div class="cinema-bottom"><span class="scene-label" id="cardLabel">66 MLN LAT TEMU / GŁÓWNA GALERIA</span><p id="cardText">Główna galeria. Król kredy schodzi z postumentu.</p><div id="cardTwist" class="card-twist hidden"><span>WARUNKI SALI</span><strong></strong><em></em></div><div class="card-foe"><span>PRZECIWNIK</span><strong id="cardFoe">TYRANNOSAURUS REX</strong></div><div class="scene-progress"><div id="cardProgress"></div></div></div></div>
+    <div id="timejump" class="cinematic timejump hidden" aria-live="polite"><div class="cinema-top"><span>PRZESKOK W CZASIE</span><span id="jumpLevel">SALA 03 / 06</span></div><div class="jump-center"><span class="eyebrow" id="jumpFrom">66 MLN LAT TEMU</span><strong id="jumpYear">480 P.N.E.</strong><span class="eyebrow jump-to" id="jumpTo">→ 480 P.N.E.</span></div><div class="cinema-bottom"><span class="scene-label" id="jumpLabel">TERMOPILE / SALA ANTYKU</span><p id="jumpText">Wąwóz Termopil.</p><div id="jumpTwist" class="card-twist hidden"><span>WARUNKI SALI</span><strong></strong><em></em></div><div class="card-foe"><span>NASTĘPNY PRZECIWNIK</span><strong id="jumpFoe">LEONIDAS I</strong></div><div class="scene-progress"><div id="jumpProgress"></div></div></div></div>
     <div id="pause" class="overlay hidden"><div class="dialog pause-dialog"><span class="eyebrow">MUZEUM MOŻE POCZEKAĆ</span><h2>CHWILA<br>ODDECHU.</h2><p>Arena jest wstrzymana.</p><div id="pauseInfo" class="pause-info hidden"></div><button id="resumeBtn" class="primary-btn">WRÓĆ DO WALKI <span>↗</span></button><div class="key-hint">ESC — WZNÓW</div></div></div>
     <div id="choice" class="cinematic choice hidden" role="dialog" aria-labelledby="choiceTitle"><div class="cinema-top"><span id="choiceLevel">SALA 03 ZALICZONA</span><span>CO DALEJ?</span></div><div class="choice-box"><span class="eyebrow" id="choiceReward">+135 ✦</span><h2 id="choiceTitle">LEONIDAS POKONANY.</h2><p id="choiceText">Następna: Sala 04 / Napoleon Bonaparte, 1805.</p><div class="result-actions"><button id="nextBtn" class="primary-btn">KOLEJNA SALA <span>↗</span></button><button id="choiceMenuBtn" class="secondary-btn">MENU GŁÓWNE</button></div><small class="choice-hint">Enter = kolejna sala · Esc = menu</small></div></div>
     <div id="ending" class="cinematic hidden"><div class="cinema-top"><span id="outcomeLabel">KONIEC POJEDYNKU</span><span>EPILOG</span></div><div class="dream-caption"><span class="eyebrow">06:00 / POKÓJ STRÓŻA</span><h2 id="dreamTitle">TO BYŁ TYLKO SEN.</h2><p id="dreamText">„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.</p></div><div id="results" class="results hidden"><div class="result-stats"><span>SALE<strong id="resultLevel">0 / 6</strong></span><span>CZAS WALK<strong id="resultTime">00:00</strong></span><span>PARADY<strong id="resultParries">0</strong></span><span>ZDOBYTE ŻETONY<strong id="resultCoins">+0 ✦</strong></span></div><div class="result-actions"><button id="retryBtn" class="primary-btn">JESZCZE JEDEN SEN <span>↗</span></button><button id="menuBtn" class="secondary-btn">WRÓĆ DO MUZEUM</button></div></div></div>
@@ -908,7 +910,7 @@ window.MuseumConfig = Object.freeze({
   function villain(id, name, alias, aliasGen, tag, era, archetype, tier, figure, description) {
     const t = tier;
     return { id, name, alias, aliasGen, tag, era, kind: 'postać historyczna', description,
-      stats: { ...human, hp: 150 + t * 18, combat: { ...human.combat, ...archetypes[archetype] },
+      stats: { ...human, archetype, hp: 150 + t * 18, combat: { ...human.combat, ...archetypes[archetype] },
         damage: { light: 13 + t, heavy: Math.round(20 + t * 1.5), lightBlocked: 11 + t, heavyBlocked: 16 + t, blockCostLight: 16 + t, blockCostHeavy: 22 + t },
         figure } };
   }
@@ -1134,7 +1136,8 @@ window.MuseumConfig = Object.freeze({
   ];
   const sorted = [...definitions].sort((a, b) => a.year - b.year);
   const levels = Object.freeze(sorted.map((level, index) => Object.freeze({
-    ...level, number: index + 1, reward: 120 + index * 15,
+    ...level, number: index + 1, twist: window.MuseumTwists ? window.MuseumTwists.forIndex(index) : null,
+    reward: Math.round((120 + index * 15) * (window.MuseumTwists && window.MuseumTwists.forIndex(index) ? 1.2 : 1)),
     prologue: Object.freeze((level.prologue || []).map(Object.freeze))
   })));
   const byId = new Map(levels.map(level => [level.id, level]));
@@ -1147,6 +1150,26 @@ window.MuseumConfig = Object.freeze({
     first() { return levels[0]; },
     count: levels.length
   });
+})();
+</script><script>/* Hall twists: one named condition per hall that bends the fight (tempo, damage, light, clock, second wind).
+   Pure data plus multipliers; game.js applies them when a fight starts and runs the few that need per-frame hooks. */
+(() => {
+  'use strict';
+  const twists = Object.freeze(Object.fromEntries(Object.entries({
+    ambush:      { name: 'ZASADZKA',      blurb: 'Przeciwnik czeka tuż za drzwiami i atakuje od pierwszej sekundy.', combat: {}, foeStart: 760, openWithStrike: true },
+    frenzy:      { name: 'SZAŁ',          blurb: 'Krótsze zamachy, krótszy odpoczynek. Mniej czasu na parowanie.', combat: { windup: .75, heavyWindup: .75, recovery: .7, heavyRecovery: .7, idleDelay: .6 } },
+    iron:        { name: 'ŻELAZNA GARDA', blurb: 'Słaba garda trwa krótko, a blokowanie kosztuje cię więcej sił.', combat: { recovery: .6, heavyRecovery: .6 }, blockCost: 1.5 },
+    glass:       { name: 'SZKLANE OSTRZA', blurb: 'Obie strony zadają półtora raza większe obrażenia.', combat: {}, foeDamage: 1.5, playerDamage: 1.5 },
+    marathon:    { name: 'MARATON',       blurb: 'Przeciwnik ma więcej zdrowia, za to twoja wytrzymałość wraca szybciej.', combat: {}, foeHP: 1.4, staminaRegen: 1.3 },
+    dark:        { name: 'CIEMNA SALA',   blurb: 'Światło zgasło. Znak zamachu pojawia się dopiero w ostatniej chwili.', combat: {}, dark: true },
+    clock:       { name: 'ZEGAR',         blurb: 'Masz 75 sekund. Potem każda sekunda kosztuje cię zdrowie.', combat: {}, clock: 75 },
+    'second-wind': { name: 'DRUGI ODDECH', blurb: 'Przy jednej trzeciej zdrowia przeciwnik odzyskuje siły i przyspiesza.', combat: {}, secondWind: { at: .35, heal: .25, combat: { windup: .8, heavyWindup: .8, recovery: .85 } } },
+    heavyhand:   { name: 'CIĘŻKA RĘKA',   blurb: 'Co drugi atak jest ciężki. Paruj tylko przy błysku.', combat: {}, heavyEvery: 2 }
+  }).map(([id, t]) => [id, Object.freeze({ id, ...t })])));
+  // The first three halls teach the basics without a twist; afterwards the cycle repeats with a quiet hall every few rooms.
+  const cycle = Object.freeze([null, 'ambush', 'frenzy', null, 'glass', 'iron', 'clock', null, 'marathon', 'dark', 'second-wind', null, 'heavyhand']);
+  const forIndex = index => index < 3 ? null : cycle[(index - 3) % cycle.length];
+  window.MuseumTwists = Object.freeze({ all: () => twists, get: id => (id && twists[id]) || null, forIndex, cycle, count: Object.keys(twists).length });
 })();
 </script><script>/* Collectible cards. Hero cards carry one passive bonus; weapon cards boost the matching weapon when it is equipped.
    Bosses of the night patrol (Hitler, Stalin and the rest) are never cards. */
@@ -2559,7 +2582,7 @@ window.MuseumConfig = Object.freeze({
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const input = { left: false, right: false, attack: false, guard: false, dodge: false };
   let canvas, ctx, ratio = 1, last = 0, frame = 0, soundEnabled = true, audio, scene = 'arena', visualTime = 0;
-  let state = fresh();
+  let state = fresh(); state.rng = Math.random;
   const particles = [], labels = [], rings = [];
   let shake = 0, flash = 0, hitstop = 0, eventClock = 0, lastHint = '';
 
@@ -2575,18 +2598,30 @@ window.MuseumConfig = Object.freeze({
     }
     return { perk: { ...perk, stats }, weapon: { ...weapon, stats: w } };
   }
-  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null) {
+  // Boss specials by archetype: a feint (windup broken off, then a quick one) or a double strike (second windup right after the first).
+  const specialsByArchetype = { duelist: 'feint', trickster: 'feint', brute: 'double', tyrant: 'double', gunman: 'burst' };
+  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false) {
     const exhibit = window.MuseumExhibits.get(exhibitId);
     const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
-    const stats = perk.stats, combat = exhibit.stats.combat;
+    const stats = perk.stats, twist = window.MuseumTwists?.get(twistId) || null, combat = { ...exhibit.stats.combat }, damage = { ...exhibit.stats.damage };
+    if (twist) {
+      for (const [key, mul] of Object.entries(twist.combat || {})) if (key in combat) combat[key] *= mul;
+      if (twist.heavyEvery) combat.heavyEvery = twist.heavyEvery;
+      if (twist.foeDamage) for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * twist.foeDamage);
+      if (twist.blockCost) for (const key of ['blockCostLight', 'blockCostHeavy']) damage[key] = Math.round(damage[key] * twist.blockCost);
+      if (twist.playerDamage) weapon.stats.weakGuardDamage = Math.ceil(weapon.stats.weakGuardDamage * twist.playerDamage);
+      if (twist.staminaRegen) stats.staminaRegenMultiplier = (stats.staminaRegenMultiplier ?? 1) * twist.staminaRegen;
+    }
+    const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1));
+    const special = specials && exhibit.stats.archetype ? specialsByArchetype[exhibit.stats.archetype] || null : null;
     return {
-      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, theme,
+      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, damage, theme, twist, special, secondWindUsed: false, clockWarned: false,
       hint: `Zbliż się do ${exhibit.aliasGen || exhibit.alias + 'a'}. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
         ammo: weapon.stats.ammo, maxAmmo: weapon.stats.ammo, reload: 0, shots: 0 },
-      foe: { x: 1060, hp: exhibit.stats.hp, maxHP: exhibit.stats.hp, state: 'idle', timer: 0, cycle: 0, attackTargetX: null,
-        heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false }
+      foe: { x: twist?.foeStart || 1060, hp: foeHP, maxHP: foeHP, state: 'idle', timer: 0, cycle: 0, attackTargetX: null,
+        heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false, feint: false, quick: 0, followUp: false }
     };
   }
   const alias = () => state.exhibit.alias;
@@ -2604,7 +2639,7 @@ window.MuseumConfig = Object.freeze({
       player: { ...state.player }, foe: { ...state.foe }, skin: state.skin, perk: state.perk, scene,
       exhibit: { id: state.exhibit.id, name: state.exhibit.name, alias: state.exhibit.alias, tag: state.exhibit.tag, maxHP: state.exhibit.stats.hp },
       weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind, ammo: state.player.ammo, maxAmmo: state.player.maxAmmo, reload: state.player.reload }, theme: state.theme,
-      combat: { ...state.combat }
+      combat: { ...state.combat }, twist: state.twist ? { id: state.twist.id || null, name: state.twist.name, blurb: state.twist.blurb } : null, special: state.special || null
     };
   }
   function updateEvent(force = false) {
@@ -2742,7 +2777,7 @@ window.MuseumConfig = Object.freeze({
   function foeHit() {
     if (state.status !== 'running' || state.player.hp <= 0 || state.foe.hp <= 0) return;
     const p = state.player, r = state.foe;
-    const stats = state.perk.stats, combat = state.combat, dmg = state.exhibit.stats.damage, reflect = state.weapon.stats.parryReflect;
+    const stats = state.perk.stats, combat = state.combat, dmg = state.damage || state.exhibit.stats.damage, reflect = state.weapon.stats.parryReflect;
     // A strike is committed when the tell begins; it cannot home in on a retreating knight.
     const target = r.attackTargetX ?? p.x;
     const inRange = r.x - p.x <= combat.range && Math.abs(p.x - target) <= combat.strikeReach;
@@ -2794,8 +2829,12 @@ window.MuseumConfig = Object.freeze({
     const r = state.foe;
     r.state = 'windup'; r.timer = 0; r.cycle++; r.heavy = r.cycle % state.combat.heavyEvery === 0; r.attackDone = false;
     r.attackTargetX = state.player.x;
+    r.feint = !r.quick && !r.heavy && state.special === 'feint' && state.rng() < .35;
+    if (r.quick) r.heavy = false;
     tone('warning');
-    hint(r.heavy ? 'CIĘŻKI ATAK — zaczekaj na błysk, potem postaw gardę!' : `${alias()} szykuje cios. Cofnij się lub postaw gardę przy błysku!`, 2);
+    if (state.twist?.dark) hint(r.heavy ? 'CIĘŻKI ATAK w ciemności — licz w głowie, znak przyjdzie późno!' : `${alias()} rusza w ciemności. Garda w ostatniej chwili!`, 2);
+    else if (r.quick) hint(state.special === 'burst' ? 'SERIA! Drugi strzał leci od razu.' : 'PODWÓJNY CIOS! Garda jeszcze raz!', 1.6);
+    else hint(r.heavy ? 'CIĘŻKI ATAK — zaczekaj na błysk, potem postaw gardę!' : `${alias()} szykuje cios. Cofnij się lub postaw gardę przy błysku!`, 2);
   }
 
   function step(dt) {
@@ -2838,6 +2877,10 @@ window.MuseumConfig = Object.freeze({
     }
     if (state.status !== 'running') return;
     r.timer += dt; r.walk = false;
+    const tw = state.twist;
+    if (tw?.openWithStrike && r.state === 'idle' && r.cycle === 0 && state.elapsed > .3) { startWindup(); label('ZASADZKA', r.x - 70, FLOOR - 300, '#ff8c9a', 22); }
+    if (tw?.clock) { const left = tw.clock - state.elapsed; if (left <= 0) { if (Math.floor(state.elapsed * 4) !== Math.floor((state.elapsed - dt) * 4)) damagePlayer(1); if (!state.clockWarned) { state.clockWarned = true; hint('ZEGAR WYBIŁ. Każda sekunda boli. Kończ to!', 3); } } else if (left < 15 && Math.floor(left) !== Math.floor(left + dt)) hint(`ZEGAR: ${Math.ceil(left)} s`, 1); }
+    if (tw?.secondWind && !state.secondWindUsed && r.hp > 0 && r.hp <= r.maxHP * tw.secondWind.at) { state.secondWindUsed = true; r.hp = Math.min(r.maxHP, r.hp + Math.round(r.maxHP * tw.secondWind.heal)); for (const [key, mul] of Object.entries(tw.secondWind.combat)) if (key in combat) combat[key] *= mul; label('DRUGI ODDECH', r.x - 80, FLOOR - 300, '#9ad28b', 22); hint(`${alias()} łapie drugi oddech i przyspiesza!`, 2.2); tone('warning'); }
     const distance = r.x - p.x;
     const setFoeState = next => { r.state = next; r.timer = 0; };
     const moveFoe = target => {
@@ -2864,16 +2907,20 @@ window.MuseumConfig = Object.freeze({
       }
     } else if (r.state === 'windup') {
       // No positional tracking during the telegraph or the actual strike.
-      const duration = r.heavy ? combat.heavyWindup : combat.windup;
-      if (r.timer >= duration) { setFoeState('strike'); r.attackDone = false; }
+      const duration = (r.heavy ? combat.heavyWindup : combat.windup) * (r.quick ? (state.special === 'burst' ? .45 : .7) : 1);
+      if (r.feint && r.timer >= duration * .55) { r.feint = false; r.quick = 1; setFoeState('idle'); r.timer = combat.idleDelay; label('FINTA', r.x - 60, FLOOR - 285, '#e7a360', 20); tone('dodge'); hint(`FINTA! ${alias()} zaraz uderzy naprawdę.`, 1.5); }
+      else if (r.timer >= duration) { setFoeState('strike'); r.attackDone = false; r.quick = 0; }
     } else if (r.state === 'strike') {
       if (!r.attackDone && r.timer >= combat.strikeContact) { r.attackDone = true; foeHit(); }
       if (r.timer >= combat.strikeDuration && state.status === 'running') {
         setFoeState('recover');
-        hint(`TERAZ! ${alias()} odpoczywa — podejdź i przełam słabą gardę.`, 1.8);
+        r.followUp = !r.heavy && !r.quick && (state.special === 'double' || state.special === 'burst') && state.rng() < (state.special === 'burst' ? .5 : .35);
+        if (r.followUp) r.timer = combat.recovery - .25;   // a breath, then the second blow
+        else hint(`TERAZ! ${alias()} odpoczywa — podejdź i przełam słabą gardę.`, 1.8);
       }
     } else if (r.state === 'recover') {
-      if (r.timer >= (r.heavy ? combat.heavyRecovery : combat.recovery)) {
+      if (r.followUp) { r.followUp = false; r.quick = 1; startWindup(); }
+      else if (r.timer >= (r.heavy ? combat.heavyRecovery : combat.recovery)) {
         setFoeState('reposition');
         hint(`Złap oddech. ${alias()} ustawia się do kolejnego pojedynku.`, 1.7);
       }
@@ -2925,8 +2972,9 @@ window.MuseumConfig = Object.freeze({
     const r = state.foe, combat = state.combat;
     if (state.status !== 'running') return;
     if (r.state === 'windup') {
-      const fraction = clamp(r.timer / (r.heavy ? combat.heavyWindup : combat.windup), 0, 1);
+      const fraction = clamp(r.timer / ((r.heavy ? combat.heavyWindup : combat.windup) * (r.quick ? (state.special === 'burst' ? .45 : .7) : 1)), 0, 1);
       const x = r.x - 70, y = FLOOR - 345;
+      if (state.twist?.dark && fraction < .65) return;
       ctx.save();
       ctx.strokeStyle = '#a9463970'; ctx.lineWidth = 5;
       ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2); ctx.stroke();
@@ -3000,6 +3048,7 @@ window.MuseumConfig = Object.freeze({
     if (pix) inPixels(() => pix.drawArena(ctx, artTime, state.theme));
     else if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
+    if (state.twist?.dark && state.status !== 'idle') { ctx.fillStyle = 'rgba(2,4,12,.58)'; ctx.fillRect(0, 0, W, H); }
     if (!pix) { shadow(p.x, 94); shadow(r.x, state.exhibit.stats.shadow); }
     if (withOverlay) drawTelegraph();
     let foePose = r.walk ? 'walk' : 'idle', foeProgress = r.timer;
@@ -3104,7 +3153,7 @@ window.MuseumConfig = Object.freeze({
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); state.finish = options.finish || null; scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers, options.twist || null, !!options.specials); state.finish = options.finish || null; state.rng = typeof options.rng === 'function' ? options.rng : Math.random; scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;
@@ -3113,7 +3162,7 @@ window.MuseumConfig = Object.freeze({
     },
     pause() { if (state.status === 'running') { state.status = 'paused'; for (const key in input) input[key] = false; updateEvent(true); draw(); } },
     resume() { if (state.status === 'paused') { state.status = 'running'; last = 0; audioReady(); updateEvent(true); } },
-    reset() { state = fresh(); scene = 'arena'; for (const key in input) input[key] = false; particles.length = labels.length = rings.length = 0; updateEvent(true); draw(); },
+    reset() { state = fresh(); state.rng = Math.random; scene = 'arena'; for (const key in input) input[key] = false; particles.length = labels.length = rings.length = 0; updateEvent(true); draw(); },
     setScene(name) { if (name === 'arena' || name === 'guard' || name === 'external') { scene = name; draw(); } },
     setSound(enabled) { soundEnabled = !!enabled; if (soundEnabled) audioReady(); },
     getState: snapshot
@@ -3759,7 +3808,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function renderMenuLevel(){
   const level=currentLevel(),exhibit=levelExhibit(level);
   $('heroTagline').innerHTML=level.tagline;$('exhibitTagName').textContent=exhibit.name;$('exhibitTagInfo').textContent=exhibit.tag;
-  $('stageHall').textContent=level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
+  $('stageHall').textContent=twistOf(level)?`${level.hall} · ${twistOf(level).name}`:level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
   $('heroLevel').textContent=`POZIOM ${String(level.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')} · ${level.title}`;
   $('introNote').innerHTML=levels.indexOf(level.id)===0?'<span>◷</span> Najpierw historia. 18 sekund. Bez pomijania.':`<span>◷</span> Noc zaczyna się od sali ${level.number}. Pokonane sale zostają zaliczone.`;
   renderLevelStrip();
@@ -3773,21 +3822,23 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   if(levels.indexOf(level.id)===0&&level.prologue.length){screen='intro';introTime=0;show('intro');$('topStatus').textContent='PROLOG / OSTATNI OBCHÓD';updateIntro();}
   else showCard(level);
  }
- function showCard(level){screen='card';cardTime=0;const exhibit=levelExhibit(level);show('card');$('cardLevel').textContent=`SALA ${String(level.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('cardLabel').textContent=`${level.yearLabel} / ${level.hall}`;$('cardText').textContent=level.card;$('cardFoe').textContent=exhibit.name;$('topStatus').textContent=`${level.title} / ${level.yearLabel}`;$('cardProgress').style.width='0%';}
+ const twistOf=level=>window.MuseumTwists?.get(level?.twist);
+ function twistLine(id,level){const box=$(id),tw=twistOf(level);if(!box)return;show(id,!!tw);if(tw){box.querySelector('strong').textContent=tw.name;box.querySelector('em').textContent=tw.blurb;}}
+ function showCard(level){screen='card';cardTime=0;const exhibit=levelExhibit(level);show('card');$('cardLevel').textContent=`SALA ${String(level.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('cardLabel').textContent=`${level.yearLabel} / ${level.hall}`;$('cardText').textContent=level.card;$('cardFoe').textContent=exhibit.name;twistLine('cardTwist',level);$('topStatus').textContent=`${level.title} / ${level.yearLabel}`;$('cardProgress').style.width='0%';}
  function updateIntro(){const level=levels.get(night.levelId),chapters=level.prologue,per=totalIntro/chapters.length,i=Math.min(chapters.length-1,Math.floor(introTime/per));const c=chapters[i];$('sceneLabel').textContent=c.label;$('sceneText').textContent=c.text;$('introChapter').textContent=`PROLOG / 0${i+1}`;$('introRemaining').textContent=Math.ceil(totalIntro-introTime);$('introProgress').style.width=(introTime/totalIntro*100)+'%';}
  function startFight(){
   if(!(screen==='intro'&&introTime>=totalIntro)&&!(screen==='card'&&cardTime>=totalCard)&&!(screen==='timejump'&&jumpTime>=totalJump))return;
   const level=levels.get(night.levelId),exhibit=levelExhibit(level);
   screen='fight';['intro','card','timejump'].forEach(id=>show(id,false));show('hud');show('combatHint');show('stageMeta');
   $('playerName').textContent=profile.skin==='stachu-jones'?'STACHU JONES':'ŻELAZNY RYCERZ';$('foeName').textContent=exhibit.name;
-  $('stageHall').textContent=level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
+  $('stageHall').textContent=twistOf(level)?`${level.hall} · ${twistOf(level).name}`:level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
   $('topStatus').textContent=`SALA ${String(level.number).padStart(2,'0')} / RYCERZ KONTRA ${exhibit.alias.toLocaleUpperCase('pl-PL')}`;stageState();
-  show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',finish:profile.finish||null,theme:level.theme,modifiers:loot.modifiers(profile),sound:profile.sound});
+  show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',finish:profile.finish||null,theme:level.theme,twist:level.twist||null,specials:level.number>3,modifiers:loot.modifiers(profile),sound:profile.sound});
  }
  function pause(){if(screen!=='fight')return;screen='paused';window.MuseumGame.pause();renderPauseInfo();show('pause');stageState();}
  // Esc shows who you are fighting: name, era, how he fights (numbers from his combat profile) and what beats him.
  function renderPauseInfo(){const box=$('pauseInfo');if(!box||!night)return;const level=levels.get(night.levelId),ex=levelExhibit(level);if(!ex){show('pauseInfo',false);return;}const cb=ex.stats.combat||{},dmg=ex.stats.damage||{};const fmt=n=>Number(n).toLocaleString('pl-PL',{maximumFractionDigits:1});const style=['pistol','rifle','bow'].includes(ex.stats.figure?.weapon)?'Strzela z dystansu: unikaj, podejdź po jego strzale i tnij.':cb.windup<=.85?'Szybki szermierz: krótkie zamachy, mało czasu na parowanie, za to szybko odpoczywa.':cb.windup>=1.3?'Powolny osiłek: długi zamach, ciężkie ciosy, długi odpoczynek po nich.':'Klasyczny tyran: równe tempo, ciężki cios co kilka zamachów.';
-  box.replaceChildren();const name=document.createElement('strong');name.textContent=ex.name;const tag=document.createElement('small');tag.textContent=`${ex.tag||''}${ex.era?' · '+ex.era:''}`;const desc=document.createElement('p');desc.textContent=ex.description||'';const list=document.createElement('ul');for(const text of [style,`Zamach ${fmt(cb.windup)} s, ciężki ${fmt(cb.heavyWindup)} s (co ${cb.heavyEvery||3}. atak). Po ciosie odpoczywa ${fmt(cb.recovery)} s: wtedy jego garda jest słaba.`,`Obrażenia: ${dmg.light||'?'} lekki, ${dmg.heavy||'?'} ciężki; sparowane ${dmg.lightBlocked||'?'} / ${dmg.heavyBlocked||'?'}. HP: ${ex.stats.hp}.`,`${level.hall} · ${String(level.yearLabel).replace(/\.$/,'')}. Nagroda za salę: ${level.reward} ✦ (+20 za każdą paradę).`]){const li=document.createElement('li');li.textContent=text;list.append(li);}box.append(name,tag,desc,list);show('pauseInfo');}
+  box.replaceChildren();const name=document.createElement('strong');name.textContent=ex.name;const tag=document.createElement('small');tag.textContent=`${ex.tag||''}${ex.era?' · '+ex.era:''}`;const desc=document.createElement('p');desc.textContent=ex.description||'';const list=document.createElement('ul');const tw=twistOf(level),sp=({feint:'Finta: potrafi przerwać zamach i uderzyć szybkim, krótkim ciosem zaraz potem.',double:'Podwójny cios: po lekkim ataku bywa drugi, prawie bez zamachu.',burst:'Seria: po strzale często leci drugi, niemal natychmiast.'})[window.MuseumGame.getState().special];for(const text of [...(tw?[`WARUNKI SALI: ${tw.name}. ${tw.blurb}`]:[]),...(sp?[sp]:[]),style,`Zamach ${fmt(cb.windup)} s, ciężki ${fmt(cb.heavyWindup)} s (co ${cb.heavyEvery||3}. atak). Po ciosie odpoczywa ${fmt(cb.recovery)} s: wtedy jego garda jest słaba.`,`Obrażenia: ${dmg.light||'?'} lekki, ${dmg.heavy||'?'} ciężki; sparowane ${dmg.lightBlocked||'?'} / ${dmg.heavyBlocked||'?'}. HP: ${ex.stats.hp}.`,`${level.hall} · ${String(level.yearLabel).replace(/\.$/,'')}. Nagroda za salę: ${level.reward} ✦ (+20 za każdą paradę).`]){const li=document.createElement('li');li.textContent=text;list.append(li);}box.append(name,tag,desc,list);show('pauseInfo');}
  function resume(){if(screen!=='paused')return;screen='fight';show('pause',false);window.MuseumGame.resume();stageState();}
  function formatTime(n){return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(Math.floor(n%60)).padStart(2,'0')}`;}
  window.addEventListener('game:update',e=>{const s=e.detail;if(!['fight','paused'].includes(screen))return;const maxP=s.player?.maxHP||120,maxR=s.exhibit?.maxHP||s.foe?.maxHP||160;$('playerHealth').style.width=Math.max(0,s.playerHP/maxP*100)+'%';$('foeHealth').style.width=Math.max(0,s.foeHP/maxR*100)+'%';$('playerHP').textContent=`${Math.ceil(s.playerHP)} / ${maxP}`;$('foeHP').textContent=`${Math.ceil(s.foeHP)} / ${maxR}`;$('staminaNum').textContent=Math.floor(s.stamina);$('staminaBar').style.width=s.stamina+'%';$('fightTime').textContent=formatTime(s.time||s.elapsed||0);$('hintText').textContent=s.hint||'Wyczuj moment. Paruj tuż przed ciosem.';if(s.perk)updateActivePerk(s.perk);if(s.weapon?.maxAmmo!=null){show('ammoRow');$('ammoNum').textContent=s.weapon.reload>0?'PRZEŁADOWANIE':`${s.weapon.ammo} / ${s.weapon.maxAmmo}`;}const names={idle:'OBSERWUJE',approach:'PODCHODZI',retreat:'ODSTĘPUJE',reposition:'ŁAPIE DYSTANS',windup:'SZYKUJE ATAK',strike:'ATAKUJE',recover:'OSŁABIONA GARDA'};$('foeState').textContent=names[s.foeState]||s.exhibit?.name||'ŻYWY EKSPONAT';});
@@ -3806,7 +3857,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function settleNight(){if(!night)return;profile.records=profile.records||{fastestNight:null,nightCoins:0};if(night.coins>profile.records.nightCoins)profile.records.nightCoins=night.coins;persist();pushCloud(true);}
  function chooseNext(){if(screen!=='choice')return;const level=levels.get(night.levelId),next=levels.next(level.id);show('choice',false);if(next)startTimeJump(level,next);else startEnding();}
  function chooseMenu(){if(screen!=='choice')return;settleNight();show('choice',false);menu();}
- function startTimeJump(from,to){screen='timejump';jumpTime=0;jumpFrom=from;jumpTo=to;night.levelId=to.id;show('hud',false);show('stageMeta',false);show('timejump');$('jumpLevel').textContent=`SALA ${String(to.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('jumpFrom').textContent=from.yearLabel;$('jumpTo').textContent=`→ ${to.yearLabel}`;$('jumpYear').textContent=from.yearLabel;$('jumpLabel').textContent=`${to.title} / ${to.hall}`;$('jumpText').textContent=to.card;$('jumpFoe').textContent=levelExhibit(to).name;$('jumpProgress').style.width='0%';$('topStatus').textContent=`PRZESKOK W CZASIE / ${to.yearLabel}`;stageState();}
+ function startTimeJump(from,to){screen='timejump';jumpTime=0;jumpFrom=from;jumpTo=to;night.levelId=to.id;show('hud',false);show('stageMeta',false);show('timejump');$('jumpLevel').textContent=`SALA ${String(to.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('jumpFrom').textContent=from.yearLabel;$('jumpTo').textContent=`→ ${to.yearLabel}`;$('jumpYear').textContent=from.yearLabel;$('jumpLabel').textContent=`${to.title} / ${to.hall}`;$('jumpText').textContent=to.card;$('jumpFoe').textContent=levelExhibit(to).name;twistLine('jumpTwist',to);$('jumpProgress').style.width='0%';$('topStatus').textContent=`PRZESKOK W CZASIE / ${to.yearLabel}`;stageState();}
  function updateTimeJump(){const k=Math.min(1,jumpTime/(totalJump*.72)),eased=1-Math.pow(1-k,3);const year=Math.round(jumpFrom.year+(jumpTo.year-jumpFrom.year)*eased);$('jumpYear').textContent=k>=1?jumpTo.yearLabel:yearText(year);$('jumpProgress').style.width=(jumpTime/totalJump*100)+'%';$('timejump').classList.toggle('arrived',k>=1);}
  function startEnding(){screen='ending';window.MuseumGame?.setScene('external');show('hud',false);show('stageMeta',false);show('ending');show('results',false);const won=endData?.win&&!levels.next(night.levelId);$('dreamTitle').textContent=won?'ŚWIT. MUZEUM OCALONE.':'TO BYŁ TYLKO SEN.';$('dreamText').innerHTML=won?'Stróż otwiera oczy o 06:00. Wszystkie sale są ciche. Wszystkie eksponaty stoją tam, gdzie powinny.<br>„Dobra zmiana.”':'„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.';stageState();}
  function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);profile.records=profile.records||{fastestNight:null,nightCoins:0};if(night.coins>profile.records.nightCoins)profile.records.nightCoins=night.coins;if(endData?.win&&!next&&night.wins===levels.count&&(profile.records.fastestNight===null||night.time<profile.records.fastestNight))profile.records.fastestNight=Math.round(night.time*10)/10;persist();pushCloud(true);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}

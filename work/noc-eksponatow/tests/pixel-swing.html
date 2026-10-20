@@ -1,7 +1,7 @@
 <!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Zamach</title>
 <style>body{margin:0;background:#10120f;color:#aaa;font:11px system-ui}.row{display:flex;flex-wrap:wrap;gap:4px;padding:8px}figure{margin:0;text-align:center}canvas{image-rendering:pixelated;width:120px;height:120px;background:#2a3a3a}figcaption{font-size:9px}</style></head>
 <body><div class="row" id="row"></div>
-<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/finishes.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/cards.js"></script><script src="../dist/hall.js"></script><script src="../dist/art.js"></script><script src="../dist/pixel.js"></script>
+<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/finishes.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/twists.js"></script><script src="../dist/cards.js"></script><script src="../dist/hall.js"></script><script src="../dist/art.js"></script><script src="../dist/pixel.js"></script>
 <script>
 const P=window.MuseumPixel,ph=[0,.3,.5,.7,.9];
 const add=(label,draw)=>{for(const p of ph){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=60;c.height=60;const x=c.getContext('2d');draw(x,p);f.append(c);const cap=document.createElement('figcaption');cap.textContent=label+' p='+p;f.append(cap);row.append(f);}};

@@ -8,7 +8,7 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const input = { left: false, right: false, attack: false, guard: false, dodge: false };
   let canvas, ctx, ratio = 1, last = 0, frame = 0, soundEnabled = true, audio, scene = 'arena', visualTime = 0;
-  let state = fresh();
+  let state = fresh(); state.rng = Math.random;
   const particles = [], labels = [], rings = [];
   let shake = 0, flash = 0, hitstop = 0, eventClock = 0, lastHint = '';
 
@@ -24,18 +24,30 @@
     }
     return { perk: { ...perk, stats }, weapon: { ...weapon, stats: w } };
   }
-  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null) {
+  // Boss specials by archetype: a feint (windup broken off, then a quick one) or a double strike (second windup right after the first).
+  const specialsByArchetype = { duelist: 'feint', trickster: 'feint', brute: 'double', tyrant: 'double', gunman: 'burst' };
+  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false) {
     const exhibit = window.MuseumExhibits.get(exhibitId);
     const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
-    const stats = perk.stats, combat = exhibit.stats.combat;
+    const stats = perk.stats, twist = window.MuseumTwists?.get(twistId) || null, combat = { ...exhibit.stats.combat }, damage = { ...exhibit.stats.damage };
+    if (twist) {
+      for (const [key, mul] of Object.entries(twist.combat || {})) if (key in combat) combat[key] *= mul;
+      if (twist.heavyEvery) combat.heavyEvery = twist.heavyEvery;
+      if (twist.foeDamage) for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * twist.foeDamage);
+      if (twist.blockCost) for (const key of ['blockCostLight', 'blockCostHeavy']) damage[key] = Math.round(damage[key] * twist.blockCost);
+      if (twist.playerDamage) weapon.stats.weakGuardDamage = Math.ceil(weapon.stats.weakGuardDamage * twist.playerDamage);
+      if (twist.staminaRegen) stats.staminaRegenMultiplier = (stats.staminaRegenMultiplier ?? 1) * twist.staminaRegen;
+    }
+    const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1));
+    const special = specials && exhibit.stats.archetype ? specialsByArchetype[exhibit.stats.archetype] || null : null;
     return {
-      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, theme,
+      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, damage, theme, twist, special, secondWindUsed: false, clockWarned: false,
       hint: `Zbliż się do ${exhibit.aliasGen || exhibit.alias + 'a'}. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
         ammo: weapon.stats.ammo, maxAmmo: weapon.stats.ammo, reload: 0, shots: 0 },
-      foe: { x: 1060, hp: exhibit.stats.hp, maxHP: exhibit.stats.hp, state: 'idle', timer: 0, cycle: 0, attackTargetX: null,
-        heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false }
+      foe: { x: twist?.foeStart || 1060, hp: foeHP, maxHP: foeHP, state: 'idle', timer: 0, cycle: 0, attackTargetX: null,
+        heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false, feint: false, quick: 0, followUp: false }
     };
   }
   const alias = () => state.exhibit.alias;
@@ -53,7 +65,7 @@
       player: { ...state.player }, foe: { ...state.foe }, skin: state.skin, perk: state.perk, scene,
       exhibit: { id: state.exhibit.id, name: state.exhibit.name, alias: state.exhibit.alias, tag: state.exhibit.tag, maxHP: state.exhibit.stats.hp },
       weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind, ammo: state.player.ammo, maxAmmo: state.player.maxAmmo, reload: state.player.reload }, theme: state.theme,
-      combat: { ...state.combat }
+      combat: { ...state.combat }, twist: state.twist ? { id: state.twist.id || null, name: state.twist.name, blurb: state.twist.blurb } : null, special: state.special || null
     };
   }
   function updateEvent(force = false) {
@@ -191,7 +203,7 @@
   function foeHit() {
     if (state.status !== 'running' || state.player.hp <= 0 || state.foe.hp <= 0) return;
     const p = state.player, r = state.foe;
-    const stats = state.perk.stats, combat = state.combat, dmg = state.exhibit.stats.damage, reflect = state.weapon.stats.parryReflect;
+    const stats = state.perk.stats, combat = state.combat, dmg = state.damage || state.exhibit.stats.damage, reflect = state.weapon.stats.parryReflect;
     // A strike is committed when the tell begins; it cannot home in on a retreating knight.
     const target = r.attackTargetX ?? p.x;
     const inRange = r.x - p.x <= combat.range && Math.abs(p.x - target) <= combat.strikeReach;
@@ -243,8 +255,12 @@
     const r = state.foe;
     r.state = 'windup'; r.timer = 0; r.cycle++; r.heavy = r.cycle % state.combat.heavyEvery === 0; r.attackDone = false;
     r.attackTargetX = state.player.x;
+    r.feint = !r.quick && !r.heavy && state.special === 'feint' && state.rng() < .35;
+    if (r.quick) r.heavy = false;
     tone('warning');
-    hint(r.heavy ? 'CIĘŻKI ATAK — zaczekaj na błysk, potem postaw gardę!' : `${alias()} szykuje cios. Cofnij się lub postaw gardę przy błysku!`, 2);
+    if (state.twist?.dark) hint(r.heavy ? 'CIĘŻKI ATAK w ciemności — licz w głowie, znak przyjdzie późno!' : `${alias()} rusza w ciemności. Garda w ostatniej chwili!`, 2);
+    else if (r.quick) hint(state.special === 'burst' ? 'SERIA! Drugi strzał leci od razu.' : 'PODWÓJNY CIOS! Garda jeszcze raz!', 1.6);
+    else hint(r.heavy ? 'CIĘŻKI ATAK — zaczekaj na błysk, potem postaw gardę!' : `${alias()} szykuje cios. Cofnij się lub postaw gardę przy błysku!`, 2);
   }
 
   function step(dt) {
@@ -287,6 +303,10 @@
     }
     if (state.status !== 'running') return;
     r.timer += dt; r.walk = false;
+    const tw = state.twist;
+    if (tw?.openWithStrike && r.state === 'idle' && r.cycle === 0 && state.elapsed > .3) { startWindup(); label('ZASADZKA', r.x - 70, FLOOR - 300, '#ff8c9a', 22); }
+    if (tw?.clock) { const left = tw.clock - state.elapsed; if (left <= 0) { if (Math.floor(state.elapsed * 4) !== Math.floor((state.elapsed - dt) * 4)) damagePlayer(1); if (!state.clockWarned) { state.clockWarned = true; hint('ZEGAR WYBIŁ. Każda sekunda boli. Kończ to!', 3); } } else if (left < 15 && Math.floor(left) !== Math.floor(left + dt)) hint(`ZEGAR: ${Math.ceil(left)} s`, 1); }
+    if (tw?.secondWind && !state.secondWindUsed && r.hp > 0 && r.hp <= r.maxHP * tw.secondWind.at) { state.secondWindUsed = true; r.hp = Math.min(r.maxHP, r.hp + Math.round(r.maxHP * tw.secondWind.heal)); for (const [key, mul] of Object.entries(tw.secondWind.combat)) if (key in combat) combat[key] *= mul; label('DRUGI ODDECH', r.x - 80, FLOOR - 300, '#9ad28b', 22); hint(`${alias()} łapie drugi oddech i przyspiesza!`, 2.2); tone('warning'); }
     const distance = r.x - p.x;
     const setFoeState = next => { r.state = next; r.timer = 0; };
     const moveFoe = target => {
@@ -313,16 +333,20 @@
       }
     } else if (r.state === 'windup') {
       // No positional tracking during the telegraph or the actual strike.
-      const duration = r.heavy ? combat.heavyWindup : combat.windup;
-      if (r.timer >= duration) { setFoeState('strike'); r.attackDone = false; }
+      const duration = (r.heavy ? combat.heavyWindup : combat.windup) * (r.quick ? (state.special === 'burst' ? .45 : .7) : 1);
+      if (r.feint && r.timer >= duration * .55) { r.feint = false; r.quick = 1; setFoeState('idle'); r.timer = combat.idleDelay; label('FINTA', r.x - 60, FLOOR - 285, '#e7a360', 20); tone('dodge'); hint(`FINTA! ${alias()} zaraz uderzy naprawdę.`, 1.5); }
+      else if (r.timer >= duration) { setFoeState('strike'); r.attackDone = false; r.quick = 0; }
     } else if (r.state === 'strike') {
       if (!r.attackDone && r.timer >= combat.strikeContact) { r.attackDone = true; foeHit(); }
       if (r.timer >= combat.strikeDuration && state.status === 'running') {
         setFoeState('recover');
-        hint(`TERAZ! ${alias()} odpoczywa — podejdź i przełam słabą gardę.`, 1.8);
+        r.followUp = !r.heavy && !r.quick && (state.special === 'double' || state.special === 'burst') && state.rng() < (state.special === 'burst' ? .5 : .35);
+        if (r.followUp) r.timer = combat.recovery - .25;   // a breath, then the second blow
+        else hint(`TERAZ! ${alias()} odpoczywa — podejdź i przełam słabą gardę.`, 1.8);
       }
     } else if (r.state === 'recover') {
-      if (r.timer >= (r.heavy ? combat.heavyRecovery : combat.recovery)) {
+      if (r.followUp) { r.followUp = false; r.quick = 1; startWindup(); }
+      else if (r.timer >= (r.heavy ? combat.heavyRecovery : combat.recovery)) {
         setFoeState('reposition');
         hint(`Złap oddech. ${alias()} ustawia się do kolejnego pojedynku.`, 1.7);
       }
@@ -374,8 +398,9 @@
     const r = state.foe, combat = state.combat;
     if (state.status !== 'running') return;
     if (r.state === 'windup') {
-      const fraction = clamp(r.timer / (r.heavy ? combat.heavyWindup : combat.windup), 0, 1);
+      const fraction = clamp(r.timer / ((r.heavy ? combat.heavyWindup : combat.windup) * (r.quick ? (state.special === 'burst' ? .45 : .7) : 1)), 0, 1);
       const x = r.x - 70, y = FLOOR - 345;
+      if (state.twist?.dark && fraction < .65) return;
       ctx.save();
       ctx.strokeStyle = '#a9463970'; ctx.lineWidth = 5;
       ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2); ctx.stroke();
@@ -449,6 +474,7 @@
     if (pix) inPixels(() => pix.drawArena(ctx, artTime, state.theme));
     else if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
+    if (state.twist?.dark && state.status !== 'idle') { ctx.fillStyle = 'rgba(2,4,12,.58)'; ctx.fillRect(0, 0, W, H); }
     if (!pix) { shadow(p.x, 94); shadow(r.x, state.exhibit.stats.shadow); }
     if (withOverlay) drawTelegraph();
     let foePose = r.walk ? 'walk' : 'idle', foeProgress = r.timer;
@@ -553,7 +579,7 @@
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); state.finish = options.finish || null; scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers, options.twist || null, !!options.specials); state.finish = options.finish || null; state.rng = typeof options.rng === 'function' ? options.rng : Math.random; scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;
@@ -562,7 +588,7 @@
     },
     pause() { if (state.status === 'running') { state.status = 'paused'; for (const key in input) input[key] = false; updateEvent(true); draw(); } },
     resume() { if (state.status === 'paused') { state.status = 'running'; last = 0; audioReady(); updateEvent(true); } },
-    reset() { state = fresh(); scene = 'arena'; for (const key in input) input[key] = false; particles.length = labels.length = rings.length = 0; updateEvent(true); draw(); },
+    reset() { state = fresh(); state.rng = Math.random; scene = 'arena'; for (const key in input) input[key] = false; particles.length = labels.length = rings.length = 0; updateEvent(true); draw(); },
     setScene(name) { if (name === 'arena' || name === 'guard' || name === 'external') { scene = name; draw(); } },
     setSound(enabled) { soundEnabled = !!enabled; if (soundEnabled) audioReady(); },
     getState: snapshot

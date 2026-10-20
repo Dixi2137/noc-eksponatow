@@ -221,6 +221,13 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Urozmaicenie sal (2026-10-21)
+
+Odpowiedź na „gra jest monotonna”. Dwie warstwy, obie czysto w danych i silniku, bez nowych grafik:
+
+- **Warunki sal** (`dist/twists.js`, `MuseumTwists`): od czwartej sali każda ma warunek z cyklu z cichymi salami co kilka pokoi: ZASADZKA (boss startuje blisko i atakuje od razu), SZAŁ (zamach i odpoczynek ×0,75/0,7), ŻELAZNA GARDA (krótka słaba garda, droższe bloki), SZKLANE OSTRZA (obie strony ×1,5 obrażeń), MARATON (boss +40 % HP, twoja wytrzymałość ×1,3), CIEMNA SALA (przyciemniona arena, znak zamachu dopiero od 65 %), ZEGAR (75 s, potem 4 HP/s), DRUGI ODDECH (boss przy 35 % HP leczy 25 % i przyspiesza, raz), CIĘŻKA RĘKA (co drugi atak ciężki). Sala z warunkiem daje +20 % nagrody. Warunek pokazuje karta sali, przeskok w czasie, HUD (nazwa sali) i karta przeciwnika na pauzie.
+- **Specjalne zagrania bossów** po archetypie (`stats.archetype` w `exhibits.js`, od sali 4): pojedynkowicz i trickster robią FINTĘ (zamach przerwany w 55 %, zaraz potem szybki cios ×0,7), osiłek i tyran PODWÓJNY CIOS (po lekkim ciosie drugi z krótkim zamachem, 35 %), strzelec SERIĘ (drugi strzał z zamachem ×0,45, 50 %). Losowość przez `state.rng` (wstrzykiwana w testach).
+
 ## Poprawki po feedbacku testera (2026-10-21)
 
 - Napisy na sztandarach (np. SPQR) są rysowane jako pikselowe glify (`pixelGlyph`), wieloliterowe pionowo na sztandarze, zamiast rozmytego tekstu wylewającego się poza sztandar.
