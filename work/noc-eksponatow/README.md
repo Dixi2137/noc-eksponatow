@@ -220,3 +220,7 @@ Epoki: starożytność, średniowiecze, nowożytność, wiek XIX i XX, współcz
 Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia Karabinów; doszedł Arsenał Współczesny. Testy: 64.
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
+
+## Tryb pikselowy (2026-10-21, prototyp)
+
+Przycisk ▦ w górnym pasku przełącza grafikę w tryb pikselowy (`profile.pixel`). Cała grafika canvasowa (arena, postacie, skrzynie, karty, sala) jest rysowana na małym płótnie o 4× mniejszej rozdzielczości i powiększana bez wygładzania (`MuseumArt.pixelFrame`, `setPixelFactor`), więc proceduralny rysunek wygląda jak pixel art bez zmiany ani jednej funkcji rysującej. W tym trybie HUD, tytuły i przyciski używają fontu Pixelify Sans (Google Fonts, z polskimi znakami).

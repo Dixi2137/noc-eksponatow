@@ -666,5 +666,20 @@
     [[-96,-66],[98,-40],[-70,-80]].forEach(([x,y],k)=>{const sIz=4+Math.sin(t*3+k)*1.5;poly(c,[[x,y-sIz*2],[x+sIz*.6,y],[x,y+sIz*2],[x-sIz*.6,y]],mixColor(col,'#fff',.5));poly(c,[[x-sIz*2,y],[x,y+sIz*.6],[x+sIz*2,y],[x,y-sIz*.6]],mixColor(col,'#fff',.5))});
     c.restore();
   }
-  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,drawTrophy,drawHall,drawCrate,fighters,themes,drawGuardScene};
+  // Pixel mode: everything is drawn onto a small offscreen canvas and blown up with nearest-neighbour sampling,
+  // so the same procedural art reads as chunky pixel art. `factor` is the pixel size in logical units.
+  const lowCanvases=new WeakMap();
+  let pixelFactor=0;
+  function setPixelFactor(f){pixelFactor=Math.max(0,Number(f)||0);}
+  function pixelFrame(ctx,logicalW,logicalH,draw){
+    if(!pixelFactor){draw(ctx);return;}
+    const target=ctx.canvas;let low=lowCanvases.get(target);
+    const lw=Math.round(logicalW/pixelFactor),lh=Math.round(logicalH/pixelFactor);
+    if(!low){low=document.createElement('canvas');lowCanvases.set(target,low)}
+    if(low.width!==lw||low.height!==lh){low.width=lw;low.height=lh}
+    const lctx=low.getContext('2d');lctx.setTransform(1/pixelFactor,0,0,1/pixelFactor,0,0);lctx.clearRect(0,0,logicalW,logicalH);
+    draw(lctx);
+    const m=ctx.getTransform();ctx.save();ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,logicalW,logicalH);ctx.drawImage(low,0,0,lw,lh,0,0,logicalW,logicalH);ctx.restore();ctx.setTransform(m);
+  }
+  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,drawTrophy,drawHall,drawCrate,fighters,themes,drawGuardScene,pixelFrame,setPixelFactor,get pixelFactor(){return pixelFactor}};
 })();

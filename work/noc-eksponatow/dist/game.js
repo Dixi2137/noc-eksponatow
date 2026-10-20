@@ -406,6 +406,10 @@
     if (!ensureCanvas()) return;
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, W, H);
+    const real = ctx, art0 = window.MuseumArt;
+    if (art0?.pixelFrame && art0.pixelFactor) { art0.pixelFrame(real, W, H, low => { ctx = low; try { drawScene(); } finally { ctx = real; } }); } else drawScene();
+  }
+  function drawScene() {
     ctx.save();
     if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
     const art = window.MuseumArt;

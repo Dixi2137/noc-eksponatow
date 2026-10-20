@@ -34,6 +34,7 @@
  function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
  async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),2500);return null;}if(pushing)return null;pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
  function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;updateLoadout();pushCloud();}
+function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?4:0);document.body.classList.toggle('pixel',on);$('pixelBtn').setAttribute('aria-pressed',String(on));$('pixelBtn').title=on?'Grafika pikselowa: włączona':'Grafika pikselowa: wyłączona';}
  function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
  function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
  function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab','rankTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));$('secretCoinsBtn').disabled=!['menu','result'].includes(screen);}
@@ -91,7 +92,7 @@
  function renderHall(){
   const shown=hallApi.exhibition(profile),sum=hallApi.summary(profile),name=profile.hall?.name||hallApi.DEFAULT_NAME;
   if($('hallName').value!==name&&document.activeElement!==$('hallName'))$('hallName').value=name;
-  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);window.MuseumArt.drawHall(ctx,1440,810,0,shown,{name});}
+  const canvas=$('hallCanvas'),ctx=canvas.getContext('2d');if(ctx&&window.MuseumArt?.drawHall){const d=canvas.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);window.MuseumArt.pixelFrame(ctx,1440,810,c=>window.MuseumArt.drawHall(c,1440,810,0,shown,{name}));}
   $('hallSummary').replaceChildren(...[['PRESTIŻ',String(sum.prestige)],['WARTOŚĆ EKSPOZYCJI',`${number(sum.value)} ✦`],['TROFEA',`${sum.trophies} / ${sum.trophiesTotal}`]].map(([k,v])=>{const span=document.createElement('span'),strong=document.createElement('strong');strong.textContent=v;span.append(k,strong);return span;}));
   $('hallFilled').textContent=`${sum.filled} / ${sum.total}${sum.fullBonus?' · PEŁNA SALA +20':''}`;
   const busy=()=>crateBusy||!['menu','result'].includes(screen);
@@ -164,17 +165,18 @@
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
  function chooseShopCrate(id){if(!canOpenShop()||!loot.getCrate(id))return;closeModal();selectedCrateId=id;collection();}
  function drawItem(canvas,item){
-  const ctx=canvas.getContext('2d'),d=canvas.width/360;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,360,360);
+  const ctx0=canvas.getContext('2d'),d=canvas.width/360;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
   const g=ctx.createRadialGradient(180,175,15,180,180,230);g.addColorStop(0,loot.rarities[item.rarity].color+'30');g.addColorStop(1,'#10180e');if(canvas.id!=='lootCanvas'){ctx.fillStyle=g;ctx.fillRect(0,0,360,360);}
   const a=window.MuseumArt;if(!a)return;
   if(item.kind==='weapon'){ctx.save();ctx.translate(180,185);ctx.scale(1.05,1.05);a.drawWeaponIcon(ctx,weapons.get(item.id));ctx.restore();}
   else if(item.kind==='card'){a.drawCardArt(ctx,cardsApi.get(item.id),360,360);}
   else{ctx.save();ctx.translate(180,320);ctx.scale(.95,.95);a.drawKnight(ctx,0,0,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();}
+  });
  }
  const drawSkin=drawItem;
  function renderDropContents(target,entries){const rows=entries.map(({item,chance})=>{const row=document.createElement('div'),name=document.createElement('span'),rarity=document.createElement('small'),odds=document.createElement('strong');row.className='drop-row';name.textContent=item.name;rarity.textContent=loot.rarities[item.rarity].name;rarity.style.color=loot.rarities[item.rarity].color;odds.textContent=chance.toLocaleString('pl-PL',{maximumFractionDigits:2})+'%';row.append(name,rarity,odds);return row;});target.replaceChildren(...rows);if(!rows.length){const text=document.createElement('p');text.textContent='Masz już wszystko, co może wypaść z tej skrzyni. Żetony nie zostaną pobrane.';target.append(text);}}
  function itemCount(n,kind){const forms={skin:['strój','stroje','strojów'],weapon:['broń','bronie','broni'],card:['karta','karty','kart'],any:['przedmiot','przedmioty','przedmiotów']}[kind]||['przedmiot','przedmioty','przedmiotów'];return `${n} ${n===1?forms[0]:n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?forms[1]:forms[2]}`;}
- function drawCrate(canvas,crate){const ctx=canvas.getContext('2d');if(!ctx||!window.MuseumArt?.drawCrate)return;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);window.MuseumArt.drawCrate(ctx,crate,canvas.width,canvas.height,{time:1.3});}
+ function drawCrate(canvas,crate){const ctx=canvas.getContext('2d');if(!ctx||!window.MuseumArt?.drawCrate)return;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);window.MuseumArt.pixelFrame(ctx,canvas.width,canvas.height,c=>window.MuseumArt.drawCrate(c,crate,canvas.width,canvas.height,{time:1.3}));}
  function renderCrateCards(selectedId){
   const root=$('crateCards');const busy=()=>crateBusy||!['menu','result'].includes(screen);
   const card=crate=>{
@@ -281,13 +283,14 @@
  $('startBtn').addEventListener('click',beginNight);$('retryBtn').addEventListener('click',beginNight);$('menuBtn').addEventListener('click',menu);$('pauseBtn').addEventListener('click',pause);$('resumeBtn').addEventListener('click',resume);$('collectionTab').addEventListener('click',collection);$('crateBtn').addEventListener('click',openCrate);$('lootEquipBtn').addEventListener('click',()=>claimReward(true));$('lootKeepBtn').addEventListener('click',()=>claimReward(false));
  $('arenaTab').addEventListener('click',()=>{if(screen==='menu')$('gameFrame').scrollIntoView({behavior:'smooth',block:'center'});});
  document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();if(screen==='menu')window.scrollTo({top:0,behavior:'smooth'});});
+$('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist();pixelUI();window.MuseumGame?.setScene(window.MuseumGame.getState().scene);renderMenuLevel();toast(profile.pixel?'Grafika pikselowa włączona.':'Grafika pikselowa wyłączona.');});
  $('soundBtn').addEventListener('click',()=>{profile.sound=!profile.sound;persist();soundUI();toast(profile.sound?'Dźwięk włączony. Muzeum już nie śpi.':'Dźwięk wyłączony.');});
  $('helpBtn').addEventListener('click',()=>{if(crateBusy||!$('loot').classList.contains('hidden'))return;if(['intro','card','timejump','ending','ko'].includes(screen)){toast('Historia trwa. Instrukcja będzie dostępna po scenie.');return;}helpWasPlaying=screen==='fight';if(helpWasPlaying)pause();openModal('help');});
  $('helpClose').addEventListener('click',closeModal);document.querySelectorAll('.close-modal').forEach(b=>b.addEventListener('click',closeModal));document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal();}));
  document.addEventListener('keydown',e=>{const modals=[...document.querySelectorAll('.modal:not(.hidden)')],modal=modals.find(m=>m.id==='loot')||modals.at(-1);if(modal){if(e.key==='Escape'){e.preventDefault();closeModal();}if(e.key==='Tab'){const buttons=[...modal.querySelectorAll('button:not(:disabled)')].filter(b=>b.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(!first){e.preventDefault();$('lootPanel').focus();}else if(e.shiftKey&&(document.activeElement===first||!modal.contains(document.activeElement))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||!modal.contains(document.activeElement))){e.preventDefault();first.focus();}}return;}if(e.key==='Escape'){e.preventDefault();if(screen==='fight')pause();else if(screen==='paused')resume();}});
  document.addEventListener('visibilitychange',()=>{frameTime=0;if(document.hidden&&screen==='fight')pause();});
  window.addEventListener('blur',()=>{if(screen==='fight')pause();frameTime=0;});
- function renderScene(time){const c=$('arena'),ctx=c.getContext('2d'),a=window.MuseumArt;if(!ctx||!a)return;const d=c.width/1440;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,1440,810);ctx.save();
+ function renderScene(time){const c=$('arena'),ctx0=c.getContext('2d'),a=window.MuseumArt;if(!ctx0||!a)return;const d=c.width/1440;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,1440,810);a.pixelFrame(ctx0,1440,810,ctx=>{ctx.save();
   const level=night?levels.get(night.levelId):currentLevel(),exhibit=levelExhibit(level),big=exhibit.stats.art==='rex';
   const drawFoe=(x,o)=>{ctx.save();ctx.translate(x,665);if(big)ctx.scale(1.18,1.18);a.drawExhibit(ctx,exhibit,0,0,o);ctx.restore();};
   if(screen==='menu'){a.drawArena(ctx,1440,810,time,level.theme);a.drawKnight(ctx,325,665,{pose:'idle',facing:1,time,skin:profile.skin});drawFoe(big?1085:1040,{pose:'idle',facing:-1,time});}
@@ -297,7 +300,7 @@
    // Rushing light streaks sell the jump; the swap hides behind the brightest frame.
    const burst=Math.sin(k*Math.PI);ctx.save();ctx.globalCompositeOperation='screen';for(let i=0;i<26;i++){const y=60+((i*131+time*900*(1+i%4))%720),len=120+burst*520+(i%5)*40;ctx.fillStyle=`rgba(255,236,180,${.04+burst*.16})`;ctx.fillRect((i*197+time*1800)%1900-400,y,len,2+(i%3));}ctx.restore();
    ctx.fillStyle=`rgba(255,244,214,${Math.pow(burst,6)*.9})`;ctx.fillRect(0,0,1440,810);ctx.fillStyle=`rgba(0,0,0,${.35*(1-Math.abs(k-.5)*2)})`;ctx.fillRect(0,0,1440,810);}
-  else if(screen==='ending'||screen==='result'){if(a.drawGuardScene)a.drawGuardScene(ctx,1440,810,time,{awake:endingTime>3});else a.drawArena(ctx,1440,810,time,level.theme);ctx.fillStyle='#08110a65';ctx.fillRect(0,0,1440,810);if(endingTime<3){ctx.fillStyle=`rgba(0,0,0,${Math.max(0,1-(endingTime-1.8)/1.2)})`;ctx.fillRect(0,0,1440,810);}}ctx.restore();}
+  else if(screen==='ending'||screen==='result'){if(a.drawGuardScene)a.drawGuardScene(ctx,1440,810,time,{awake:endingTime>3});else a.drawArena(ctx,1440,810,time,level.theme);ctx.fillStyle='#08110a65';ctx.fillRect(0,0,1440,810);if(endingTime<3){ctx.fillStyle=`rgba(0,0,0,${Math.max(0,1-(endingTime-1.8)/1.2)})`;ctx.fillRect(0,0,1440,810);}}ctx.restore();});}
  function loop(now){const dt=frameTime?Math.min(.1,(now-frameTime)/1000):0;frameTime=now;if(!document.hidden){
    if(screen==='intro'){introTime=Math.min(totalIntro,introTime+dt);updateIntro();if(introTime>=totalIntro)startFight();}
    else if(screen==='card'){cardTime=Math.min(totalCard,cardTime+dt);$('cardProgress').style.width=(cardTime/totalCard*100)+'%';if(cardTime>=totalCard)startFight();}
@@ -307,6 +310,6 @@
    if(['menu','intro','card','timejump','ending','result'].includes(screen))renderScene(now/1000);}requestAnimationFrame(loop);}
  const daily=cloud.user()?null:loot.dailyBonus(profile);if(daily){profile=daily.profile;}
  function renderDaily(){const streak=profile.login?.streak||0;$('dailyLine').textContent=streak?`SERIA LOGOWAŃ: ${streak} ${streak===1?'DZIEŃ':'DNI'} · JUTRO +${Math.min(300,50+streak*25)} ✦`:'';show('dailyLine',streak>0);}
- persist();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
+ persist();pixelUI();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
  renderAccount();cloud.restore().then(async me=>{renderAccount();if(me)await claimServerDaily();});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
 })();
