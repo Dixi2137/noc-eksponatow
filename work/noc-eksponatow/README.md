@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Seria ciosów bronią białą (2026-10-21)
+
+Jakub chciał atakować mieczem ciągiem. Trzymanie J już powtarzało ciosy, ale hamowało tempo i energia. Teraz broń biała ma krótszy odstęp po ciosie (ostrza 0,26 s zamiast 0,46; ciężka 0,4; noże 0,18) i tańsze ciosy (ostrza 7 energii zamiast 12; ciężka 10; noże 5), a w trakcie serii energia wraca 6/s zamiast 2/s. Broń dystansowa bez zmian.
+
 ## Rangi honorowe (2026-10-21)
 
 Kolumna `profiles.title` (owner, first-to-arrive, founder, veteran, patron; katalog nazw i kolorów w `MuseumCloud.titles`). Nadaje moderator przyciskiem RANGA w panelu (`mod_set_title`); „first-to-arrive” jest unikalna w bazie (indeks częściowy), więc dostanie ją tylko jedna osoba. Ranga pokazuje się jako plakietka przy pseudonimie w rankingu, w liście moderatora i w KONCIE właściciela. Dla istniejącego projektu Supabase: `supabase/2026-10-21-rangi.sql`, potem `supabase/2026-10-21-ranga-owner.sql`.

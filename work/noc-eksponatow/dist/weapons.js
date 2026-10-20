@@ -3,16 +3,16 @@
 (() => {
   'use strict';
   const baseline = Object.freeze({
-    kind: 'melee', range: 410, staminaCost: 12, swing: .36, contact: .23, cooldown: .46,
+    kind: 'melee', range: 410, staminaCost: 7, swing: .36, contact: .23, cooldown: .26,   // melee chains: short recovery, cheap swings (hold J to keep striking)
     weakGuardDamage: 9, comboBonus: 3, comboAt: 3, parryDrain: 10,
     parryReflect: Object.freeze({ light: 20, heavy: 25 }), ammo: null, reload: 0
   });
   const ranged = { kind: 'ranged', comboBonus: 0, comboAt: 99, parryDrain: 4, parryReflect: { light: 14, heavy: 18 } };
   const types = Object.freeze({
     blade:   { name: 'Ostrza', stats: {} },
-    heavy:   { name: 'Broń ciężka', stats: { staminaCost: 16, swing: .46, contact: .3, cooldown: .6, weakGuardDamage: 13, comboBonus: 2, parryReflect: { light: 24, heavy: 30 } } },
+    heavy:   { name: 'Broń ciężka', stats: { staminaCost: 10, swing: .46, contact: .3, cooldown: .4, weakGuardDamage: 13, comboBonus: 2, parryReflect: { light: 24, heavy: 30 } } },
     polearm: { name: 'Broń drzewcowa', stats: { range: 470, weakGuardDamage: 8, comboBonus: 2, parryDrain: 6, parryReflect: { light: 18, heavy: 23 } } },
-    light:   { name: 'Noże i sztylety', stats: { staminaCost: 8, swing: .28, contact: .17, cooldown: .32, range: 350, weakGuardDamage: 7, comboBonus: 5, comboAt: 2, parryReflect: { light: 17, heavy: 21 } } },
+    light:   { name: 'Noże i sztylety', stats: { staminaCost: 5, swing: .28, contact: .17, cooldown: .18, range: 350, weakGuardDamage: 7, comboBonus: 5, comboAt: 2, parryReflect: { light: 17, heavy: 21 } } },
     bow:     { name: 'Łuki i kusze', stats: { ...ranged, range: 900, staminaCost: 6, swing: .5, contact: .25, cooldown: .6, weakGuardDamage: 10, ammo: 8, reload: 1.2 } },
     pistol:  { name: 'Pistolety', stats: { ...ranged, range: 700, staminaCost: 6, swing: .42, contact: .2, cooldown: .5, weakGuardDamage: 14, ammo: 6, reload: 1.6 } },
     rifle:   { name: 'Karabiny i strzelby', stats: { ...ranged, range: 900, staminaCost: 8, swing: .5, contact: .22, cooldown: .7, weakGuardDamage: 18, ammo: 5, reload: 2.2 } }

@@ -280,7 +280,7 @@
     }
     p.x = clamp(p.x, LEFT, Math.min(RIGHT - GAP, r.x - GAP));
     const recovering = p.attack <= 0 && p.evade <= 0;
-    p.stamina = clamp(p.stamina + dt * (recovering ? (p.guarding ? 7 : 19) : 2) * state.perk.stats.staminaRegenMultiplier, 0, p.maxStamina);
+    p.stamina = clamp(p.stamina + dt * (recovering ? (p.guarding ? 7 : 19) : (w.kind === 'melee' ? 6 : 2)) * state.perk.stats.staminaRegenMultiplier, 0, p.maxStamina);   // melee keeps a trickle of breath while swinging
     if (p.attack > 0) {
       const before = p.attack; p.attack = Math.max(0, p.attack - dt);
       if (!p.attackDone && before > w.contact && p.attack <= w.contact) { p.attackDone = true; playerHit(); }
