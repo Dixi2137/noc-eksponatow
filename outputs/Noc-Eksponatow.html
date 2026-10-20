@@ -1873,10 +1873,16 @@ window.MuseumConfig = Object.freeze({
   // Attack swing shared by the knight and the human rig. `hold` is the vertical sprite (grip at the bottom),
   // `fwd` the horizontal thrust sprite (grip on the left). The front arm is drawn by the same call so the hand stays on the grip.
   // Phases: wind-up (arm up, blade over the head), strike (arm and blade thrust forward), follow-through (lowered).
+  // The fist is redrawn over the grip after the weapon, so the weapon visibly passes through the closed hand.
   function swing(B, p, arms, hold, fwd, wpal) {
-    if (p < .45) { B(arms.raised, 2, 6); B(hold, 3, 9 - hold.length, wpal); }
-    else if (p < .75) { B(arms.fwd, 2, 13); B(fwd, 8, 15 - Math.floor(fwd.length / 2), wpal); }
-    else { B(arms.fwd, 2, 15); B(fwd, 8, 17 - Math.floor(fwd.length / 2), wpal); }
+    const hx = 4 - Math.floor(hold[0].length / 2);
+    if (p < .45) { B(arms.raised, 2, 6); B(hold, hx, 10 - hold.length, wpal); B(arms.raised.slice(0, 3), 2, 6); }
+    else if (p < .75) { B(arms.fwd, 2, 13); B(fwd, 8, 15 - Math.floor(fwd.length / 2), wpal); B(arms.fwd, 2, 13); }
+    else { B(arms.fwd, 2, 15); B(fwd, 8, 17 - Math.floor(fwd.length / 2), wpal); B(arms.fwd, 2, 15); }
+  }
+  // Resting grip: weapon upright in the front hand (arm at 2,13; fist on its last two rows), pommel peeking under the fist.
+  function holdIdle(B, arm, hold, wpal) {
+    B(arm, 2, 13); B(hold, 4 - Math.floor(hold[0].length / 2), 22 - hold.length, wpal); B(arm.slice(-2), 2, 13 + arm.length - 2);
   }
   const lunge = p => p < .45 ? -1 : p < .75 ? 2 : 1;   // body lean during the swing, in pixels along the facing direction
 
@@ -1959,7 +1965,7 @@ window.MuseumConfig = Object.freeze({
     B(knightParts.head, -6, 0); B(knightParts.plume, -10, -3);
     if (pose === 'guard') B(knightParts.shield, 4, 10); else B(knightParts.shield, -11, 14);
     if (pose === 'attack') swing(B, p, { raised: knightParts.armRaised, fwd: knightParts.armFwd }, hold, fwd, wpal);
-    else { B(knightParts.armFront, 2, 13); Wb(hold, 7, 20 - hold.length); }
+    else holdIdle(B, knightParts.armFront, hold, wpal);
     c.restore();
   }
 
@@ -2141,7 +2147,7 @@ window.MuseumConfig = Object.freeze({
     if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
     if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
     if (attacking) swing(B, p, { raised: bare ? human.armRaisedBare : human.armRaised, fwd: bare ? human.armFwdBare : human.armFwd }, wp.hold, wp.fwd, pal);
-    else { B(bare ? human.armBare : human.armFront, 2, 13); B(wp.hold, 7, 20 - wp.hold.length); }
+    else holdIdle(B, bare ? human.armBare : human.armFront, wp.hold, pal);
     c.restore();
   }
   // ── Weapon icons: 16 x 16 pixel glyphs per icon key, tinted by rarity ─────
