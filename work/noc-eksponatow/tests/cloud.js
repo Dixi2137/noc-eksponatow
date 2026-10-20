@@ -106,3 +106,17 @@
     } finally { window.fetch = realFetch; window.MuseumConfig = old; }
   });
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const cloud = window.MuseumCloud, realFetch = window.fetch;
+  test('Profil bez nowych kolumn (brak migracji) wczytuje się po ponowieniu z węższym select', async () => {
+    const old = window.MuseumConfig; window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'sb_publishable_t' }; const calls = [];
+    window.fetch = async (url, init) => { calls.push(url); const missing = url.includes('title'); return { ok: !missing, status: missing ? 400 : 200, text: async () => missing ? JSON.stringify({ message: 'column profiles.title does not exist' }) : JSON.stringify([{ id: 'u1', nickname: 'Mr. Dixi', role: 'admin' }]) }; };
+    try {
+      cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl' } });
+      const r = await cloud.fetchProfile(); assert.equal(r.ok, true); assert.equal(r.data.role, 'admin'); assert.equal(calls.length, 2); assert.ok(!calls[1].includes('title'));
+      await cloud.signOut();
+    } finally { window.fetch = realFetch; window.MuseumConfig = old; }
+  });
+})();

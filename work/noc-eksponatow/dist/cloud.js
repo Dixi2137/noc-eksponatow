@@ -64,7 +64,11 @@
   async function nicknameTaken(nickname) { const r = await request('/rest/v1/rpc/nickname_taken', { method: 'POST', body: { name: nickname }, auth: false }); return r.ok ? !!r.data : null; }
   async function fetchProfile() {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
-    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at,role,banned_until,ban_reason,title`);
+    // Newer columns (moderation, titles) may be missing until the matching migration is applied; fall back to the base set.
+    const base = 'id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at';
+    let r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title`);
+    if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason`);
+    if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base}`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
   }
   // The profile row is created by a database trigger at sign-up, so saving is an UPDATE. (An upsert without the nickname
