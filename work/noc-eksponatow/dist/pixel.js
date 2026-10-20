@@ -84,9 +84,9 @@
     [[2, 30], [258, 286]].forEach(([a, b]) => { px(c, a, 116, '#9f9061', 2, 14); px(c, b, 116, '#9f9061', 2, 14); for (let k = a + 2; k < b; k += 2) px(c, k, 120 + Math.round(Math.sin((k - a) / (b - a) * Math.PI) * 3), '#6c2637'); });
     // Sign plaque above the door (drawn after the pillars so long names never hide behind them).
     const sign = String(o.sign || signs[themeKey] || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
-    px(c, 144 - sw / 2 - 1, 16, '#3b352a', sw + 2, 12); px(c, 144 - sw / 2, 17, '#1a1612', sw, 10);
-    if (o.texts) o.texts.push({ x: 144, y: 25, text: sign, size: 7, color: '#e2cf8f' });
-    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25); }
+    px(c, 144 - sw / 2 - 1, 44, '#3b352a', sw + 2, 13); px(c, 144 - sw / 2, 45, '#1a1612', sw, 11); px(c, 144 - sw / 2, 45, '#5a5040', sw, 1);
+    if (o.texts) o.texts.push({ x: 144, y: 54, text: sign, size: 7, color: '#e2cf8f', plaque: false });
+    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 54); }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.

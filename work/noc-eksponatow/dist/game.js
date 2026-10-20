@@ -439,6 +439,7 @@
     ctx.save();
     if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
     const p = state.player, w = state.weapon.stats;
+    if (arenaTexts.length && window.MuseumPixel) window.MuseumPixel.drawTexts(ctx, arenaTexts, window.MuseumPixel.PX);
     drawTelegraph();
     if (w.kind === 'ranged' && p.reload > 0) {
       ctx.save(); ctx.textAlign = 'center'; ctx.font = `700 16px ${uiFont}`; ctx.fillStyle = '#ffd98a';
@@ -457,6 +458,7 @@
     }
   }
   let uiFont = 'system-ui, sans-serif';
+  const arenaTexts = [];   // door sign etc., collected in the low-res pass and drawn crisp by drawOverlay
   function drawScene(withOverlay) {
     uiFont = window.MuseumArt?.pixelFactor ? "'Jersey 10', 'Pixelify Sans', monospace" : 'system-ui, sans-serif';
     ctx.save();
@@ -470,7 +472,7 @@
     const artTime = state.status === 'idle' ? visualTime : state.elapsed;
     const pix = art?.pixelFactor && window.MuseumPixel ? window.MuseumPixel : null;
     const inPixels = fn => { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); fn(); ctx.restore(); };
-    if (pix) inPixels(() => pix.drawArena(ctx, artTime, state.theme));
+    if (pix) { arenaTexts.length = 0; inPixels(() => pix.drawArena(ctx, artTime, state.theme, { texts: arenaTexts })); }
     else if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
     if (state.twist?.dark && state.status !== 'idle') { ctx.fillStyle = 'rgba(2,4,12,.58)'; ctx.fillRect(0, 0, W, H); }

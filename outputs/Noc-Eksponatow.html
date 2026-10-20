@@ -2115,9 +2115,9 @@ window.MuseumConfig = Object.freeze({
     [[2, 30], [258, 286]].forEach(([a, b]) => { px(c, a, 116, '#9f9061', 2, 14); px(c, b, 116, '#9f9061', 2, 14); for (let k = a + 2; k < b; k += 2) px(c, k, 120 + Math.round(Math.sin((k - a) / (b - a) * Math.PI) * 3), '#6c2637'); });
     // Sign plaque above the door (drawn after the pillars so long names never hide behind them).
     const sign = String(o.sign || signs[themeKey] || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
-    px(c, 144 - sw / 2 - 1, 16, '#3b352a', sw + 2, 12); px(c, 144 - sw / 2, 17, '#1a1612', sw, 10);
-    if (o.texts) o.texts.push({ x: 144, y: 25, text: sign, size: 7, color: '#e2cf8f' });
-    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25); }
+    px(c, 144 - sw / 2 - 1, 44, '#3b352a', sw + 2, 13); px(c, 144 - sw / 2, 45, '#1a1612', sw, 11); px(c, 144 - sw / 2, 45, '#5a5040', sw, 1);
+    if (o.texts) o.texts.push({ x: 144, y: 54, text: sign, size: 7, color: '#e2cf8f', plaque: false });
+    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 54); }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.
@@ -3041,6 +3041,7 @@ window.MuseumConfig = Object.freeze({
     ctx.save();
     if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
     const p = state.player, w = state.weapon.stats;
+    if (arenaTexts.length && window.MuseumPixel) window.MuseumPixel.drawTexts(ctx, arenaTexts, window.MuseumPixel.PX);
     drawTelegraph();
     if (w.kind === 'ranged' && p.reload > 0) {
       ctx.save(); ctx.textAlign = 'center'; ctx.font = `700 16px ${uiFont}`; ctx.fillStyle = '#ffd98a';
@@ -3059,6 +3060,7 @@ window.MuseumConfig = Object.freeze({
     }
   }
   let uiFont = 'system-ui, sans-serif';
+  const arenaTexts = [];   // door sign etc., collected in the low-res pass and drawn crisp by drawOverlay
   function drawScene(withOverlay) {
     uiFont = window.MuseumArt?.pixelFactor ? "'Jersey 10', 'Pixelify Sans', monospace" : 'system-ui, sans-serif';
     ctx.save();
@@ -3072,7 +3074,7 @@ window.MuseumConfig = Object.freeze({
     const artTime = state.status === 'idle' ? visualTime : state.elapsed;
     const pix = art?.pixelFactor && window.MuseumPixel ? window.MuseumPixel : null;
     const inPixels = fn => { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); fn(); ctx.restore(); };
-    if (pix) inPixels(() => pix.drawArena(ctx, artTime, state.theme));
+    if (pix) { arenaTexts.length = 0; inPixels(() => pix.drawArena(ctx, artTime, state.theme, { texts: arenaTexts })); }
     else if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
     if (state.twist?.dark && state.status !== 'idle') { ctx.fillStyle = 'rgba(2,4,12,.58)'; ctx.fillRect(0, 0, W, H); }
@@ -4174,10 +4176,10 @@ $('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist
  document.addEventListener('keydown',e=>{const modals=[...document.querySelectorAll('.modal:not(.hidden)')],modal=modals.find(m=>m.id==='loot')||modals.at(-1);if(modal){if(e.key==='Escape'){e.preventDefault();closeModal();}if(e.key==='Tab'){const buttons=[...modal.querySelectorAll('button:not(:disabled)')].filter(b=>b.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(!first){e.preventDefault();$('lootPanel').focus();}else if(e.shiftKey&&(document.activeElement===first||!modal.contains(document.activeElement))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||!modal.contains(document.activeElement))){e.preventDefault();first.focus();}}return;}if(screen==='choice'&&(e.key==='Enter'||e.key==='Escape')){e.preventDefault();if(e.key==='Enter')chooseNext();else chooseMenu();return;}if(e.key==='Escape'){e.preventDefault();if(screen==='fight')pause();else if(screen==='paused')resume();}});
  document.addEventListener('visibilitychange',()=>{frameTime=0;if(document.hidden&&screen==='fight')pause();});
  window.addEventListener('blur',()=>{if(screen==='fight')pause();frameTime=0;});
- function renderScene(time){const c=$('arena'),ctx0=c.getContext('2d'),a=window.MuseumArt;if(!ctx0||!a)return;const d=c.width/1440;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,1440,810);a.pixelFrame(ctx0,1440,810,ctx=>{ctx.save();
+ function renderScene(time){const c=$('arena'),ctx0=c.getContext('2d'),a=window.MuseumArt;if(!ctx0||!a)return;const d=c.width/1440;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,1440,810);const sceneTexts=[];a.pixelFrame(ctx0,1440,810,ctx=>{ctx.save();
   const level=night?levels.get(night.levelId):currentLevel(),exhibit=levelExhibit(level),big=exhibit.stats.art==='rex';
   const pix=a.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;const inPixels=fn=>{ctx.save();ctx.setTransform(1,0,0,1,0,0);fn();ctx.restore();};
-  const arena=(theme)=>pix?inPixels(()=>pix.drawArena(ctx,time,theme)):a.drawArena(ctx,1440,810,time,theme);
+  const arena=(theme)=>pix?inPixels(()=>pix.drawArena(ctx,time,theme,{texts:sceneTexts})):a.drawArena(ctx,1440,810,time,theme);
   const knight=(x,o)=>pix?inPixels(()=>pix.drawKnight(ctx,x/pix.PX,pix.FLOOR,{...o,skin:profile.skin,weapon:profile.weapon,finish:profile.finish||null})):a.drawKnight(ctx,x,665,{...o,skin:profile.skin});
   const drawFoe=(x,o)=>{const art=exhibit.stats.art;if(pix&&(art==='rex'||art==='raptor')){inPixels(()=>pix.drawRex(ctx,x/pix.PX,pix.FLOOR,{...o,skin:art==='raptor'?'raptor':null,scale:art==='raptor'?.9:1.4}));return;}if(pix&&art==='figure'){inPixels(()=>pix.drawFigure(ctx,x/pix.PX,pix.FLOOR,{...o,figure:exhibit.stats.figure}));return;}ctx.save();ctx.translate(x,665);if(big)ctx.scale(1.18,1.18);a.drawExhibit(ctx,exhibit,0,0,o);ctx.restore();};
   if(screen==='menu'){arena(level.theme);knight(325,{pose:'idle',facing:1,time});drawFoe(big?1085:1040,{pose:'idle',facing:-1,time});}
@@ -4187,7 +4189,7 @@ $('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist
    // Rushing light streaks sell the jump; the swap hides behind the brightest frame.
    const burst=Math.sin(k*Math.PI);ctx.save();ctx.globalCompositeOperation='screen';for(let i=0;i<26;i++){const y=60+((i*131+time*900*(1+i%4))%720),len=120+burst*520+(i%5)*40;ctx.fillStyle=`rgba(255,236,180,${.04+burst*.16})`;ctx.fillRect((i*197+time*1800)%1900-400,y,len,2+(i%3));}ctx.restore();
    ctx.fillStyle=`rgba(255,244,214,${Math.pow(burst,6)*.9})`;ctx.fillRect(0,0,1440,810);ctx.fillStyle=`rgba(0,0,0,${.35*(1-Math.abs(k-.5)*2)})`;ctx.fillRect(0,0,1440,810);}
-  else if(screen==='ending'||screen==='result'){if(pix)inPixels(()=>pix.drawGuardRoom(ctx,time,{awake:endingTime>3}));else if(a.drawGuardScene)a.drawGuardScene(ctx,1440,810,time,{awake:endingTime>3});else arena(level.theme);ctx.fillStyle='#08110a65';ctx.fillRect(0,0,1440,810);if(endingTime<3){ctx.fillStyle=`rgba(0,0,0,${Math.max(0,1-(endingTime-1.8)/1.2)})`;ctx.fillRect(0,0,1440,810);}}ctx.restore();});}
+  else if(screen==='ending'||screen==='result'){if(pix)inPixels(()=>pix.drawGuardRoom(ctx,time,{awake:endingTime>3}));else if(a.drawGuardScene)a.drawGuardScene(ctx,1440,810,time,{awake:endingTime>3});else arena(level.theme);ctx.fillStyle='#08110a65';ctx.fillRect(0,0,1440,810);if(endingTime<3){ctx.fillStyle=`rgba(0,0,0,${Math.max(0,1-(endingTime-1.8)/1.2)})`;ctx.fillRect(0,0,1440,810);}}ctx.restore();});if(sceneTexts.length&&window.MuseumPixel){ctx0.setTransform(d,0,0,d,0,0);window.MuseumPixel.drawTexts(ctx0,sceneTexts,window.MuseumPixel.PX);}}
  function loop(now){const dt=frameTime?Math.min(.1,(now-frameTime)/1000):0;frameTime=now;if(!document.hidden){
    if(screen==='intro'){introTime=Math.min(totalIntro,introTime+dt);updateIntro();if(introTime>=totalIntro)startFight();}
    else if(screen==='card'){cardTime=Math.min(totalCard,cardTime+dt);$('cardProgress').style.width=(cardTime/totalCard*100)+'%';if(cardTime>=totalCard)startFight();}
