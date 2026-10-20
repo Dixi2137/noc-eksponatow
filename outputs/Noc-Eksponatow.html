@@ -328,6 +328,8 @@ window.MuseumConfig = Object.freeze({
     if (/email not confirmed/i.test(text)) return 'Potwierdź e-mail linkiem z wiadomości, potem zaloguj się.';
     if (/already registered|already been registered/i.test(text)) return 'Ten e-mail ma już konto. Zaloguj się.';
     if (/password/i.test(text) && /6|short|weak/i.test(text)) return 'Hasło musi mieć co najmniej 6 znaków.';
+    if (/null value in column/i.test(text)) return `Brak wymaganego pola w zapisie (${text.match(/column "?(\w+)"?/)?.[1] || '?'}).`;
+    if (/row-level security/i.test(text)) return 'Serwer odrzucił zapis (brak uprawnień albo konto zablokowane).';
     if (/nickname|profiles_nickname_key|duplicate key/i.test(text)) return 'Ten pseudonim jest zajęty.';
     if (/database error saving new user/i.test(text)) return 'Pseudonim zajęty albo nieprawidłowy (3–20 znaków).';
     if (/failed to fetch|networkerror|load failed/i.test(text)) return 'Brak połączenia z chmurą.';
@@ -374,9 +376,14 @@ window.MuseumConfig = Object.freeze({
     const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at,role,banned_until,ban_reason`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
   }
+  // The profile row is created by a database trigger at sign-up, so saving is an UPDATE. (An upsert without the nickname
+  // fails on the NOT NULL check before the conflict is even resolved.) If the row is somehow missing, insert it with a nickname.
   async function upsertProfile(fields) {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
-    return request('/rest/v1/profiles?on_conflict=id', { method: 'POST', body: { id: me.id, ...fields, updated_at: new Date().toISOString() }, prefer: 'resolution=merge-duplicates,return=representation' });
+    const body = { ...fields, updated_at: new Date().toISOString() };
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}`, { method: 'PATCH', body, prefer: 'return=representation' });
+    if (!r.ok || (Array.isArray(r.data) && r.data.length)) return r;
+    return request('/rest/v1/profiles', { method: 'POST', body: { id: me.id, nickname: me.nickname || `gracz-${me.id.slice(0, 8)}`, ...body }, prefer: 'return=representation' });
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
   // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.

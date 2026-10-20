@@ -8,8 +8,11 @@
   function fakeFetch(handler) { const calls = []; window.fetch = async (url, init) => { calls.push({ url, init }); const r = handler(url, init) || { status: 200, body: {} }; return { ok: r.status < 400, status: r.status, text: async () => JSON.stringify(r.body) }; }; return calls; }
 
   test('Bez konfiguracji chmura jest wyłączona i każde wywołanie kończy się offline', async () => {
-    assert.equal(cloud.enabled(), false); const r = await cloud.leaderboard(); assert.equal(r.ok, false); assert.equal(r.offline, true);
-    assert.equal(cloud.user(), null); assert.equal(await cloud.restore(), null);
+    const old = window.MuseumConfig; window.MuseumConfig = {}; localStorage.removeItem('museum-night-session');
+    try {
+      assert.equal(cloud.enabled(), false); const r = await cloud.leaderboard(); assert.equal(r.ok, false); assert.equal(r.offline, true);
+      assert.equal(cloud.user(), null); assert.equal(await cloud.restore(), null);
+    } finally { window.MuseumConfig = old; }
   });
   test('Profil migruje rekordy nocy', () => {
     const p = loot.migrate({ records: { fastestNight: 123.4, nightCoins: 900 } }); assert.equal(p.records.fastestNight, 123.4); assert.equal(p.records.nightCoins, 900);
@@ -22,7 +25,7 @@
       const profile = await cloud.fetchProfile(); assert.equal(profile.ok, true); assert.equal(profile.data.nickname, 'Jakub');
       const last = calls.at(-1); assert.equal(last.init.headers.apikey, 'anon-key'); assert.equal(last.init.headers.Authorization, 'Bearer tok'); assert.ok(last.url.includes('id=eq.u1'));
       const up = await cloud.upsertProfile({ save: { coins: 5 }, halls_cleared: 2 }); assert.equal(up.ok, true);
-      const body = JSON.parse(calls.at(-1).init.body); assert.equal(body.id, 'u1'); assert.equal(body.halls_cleared, 2); assert.ok(calls.at(-1).init.headers.Prefer.includes('merge-duplicates'));
+      const body = JSON.parse(calls.at(-1).init.body); assert.equal(body.id, undefined, 'PATCH nie niesie id w ciele'); assert.equal(body.halls_cleared, 2); assert.equal(calls.at(-1).init.method, 'PATCH'); assert.ok(calls.at(-1).url.includes('/profiles?id=eq.u1'));
       await cloud.signOut(); assert.equal(cloud.user(), null); assert.equal(localStorage.getItem('museum-night-session'), null);
     } finally { window.fetch = realFetch; }
   }));
@@ -81,6 +84,24 @@
       await cloud.leaderboard(5); assert.equal(calls.at(-1).init.headers.apikey, 'sb_publishable_abc'); assert.equal(calls.at(-1).init.headers.Authorization, undefined);
       window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'eyJanon' };
       await cloud.leaderboard(5); assert.equal(calls.at(-1).init.headers.Authorization, 'Bearer eyJanon');
+    } finally { window.fetch = realFetch; window.MuseumConfig = old; }
+  });
+})();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const cloud = window.MuseumCloud, realFetch = window.fetch;
+  test('Zapis profilu: PATCH istniejącego wiersza, a gdy go brak, INSERT z pseudonimem; błąd NOT NULL nie udaje zajętego pseudonimu', async () => {
+    const old = window.MuseumConfig; window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'sb_publishable_t' }; const calls = [];
+    window.fetch = async (url, init) => { calls.push({ url, init }); const patch = init.method === 'PATCH'; return { ok: true, status: 200, text: async () => patch ? '[]' : JSON.stringify([{ id: 'u1' }]) }; };
+    try {
+      cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl', user_metadata: { nickname: 'Mr. Dixi' } } });
+      const r = await cloud.upsertProfile({ save: { coins: 7 } }); assert.equal(r.ok, true);
+      assert.equal(calls.length, 2); assert.equal(calls[0].init.method, 'PATCH'); assert.equal(calls[1].init.method, 'POST');
+      const body = JSON.parse(calls[1].init.body); assert.equal(body.nickname, 'Mr. Dixi'); assert.equal(body.id, 'u1'); assert.equal(body.save.coins, 7);
+      assert.ok(cloud.messageFor({ message: 'null value in column "nickname" of relation "profiles" violates not-null constraint' }).includes('nickname'));
+      assert.ok(!cloud.messageFor({ message: 'null value in column "nickname" violates not-null constraint' }).includes('zajęty'));
+      await cloud.signOut();
     } finally { window.fetch = realFetch; window.MuseumConfig = old; }
   });
 })();
