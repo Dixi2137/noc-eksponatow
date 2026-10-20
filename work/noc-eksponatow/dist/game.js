@@ -439,7 +439,9 @@
     if (shake && state.status === 'running') ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
     const art = window.MuseumArt;
     if (scene === 'guard' && state.status !== 'running' && art?.drawGuardScene) {
-      art.drawGuardScene(ctx, W, H, visualTime); ctx.restore(); return;
+      const pg = art.pixelFactor && window.MuseumPixel ? window.MuseumPixel : null;
+      if (pg) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); pg.drawGuardRoom(ctx, visualTime, { awake: false }); ctx.restore(); } else art.drawGuardScene(ctx, W, H, visualTime);
+      ctx.restore(); return;
     }
     const artTime = state.status === 'idle' ? visualTime : state.elapsed;
     const pix = art?.pixelFactor && window.MuseumPixel ? window.MuseumPixel : null;

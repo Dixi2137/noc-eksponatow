@@ -106,6 +106,92 @@
   }
   const lunge = p => p < .45 ? -1 : p < .75 ? 2 : 1;   // body lean during the swing, in pixels along the facing direction
 
+
+  // ── The watchman's room (prologue / epilogue): 288 x 162, hand-placed pixels ──
+  const guardParts = {
+    cap: [
+      "......OOOOOOOOOOOOOO......",
+      "....OOCCCCCCCCCCCCCCOO....",
+      "...OCCCCCCCCCCCCCCCCCCO...",
+      "...OCCCCCCCCGGCCCCCCCCO...",
+      "...OCCCCCCCCGGCCCCCCCCO...",
+      "..OOCCCCCCCCCCCCCCCCCCOO..",
+      ".OuuuuuuuuuuuuuuuuuuuuuuO.",
+      ".OOOOOOOOOOOOOOOOOOOOOOOO."],
+    face: [
+      "...OSSSSSSSSSSSSSSSSSSO...",
+      "..OSSSSSSSSSSSSSSSSSSSSO..",
+      "..OSSSSSSSSSSSSSSSSSSSSO..",
+      "..OSSSWWWSSSSSSSSWWWSSSO..",
+      "..OSSSWKWSSSSSSSSWKWSSSO..",
+      "..OSSSSSSSSSsSSSSSSSSSSO..",
+      "..OSSSSSSSSSsSSSSSSSSSSO..",
+      "..OSSSSMMMMMMMMMMMMMSSSO..",
+      "..OSSSSMMMMMMMMMMMMMSSSO..",
+      "...OSSSSSSSSSSSSSSSSSSO...",
+      "...OSSSSSSSsssSSSSSSSSO...",
+      "....OSSSSSSSSSSSSSSSSO....",
+      ".....OOOSSSSSSSSSOOO......",
+      "........OOOOOOOOO........."],
+    torso: [
+      "..........OOOOOOOOOOOOOOOO..........",
+      "......OOOOUUUUUUSSSSUUUUUUOOOO......",
+      "....OOUUUUUUUUUuSSSSuUUUUUUUUUOO....",
+      "...OUUUUUUUUUUUUuuuuUUUUUUUUUUUUO...",
+      "..OUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUO..",
+      "..OUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUO..",
+      "..OUUUUGGUUUUUUUUuuUUUUUUUUUUUUUUO..",
+      "..OUUUUGGUUUUUUUUuuUUUUUUUUUUUUUUO..",
+      "..OUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUO..",
+      ".OUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUO.",
+      ".OUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUO.",
+      ".OUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUO.",
+      ".OUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUO.",
+      "OUUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUUO",
+      "OUUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUUO",
+      "OUUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUUO"],
+    hand: [".OOOOO.", "OSSSSSO", "OSSSSSO", ".OOOOO."],
+    mug: ["OOOOOOO..", "OLLLLLOO.", "OLLLLLOLO", "OLLLLLOLO", "OLLLLLOO.", ".OOOOO..."],
+    lampShade: ["....OOOOOOOOOOOO....", "...OJJJJJJJJJJJJO...", "..OJJJJJJJJJJJJJJO..", ".OJJJJJJJJJJJJJJJJO.", "OjjjjjjjjjjjjjjjjjjO", "OOOOOOOOOOOOOOOOOOOO"],
+    key: [".OO.", "OGGO", "OGGO", ".OO.", ".OG.", ".OG.", ".OGG", ".OG."]
+  };
+  const guardPal = { O: '#0b1418', C: '#203a49', u: '#152b39', G: '#c9b591', S: '#b9a07e', s: '#8e806b', W: '#e0d8b9', K: '#293c38', M: '#5a4a35', U: '#2a4350', L: '#d9d3b6', J: '#2e554c', j: '#91a78a' };
+  function drawGuardRoom(c, t, o = {}) {
+    const awake = !!o.awake;
+    // Walls: dark teal with a lighter dado band.
+    px(c, 0, 0, '#16262e', W, H); px(c, 0, 0, '#1a2d35', W, 70); px(c, 0, 96, '#22363a', W, 2); px(c, 0, 98, '#122026', W, 64);
+    // Window with a Venetian blind, dawn creeping in from the bottom.
+    px(c, 164, 14, '#65716a', 90, 80); px(c, 166, 16, '#2a4144', 86, 76);
+    for (let r = 0; r < 76; r++) { const k = r / 76; c.fillStyle = mix(mix('#486366', '#9b9b79', Math.min(1, k * 1.5)), '#b3a17b', Math.max(0, (k - .65) * 2.8)); c.fillRect(166, 16 + r, 86, 1); }
+    for (let i = 0; i < 13; i++) px(c, 166, 18 + i * 6, 'rgba(13,34,38,.7)', 86, 2);
+    px(c, 207, 16, '#263c3e', 3, 76);
+    // Dawn rays on the wall.
+    c.fillStyle = 'rgba(219,189,125,.05)'; for (let i = 0; i < 5; i++) c.fillRect(120 - i * 14, 40 + i * 18, 60, 2);
+    // Corkboard: photograph of the arena arch, the duty rota and three keys.
+    px(c, 30, 18, '#776e51', 80, 58); px(c, 32, 20, '#2b3430', 76, 54);
+    px(c, 36, 24, '#b3a47e', 34, 28); px(c, 37, 25, '#1e3238', 32, 26); px(c, 44, 31, '#17252e', 18, 18); px(c, 46, 29, '#17252e', 14, 4); px(c, 37, 47, '#596a54', 32, 1);
+    px(c, 76, 23, '#c6bf9d', 26, 32); for (let i = 0; i < 6; i++) px(c, 79, 29 + i * 4, '#8a8d75', 20, 1); px(c, 79, 25, '#313d3a', 20, 2);
+    for (let j = 0; j < 3; j++) blit(c, guardParts.key, 40 + j * 9, 58, guardPal);
+    // Chair back behind the watchman.
+    px(c, 118, 92, '#344a4c', 48, 40); px(c, 120, 90, '#344a4c', 44, 2); px(c, 121, 94, '#0b1720', 42, 36); px(c, 124, 97, '#1b2d35', 36, 30);
+    // The watchman: cap, face, uniform. Asleep: head tipped two pixels and eyes shut.
+    const hx = 129, hy = awake ? 78 : 81;
+    const face = guardParts.face.map(r => awake ? r : r.replace(/WWW/g, 'SSS').replace(/WKW/g, 'sss'));
+    blit(c, guardParts.torso, 124, 100, guardPal);
+    blit(c, face, hx, hy + 8, guardPal); blit(c, guardParts.cap, hx, hy, guardPal);
+    if (!awake) { px(c, hx + 6, hy + 11, 'rgba(0,0,0,.12)', 14, 12); }
+    // Desk, hands, mug with steam, paper, lamp.
+    px(c, 40, 128, '#a28f60', 208, 1); px(c, 38, 129, '#58604a', 212, 10); px(c, 30, 139, '#35433a', 228, 23); px(c, 30, 139, '#1f2d2a', 228, 1);
+    blit(c, guardParts.hand, 128, 124, guardPal); blit(c, guardParts.hand, 150, 124, guardPal);
+    blit(c, guardParts.mug, 82, 118, guardPal); px(c, 83, 119, '#3c3830', 5, 1);
+    for (let i = 0; i < 3; i++) { const yy = 112 - ((t * 6 + i * 3) % 9), xx = 84 + i * 2 + Math.round(Math.sin(t * 2 + i) * 1.5); px(c, xx, yy, 'rgba(210,219,197,.25)', 1, 2); }
+    px(c, 100, 144, '#b9b195', 70, 10); px(c, 104, 147, '#364c49', 40, 1); px(c, 104, 150, '#364c49', 54, 1);
+    px(c, 203, 125, '#8d8963', 20, 3); px(c, 212, 96, '#5a6654', 2, 29); blit(c, guardParts.lampShade, 203, 88, guardPal);
+    const g = c.createRadialGradient(213, 96, 2, 213, 96, 64); g.addColorStop(0, 'rgba(230,200,120,.34)'); g.addColorStop(1, 'rgba(230,200,120,0)'); c.fillStyle = g; c.fillRect(140, 40, 148, 125);
+    // Vignette.
+    const v = c.createRadialGradient(144, 86, 40, 144, 86, 170); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,8,16,.55)'); c.fillStyle = v; c.fillRect(0, 0, W, H);
+  }
+
   // ── The knight: 28 x 40 pixels, facing right, assembled from parts ───────
   const knightParts = {
     head: [
@@ -478,5 +564,5 @@
     }
     c.restore();
   }
-  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
+  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, drawGuardRoom, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();
