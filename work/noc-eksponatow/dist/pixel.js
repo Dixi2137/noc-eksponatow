@@ -324,7 +324,7 @@
     c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(-9, -1, 18, 2);
     if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
     else if (pose === 'dodge') c.translate(-4, 2); else if (pose === 'hurt') c.translate(-2, 0);
-    const oy = -40 - bob;
+    const oy = -33 - bob;   // boots (legs 22 + 9 rows, boot 30 + 3 rows) end exactly at ground level
     const B = (rows, dx, dy, pl = pal) => rows && blit(c, rows, dx, oy + dy, pl);
     if (F.cloak) B(human.cloak, -11, 9);
     const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
