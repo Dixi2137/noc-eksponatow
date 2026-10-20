@@ -221,6 +221,13 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Poprawki po feedbacku testera (2026-10-21)
+
+- Napisy na sztandarach (np. SPQR) są rysowane jako pikselowe glify (`pixelGlyph`), wieloliterowe pionowo na sztandarze, zamiast rozmytego tekstu wylewającego się poza sztandar.
+- Tabliczka nad drzwiami zależy od epoki (`signs` w `pixel.js`: TERMOPILE, ROMA, BUNKIER…), a drzwi są tintowane kolorem sztandaru, więc wyjście nie wygląda wszędzie identycznie.
+- Data i nazwa sali w rogu areny są większe, jasne i na ciemnej plakietce.
+- Pauza (Esc) pokazuje kartę przeciwnika: nazwa, epoka, opis, styl walki wyliczony z jego profilu (zamach, ciężki cios, odpoczynek), obrażenia, HP i nagroda za salę.
+
 ## Ogłoszenia dla wszystkich (2026-10-21)
 
 Tabela `announcements` (treść do 300 znaków, rodzaj info/event/warning, autor, wygaśnięcie), publiczna do odczytu, dodana do publikacji `supabase_realtime`. Moderator wysyła z panelu (`mod_announce(body, kind, seconds)`, od 30 s do 7 dni w selektorze, serwer przyjmuje 10 s–30 dni) i wycofuje (`mod_unannounce`; wycofanie dochodzi przez Realtime jako UPDATE). Klient (`MuseumCloud.announcements`) łączy się z Supabase Realtime po WebSocket ręcznie mówionym protokołem Phoenix (join na `postgres_changes` INSERT, heartbeat co 25 s, reconnect z backoffem) i dodatkowo odpytuje tabelę co 15 s oraz po powrocie karty, więc nic nie ginie. Pasek nad areną (`#announceBar`) jest tickerem: aktywne ogłoszenia po kolei przelatują przez pasek (Web Animations, prędkość ok. 90 px/s, 4 s przerwy między przelotami, pauza po najechaniu) aż wygasną; zamknięcie chowa pasek do następnego nowego ogłoszenia. Nowe ogłoszenie daje też toast w menu. Migracja zmiany na sekundy: `supabase/2026-10-21-ogloszenia-sekundy.sql`. Migracja dla istniejącego projektu: `supabase/2026-10-21-ogloszenia.sql`.

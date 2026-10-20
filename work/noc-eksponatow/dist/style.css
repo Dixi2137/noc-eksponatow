@@ -187,3 +187,7 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 @keyframes announce-pulse{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.02);filter:brightness(1.35)}100%{transform:scale(1);filter:brightness(1)}}
 body.pixel .announce-bar{font-family:'Pixelify Sans',monospace;font-size:17px}
 @media(max-width:650px){.announce-bar{font-size:13px;padding:10px 12px}}
+
+/* Daty i nazwa sali w rogu areny: większe, jaśniejsze, na ciemnej plakietce. */
+.stage-meta{font-size:10px;letter-spacing:1.5px;color:#e8e6d2}.stage-meta>span{background:rgba(8,12,10,.72);padding:5px 9px;border:1px solid #2b3326}body.pixel .stage-meta{font-family:'Pixelify Sans',monospace;font-size:12px;letter-spacing:.5px}@media(max-width:1000px){.stage-meta{font-size:9px}}@media(max-width:650px){.stage-meta{font-size:8px}.stage-meta>span{padding:3px 6px}}
+.pause-info{margin:14px auto 18px;max-width:420px;text-align:left;font-size:11px;line-height:1.6;color:var(--cream);border:1px solid var(--line);padding:12px 14px;background:#0f140d}.pause-info strong{display:block;font-family:'Barlow Condensed',Impact,sans-serif;font-size:22px;letter-spacing:.5px;color:var(--lime);margin-bottom:2px}.pause-info small{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:8px}.pause-info p{margin:0 0 8px}.pause-info ul{margin:0;padding-left:16px;color:#bdc1b2}body.pixel .pause-info strong{font-family:'Pixelify Sans',monospace}
