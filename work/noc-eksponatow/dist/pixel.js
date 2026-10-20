@@ -64,7 +64,6 @@
     px(c, 112, 28, '#1a2224', 64, 100); px(c, 114, 30, '#0b1418', 60, 98);
     for (let r = 0; r < 4; r++) for (let col = 0; col < 3; col++) tile(c, 9 + col, r, 120 + col * T, 64 + r * T);   // the great wooden door
     px(c, 116, 60, '#3a3a2c', 56, 4);
-    c.fillStyle = '#c9b37a'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(o.sign || (themeKey === 'hall' ? 'SALA' : 'MUSEUM'), 144, 24);
     px(c, 140, 44, '#2c4a3e', 8, 8); px(c, 143, 46, '#d9c28a', 2, 4);                   // clock
     // Banners or reliefs between the windows and the arch.
     if (th.banner) {
@@ -80,6 +79,10 @@
     if (th.floorTint) { c.fillStyle = th.floorTint; c.fillRect(0, 128, W, 34); }
     px(c, 0, 127, '#6a6c50', W, 1); px(c, 0, 128, '#293d33', W, 2);
     [[2, 30], [258, 286]].forEach(([a, b]) => { px(c, a, 116, '#9f9061', 2, 14); px(c, b, 116, '#9f9061', 2, 14); for (let k = a + 2; k < b; k += 2) px(c, k, 120 + Math.round(Math.sin((k - a) / (b - a) * Math.PI) * 3), '#6c2637'); });
+    // Sign plaque above the door (drawn after the pillars so long names never hide behind them).
+    const sign = String(o.sign || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
+    px(c, 144 - sw / 2 - 1, 16, '#3b352a', sw + 2, 12); px(c, 144 - sw / 2, 17, '#1a1612', sw, 10);
+    c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 25);
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.
@@ -152,15 +155,18 @@
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
-    if (pose === 'attack' && p < .45) B(knightParts.sword, 6, -14);   // raised behind the head
-    B(walk > 0 ? knightParts.legB : knightParts.legA, -6, 27); B(walk < 0 ? knightParts.legB : knightParts.legA, 0, 27);
-    B(knightParts.boot, -6, 36); B(knightParts.boot, 0, 36);
+    const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a' };                         // weapon colours (steel, edge, wood, brass)
+    const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
+    if (pose === 'attack' && p < .45) { if (held) Wb(held.hold, 6, 8 - held.hold.length); else B(knightParts.sword, 6, -14); }   // raised behind the head
+    B(walk > 0 ? knightParts.legB : knightParts.legA, -6, 23); B(walk < 0 ? knightParts.legB : knightParts.legA, 0, 23);
+    B(knightParts.boot, -6, 32); B(knightParts.boot, 0, 32);
     B(knightParts.torso, -7, 11);
     B(knightParts.head, -6, 0); B(knightParts.plume, -10, -3);
     if (pose === 'guard') B(knightParts.shield, 4, 10); else B(knightParts.shield, -11, 14);
     B(knightParts.armFront, 2, 13);
-    if (pose === 'attack' && p >= .45) B(knightParts.swordFwd, 4, 14);
-    else if (pose !== 'attack') B(knightParts.sword, 7, -6);
+    if (pose === 'attack' && p >= .45) { if (held) Wb(held.fwd, 4, 16 - Math.floor(held.fwd.length / 2)); else B(knightParts.swordFwd, 4, 14); }
+    else if (pose !== 'attack') { if (held) Wb(held.hold, 7, 17 - held.hold.length); else B(knightParts.sword, 7, -6); }
     c.restore();
   }
 
@@ -222,5 +228,210 @@
     c.restore();
   }
 
-  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, blit, themes, knightPalette });
+  // ── Humans: one 26 x 40 body, costume layers read from the exhibit's `figure` ─────────
+  const human = {
+    head: [
+      "...OOOOOO...",
+      "..OHHHHHHO..",
+      ".OHHHHHHHHO.",
+      ".OSSSSSSSSO.",
+      "OSSSSSSSSSSO",
+      "OSSKSSSSKSSO",
+      "OSSSSSSSSSSO",
+      "OSSSSSNSSSSO",
+      ".OSSSSSSSSO.",
+      ".OSSSSSSSSO.",
+      "..OOOOOOOO..",
+    ],
+    neck: ["OSSO"],
+    torso: [
+      "..OOOOOOOOOO..",
+      ".OCCCCCCCCCCO.",
+      "OCCCCCCCCCCCCO",
+      "OCCCCCcCCCCCCO",
+      "OCCCCCcCCCCCCO",
+      "OcCCCCcCCCCCcO",
+      "OcCCCCcCCCCCcO",
+      ".OccCCcCCCccO.",
+      ".OcccccccccO..",
+      ".OGGGGGGGGGGO.",
+      ".OccccccccccO.",
+      "..OOOOOOOOOO..",
+    ],
+    lapel: [".OLL..LL.", ".OLL..LL.", "..LL..LL.", "..L...L..", ".........", "...GG....", "...GG...."],
+    armor: ["..OOOOOOOO..", ".OAAAAAAAAO.", "OAAaAAAAaAAO", "OAAAAaaAAAAO", "OaAAAAAAAAaO", "OaaAAAAAAaaO", ".OaaaAAaaaO.", "..OOOOOOOO.."],
+    sash: ["Q.........", ".QQ.......", "..QQ......", "...QQ.....", "....QQ....", ".....QQ...", "......QQ..", ".......QQ.", "........QQ"],
+    epaulette: ["EEEE", "EeEe"],
+    armband: ["RRRR", "RRRR", "RRRR"],
+    armBack: ["OOOO", "OCCO", "OCCO", "OcCO", "OcCO", "OccO", "OSSO", ".OO."],
+    armFront: ["OOOOO", "OCCCO", "OCCCO", "OCCCO", "OcCCO", "OccCO", "OSSSO", ".OOO."],
+    armBare: ["OOOO", "OSSO", "OSSO", "OSSO", "OSSO", "OSSO", "OSSO", ".OO."],
+    legA: ["OTTTTO", "OTTTTO", "OTtTTO", "OTtTTO", "OTtTTO", "OTTTTO", "OtTTtO", "OtTTtO"],
+    legB: ["OTTTTO", "OTtTTO", "OTtTTO", "OtTTtO", ".OTTO.", "OTTTTO", "OtTTtO", "OtTTtO"],
+    legBare: ["OSSSSO", "OSSSSO", "OSsSSO", "OSsSSO", "OSsSSO", "OSSSSO", "OsSSsO", "OsSSsO"],
+    boot: ["OBBBBO", "OBBBBO", "ObbbbO", "OOOOOO"],
+    sandal: ["OSSSSO", "ODDDDO", "OOOOOO"],
+    cloak: ["KKKKKK", "KKKKKKK", "kKKKKKKK", "kKKKKKKK", "kkKKKKKK", "kkKKKKKK", "kkkKKKKK", "kkkKKKKK", "kkkkKKKK", "kkkkKKKK", "kkkkkKKK", "kkkkkKKK", "kkkkkkKK", "kkkkkkKK", "kkkkkkk.", "kkkkkk..", "kkkkk...", "kkkk...."],
+    shield: [".OOOOOOO.", "OGPPPPPGO", "OPPPPPPPO", "OPPPGPPPO", "OPPPGPPPO", "OPPPPPPPO", "OPPPPPPPO", ".OPPPPPO.", "..OPPPO..", "...OOO..."],
+    hair: { full: ["......", ".HHHH.", "HHHHHH", "HHHHHH", ".HHHH.", "..HH.."], long: ["......", ".HHHH.", "HHHHHH", "HHHHHH", "HHHHHH", ".HHHH.", ".HHHH.", "..HH.."], goatee: ["......", "..HH..", "..HH..", "..HH.."],
+      thick: ["HHHHHH"], toothbrush: ["..HH.."], handlebar: ["HHHHHH", "H....H"] },
+    hats: {
+      peaked: ["..OOOOOOOO..", ".OPPPPPPPPO.", "OPPPPGPPPPPO", "OpppppppppppO", "..OOOOOOOOOOO"],
+      bicorne: ["OOOO........OOOO", "OPPPOO....OOPPPO", "OPPPPPOOOOPPPPPO", ".OPPPPPPPPPPPPO.", "..OOGGGGGGGGOO.."],
+      corinthian: ["....RRRR....", "...RRRRRRR..", "..OGGGGGGO..", ".OGGGGGGGGO.", "OGGGGGGGGGGO", "OGGGGOOGGGGO", "OGGGOOOOGGGO", "OGGGOSSOGGGO", "OGGGGOOGGGGO", ".OGGGGGGGGO."],
+      crown: ["G..G..G..G", "GG.GG.GG.GG", "GGGGGGGGGGG", "GRGGRGGRGGG", "GGGGGGGGGGG"],
+      mianguan: ["GGGGGGGGGGGGGG", ".G..G..G..G..G", "..OOOOOOOOOO..", "..OPPPPPPPPO..", "..OPPPPPPPPO.."],
+      laurel: ["..LL....LL..", ".LLL....LLL.", "LLL......LLL"],
+      turban: ["...OOOOOO...", "..OWWWWWWO..", ".OWWRWWWWWO.", "OWWWWWWWWWWO", "OWWWWWWWWWWO", ".OOWWWWWWOO."],
+      furhat: ["...OOOOOO...", "..OPPPPPPO..", ".OPPPPPPPPO.", "OpppppppppppO", "OpppppppppppO", ".OOOOOOOOOO."],
+      hood: ["....OOOO....", "...OPPPPO...", "..OPPPPPPO..", ".OPPPPPPPPO.", "OPPPPPPPPPPO", "OPPOOOOOOPPO", "OPPO....OPPO", "OPPO....OPPO", "OPPO....OPPO", "OPPO....OPPO"],
+      tricorn: ["OOO........OOO", "OPPPOO...OOPPPO", ".OPPPPPOOPPPPO.", "..OPPPPPPPPPO..", "...OGGGGGGGO..."],
+      fez: ["..OOOOOO..", ".OPPPPPPO.", ".OPPPPPPO.", ".OPPPPPPO.", "OPPPPPPPPO"],
+      cap: ["..OOOOOO..", ".OPPPPPPO.", "OPPPPGPPPPO", "OpppppppppOOO", ".OOOOOOOOOOO."],
+      beret: ["....OOOO....", "..OOPPPPOO..", ".OPPPPPPPPO.", "OPPPPPPPPPPO", ".OOOOOOOOOO."],
+      fedora: ["...OOOOOO...", "..OWWWWWWO..", "..OWWWWWWO..", ".OOOOOOOOOO.", "OWWWWWWWWWWO", ".OOOOOOOOOO."],
+      morion: ["....OO....", "...OMMO...", "..OMMMMO..", ".OMMMMMMO.", "OMMMMMMMMO", ".OOMMMMOO.", "OOOOOOOOOO"],
+      helmet: ["....OO....", "....OM....", "...OMMO...", "..OMMMMO..", ".OMMMMMMO.", "OMMMMMMMMO", "OPPPPPPPPO"]
+    },
+    weapons: {
+      spear: { hold: [".OO.", "OMMO", "OMMO", ".OO.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD."], fwd: ["DDDDDDDDDDDDDDDDOMMMMO", "................OMMO.."] },
+      sabre: { hold: [".OO.", "OMMO", "OMMO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", ".OWO", ".OGO", ".GGG", ".OO."], fwd: ["GGOMWWWWWWWWWWMO", "GG.OMMMMMMMMMMO."] },
+      dagger: { hold: ["OMO", "OMO", "OWO", "OWO", "OWO", "OGO", "GGG", "ODO", "ODO"], fwd: ["ODOGGOWWWWMO"] },
+      axe: { hold: ["..OOOO", ".OMMMMO", "OMMMMMO", "OMMMMO.", ".OMMO..", "..DD...", "..DD...", "..DD...", "..DD...", "..DD...", "..DD...", "..DD...", "..DD...", "..DD..."], fwd: ["DDDDDDDDDDDOMMMMO", "...........OMMMMO", "............OMMO."] },
+      staff: { hold: [".GG.", "GGGG", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD."], fwd: ["DDDDDDDDDDDDDDDDDDGG", "..................GG"] },
+      pistol: { hold: ["OMMMMMO", "OMMMMMO", "..ODDO.", "..ODDO."], fwd: ["ODDOMMMMMMMO", "ODD.OMMMMMMO"] },
+      rifle: { hold: ["OMO", "OMO", "OMO", "OMO", "OMO", "OMO", "OMO", "ODO", "ODO", "ODO", "ODO", "ODO", "ODO", ".OO"], fwd: ["ODDDDDOMMMMMMMMMMMO", ".ODDDD.OMMMMMMMMMO."] },
+      bow: { hold: ["..O.", ".OD.", "OD..", "OD..", "OD..", "OD..", ".OD.", "..O.", ".OD.", "OD..", "OD..", "OD..", "OD..", ".OD.", "..O."], fwd: ["OD..........", ".OD.........", "..ODDDDDDOMO", ".OD.........", "OD.........."] }
+    }
+  };
+  function figurePalette(F) {
+    const skin = F.skin || '#e2bf9f', coat = F.coat || F.tunic || '#4a4a4a', coatDark = F.coatDark || mix(coat, '#000000', .4), trousers = F.trousers || coat, boots = F.boots || '#1a1a1a';
+    return {
+      O: '#141216', S: skin, s: mix(skin, '#000000', .25), N: mix(skin, '#000000', .4), K: '#1a1410', H: F.hair || '#2a2118',
+      C: coat, c: coatDark, T: trousers, t: mix(trousers, '#000000', .35), B: boots, b: mix(boots, '#ffffff', .2), D: '#5a3a22',
+      L: F.lapel || '#e8e4d8', A: F.armor || '#9a9aa0', a: F.armorDark || '#5a5a60', Q: F.sash || '#c0392b', E: F.epaulettes || '#d4af37', e: mix(F.epaulettes || '#d4af37', '#000', .3),
+      R: F.armband || F.crest || F.star || '#b3202a', G: '#d4af37', W: F.hatColor === '#e8e2d0' || F.hat === 'turban' ? (F.hatColor || '#f0ead6') : (F.hatColor || '#e8e2d0'),
+      P: F.hatColor || coat, p: mix(F.hatColor || coat, '#000000', .3), M: '#c9d6dc', k: mix(F.cloak || '#5a3a1e', '#000', .4), ...(F.cloak ? { K: F.cloak } : {}),
+      // shield uses P for its field; override below if a shield colour is given
+    };
+  }
+  function drawFigure(c, x, y, o = {}) {
+    const F = o.figure || {}, pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0;
+    const pal = figurePalette(F); const flip = o.facing === -1;
+    const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
+    const bare = F.legs === 'bare';
+    c.save(); c.translate(Math.round(x), Math.round(y)); if (flip) c.scale(-1, 1);
+    c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(-9, -1, 18, 2);
+    if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
+    else if (pose === 'dodge') c.translate(-4, 2); else if (pose === 'hurt') c.translate(-2, 0);
+    const oy = -40 - bob;
+    const B = (rows, dx, dy, pl = pal) => rows && blit(c, rows, dx, oy + dy, pl);
+    if (F.cloak) B(human.cloak, -11, 9);
+    const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
+    B(bare ? human.armBare : human.armBack, 4, 12);
+    if (attacking && p < .45) B(wp.hold, 6, -12);
+    if (bare) { B(human.legBare, -6, 22); B(human.legBare, 0, 22); B(human.sandal, -6, 30); B(human.sandal, 0, 30); }
+    else { B(walk > 0 ? human.legB : human.legA, -6, 22); B(walk < 0 ? human.legB : human.legA, 0, 22); B(human.boot, -6, 30); B(human.boot, 0, 30); }
+    B(human.torso, -7, 11);
+    if (F.armor) B(human.armor, -6, 12);
+    if (F.lapel) B(human.lapel, -4, 12);
+    if (F.sash) B(human.sash, -6, 12);
+    if (F.epaulettes) { B(human.epaulette, -7, 11); B(human.epaulette, 3, 11); }
+    if (F.armband) B(human.armband, 4, 15);
+    B(human.neck, -2, 10);
+    B(human.head, -6, 0);
+    if (F.beard) B(human.hair[F.beard], -3, 7); if (F.mustache) B(human.hair[F.mustache], -3, 7);
+    if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
+    if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
+    B(bare ? human.armBare : human.armFront, 2, 13);
+    if (attacking && p >= .45) B(wp.fwd, 4, 16); else if (!attacking) B(wp.hold, 7, -4);
+    c.restore();
+  }
+  // ── Weapon icons: 16 x 16 pixel glyphs per icon key, tinted by rarity ─────
+  const I = {
+    sword:      ["..........OO....", ".........OWO....", "........OWMO....", ".......OWMO.....", "......OWMO......", ".....OWMO.......", "....OWMO........", "...OWMO.........", "..GGMO..........", ".GGGG...........", "GGOGG...........", "ODO.............", "OD..............", "G...............", "................", "................"],
+    shortsword: ["................", "................", "..........OO....", ".........OWO....", "........OWMO....", ".......OWMO.....", "......OWMO......", ".....OWMO.......", "...GGMO.........", "..GGGG..........", ".GGOG...........", "ODO.............", "OD..............", "................", "................", "................"],
+    greatsword: ["..............OO", ".............OWO", "............OWMO", "...........OWMO.", "..........OWMO..", ".........OWMO...", "........OWMO....", ".......OWMO.....", "......OWMO......", ".....OWMO.......", "...GGMO.........", "..GGGGG.........", ".GGOGGG.........", "ODO.............", "OD..............", "G..............."],
+    curved:     [".........OOO....", ".......OOWWO....", ".....OOWMMO.....", "....OWMMO.......", "...OWMMO........", "...OMMO.........", "..OMMO..........", "..OMO...........", ".GGO............", "GGGG............", "ODO.............", "OD..............", "G...............", "................", "................", "................"],
+    rapier:     ["..............OO", ".............OWO", "............OWO.", "...........OWO..", "..........OWO...", ".........OWO....", "........OWO.....", ".......OWO......", "......OWO.......", "....GGGO........", "...G..G.........", "..G.GG..........", ".ODO............", "OD..............", "G...............", "................"],
+    dagger:     ["................", "................", "................", "........OO......", ".......OWO......", "......OWMO......", ".....OWMO.......", "....OWMO........", "..GGMO..........", ".GGGG...........", "ODO.............", "OD..............", "G...............", "................", "................", "................"],
+    karambit:   ["................", "......OOOO......", ".....OWMMMO.....", "....OWMO.OMO....", "...OWMO...OO....", "...OMO..........", "...OMO..........", "...OMO..........", "....OMO.........", ".....OGGO.......", "......ODDO......", "......ODDO......", ".......OGO......", "........OO......", "................", "................"],
+    kukri:      ["................", "................", "...........OO...", "..........OWO...", ".........OWMO...", "........OWMMO...", ".......OWMMMO...", "......OWMMMO....", ".....OWMMO......", "....OMMO........", "...GGO..........", "..ODD...........", ".ODD............", "OD..............", "................", "................"],
+    machete:    ["................", "..........OOO...", ".........OWMO...", "........OWMMO...", ".......OWMMO....", "......OWMMO.....", ".....OWMMO......", "....OWMMO.......", "...OMMMO........", "..GGMO..........", ".ODD............", "ODD.............", "D...............", "................", "................", "................"],
+    axe:        ["......OOOO......", ".....OMMMMO.....", "....OMMMMMMO....", "....OMMMMMMO....", ".....OMMMMO.....", "......ODDO......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......OO.......", "................"],
+    doubleaxe:  ["................", "..OOO...OOO.....", ".OMMMO.OMMMO....", "OMMMMMOMMMMMO...", "OMMMMMDMMMMMO...", ".OMMMODOMMMO....", "..OOO.DD.OOO....", "......DD........", "......DD........", "......DD........", "......DD........", "......DD........", "......DD........", "......OO........", "................", "................"],
+    poleaxe:    ["................", ".........OOO....", "........OMMMO...", ".......OMMMMO...", ".......OMMMMO...", ".......ODMMO....", "......ODDOO.....", ".....ODD........", "....ODD.........", "...ODD..........", "..ODD...........", ".ODD............", "ODD.............", "OO..............", "................", "................"],
+    hammer:     ["................", "....OOOOOOO.....", "...OMMMMMMMO....", "...OMMMMMMMO....", "...OMMMMMMMO....", "....OOODDOO.....", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......OO.......", "................", "................"],
+    mace:       ["................", "......OOOO......", ".....OMMMMO.....", "....OMMMMMMO....", "....OMMMMMMO....", "....OMMMMMMO....", ".....OMMMMO.....", "......ODDO......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......DD.......", ".......OO.......", "................", "................"],
+    flail:      ["..........OOO...", ".........OMMMO..", ".........OMMMO..", "..........OOO...", ".........M......", "........M.......", ".......M........", "......ODD.......", "......ODD.......", "......ODD.......", "......ODD.......", "......ODD.......", "......ODD.......", "......OO........", "................", "................"],
+    club:       ["................", "........OOO.....", ".......ODDDO....", ".......ODDDO....", "......ODDDDO....", "......ODDDO.....", ".....ODDDO......", ".....ODDO.......", "....ODDO........", "....ODD.........", "...ODD..........", "...ODD..........", "..ODD...........", "..OO............", "................", "................"],
+    spear:      ["..............OO", ".............OMO", "............OMMO", "...........OMMO.", "..........ODDO..", ".........ODD....", "........ODD.....", ".......ODD......", "......ODD.......", ".....ODD........", "....ODD.........", "...ODD..........", "..ODD...........", ".ODD............", "ODD.............", "OO.............."],
+    pike:       ["...............O", "..............OM", ".............OMO", "............ODD.", "...........ODD..", "..........ODD...", ".........ODD....", "........ODD.....", ".......ODD......", "......ODD.......", ".....ODD........", "....ODD.........", "...ODD..........", "..ODD...........", ".ODD............", "OO.............."],
+    trident:    ["...........O.O.O", "..........OMOMOM", "...........OMMMO", "............OMO.", "...........ODD..", "..........ODD...", ".........ODD....", "........ODD.....", ".......ODD......", "......ODD.......", ".....ODD........", "....ODD.........", "...ODD..........", "..ODD...........", ".ODD............", "OO.............."],
+    halberd:    ["..............OO", ".............OMO", "...........OOMMO", "..........OMMMMO", "..........OMMMO.", "...........OOO..", "..........ODD...", ".........ODD....", "........ODD.....", ".......ODD......", "......ODD.......", ".....ODD........", "....ODD.........", "...ODD..........", "..ODD...........", ".OO............."],
+    bow:        ["......OOOO......", ".....ODDDDO.....", "....ODD..ODO....", "...ODD....OD....", "...OD.....OD....", "...OD.....OD....", "...OD.....OD....", "...OD.....OD....", "...OD.....OD....", "...ODD....OD....", "....ODD..OD.....", ".....ODDDDO.....", "......OOOO......", "................", "................", "................"],
+    crossbow:   ["................", "OOOOOOOOOOOOOOOO", "ODDDDDDMMDDDDDDO", "OOOOOOOMMOOOOOOO", ".......OMO......", ".......ODO......", ".......ODO......", ".......ODO......", ".......ODO......", ".......ODO......", "......ODDDO.....", "......ODDDO.....", ".......OOO......", "................", "................", "................"],
+    sling:      ["................", "......OOOO......", ".....ODDDDO.....", ".....ODMMDO.....", ".....ODDDDO.....", "......ODDO......", ".....OD..DO.....", ".....OD..DO.....", "....OD....DO....", "....OD....DO....", "...OD......DO...", "...OD......DO...", "..OO........OO..", "................", "................", "................"],
+    revolver:   ["................", "................", "OOOOOOOOOOOO....", "OMMMMMMMMMMMO...", "OOOOOOMMOOOOO...", "....OMMMMO......", "....OMMMMO......", "....OOODDO......", "......ODDO......", "......ODDO......", ".......OOO......", "................", "................", "................", "................", "................"],
+    pistol:     ["................", "................", "OOOOOOOOOOOOO...", "OMMMMMMMMMMMMO..", "OOOOOOMMOOOOOO..", ".....OMMO.......", ".....ODDO.......", ".....ODDO.......", ".....ODDO.......", "......OOO.......", "................", "................", "................", "................", "................", "................"],
+    flintlock:  ["................", "..........G.....", "OOOOOOOOOOGO....", "OMMMMMMMMGGGO...", "OOOOOOOODDOOO...", "......ODDDO.....", ".....ODDDO......", "....ODDDO.......", "...ODDO.........", "...OOO..........", "................", "................", "................", "................", "................", "................"],
+    musket:     ["..............OO", ".............OMO", "............OMMO", "...........OMMO.", "..........OMMO..", ".........OMMO...", "........OMMO....", ".......OMMO.....", "......ODDO......", ".....ODDDO......", "....ODDDO.......", "...ODDDO........", "..ODDDO.........", ".ODDDO..........", "OOOOO...........", "................"],
+    rifle:      ["..............OO", ".............OMO", "............OMMO", "...........OMMO.", "..........OMMO..", ".........OMMO...", "........OMMO....", ".......ODDO.....", "......ODDO......", ".....ODDDO......", "....ODDDDO......", "...ODDDO........", "..ODDDO.........", ".ODDO...........", "OOO.............", "................"],
+    smg:        ["................", "................", "OOOOOOOOOOOOOO..", "OMMMMMMMMMMMMMO.", "OOOOOOMMOOOOOOO.", "..OMMMMMMO......", "..OMMOOMMO......", "..OMMO.OO.......", "..OMMO..........", "...OO...........", "................", "................", "................", "................", "................", "................"],
+    shotgun:    ["................", "..............OO", ".............OMO", "............OMMO", "...........OMMO.", "..........OMMO..", ".........OMMO...", "........OMMO....", ".......ODDO.....", "......ODDDO.....", ".....ODDDO......", "....ODDDO.......", "...ODDDO........", "..ODDO..........", ".OOO............", "................"],
+    sniper:     ["...............O", "..............OM", ".............OMO", "............OMO.", "........OOOOMO..", ".......OMMOMO...", "........OOOMO...", ".........OMO....", "........ODDO....", ".......ODDDO....", "......ODDDO.....", ".....ODDDO......", "....ODDDO.......", "...ODDO.........", "..OOO...........", "................"]
+  };
+  const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72' };
+  function drawWeaponIcon(c, weapon, x, y, scale = 1) {
+    const rows = I[weapon?.icon] || I.sword, tint = rarityTint[weapon?.rarity] || '#c9d6dc';
+    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), D: '#8a6a42', G: '#d4af37' };
+    c.save(); c.translate(x, y); c.scale(scale, scale); blit(c, rows, 0, 0, pal); c.restore();
+  }
+  // ── Crates, cards and the private hall in pixels ─────────────────────────
+  const crateGlyphPal = {};
+  const glyphCanvas = document.createElement('canvas'); glyphCanvas.width = glyphCanvas.height = 16;
+  function pixelGlyph(c, text, color, x, y, sc) {
+    const g = glyphCanvas.getContext('2d'); g.clearRect(0, 0, 16, 16); g.fillStyle = color; g.font = '11px monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 8, 9);
+    c.imageSmoothingEnabled = false; c.drawImage(glyphCanvas, 0, 0, 16, 16, x - 8 * sc, y - 8 * sc, 16 * sc, 16 * sc);
+  }
+  // Crate showcase: a Kenney chest on a stone plinth, tinted with the crate colour, with the crate glyph as a pixel badge.
+  function drawCrate(c, crate, w, h, o = {}) {
+    const col = crate?.color || '#c9b37a', fam = crate?.family || 'classic';
+    const chest = fam === 'weapons' ? [7, 7] : fam === 'cards' ? [8, 7] : fam === 'mixed' ? [6, 7] : [5, 7];
+    const sc = Math.max(1, Math.floor(Math.min(w, h) / 30));
+    const cx = Math.round(w / 2), cy = Math.round(h / 2);
+    c.clearRect(0, 0, w, h); c.imageSmoothingEnabled = false;
+    c.fillStyle = mix(col, '#000000', .8); c.fillRect(0, 0, w, h);
+    for (let yy = 0; yy < h; yy += 8 * sc) for (let xx = (yy / (8 * sc)) % 2 ? -8 * sc : 0; xx < w; xx += 16 * sc) px(c, xx + sc, yy + sc, mix(col, '#000000', .72), 14 * sc, 6 * sc);
+    const g = c.createRadialGradient(cx, cy, 2, cx, cy, Math.max(w, h) / 2); g.addColorStop(0, mix(col, '#000000', .3)); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+    tile(c, 2, 3, cx - 16 * sc, cy + 6 * sc, 16 * sc, 16 * sc); tile(c, 2, 3, cx, cy + 6 * sc, 16 * sc, 16 * sc);
+    c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(cx - 16 * sc, cy + 6 * sc, 32 * sc, 16 * sc); px(c, cx - 16 * sc, cy + 6 * sc, mix(col, '#000000', .5), 32 * sc, sc);
+    px(c, cx - 10 * sc, cy + 7 * sc, 'rgba(0,0,0,.5)', 20 * sc, 2 * sc);
+    tile(c, chest[0], chest[1], cx - 8 * sc, cy - 10 * sc, 16 * sc, 16 * sc);
+    c.globalAlpha = .3; c.fillStyle = col; c.fillRect(cx - 8 * sc, cy - 10 * sc, 16 * sc, 16 * sc); c.globalAlpha = 1;
+    px(c, cx - 7 * sc, cy - 13 * sc, '#1a1612', 14 * sc, 3 * sc); px(c, cx - 6 * sc, cy - 12 * sc, mix(col, '#000000', .35), 12 * sc, sc);
+    pixelGlyph(c, crate?.glyph || '✦', mix(col, '#ffffff', .55), cx, cy - 1 * sc, sc);
+    [[-13, -12], [14, -9], [-11, 11], [13, 12], [0, -17]].forEach(([dx, dy], i) => { px(c, cx + dx * sc, cy + dy * sc, mix(col, '#ffffff', .45), sc, sc); if (i % 2) px(c, cx + dx * sc - sc, cy + dy * sc, mix(col, '#ffffff', .2), 3 * sc, sc); });
+  }
+  function drawCardArt(c, card, w, h) {
+    const col = card?.color || '#777', sc = Math.max(1, Math.floor(Math.min(w, h) / 32));
+    const x0 = Math.round((w - 20 * sc) / 2), y0 = Math.round((h - 28 * sc) / 2);
+    px(c, x0, y0, '#141216', 20 * sc, 28 * sc); px(c, x0 + sc, y0 + sc, mix(col, '#000', .6), 18 * sc, 26 * sc); px(c, x0 + 2 * sc, y0 + 2 * sc, mix(col, '#000', .4), 16 * sc, 12 * sc);
+    px(c, x0 + 6 * sc, y0 + 4 * sc, mix(col, '#fff', .3), 8 * sc, 8 * sc); px(c, x0 + 7 * sc, y0 + 5 * sc, col, 6 * sc, 6 * sc);
+    c.fillStyle = '#f6efd8'; c.font = `${5 * sc}px monospace`; c.textAlign = 'center'; c.fillText(card?.initials || '?', x0 + 10 * sc, y0 + 10 * sc);
+    px(c, x0 + 2 * sc, y0 + 16 * sc, '#0d110e', 16 * sc, 9 * sc);
+    c.fillStyle = '#f3e9cf'; c.font = `${3 * sc}px monospace`; const name = (card?.name || '').replace('KARTA: ', '').split(' ');
+    name.slice(0, 2).forEach((wd, i) => c.fillText(wd.slice(0, 9), x0 + 10 * sc, y0 + (19 + i * 4) * sc));
+    for (let k = 0; k < ({ basic: 0, common: 1, rare: 2, epic: 3, legendary: 4 })[card?.rarity] || 0; k++) px(c, x0 + (4 + k * 3) * sc, y0 + 26 * sc, mix(col, '#fff', .6), 2 * sc, sc);
+  }
+  function drawHall(c, t, shown, o = {}) {
+    drawArena(c, t, 'hall', { sign: (o.name || 'SALA').slice(0, 18) });
+    const at = id => shown.find(e => e.slot.id === id)?.item || null;
+    const label = (x, y, text) => { px(c, x - 14, y, '#120f0b', 28, 7); c.fillStyle = '#d9c89a'; c.font = '5px monospace'; c.textAlign = 'center'; c.fillText(String(text).slice(0, 9), x, y + 5); };
+    [['armor-1', 56], ['armor-2', 232]].forEach(([id, x], i) => { const item = at(id); px(c, x - 14, 124, '#4a3b2a', 28, 4); px(c, x - 16, 128, '#241c13', 32, 3); if (item) drawKnight(c, x, 124, { pose: 'idle', facing: i ? -1 : 1, time: t, skin: item.id }); label(x, 118 - (item ? 46 : 0), item ? item.name : 'POSTUMENT'); });
+    [['weapon-1', 24], ['weapon-2', 264]].forEach(([id, x]) => { const item = at(id); px(c, x - 10, 40, '#1d1710', 20, 44); if (item) drawWeaponIcon(c, window.MuseumWeapons?.get(item.id), x - 8, 54, 1); label(x, 86, item ? item.name : 'BROŃ'); });
+    [['card-1', 84], ['card-2', 182]].forEach(([id, x]) => { const item = at(id); if (item) drawCardArt(c, window.MuseumCards?.get(item.id), x + 22, 90); else label(x + 11, 56, 'KARTA'); });
+    [['trophy-1', 132], ['trophy-2', 156]].forEach(([id, x]) => { const item = at(id); px(c, x - 9, 76, '#2a2219', 18, 30); px(c, x - 8, 78, 'rgba(154,208,232,.18)', 16, 24); if (item) { c.fillStyle = item.color || '#c9b37a'; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText(item.glyph || '?', x, 94); } else label(x, 86, 'GABLOTA'); });
+  }
+  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();

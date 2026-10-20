@@ -444,6 +444,7 @@
     const playerOpts = { facing: 1, pose: playerPose, progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 };
     const foeArt = state.exhibit.stats.art;
     const drawR = () => pix && (foeArt === 'rex' || foeArt === 'raptor') ? inPixels(() => pix.drawRex(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, skin: foeArt === 'raptor' ? 'raptor' : null, scale: foeArt === 'raptor' ? .9 : 1.4 }))
+      : pix && foeArt === 'figure' ? inPixels(() => pix.drawFigure(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, figure: state.exhibit.stats.figure }))
       : art?.drawExhibit ? art.drawExhibit(ctx, state.exhibit, r.x + rEvadeX, FLOOR, foeOpts) : fallbackFighter(r.x, foePose, true);
     const drawP = () => pix ? inPixels(() => pix.drawKnight(ctx, (p.x + pEvadeX) / pix.PX, pix.FLOOR, playerOpts))
       : art?.drawKnight ? art.drawKnight(ctx, p.x + pEvadeX, FLOOR, playerOpts) : fallbackFighter(p.x, playerPose);

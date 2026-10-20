@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><title>Pikselowe ikony broni</title>
+<style>body{margin:0;background:#10120f;color:#eee;font:12px system-ui}.row{display:flex;flex-wrap:wrap;gap:6px;padding:10px}figure{margin:0;text-align:center}canvas{background:#1a2020;border:1px solid #333;image-rendering:pixelated;width:96px;height:96px}figcaption{font-size:9px;color:#aaa;max-width:96px}</style></head>
+<body><div class="row" id="row"></div>
+<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/cards.js"></script><script src="../dist/hall.js"></script><script src="../dist/art.js"></script><script src="../dist/pixel.js"></script>
+<script>
+const P=window.MuseumPixel,seen=new Set();
+for(const w of window.MuseumWeapons.all()){if(seen.has(w.icon))continue;seen.add(w.icon);const f=document.createElement('figure'),c=document.createElement('canvas');c.width=16;c.height=16;const x=c.getContext('2d');P.drawWeaponIcon(x,w,0,0,1);f.append(c);const cap=document.createElement('figcaption');cap.textContent=w.icon+' · '+w.name;f.append(cap);row.append(f);}
+</script></body></html>
+<div class="row" id="row2"></div>
+<script>
+const ids=['sword','axe','spear','dagger','bow','revolver','musket','hammer','flintlock'];
+for(const pose of ['idle','attack']) for(const id of ids){const w=window.MuseumWeapons.get(id);if(!w)continue;const f=document.createElement('figure'),c=document.createElement('canvas');c.width=48;c.height=48;c.style.width='144px';c.style.height='144px';const x=c.getContext('2d');x.fillStyle='#2a3a3a';x.fillRect(0,0,48,48);P.drawKnight(x,20,42,{pose,facing:1,time:pose==='attack'?.25:0,skin:'verdigris',weapon:id});f.append(c);const cap=document.createElement('figcaption');cap.textContent=pose+' · '+w.name+' ('+w.type+')';f.append(cap);row2.append(f);}
+</script>
