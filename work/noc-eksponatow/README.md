@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Ekran startowy (2026-10-21)
+
+Po otwarciu strony pełnoekranowy `#boot` (z-index nad wszystkim): 1) „GAME BY / AFTER DARK STUDIO” z limonkową linią (2,3 s), 2) pieczęć kustosza wbijana jak stempel + tytuł NOC EKSPONATÓW / MUZEUM PO GODZINACH (3,3 s), 3) karta „Księga gości”: ZALOGUJ SIĘ, ZAŁÓŻ KONTO (otwierają okno konta w odpowiednim trybie), KONTYNUUJ JAKO GOŚĆ. Klik, Esc albo POMIŃ skraca do karty; przywrócona sesja pokazuje „Witaj, …” i WEJDŹ DO MUZEUM; bez konfiguracji chmury zostaje tylko gość; `prefers-reduced-motion` pomija animacje. Scanlines i przejścia w CSS (`boot-*` keyframes).
+
 ## Tryb serwisowy (2026-10-21)
 
 Tabela `settings` (klucz → jsonb, publiczny odczyt, w publikacji Realtime) z wierszem `maintenance` {enabled, message, since}. Tylko admin przełącza (`mod_set_maintenance(enabled, message)`, sekcja TRYB SERWISOWY na górze panelu moderatora, z potwierdzeniem). U graczy pełnoekranowy ekran „PRACE SERWISOWE” (`#maintenance`, z komunikatem i godziną), walka pauzowana, nic nie da się kliknąć; moderatorzy grają dalej pod czerwonym banerem. Rola jest dociągana już przy przywracaniu sesji, a ekran serwisowy ma przycisk LOGOWANIE MODERATORA (okno konta nad ekranem), więc admin nigdy nie zostaje zamknięty na zewnątrz. Awaryjnie: `update public.settings set value = '{"enabled": false, "message": ""}'::jsonb where key = 'maintenance';` w SQL Editorze. Po stronie serwera polityka aktualizacji profilu odrzuca zapisy zwykłych graczy, gdy `maintenance_on()`. Dostawa: ten sam WebSocket co ogłoszenia (`postgres_changes` na `settings`) plus odpytywanie co 15 s. Migracja: `supabase/2026-10-21-serwis.sql`.

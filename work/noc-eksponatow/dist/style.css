@@ -223,3 +223,34 @@ body.pixel .exhibit-tag #exhibitTagName{font-family:var(--pixel-head);font-weigh
 @media(max-width:650px){.exhibit-tag{font-size:10px;max-width:52%;bottom:12%}body.pixel .exhibit-tag #exhibitTagName{font-size:18px}.exhibit-tag small{font-size:7px}}
 
 .brand-seal{border:0;width:44px;height:44px;padding:0}.brand-seal svg{width:44px;height:44px;display:block}@media(max-width:650px){.brand-seal,.brand-seal svg{width:36px;height:36px}}
+
+/* ── Ekran startowy: studio → tytuł z pieczęcią → logowanie / gość ── */
+.boot{position:fixed;inset:0;z-index:400;background:#0b0d0a;background-image:radial-gradient(circle at 50% 40%,#17201a,#0b0d0a 70%);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .7s ease,visibility .7s}
+.boot.out{opacity:0;visibility:hidden}
+.boot::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px);opacity:.5}
+.boot-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.boot-eyebrow{font-size:10px;letter-spacing:5px;color:var(--muted);font-weight:800}
+.boot-studio h1{font-family:'Jersey 10',monospace;font-weight:400;font-size:clamp(56px,11vw,128px);line-height:.9;margin:16px 0 20px;color:var(--cream);animation:boot-rise .9s cubic-bezier(.2,.8,.2,1) both}
+.boot-studio .boot-eyebrow{animation:boot-fade .6s .1s both}
+.boot-line{display:block;width:0;height:3px;background:var(--lime);animation:boot-line 1.1s .5s cubic-bezier(.2,.8,.2,1) both}
+.boot-studio.leave{animation:boot-leave .5s ease-in both}
+.boot-title .boot-seal{animation:boot-stamp .7s cubic-bezier(.2,.9,.2,1.2) both;filter:drop-shadow(0 0 30px rgba(213,237,113,.25))}
+.boot-title .boot-seal svg{width:min(180px,40vw);height:auto}
+.boot-title h1{font-family:'Jersey 10',monospace;font-weight:400;font-size:clamp(52px,10vw,120px);line-height:.88;margin:18px 0 10px;color:var(--cream);animation:boot-rise .8s .35s both}
+.boot-title h1 em{font-style:normal;color:var(--lime)}
+.boot-title .boot-eyebrow{animation:boot-fade .6s .8s both}
+.boot-title.leave{animation:boot-leave .5s ease-in both}
+.boot-login{animation:boot-fade .6s both}
+.boot-card{width:min(520px,92vw);padding:30px 30px 26px;background:var(--panel);border:1px solid var(--line);box-shadow:0 30px 100px #000c;text-align:left}
+.boot-card h2{font-family:'Jersey 10',monospace;font-weight:400;font-size:40px;line-height:.95;margin:10px 0 12px;color:var(--lime)}
+.boot-card p{margin:0 0 20px;color:#bdc1b2;font-size:13px;line-height:1.6}
+.boot-actions{display:flex;flex-direction:column;gap:10px}
+.boot-actions .secondary-btn,.boot-actions .primary-btn{width:100%;justify-content:center}
+.boot-skip{position:absolute;right:22px;bottom:18px;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:9px;letter-spacing:2px;padding:8px 12px;cursor:pointer}
+.boot-skip:hover{color:var(--lime);border-color:var(--lime)}
+@keyframes boot-rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes boot-fade{from{opacity:0}to{opacity:1}}
+@keyframes boot-line{from{width:0}to{width:160px}}
+@keyframes boot-leave{to{opacity:0;transform:translateY(-18px)}}
+@keyframes boot-stamp{0%{opacity:0;transform:scale(2.4) rotate(-8deg)}70%{opacity:1;transform:scale(.96) rotate(1deg)}100%{transform:scale(1) rotate(0)}}
+@media(prefers-reduced-motion:reduce){.boot *{animation:none!important}}

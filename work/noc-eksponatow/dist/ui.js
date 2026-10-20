@@ -417,5 +417,22 @@ $('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist
  // and the in-frame UI zooms by the ratio of the frame to the full content width, so nothing is ever clipped.
  function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(1,frame.clientWidth/Math.max(1,parent.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}
  fitStage();window.addEventListener('resize',fitStage);window.addEventListener('orientationchange',fitStage);if(document.fonts?.ready)document.fonts.ready.then(fitStage);setTimeout(fitStage,300);
- renderAccount();cloud.restore().then(async me=>{renderAccount();if(me){const r=await cloud.fetchProfile();if(r.ok&&r.data){cloudRole=r.data.role||'player';cloudTitle=r.data.title||null;renderAccount();applyMaintenance();}await claimServerDaily();}});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
+ // Boot sequence: studio card → title with the seal → login / guest. Click or Esc skips to the choice; a restored session skips the choice.
+ const boot={timers:[],done:false,restored:null};
+ function bootShow(id){for(const s of ['bootStudio','bootTitle','bootLogin'])show(s,s===id);}
+ function bootLeave(id,next,after){const el=$(id);el.classList.add('leave');boot.timers.push(setTimeout(()=>{el.classList.remove('leave');bootShow(next);if(after)after();},480));}
+ function bootChoice(){boot.timers.forEach(clearTimeout);boot.timers=[];if(boot.done)return;const me=cloud.user();show('bootSkip',false);
+  if(me){$('bootHello').textContent=`WITAJ, ${(me.nickname||me.email).toLocaleUpperCase('pl-PL')}.`;$('bootLead').textContent='Sesja przywrócona. Postęp zapisuje się w chmurze po każdej zmianie.';show('bootEnterBtn');$('bootEnterBtn').focus();for(const b of ['bootLoginBtn','bootRegisterBtn','bootGuestBtn'])show(b,false);}
+  else if(!cloud.enabled()){$('bootLead').textContent='Chmura nie jest skonfigurowana, dziś gra tylko jako gość.';show('bootLoginBtn',false);show('bootRegisterBtn',false);}
+  bootShow('bootLogin');}
+ function bootEnd(){if(boot.done)return;boot.done=true;boot.timers.forEach(clearTimeout);const el=$('boot');el.classList.add('out');document.body.classList.remove('booting');setTimeout(()=>show('boot',false),800);fitStage();}
+ function bootStart(){document.body.classList.add('booting');const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;if(reduced){bootChoice();return;}
+  bootShow('bootStudio');boot.timers.push(setTimeout(()=>bootLeave('bootStudio','bootTitle'),2300));boot.timers.push(setTimeout(()=>bootLeave('bootTitle','bootLogin',bootChoice),5600));}
+ $('bootSkip').addEventListener('click',bootChoice);$('bootStudio').addEventListener('click',bootChoice);$('bootTitle').addEventListener('click',bootChoice);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!boot.done&&!$('bootLogin').classList.contains('hidden')===false)bootChoice();},true);
+ $('bootGuestBtn').addEventListener('click',bootEnd);$('bootEnterBtn').addEventListener('click',bootEnd);
+ $('bootLoginBtn').addEventListener('click',()=>{bootEnd();accountMode='login';setTimeout(()=>account(),250);});
+ $('bootRegisterBtn').addEventListener('click',()=>{bootEnd();accountMode='register';setTimeout(()=>account(),250);});
+ bootStart();
+ renderAccount();cloud.restore().then(async me=>{renderAccount();boot.restored=me;if(me&&!boot.done&&!$('bootLogin').classList.contains('hidden'))bootChoice();if(me){const r=await cloud.fetchProfile();if(r.ok&&r.data){cloudRole=r.data.role||'player';cloudTitle=r.data.title||null;renderAccount();applyMaintenance();}await claimServerDaily();}});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
 })();
