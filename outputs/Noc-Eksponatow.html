@@ -205,6 +205,10 @@ body.pixel .announce-bar{font-family:'Pixelify Sans',monospace;font-size:17px}
 body.pixel{font-synthesis:none}body.pixel .announce-bar,body.pixel .choice-box h2,body.pixel .maintenance-box h2,body.pixel .shop-finish-price strong{font-weight:700}body.pixel .announce-bar{letter-spacing:1px}body.pixel .menu-screen h1,body.pixel .dream-caption h2{letter-spacing:1px}
 
 .maintenance-login-btn{display:block;margin:18px auto 0;font-size:9px}body.maintenance-login #account{z-index:320}body.maintenance-login #maintenance{opacity:.35}
+/* Pikselowa czcionka tylko tam, gdzie jest duża (nagłówki, HUD ≥ 16 px). Drobne etykiety wracają do Manrope: Pixelify poniżej 16 px zlewa H z W i C z O. */
+body.pixel .health-numbers,body.pixel .hero-level,body.pixel .level-pip strong,body.pixel .nav-tab,body.pixel .primary-btn,body.pixel .secondary-btn,body.pixel .stage-meta,body.pixel .combat-hint,body.pixel .toast,body.pixel .crate-card strong,body.pixel .skin-card strong,body.pixel .card-twist strong,body.pixel .result-stats strong,body.pixel .cinema-bottom .scene-label,body.pixel .pause-info strong,body.pixel .shop-finish-price strong,body.pixel .mod-panel strong{font-family:Manrope,Arial,sans-serif;letter-spacing:1px}
+body.pixel .health-numbers{font-size:10px;font-weight:800}body.pixel .hero-level{font-size:10px}body.pixel .level-pip strong{font-size:10px}body.pixel .nav-tab{font-size:10px}body.pixel .primary-btn,body.pixel .secondary-btn{font-size:10px;letter-spacing:1.5px}body.pixel .stage-meta{font-size:10px;letter-spacing:1.5px}body.pixel .combat-hint{font-size:11px}body.pixel .result-stats strong{font-size:24px;font-family:'Barlow Condensed',Impact,sans-serif}body.pixel .pause-info strong{font-family:'Barlow Condensed',Impact,sans-serif}
+body.pixel .fighter-label strong{font-size:19px;letter-spacing:1px}body.pixel #fightTime{font-size:18px}body.pixel .announce-bar{font-size:18px}
 </style>
 </head>
 <body>
