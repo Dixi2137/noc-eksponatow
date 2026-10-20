@@ -97,6 +97,7 @@
   });
   // Honorary titles a moderator can grant; 'first-to-arrive' is unique on the server.
   const titles = Object.freeze({
+    owner: { name: 'OWNER', color: '#ff8c9a', note: 'Właściciel muzeum.' },
     'first-to-arrive': { name: 'FIRST TO ARRIVE', color: '#f0ca72', note: 'Pierwsza osoba, która zalogowała się po założycielu.' },
     founder: { name: 'ZAŁOŻYCIEL', color: '#7ff0e0', note: 'Twórca muzeum.' },
     veteran: { name: 'WETERAN', color: '#c4a1f0', note: 'Przeszedł całą noc.' },

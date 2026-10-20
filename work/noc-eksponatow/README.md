@@ -223,7 +223,7 @@ Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej bro
 
 ## Rangi honorowe (2026-10-21)
 
-Kolumna `profiles.title` (first-to-arrive, founder, veteran, patron; katalog nazw i kolorów w `MuseumCloud.titles`). Nadaje moderator przyciskiem RANGA w panelu (`mod_set_title`); „first-to-arrive” jest unikalna w bazie (indeks częściowy), więc dostanie ją tylko jedna osoba. Ranga pokazuje się jako plakietka przy pseudonimie w rankingu, w liście moderatora i w KONCIE właściciela. Dla istniejącego projektu Supabase: `supabase/2026-10-21-rangi.sql`.
+Kolumna `profiles.title` (owner, first-to-arrive, founder, veteran, patron; katalog nazw i kolorów w `MuseumCloud.titles`). Nadaje moderator przyciskiem RANGA w panelu (`mod_set_title`); „first-to-arrive” jest unikalna w bazie (indeks częściowy), więc dostanie ją tylko jedna osoba. Ranga pokazuje się jako plakietka przy pseudonimie w rankingu, w liście moderatora i w KONCIE właściciela. Dla istniejącego projektu Supabase: `supabase/2026-10-21-rangi.sql`, potem `supabase/2026-10-21-ranga-owner.sql`.
 
 ## Moderacja (2026-10-21)
 

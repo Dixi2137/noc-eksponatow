@@ -452,6 +452,7 @@ window.MuseumConfig = Object.freeze({
   });
   // Honorary titles a moderator can grant; 'first-to-arrive' is unique on the server.
   const titles = Object.freeze({
+    owner: { name: 'OWNER', color: '#ff8c9a', note: 'Właściciel muzeum.' },
     'first-to-arrive': { name: 'FIRST TO ARRIVE', color: '#f0ca72', note: 'Pierwsza osoba, która zalogowała się po założycielu.' },
     founder: { name: 'ZAŁOŻYCIEL', color: '#7ff0e0', note: 'Twórca muzeum.' },
     veteran: { name: 'WETERAN', color: '#c4a1f0', note: 'Przeszedł całą noc.' },
@@ -3817,7 +3818,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
    act('NOTATKA',()=>{const v=window.prompt(`Notatka moderatora o ${p.nickname}:`,p.mod_note||'');if(v===null)return;return cloud.mod.note(p.id,v);});
    if(banned)act('ODBANUJ',()=>cloud.mod.unban(p.id),false,self);
    else act('BAN',()=>{const h=window.prompt(`Ban dla ${p.nickname}: na ile godzin? (0 = bezterminowo)`,'24');if(h===null||!Number.isFinite(Number(h)))return;const reason=window.prompt('Powód (widoczny dla gracza):','')||'';return cloud.mod.ban(p.id,Math.trunc(Number(h)),reason);},true,self);
-   act('RANGA',()=>{const keys=Object.keys(cloud.titles||{});const v=window.prompt(`Ranga dla ${p.nickname}: ${keys.join(', ')} albo puste, żeby zdjąć.`,p.title||'first-to-arrive');if(v===null)return;const t=v.trim();if(t&&!keys.includes(t)){modMessage(`Nieznana ranga. Dostępne: ${keys.join(', ')}.`,true);return;}return cloud.mod.setTitle(p.id,t);});
+   act('RANGA',()=>{const keys=Object.keys(cloud.titles||{});const v=window.prompt(`Ranga dla ${p.nickname}: ${keys.join(', ')} albo puste, żeby zdjąć.`,p.title||(p.id===me?.id?'owner':'first-to-arrive'));if(v===null)return;const t=v.trim();if(t&&!keys.includes(t)){modMessage(`Nieznana ranga. Dostępne: ${keys.join(', ')}.`,true);return;}return cloud.mod.setTitle(p.id,t);});
    act('RESET ZAPISU',()=>{if(!window.confirm(`Wyzerować zapis gry ${p.nickname}? Konto i pseudonim zostają.`))return;return cloud.mod.reset(p.id);},true);
    if(cloudRole==='admin')act('ROLA',()=>{const v=window.prompt(`Nowa rola dla ${p.nickname}: player, moderator albo admin`,p.role);if(v===null)return;if(!['player','moderator','admin'].includes(v.trim())){modMessage('Rola musi być: player, moderator albo admin.',true);return;}return cloud.mod.setRole(p.id,v.trim());},false,self);
    row.append(actions);return row;}));

@@ -66,7 +66,7 @@
       await cloud.mod.ban('u2', 24, 'spam'); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', hours: 24, reason: 'spam' });
       await cloud.mod.adjust('u2', -500, 2137); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', coins_delta: -500, balance_delta: 2137 });
       await cloud.mod.stats(); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_stats'));
-      await cloud.mod.setTitle('u2', 'first-to-arrive'); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', new_title: 'first-to-arrive' }); assert.equal(cloud.titles['first-to-arrive'].name, 'FIRST TO ARRIVE');
+      await cloud.mod.setTitle('u2', 'first-to-arrive'); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', new_title: 'first-to-arrive' }); assert.equal(cloud.titles['first-to-arrive'].name, 'FIRST TO ARRIVE'); assert.equal(cloud.titles.owner.name, 'OWNER');
       const role = await cloud.mod.setRole('u2', 'moderator'); assert.equal(role.ok, false); assert.equal(role.error, 'Brak uprawnień moderatora.');
       const profileCall = cloud.fetchProfile(); await profileCall; assert.ok(calls.at(-1).url.includes('role,banned_until,ban_reason'), 'profil niesie rolę i ban');
       await cloud.signOut();
