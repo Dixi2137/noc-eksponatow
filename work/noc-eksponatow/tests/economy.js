@@ -132,7 +132,18 @@
     for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
     assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
     assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
-    assert.equal(loot.crates.length, 29); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+    assert.equal(loot.crates.length, 30); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+  });
+  test('Sejf Kolekcjonera: 8 mitycznych wykończeń, nakładanie na dowolną broń, sprzedaż za 6000, nic nie wypada z innych skrzyń', () => {
+    const fin = window.MuseumFinishes; assert.equal(fin.count, 8); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
+    const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.length, 8); assert.ok(pool.every(i => i.kind === 'finish' && i.rarity === 'mythic'));
+    for (const id of ['gallery', 'legends', 'armory', 'night']) assert.ok(loot.remaining(p, id).every(i => i.kind !== 'finish'), id);
+    const r = loot.reserve(p, () => .5, 'collector'); assert.ok(r && r.reward.kind === 'finish'); assert.equal(r.cost, 12000); p = loot.claim(r.profile, { equip: true });
+    assert.equal(p.finish, r.reward.id); assert.ok(loot.has(p, r.reward.id)); assert.ok(loot.equipped(p, r.reward.id));
+    p = loot.equip(p, r.reward.id); assert.equal(p.finish, null, 'drugie kliknięcie zdejmuje'); assert.equal(loot.value(r.reward), 15000); assert.equal(loot.sellPrice(r.reward), 6000);
+    assert.ok(loot.canSell(p, r.reward.id)); const sold = loot.sell(p, r.reward.id); assert.equal(sold.price, 6000); assert.equal(sold.profile.finishes.length, 0);
+    const m = loot.migrate({ finishes: ['titanium', 'nie-ma'], finish: 'titanium', weapons: ['sword'] }); assert.deepEqual(m.finishes, ['titanium']); assert.equal(m.finish, 'titanium');
+    assert.equal(loot.migrate({ finishes: [], finish: 'titanium' }).finish, null);
   });
   test('Każdą skrzynię da się narysować', () => {
     const c = document.createElement('canvas'); c.width = 240; c.height = 200; const x = c.getContext('2d');

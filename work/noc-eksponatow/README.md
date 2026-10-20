@@ -221,6 +221,14 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Limitowane wykończenia broni (2026-10-21)
+
+Osiem mitycznych wykończeń (`dist/finishes.js`, `window.MuseumFinishes`): Diamentowy Szmaragd, Złoty Marmur, Tytan, Hologram, Obsydian i Rubin, Stal Damasceńska, Różowe Złoto, Nocna Pustka. Wykończenie to osobny rodzaj przedmiotu (`kind:'finish'`, rzadkość `mythic`, wartość 15 000 ✦, sprzedaż 6 000 ✦), nakładany na dowolną broń: przebarwia stal, krawędź, okucia i trzonek w walce, w menu i w kolekcji (zakładka WYKOŃCZENIA; drugie kliknięcie zdejmuje).
+
+- Wypadają wyłącznie ze skrzyni **Sejf Kolekcjonera** (`collector`, 12 000 ✦ / 199,99 zł, grupa „Limitowane wykończenia broni”); żadna inna skrzynia ich nie losuje, bo tylko ona ma wagę dla rzadkości `mythic`.
+- Render: `MuseumFinishes.palette(id, time)` podmienia litery palety sprite'ów (M stal, W krawędź, S ciemna stal, G okucia, D trzonek), a `overlay()` dokłada efekty na piksel: iskry (szmaragd, różowe złoto), gwiazdy (pustka), żyłki (marmur, damast), szczotkowanie (tytan), żar krawędzi (obsydian) i przesuwające się tęczowe pasy (hologram, kolor liczony z czasu). W trybie wektorowym ikona jest tintowana `source-atop` kolorami wykończenia.
+- Profil: `finishes` (posiadane) i `finish` (nałożone); `MuseumGame.start` dostaje `finish`, rycerz rysuje broń z paletą wykończenia.
+
 ## Tryb pikselowy (2026-10-21)
 
 Przycisk ▦ w górnym pasku przełącza grę w prawdziwy pixel art (`profile.pixel`). Rysowanie przejmuje `dist/pixel.js` (`window.MuseumPixel`): scena ma 288 × 162 pikseli (czynnik 5 względem 1440 × 810), rysowana na małym płótnie i powiększana bez wygładzania przez `MuseumArt.pixelFrame`.

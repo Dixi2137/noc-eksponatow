@@ -175,7 +175,7 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
  <div id="collection" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="collectionTitle">
   <div class="collection-panel">
    <div class="modal-heading"><div><span class="eyebrow">ZBROJOWNIA / STROJE, BROŃ I KARTY</span><h2 id="collectionTitle">SKRZYNKI I KOLEKCJA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij kolekcję">✕</button></div>
-   <p class="modal-lead">58 strojów, 5 rodzajów broni i 13 kart bohaterów. Każdy przedmiot ma wartość: zbędne sprzedasz, ulubione ulepszysz. Stachu Jones pozostaje prezentem dla ciebie.</p>
+   <p class="modal-lead">58 strojów, 122 bronie, 13 kart i 8 limitowanych wykończeń broni. Każdy przedmiot ma wartość: zbędne sprzedasz, ulubione ulepszysz. Stachu Jones pozostaje prezentem dla ciebie.</p>
    <div class="collection-section"><span>WITRYNA SKRZYŃ</span><span id="crateCount"></span></div>
    <div id="crateCards" class="crate-cards" aria-label="Wybór skrzyni"></div>
    <div class="crate-box">
@@ -188,7 +188,7 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
    <button id="crateShopBtn" class="store-link">ZOBACZ WSZYSTKIE OFERTY W SKLEPIE ↗</button>
    <p id="collectionMessage" class="collection-message" aria-live="polite">Pierwszy eksponat czeka. Otwórz darmową skrzynię.</p>
    <div class="collection-section"><span>TWOJE EKSPONATY</span><span id="collectionCount">2 / 58</span></div>
-   <div class="kind-tabs" role="group" aria-label="Rodzaj przedmiotów"><button id="kindSkins" class="kind-tab" aria-pressed="true">STROJE</button><button id="kindWeapons" class="kind-tab" aria-pressed="false">BROŃ</button><button id="kindCards" class="kind-tab" aria-pressed="false">KARTY</button></div>
+   <div class="kind-tabs" role="group" aria-label="Rodzaj przedmiotów"><button id="kindSkins" class="kind-tab" aria-pressed="true">STROJE</button><button id="kindWeapons" class="kind-tab" aria-pressed="false">BROŃ</button><button id="kindCards" class="kind-tab" aria-pressed="false">KARTY</button><button id="kindFinishes" class="kind-tab" aria-pressed="false">WYKOŃCZENIA</button></div>
    <div class="wardrobe-toolbar">
     <label class="skin-search-label"><span>SZUKAJ STROJU LUB ZDOLNOŚCI</span><input id="skinSearch" type="search" placeholder="Nazwa, motyw lub zdolność…" autocomplete="off"></label>
     <label><span>KATEGORIA</span><select id="categoryFilter"></select></label>
@@ -676,6 +676,56 @@ window.MuseumConfig = Object.freeze({
     has(id) { return byId.has(id); },
     all() { return weapons; }
   });
+})();
+</script><script>/* Limited weapon finishes: cosmetic coats that re-colour any weapon in hand and in the collection.
+   Mythic rarity, dropped only by the Sejf Kolekcjonera crate. Colours: steel body, edge highlight, dark steel, fittings (gold), haft (wood). */
+(() => {
+  'use strict';
+  const f = (id, name, era, flavour, colors, fx) => Object.freeze({ id, name, era, flavour, rarity: 'mythic', fx, colors: Object.freeze(colors) });
+  const finishes = Object.freeze([
+    f('diamond-emerald', 'DIAMENTOWY SZMARAGD', 'SZMARAGD I DIAMENT · WYKOŃCZENIE LIMITOWANE', 'Szlifowany szmaragd oprawiony w diament. Każde ostrze rzuca zielone iskry.',
+      { steel: '#5fd9b4', edge: '#eafff8', dark: '#1d6f58', gold: '#d6fff2', wood: '#1a4a3a' }, 'sparkle'),
+    f('gold-marble', 'ZŁOTY MARMUR', 'MARMUR KARRARYJSKI I ZŁOTO · WYKOŃCZENIE LIMITOWANE', 'Biały marmur z żyłkami złota. Broń, która wygląda jak posąg.',
+      { steel: '#efe9dc', edge: '#ffffff', dark: '#b9ae99', gold: '#e8b84a', wood: '#c9a24e', vein: '#e0b34a' }, 'veins'),
+    f('titanium', 'TYTAN', 'SZCZOTKOWANY TYTAN · WYKOŃCZENIE LIMITOWANE', 'Matowy, szczotkowany metal. Lżejszy, twardszy, bez jednego błysku za dużo.',
+      { steel: '#8f99a8', edge: '#e2e8f0', dark: '#3b424e', gold: '#b7c0cf', wood: '#2b3038', vein: '#a9b3c2' }, 'brushed'),
+    f('holo', 'HOLOGRAM', 'WIDMO ŚWIATŁA · WYKOŃCZENIE LIMITOWANE', 'Powłoka, która zmienia kolor z każdym ruchem. Tęcza zamknięta w stali.',
+      { steel: '#9ad7ff', edge: '#ffffff', dark: '#3a5a8a', gold: '#ffd6ff', wood: '#2a2a44' }, 'holo'),
+    f('obsidian-ruby', 'OBSYDIAN I RUBIN', 'WULKANICZNE SZKŁO I RUBIN · WYKOŃCZENIE LIMITOWANE', 'Czarne szkło z rubinową krawędzią, która żarzy się w ciemności.',
+      { steel: '#2a2230', edge: '#ff5a6e', dark: '#120d16', gold: '#c81e3a', wood: '#1a1418' }, 'glow'),
+    f('damascus', 'STAL DAMASCEŃSKA', 'STAL WARSTWOWA · WYKOŃCZENIE LIMITOWANE', 'Setki warstw kutej stali układają się w falisty wzór.',
+      { steel: '#6b7a86', edge: '#d2e0e8', dark: '#2a353e', gold: '#c9a24e', wood: '#4a3222', vein: '#b9c8d2' }, 'veins'),
+    f('rose-gold', 'RÓŻOWE ZŁOTO', 'RÓŻOWE ZŁOTO I PERŁA · WYKOŃCZENIE LIMITOWANE', 'Ciepły połysk różowego złota i perłowa krawędź. Elegancja, która boli.',
+      { steel: '#e4a59c', edge: '#ffe8e2', dark: '#9a564f', gold: '#f7d3cb', wood: '#6a3a38' }, 'sparkle'),
+    f('void', 'NOCNA PUSTKA', 'GWIAZDY I PUSTKA · WYKOŃCZENIE LIMITOWANE', 'Głęboki fiolet nocy, w którym migoczą gwiazdy. Broń z innego muzeum.',
+      { steel: '#241640', edge: '#c4a0ff', dark: '#0d0820', gold: '#7a5cff', wood: '#161028' }, 'stars')
+  ]);
+  const byId = new Map(finishes.map(x => [x.id, x]));
+  function hue(h, s, l) { return `hsl(${((h % 360) + 360) % 360},${s}%,${l}%)`; }
+  // Palette letters shared by icons and in-hand sprites: M steel, W edge, S dark steel, G fittings, D haft.
+  function palette(finish, time = 0) {
+    const fin = typeof finish === 'string' ? byId.get(finish) : finish;
+    if (!fin) return null;
+    if (fin.fx === 'holo') { const h = time * 90; return { M: hue(h, 75, 62), W: hue(h + 60, 90, 88), S: hue(h - 50, 60, 34), G: hue(h + 150, 80, 78), D: fin.colors.wood }; }
+    const c = fin.colors; return { M: c.steel, W: c.edge, S: c.dark, G: c.gold, D: c.wood };
+  }
+  // Per-pixel overlay for the special effects: returns a colour for a sprite pixel (letter at col/row) or null.
+  function overlay(finish, letter, col, row, time = 0) {
+    const fin = typeof finish === 'string' ? byId.get(finish) : finish;
+    if (!fin || letter === 'O' || letter === '.') return null;
+    const metal = letter === 'M' || letter === 'W' || letter === 'S';
+    const tick = Math.floor(time * 6);
+    switch (fin.fx) {
+      case 'sparkle': return metal && ((col * 7 + row * 13 + tick * 5) % 23 === 0) ? '#ffffff' : null;
+      case 'stars': return metal && ((col * 11 + row * 7 + tick * 3) % 19 === 0) ? '#f0e6ff' : null;
+      case 'veins': return letter === 'M' && ((col * 2 + row * 3) % 9 === 0 || (col + row * 2) % 11 === 0) ? fin.colors.vein : null;
+      case 'brushed': return letter === 'M' && (row % 3 === 1) ? fin.colors.vein : null;
+      case 'glow': return letter === 'W' && tick % 2 === 0 ? '#ff8c9a' : null;
+      case 'holo': return metal ? hue(time * 90 + row * 22 + col * 8, 85, 70, ) : null;
+      default: return null;
+    }
+  }
+  window.MuseumFinishes = Object.freeze({ all: () => finishes, get: id => byId.get(id) || null, has: id => byId.has(id), palette, overlay, count: finishes.length });
 })();
 </script><script>/* Opponents are data. Every exhibit that wakes up at night is one entry: numbers, rhythm, costume and art key.
    The night patrol's bosses are real historical villains; they are enemies to defeat, never collectibles. */
@@ -1955,7 +2005,7 @@ window.MuseumConfig = Object.freeze({
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
     const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a' };                         // weapon colours (steel, edge, wood, brass)
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
     const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
@@ -2185,10 +2235,16 @@ window.MuseumConfig = Object.freeze({
     sniper:     ["...............O", "..............OM", ".............OMO", "............OMO.", "........OOOOMO..", ".......OMMOMO...", "........OOOMO...", ".........OMO....", "........ODDO....", ".......ODDDO....", "......ODDDO.....", ".....ODDDO......", "....ODDDO.......", "...ODDO.........", "..OOO...........", "................"]
   };
   const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72' };
-  function drawWeaponIcon(c, weapon, x, y, scale = 1) {
+  // Finish overlay: per-pixel colours from MuseumFinishes (sparkles, veins, holographic bands) on top of the recoloured sprite.
+  function finishPass(c, rows, x, y, finish, time) {
+    const F = window.MuseumFinishes; if (!F || !finish) return;
+    for (let r = 0; r < rows.length; r++) for (let i = 0; i < rows[r].length; i++) { const col = F.overlay(finish, rows[r][i], i, r, time); if (col) px(c, x + i, y + r, col); }
+  }
+  function drawWeaponIcon(c, weapon, x, y, scale = 1, o = {}) {
     const rows = I[weapon?.icon] || I.sword, tint = rarityTint[weapon?.rarity] || '#c9d6dc';
-    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37' };
-    c.save(); c.translate(x, y); c.scale(scale, scale); blit(c, rows, 0, 0, pal); c.restore();
+    const fin = o.finish ? window.MuseumFinishes?.palette(o.finish, o.time || 0) : null;
+    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37', ...(fin || {}) };
+    c.save(); c.translate(x, y); c.scale(scale, scale); blit(c, rows, 0, 0, pal); if (fin) finishPass(c, rows, 0, 0, o.finish, o.time || 0); c.restore();
   }
   // ── Crates, cards and the private hall in pixels ─────────────────────────
   const crateGlyphPal = {};
@@ -2706,7 +2762,7 @@ window.MuseumConfig = Object.freeze({
     const pEvadeX = p.evade > 0 ? Math.max(LEFT - p.x, -Math.sin(clamp(playerProgress, 0, 1) * Math.PI) * 55) : 0;
     const rEvadeX = foePose === 'dodge' ? Math.min(RIGHT - r.x - 29, Math.sin(clamp(foeProgress, 0, 1) * Math.PI) * 48) : 0;
     const foeOpts = { facing: -1, pose: foePose, progress: clamp(foeProgress, 0, 1), phase: clamp(foeProgress, 0, 1), time: artTime, heavy: r.heavy, glow: r.hurt > 0 };
-    const playerOpts = { facing: 1, pose: playerPose, progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 };
+    const playerOpts = { facing: 1, pose: playerPose, progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, finish: state.finish || null, glow: p.hurt > 0 };
     const foeArt = state.exhibit.stats.art;
     const drawR = () => pix && (foeArt === 'rex' || foeArt === 'raptor') ? inPixels(() => pix.drawRex(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, skin: foeArt === 'raptor' ? 'raptor' : null, scale: foeArt === 'raptor' ? .9 : 1.4 }))
       : pix && foeArt === 'figure' ? inPixels(() => pix.drawFigure(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, figure: state.exhibit.stats.figure }))
@@ -2791,7 +2847,7 @@ window.MuseumConfig = Object.freeze({
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); state.finish = options.finish || null; scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;
@@ -2819,7 +2875,7 @@ window.MuseumConfig = Object.freeze({
    Items (skins, weapons, cards) share one catalogue with a value per rarity; selling, upgrades and the daily bonus live here too. */
 (() => {
  'use strict';
- const weaponsApi=window.MuseumWeapons,cardsApi=window.MuseumCards;
+ const weaponsApi=window.MuseumWeapons,cardsApi=window.MuseumCards,finishesApi=window.MuseumFinishes;
  const categories=Object.freeze([
   {id:'arsenal',name:'Arsenał',color:'#c9b37a'},
   {id:'heroes',name:'Bohaterowie',color:'#d9a0c6'},
@@ -2834,7 +2890,8 @@ window.MuseumConfig = Object.freeze({
   {id:'royal',name:'Korona i Honor',color:'#eccd76'},
   {id:'forge',name:'Kuźnia i Technika',color:'#d99c7b'},
   {id:'desert',name:'Piaski i Szlaki',color:'#d8ba86'},
-  {id:'special',name:'Eksponaty Specjalne',color:'#76d5d9'}
+  {id:'special',name:'Eksponaty Specjalne',color:'#76d5d9'},
+  {id:'finishes',name:'Limitowane wykończenia',color:'#7ff0e0'}
  ].map(Object.freeze));
  function getCategory(id) { return categories.find(category=>category.id===id)||null; }
  const categoryNumbers=Object.freeze({
@@ -2956,9 +3013,13 @@ window.MuseumConfig = Object.freeze({
   {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:9000,pricePLN:199.99,
    description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
-   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})}
+   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
+  {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'finish',family:'finishes',group:'finishes',
+   description:'Osiem limitowanych wykończeń broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Wykończenie nakładasz na dowolną broń.',
+   guarantee:'1 nowe wykończenie · mityczne, limitowane',color:'#7ff0e0',glyph:'◆',
+   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:0,mythic:100})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic')})));
- const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'}]);
+ const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -2967,7 +3028,8 @@ window.MuseumConfig = Object.freeze({
   common: {name:'ZWYKŁY',color:'#b8c4cf'},
   rare: {name:'RZADKI',color:'#90cce8'},
   epic: {name:'EPICKI',color:'#c4a1f0'},
-  legendary: {name:'LEGENDARNY',color:'#f0ca72'}
+  legendary: {name:'LEGENDARNY',color:'#f0ca72'},
+  mythic: {name:'MITYCZNY',color:'#7ff0e0'}
  });
  const skins = Object.freeze([
   {id:'brass',name:'STARA GWARDIA',era:'STAL · KOLEKCJA PODSTAWOWA',rarity:'basic',weight:0},
@@ -2981,20 +3043,21 @@ window.MuseumConfig = Object.freeze({
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
  ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
  // One catalogue for everything a crate can drop or a player can sell.
- const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500});
+ const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
  const SELL_RATE=.4, UPGRADE_MAX=5;
  const items=Object.freeze([
   ...skins.map(skin=>({kind:'skin',...skin})),
   ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
-  ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'}))
+  ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
+  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:'mythic',summary:'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors}))
  ].map(Object.freeze));
  const itemsById=new Map(items.map(item=>[item.id,item]));
  function getItem(id){return itemsById.get(id)||null;}
  function value(item){const it=typeof item==='string'?getItem(item):item;return it&&!it.gift?values[it.rarity]||0:0;}
  function sellPrice(item){return Math.floor(value(item)*SELL_RATE);}
- function listFor(profile,kind){return kind==='weapon'?profile.weapons:kind==='card'?profile.cards:profile.owned;}
+ function listFor(profile,kind){return kind==='weapon'?profile.weapons:kind==='card'?profile.cards:kind==='finish'?(profile.finishes||[]):profile.owned;}
  function has(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&listFor(profile,it.kind).includes(it.id);}
- function equipped(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&(it.kind==='skin'?profile.skin===it.id:it.kind==='weapon'?profile.weapon===it.id:profile.card===it.id);}
+ function equipped(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&(it.kind==='skin'?profile.skin===it.id:it.kind==='weapon'?profile.weapon===it.id:it.kind==='finish'?profile.finish===it.id:profile.card===it.id);}
  const integer = value => Number.isFinite(Number(value)) ? Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(Number(value)))) : 0;
  function migrate(saved) {
   const source = saved && typeof saved === 'object' ? saved : {};
@@ -3002,8 +3065,9 @@ window.MuseumConfig = Object.freeze({
   const owned = skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id);
   const weapons=['sword',...(Array.isArray(source.weapons)?source.weapons:[]).filter(id=>id!=='sword'&&weaponsApi.has(id))];
   const cards=(Array.isArray(source.cards)?source.cards:[]).filter(id=>cardsApi.get(id));
+  const finishes=(Array.isArray(source.finishes)?source.finishes:[]).filter(id=>finishesApi?.has(id));
   const pendingItem=getItem(source.pendingReward);
-  const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:cards).includes(pendingItem.id) ? pendingItem.id : null;
+  const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:pendingItem.kind==='finish'?finishes:cards).includes(pendingItem.id) ? pendingItem.id : null;
   const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(item&&item.kind===kind&&(kind==='skin'||kind==='weapon'))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}
   return {
    coins:integer(source.coins),owned,
@@ -3016,6 +3080,7 @@ window.MuseumConfig = Object.freeze({
    exhibit:typeof source.exhibit==='string' ? source.exhibit : null,
    weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
+   finishes,finish:finishes.includes(source.finish) ? source.finish : null,
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
@@ -3028,7 +3093,7 @@ window.MuseumConfig = Object.freeze({
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);
-  const result={common:0,rare:0,epic:0,legendary:0};
+  const result={common:0,rare:0,epic:0,legendary:0,mythic:0};
   if(!crate)return result;
   const tiers=Object.keys(crate.rarityWeights).filter(tier=>crate.rarityWeights[tier]>0&&pool.some(s=>s.rarity===tier));
   const total=tiers.reduce((sum,tier)=>sum+crate.rarityWeights[tier],0);
@@ -3067,17 +3132,18 @@ window.MuseumConfig = Object.freeze({
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
   const next={...profile,coins:profile.coins-cost,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
-  if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else next.cards=[...profile.cards,reward.id];
+  if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else if(reward.kind==='finish')next.finishes=[...(profile.finishes||[]),reward.id];else next.cards=[...profile.cards,reward.id];
   return {reward,cost,free,crate,profile:next};
  }
  function claim(profile, {equip=false}={}) {
   const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null};
-  if(equip&&reward&&has(profile,reward)){if(reward.kind==='skin')next.skin=reward.id;else if(reward.kind==='weapon')next.weapon=reward.id;else if(reward.type==='hero')next.card=reward.id;}
+  if(equip&&reward&&has(profile,reward)){if(reward.kind==='skin')next.skin=reward.id;else if(reward.kind==='weapon')next.weapon=reward.id;else if(reward.kind==='finish')next.finish=reward.id;else if(reward.type==='hero')next.card=reward.id;}
   return next;
  }
  function equip(profile,id){
   const item=getItem(id);if(!item||!has(profile,item))return null;
   if(item.kind==='skin')return {...profile,skin:item.id};if(item.kind==='weapon')return {...profile,weapon:item.id};
+  if(item.kind==='finish')return {...profile,finish:profile.finish===item.id?null:item.id};
   if(item.type==='hero')return {...profile,card:profile.card===item.id?null:item.id};return null;
  }
  // Selling: owned, not equipped, not a gift or basic item. Pays SELL_RATE of the value and forgets the upgrades.
@@ -3085,7 +3151,7 @@ window.MuseumConfig = Object.freeze({
  function sell(profile,id){
   if(!canSell(profile,id))return null;const item=getItem(id),price=sellPrice(item),upgrades={...profile.upgrades};delete upgrades[`${item.kind}:${item.id}`];
   const next={...profile,coins:profile.coins+price,upgrades};
-  if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
+  if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else if(item.kind==='finish')next.finishes=(profile.finishes||[]).filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
   return {profile:next,price,item};
  }
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
@@ -3166,6 +3232,7 @@ window.MuseumConfig = Object.freeze({
    const price=node('span','shop-product-price');price.append(node('strong','',currency.format(crate.pricePLN)),node('small','shop-product-planned','PLANOWANA CENA'));
    button.append(heading,art,node('h3','',crate.name),node('p','shop-product-guarantee',crate.guarantee));
    if(category&&crate.pool==='skin'){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
+   else if(crate.pool==='finish'){const pool=loot.items.filter(item=>item.kind==='finish'),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} WYKOŃCZEŃ LIMITOWANYCH`));}
    else if(crate.pool==='weapon'&&(crate.weaponType||category)){const pool=loot.items.filter(item=>item.kind==='weapon'&&item.weight>0&&(!crate.weaponType||item.type===crate.weaponType)&&(!category||item.categoryId===category.id)),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} BRONI W PULI`));}
    else if(crate.pool!=='skin'){const pool=loot.items.filter(item=>(crate.pool==='any'||item.kind===crate.pool)&&item.weight>0&&crate.rarityWeights[item.rarity]>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} ${crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':'PRZEDMIOTÓW'} W PULI`));}
    else button.append(node('span','shop-product-progress','WSZYSTKIE KATEGORIE STROJÓW'));
@@ -3370,7 +3437,7 @@ window.MuseumConfig = Object.freeze({
  function matchingItems(){const query=normalizeSkinText(collectionFilters.search);return loot.items.filter(s=>{if(s.kind!==collectionKind)return false;const owned=loot.has(profile,s);return (!collectionFilters.newOnly||/^knight-\d{2}$/.test(s.id))&&(collectionFilters.category==='all'||s.categoryId===collectionFilters.category)&&(collectionFilters.rarity==='all'||s.rarity===collectionFilters.rarity)&&(collectionFilters.ownership==='all'||(collectionFilters.ownership==='owned'?owned:!owned))&&(!query||normalizeSkinText(itemSearchText(s)).includes(query));});}
  const matchingSkins=matchingItems;
  function perkText(perk){return `${perk.title}: ${perk.summary}`;}
- function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),weapon=weapons.get(profile.weapon),card=cardsApi.get(profile.card);const up=loot.upgradeLevel(profile,skin.id),wup=loot.upgradeLevel(profile,weapon.id);const text=`${skin.name}${up?` +${up}`:''} — ${perkText(perks.get(skin.id))} · ${weapon.name}${wup?` +${wup}`:''}${card?` · ${card.name}: ${card.summary}`:''}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
+ function updateLoadout(){const skin=skins.find(s=>s.id===profile.skin),weapon=weapons.get(profile.weapon),card=cardsApi.get(profile.card);const up=loot.upgradeLevel(profile,skin.id),wup=loot.upgradeLevel(profile,weapon.id);const finish=window.MuseumFinishes?.get(profile.finish);const text=`${skin.name}${up?` +${up}`:''} — ${perkText(perks.get(skin.id))} · ${weapon.name}${wup?` +${wup}`:''}${finish?` (${finish.name})`:''}${card?` · ${card.name}: ${card.summary}`:''}`;if($('loadoutPerk').textContent!==text)$('loadoutPerk').textContent=text;}
  function updateActivePerk(perk){const target=$('activePerk');if(target.dataset.perk===perk.id)return;const title=document.createElement('strong'),summary=document.createElement('span');title.textContent=perk.title;summary.textContent=perk.summary;target.replaceChildren(title,summary);target.dataset.perk=perk.id;target.setAttribute('aria-label',perkText(perk));}
  let pushTimer=null,pushing=false;
  function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
@@ -3411,7 +3478,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   $('playerName').textContent=profile.skin==='stachu-jones'?'STACHU JONES':'ŻELAZNY RYCERZ';$('foeName').textContent=exhibit.name;
   $('stageHall').textContent=level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
   $('topStatus').textContent=`SALA ${String(level.number).padStart(2,'0')} / RYCERZ KONTRA ${exhibit.alias.toLocaleUpperCase('pl-PL')}`;stageState();
-  show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',theme:level.theme,modifiers:loot.modifiers(profile),sound:profile.sound});
+  show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',finish:profile.finish||null,theme:level.theme,modifiers:loot.modifiers(profile),sound:profile.sound});
  }
  function pause(){if(screen!=='fight')return;screen='paused';window.MuseumGame.pause();show('pause');stageState();}
  function resume(){if(screen!=='paused')return;screen='fight';show('pause',false);window.MuseumGame.resume();stageState();}
@@ -3515,15 +3582,19 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   const ctx0=canvas.getContext('2d'),d=canvas.width/360;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
   const g=ctx.createRadialGradient(180,175,15,180,180,230);g.addColorStop(0,loot.rarities[item.rarity].color+'30');g.addColorStop(1,'#10180e');if(canvas.id!=='lootCanvas'){ctx.fillStyle=g;ctx.fillRect(0,0,360,360);}
   const a=window.MuseumArt;if(!a)return;const pix=a.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;
-  if(pix){ctx.save();ctx.setTransform(1,0,0,1,0,0);const sz=Math.round(360/pix.PX);if(item.kind==='weapon')pix.drawWeaponIcon(ctx,weapons.get(item.id),Math.round(sz/2-32),Math.round(sz/2-32),4);else if(item.kind==='card')pix.drawCardArt(ctx,cardsApi.get(item.id),sz,sz);else pix.drawKnight(ctx,sz/2,sz-6,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();return;}
+  if(pix){ctx.save();ctx.setTransform(1,0,0,1,0,0);const sz=Math.round(360/pix.PX);if(item.kind==='weapon')pix.drawWeaponIcon(ctx,weapons.get(item.id),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:loot.equipped(profile,item)&&profile.finish?profile.finish:null,time:performance.now()/1000});else if(item.kind==='finish')pix.drawWeaponIcon(ctx,weapons.get(profile.weapon)||weapons.get('sword'),Math.round(sz/2-32),Math.round(sz/2-32),4,{finish:item.id,time:performance.now()/1000});else if(item.kind==='card')pix.drawCardArt(ctx,cardsApi.get(item.id),sz,sz);else pix.drawKnight(ctx,sz/2,sz-6,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();return;}
   if(item.kind==='weapon'){ctx.save();ctx.translate(180,185);ctx.scale(1.05,1.05);a.drawWeaponIcon(ctx,weapons.get(item.id));ctx.restore();}
+  else if(item.kind==='finish'){drawFinishVector(ctx,weapons.get(profile.weapon)||weapons.get('sword'),item);}
   else if(item.kind==='card'){a.drawCardArt(ctx,cardsApi.get(item.id),360,360);}
   else{ctx.save();ctx.translate(180,320);ctx.scale(.95,.95);a.drawKnight(ctx,0,0,{pose:'idle',facing:1,time:0,skin:item.id});ctx.restore();}
   });
  }
+ // Vector fallback for finishes: draw the weapon on a layer, tint it source-atop with the finish colours, add a few sparks.
+ const finishLayer=document.createElement('canvas');finishLayer.width=finishLayer.height=360;
+ function drawFinishVector(ctx,weapon,item){const a=window.MuseumArt,l=finishLayer.getContext('2d');l.setTransform(1,0,0,1,0,0);l.clearRect(0,0,360,360);l.save();l.translate(180,185);l.scale(1.05,1.05);a.drawWeaponIcon(l,weapon);l.restore();const c=item.colors||{};l.save();l.globalCompositeOperation='source-atop';const g=l.createLinearGradient(60,60,300,300);g.addColorStop(0,c.edge||'#fff');g.addColorStop(.5,c.steel||'#ccc');g.addColorStop(1,c.dark||'#333');l.fillStyle=g;l.globalAlpha=.72;l.fillRect(0,0,360,360);l.restore();ctx.drawImage(finishLayer,0,0);ctx.save();ctx.fillStyle=c.edge||'#fff';for(let k=0;k<6;k++){const sx=80+(k*97)%200,sy=70+(k*61)%220;ctx.fillRect(sx,sy,3,3);ctx.fillRect(sx-3,sy+1,9,1);ctx.fillRect(sx+1,sy-3,1,9);}ctx.restore();}
  const drawSkin=drawItem;
  function renderDropContents(target,entries){const rows=entries.map(({item,chance})=>{const row=document.createElement('div'),name=document.createElement('span'),rarity=document.createElement('small'),odds=document.createElement('strong');row.className='drop-row';name.textContent=item.name;rarity.textContent=loot.rarities[item.rarity].name;rarity.style.color=loot.rarities[item.rarity].color;odds.textContent=chance.toLocaleString('pl-PL',{maximumFractionDigits:2})+'%';row.append(name,rarity,odds);return row;});target.replaceChildren(...rows);if(!rows.length){const text=document.createElement('p');text.textContent='Masz już wszystko, co może wypaść z tej skrzyni. Żetony nie zostaną pobrane.';target.append(text);}}
- function itemCount(n,kind){const forms={skin:['strój','stroje','strojów'],weapon:['broń','bronie','broni'],card:['karta','karty','kart'],any:['przedmiot','przedmioty','przedmiotów']}[kind]||['przedmiot','przedmioty','przedmiotów'];return `${n} ${n===1?forms[0]:n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?forms[1]:forms[2]}`;}
+ function itemCount(n,kind){const forms={skin:['strój','stroje','strojów'],weapon:['broń','bronie','broni'],card:['karta','karty','kart'],finish:['wykończenie','wykończenia','wykończeń'],any:['przedmiot','przedmioty','przedmiotów']}[kind]||['przedmiot','przedmioty','przedmiotów'];return `${n} ${n===1?forms[0]:n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?forms[1]:forms[2]}`;}
  function drawCrate(canvas,crate){const ctx=canvas.getContext('2d');if(!ctx||!window.MuseumArt?.drawCrate)return;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);const pix=window.MuseumArt.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;if(pix){pix.drawCrate(ctx,crate,canvas.width,canvas.height);return;}window.MuseumArt.pixelFrame(ctx,canvas.width,canvas.height,c=>window.MuseumArt.drawCrate(c,crate,canvas.width,canvas.height,{time:1.3}));}
  function renderCrateCards(selectedId){
   const root=$('crateCards');const busy=()=>crateBusy||!['menu','result'].includes(screen);
@@ -3541,11 +3612,11 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   root.replaceChildren(...loot.crateGroups.map(group=>{const crates=loot.crates.filter(c=>c.group===group.id);if(!crates.length)return null;const section=document.createElement('div');section.className='crate-group';const head=document.createElement('div');head.className='crate-group-head';head.innerHTML=`<span>${group.name}</span><small>${crates.length}</small>`;const row=document.createElement('div');row.className='crate-row';row.append(...crates.map(card));section.append(head,row);return section;}).filter(Boolean));
   $('crateCount').textContent=`${loot.crates.length} RODZAJÓW W ${loot.crateGroups.length} GRUPACH`;
  }
- function equipLabel(item,selected){if(item.kind==='card')return cardsApi.get(item.id)?.type==='hero'?(selected?'● AKTYWNA':'AKTYWUJ KARTĘ ↗'):'✓ DZIAŁA Z BRONIĄ';return selected?'● WYBRANY':item.kind==='weapon'?'ZAŁÓŻ BROŃ ↗':'WYBIERZ SKIN ↗';}
+ function equipLabel(item,selected){if(item.kind==='card')return cardsApi.get(item.id)?.type==='hero'?(selected?'● AKTYWNA':'AKTYWUJ KARTĘ ↗'):'✓ DZIAŁA Z BRONIĄ';if(item.kind==='finish')return selected?'● NAŁOŻONE · ZDEJMIJ':'NAŁÓŻ NA BROŃ ↗';return selected?'● WYBRANY':item.kind==='weapon'?'ZAŁÓŻ BROŃ ↗':'WYBIERZ SKIN ↗';}
  function renderSkins(){
   const grid=$('skinGrid');grid.replaceChildren();
-  for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card']])$(id).setAttribute('aria-pressed',String(collectionKind===kind));
-  show('newSkinsOnly',collectionKind==='skin');$('categoryFilter').disabled=collectionKind==='card';
+  for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card'],['kindFinishes','finish']])$(id).setAttribute('aria-pressed',String(collectionKind===kind));
+  show('newSkinsOnly',collectionKind==='skin');$('categoryFilter').disabled=collectionKind==='card'||collectionKind==='finish';
   const matches=matchingItems(),pages=Math.max(1,Math.ceil(matches.length/SKINS_PER_PAGE));collectionPage=Math.max(0,Math.min(collectionPage,pages-1));const page=matches.slice(collectionPage*SKINS_PER_PAGE,(collectionPage+1)*SKINS_PER_PAGE);
   $('skinResultsCount').textContent=matches.length?`${itemCount(matches.length,collectionKind)} · ${collectionPage*SKINS_PER_PAGE+1}–${Math.min((collectionPage+1)*SKINS_PER_PAGE,matches.length)} na stronie`:itemCount(0,collectionKind);
   $('skinPageInfo').textContent=`Strona ${collectionPage+1} / ${pages}`;$('skinPagePrev').disabled=collectionPage===0;$('skinPageNext').disabled=collectionPage>=pages-1;show('skinPagination',matches.length>SKINS_PER_PAGE);show('skinEmpty',!matches.length);$('newSkinsOnly').setAttribute('aria-pressed',String(collectionFilters.newOnly));
@@ -3566,7 +3637,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
     const actions=document.createElement('div');actions.className='skin-actions';
     const cost=loot.upgradeCost(level),up=document.createElement('button');up.type='button';up.className='skin-action';up.disabled=cost===null||profile.coins<cost;up.textContent=cost===null?`MAKS. +${level}`:`ULEPSZ +${level+1} · ${number(cost)} ✦`;up.title=cost===null?'Maksymalny poziom ulepszenia.':`${s.kind==='skin'?'+6 maks. HP':'+8% obrażeń'} za poziom.`;
     up.addEventListener('click',()=>{if(busy())return;const result=loot.upgrade(profile,s.id);if(!result){toast(`Brakuje żetonów na ulepszenie. Koszt: ${number(cost)} ✦.`);return;}profile=result.profile;persist();renderSkins();toast(`${s.name} ulepszono do +${result.level}: ${loot.upgradeEffect(s,result.level)}.`);});
-    actions.append(up);
+    if(s.kind!=='finish')actions.append(up);
     const price=loot.sellPrice(s),sellable=loot.canSell(profile,s.id),sell=document.createElement('button');sell.type='button';sell.className='skin-action sell';sell.disabled=!sellable;sell.textContent=price?`SPRZEDAJ · ${number(price)} ✦`:'NIE NA SPRZEDAŻ';sell.title=selected?'Zdejmij przedmiot, żeby go sprzedać.':price?`Wartość ${number(loot.value(s))} ✦, sprzedaż za 40%.`:'Przedmiotów podstawowych i prezentów nie da się sprzedać.';
     sell.addEventListener('click',()=>{if(busy()||!loot.canSell(profile,s.id))return;if(!window.confirm(`Sprzedać ${s.name} za ${number(price)} ✦? Ulepszenia przepadną.`))return;const result=loot.sell(profile,s.id);if(!result)return;profile=result.profile;persist();renderSkins();toast(`Sprzedano ${result.item.name} za ${number(result.price)} ✦.`);});
     actions.append(sell);cell.append(actions);
@@ -3575,7 +3646,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   }
   const crate=loot.getCrate(selectedCrateId)||loot.getCrate('gallery');selectedCrateId=crate.id;
   const entries=loot.entries(profile,crate.id),all=!entries.length,free=crate.id==='gallery'&&profile.freeCrates>0,odds=loot.odds(profile,crate.id);
-  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?(crate.weaponType?`Broń · ${weapons.types[crate.weaponType].name}`:crate.categoryId?`Broń · ${loot.getCategory(crate.categoryId)?.name}`:'Cała zbrojownia'):crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
+  renderCrateCards(crate.id);drawCrate($('crateCanvas'),crate);$('crateTitle').textContent=crate.name;$('crateGuarantee').textContent=crate.guarantee+'. Bez duplikatów.';$('crateCategory').textContent=crate.pool==='finish'?'Limitowane wykończenia broni · mityczne':crate.pool==='any'?'Skrzynia mieszana · stroje, broń i karty':crate.pool==='weapon'?(crate.weaponType?`Broń · ${weapons.types[crate.weaponType].name}`:crate.categoryId?`Broń · ${loot.getCategory(crate.categoryId)?.name}`:'Cała zbrojownia'):crate.pool==='card'?(loot.getCategory(crate.categoryId)?.name||'Skrzynia kart'):loot.getCategory(crate.categoryId)?.name||'Wszystkie kategorie strojów';$('crateCategory').style.color=crate.color;
   $('crateContentsSummary').textContent=`ZAWARTOŚĆ I SZANSE · ${itemCount(entries.length,crate.pool)}`;renderDropContents($('crateContentsList'),entries);
   $('crateBtn').disabled=all||crateBusy||!!profile.pendingReward||(!free&&profile.coins<crate.cost);
   $('crateBtn').innerHTML=all?'ZAWARTOŚĆ ZEBRANA <span>✓</span>':free?'OTWÓRZ GRATIS <span>◇</span>':`OTWÓRZ SKRZYNIĘ <span>${number(crate.cost)} ✦</span>`;
@@ -3593,7 +3664,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   const s=loot.getItem(profile.pendingReward);if(!s)return;
   if(recovered)window.MuseumLootShow.cancel();setLootBusy(false);delete $('lootPanel').dataset.lootPhase;$('lootPanel').classList.remove('is-rolling');$('lootPanel').classList.add('is-revealed');$('lootPanel').dataset.rarity=s.rarity;$('lootPanel').style.setProperty('--rarity',loot.rarities[s.rarity].color);
   $('lootEyebrow').textContent=recovered?'TWOJA SKRZYNIA NIE PRZEPADŁA':'PIECZĘĆ ZERWANA / NOWE ODKRYCIE';$('lootTitle').textContent='NOWY EKSPONAT.';$('lootSubtitle').textContent=recovered?'Odzyskano odkryty wygląd. Czeka bezpiecznie w twojej kolekcji.':'Ten wygląd już należy do ciebie. Załóż go na kolejny pojedynek.';
-  show('lootWindow',false);show('lootSuspense',false);show('lootReward');show('lootActions');$('lootRarity').textContent=loot.rarities[s.rarity].name;$('lootName').textContent=s.name;$('lootEra').textContent=s.era;$('lootPerk').textContent=itemSummary(s);drawItem($('lootCanvas'),s);const weaponCard=s.kind==='card'&&cardsApi.get(s.id)?.type==='weapon';show('lootEquipBtn',!weaponCard);$('lootEquipBtn').innerHTML=s.kind==='weapon'?'ZAŁÓŻ BROŃ <span>↗</span>':s.kind==='card'?'AKTYWUJ KARTĘ <span>↗</span>':'ZAŁÓŻ SKIN <span>↗</span>';(weaponCard?$('lootKeepBtn'):$('lootEquipBtn')).focus({preventScroll:true});renderSkins();
+  show('lootWindow',false);show('lootSuspense',false);show('lootReward');show('lootActions');$('lootRarity').textContent=loot.rarities[s.rarity].name;$('lootName').textContent=s.name;$('lootEra').textContent=s.era;$('lootPerk').textContent=itemSummary(s);drawItem($('lootCanvas'),s);const weaponCard=s.kind==='card'&&cardsApi.get(s.id)?.type==='weapon';show('lootEquipBtn',!weaponCard);$('lootEquipBtn').innerHTML=s.kind==='weapon'?'ZAŁÓŻ BROŃ <span>↗</span>':s.kind==='card'?'AKTYWUJ KARTĘ <span>↗</span>':s.kind==='finish'?'NAŁÓŻ NA BROŃ <span>↗</span>':'ZAŁÓŻ SKIN <span>↗</span>';(weaponCard?$('lootKeepBtn'):$('lootEquipBtn')).focus({preventScroll:true});renderSkins();
  }
  function claimReward(equip){
   if(crateBusy||!['menu','result'].includes(screen))return;
@@ -3617,7 +3688,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   window.MuseumLootShow.start({reel,viewport:$('lootWindow'),cards,winner,isSoundEnabled:()=>profile.sound,onReveal:()=>{if(token===rollToken)revealReward();}});
  }
  function changeCollectionFilter(){if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.search=$('skinSearch').value;collectionFilters.category=$('categoryFilter').value;collectionFilters.rarity=$('rarityFilter').value;collectionFilters.ownership=$('ownershipFilter').value;collectionPage=0;renderSkins();}
- for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card']])$(id).addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionKind=kind;collectionPage=0;collectionFilters.newOnly=false;renderSkins();});
+ for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card'],['kindFinishes','finish']])$(id).addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionKind=kind;collectionPage=0;collectionFilters.newOnly=false;renderSkins();});
  for(const category of [{id:'all',name:'Wszystkie kategorie'},...loot.categories]){const option=document.createElement('option');option.value=category.id;option.textContent=category.name;$('categoryFilter').append(option);}
  $('categoryFilter').value='all';
  window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,notify:toast});
@@ -3642,7 +3713,7 @@ $('pixelBtn').addEventListener('click',()=>{profile.pixel=!profile.pixel;persist
   const level=night?levels.get(night.levelId):currentLevel(),exhibit=levelExhibit(level),big=exhibit.stats.art==='rex';
   const pix=a.pixelFactor&&window.MuseumPixel?window.MuseumPixel:null;const inPixels=fn=>{ctx.save();ctx.setTransform(1,0,0,1,0,0);fn();ctx.restore();};
   const arena=(theme)=>pix?inPixels(()=>pix.drawArena(ctx,time,theme)):a.drawArena(ctx,1440,810,time,theme);
-  const knight=(x,o)=>pix?inPixels(()=>pix.drawKnight(ctx,x/pix.PX,pix.FLOOR,{...o,skin:profile.skin})):a.drawKnight(ctx,x,665,{...o,skin:profile.skin});
+  const knight=(x,o)=>pix?inPixels(()=>pix.drawKnight(ctx,x/pix.PX,pix.FLOOR,{...o,skin:profile.skin,weapon:profile.weapon,finish:profile.finish||null})):a.drawKnight(ctx,x,665,{...o,skin:profile.skin});
   const drawFoe=(x,o)=>{const art=exhibit.stats.art;if(pix&&(art==='rex'||art==='raptor')){inPixels(()=>pix.drawRex(ctx,x/pix.PX,pix.FLOOR,{...o,skin:art==='raptor'?'raptor':null,scale:art==='raptor'?.9:1.4}));return;}if(pix&&art==='figure'){inPixels(()=>pix.drawFigure(ctx,x/pix.PX,pix.FLOOR,{...o,figure:exhibit.stats.figure}));return;}ctx.save();ctx.translate(x,665);if(big)ctx.scale(1.18,1.18);a.drawExhibit(ctx,exhibit,0,0,o);ctx.restore();};
   if(screen==='menu'){arena(level.theme);knight(325,{pose:'idle',facing:1,time});drawFoe(big?1085:1040,{pose:'idle',facing:-1,time});}
   else if(screen==='intro'){if(introTime<6&&a.drawGuardScene){a.drawGuardScene(ctx,1440,810,time);}else{arena(level.theme);const awake=Math.min(1,Math.max(0,(introTime-6)/3));drawFoe(big?1055:1030,{pose:introTime<11?'guard':'idle',facing:-1,time,phase:awake,glow:introTime<11});knight(365,{pose:introTime<12?'idle':'guard',facing:1,time});ctx.fillStyle=`rgba(0,8,5,${Math.max(0,.65-awake*.65)})`;ctx.fillRect(0,0,1440,810);}const boundary=[0,6,12].some(t=>introTime>=t&&introTime<t+.6);if(boundary){const at=introTime%6;ctx.fillStyle=`rgba(4,9,6,${1-at/.6})`;ctx.fillRect(0,0,1440,810);}}

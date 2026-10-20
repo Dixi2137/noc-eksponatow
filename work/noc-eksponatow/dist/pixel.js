@@ -174,7 +174,7 @@
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
     const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a' };                         // weapon colours (steel, edge, wood, brass)
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
     const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
@@ -404,10 +404,16 @@
     sniper:     ["...............O", "..............OM", ".............OMO", "............OMO.", "........OOOOMO..", ".......OMMOMO...", "........OOOMO...", ".........OMO....", "........ODDO....", ".......ODDDO....", "......ODDDO.....", ".....ODDDO......", "....ODDDO.......", "...ODDO.........", "..OOO...........", "................"]
   };
   const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72' };
-  function drawWeaponIcon(c, weapon, x, y, scale = 1) {
+  // Finish overlay: per-pixel colours from MuseumFinishes (sparkles, veins, holographic bands) on top of the recoloured sprite.
+  function finishPass(c, rows, x, y, finish, time) {
+    const F = window.MuseumFinishes; if (!F || !finish) return;
+    for (let r = 0; r < rows.length; r++) for (let i = 0; i < rows[r].length; i++) { const col = F.overlay(finish, rows[r][i], i, r, time); if (col) px(c, x + i, y + r, col); }
+  }
+  function drawWeaponIcon(c, weapon, x, y, scale = 1, o = {}) {
     const rows = I[weapon?.icon] || I.sword, tint = rarityTint[weapon?.rarity] || '#c9d6dc';
-    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37' };
-    c.save(); c.translate(x, y); c.scale(scale, scale); blit(c, rows, 0, 0, pal); c.restore();
+    const fin = o.finish ? window.MuseumFinishes?.palette(o.finish, o.time || 0) : null;
+    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37', ...(fin || {}) };
+    c.save(); c.translate(x, y); c.scale(scale, scale); blit(c, rows, 0, 0, pal); if (fin) finishPass(c, rows, 0, 0, o.finish, o.time || 0); c.restore();
   }
   // ── Crates, cards and the private hall in pixels ─────────────────────────
   const crateGlyphPal = {};

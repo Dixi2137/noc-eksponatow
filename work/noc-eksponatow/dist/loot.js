@@ -2,7 +2,7 @@
    Items (skins, weapons, cards) share one catalogue with a value per rarity; selling, upgrades and the daily bonus live here too. */
 (() => {
  'use strict';
- const weaponsApi=window.MuseumWeapons,cardsApi=window.MuseumCards;
+ const weaponsApi=window.MuseumWeapons,cardsApi=window.MuseumCards,finishesApi=window.MuseumFinishes;
  const categories=Object.freeze([
   {id:'arsenal',name:'Arsenał',color:'#c9b37a'},
   {id:'heroes',name:'Bohaterowie',color:'#d9a0c6'},
@@ -17,7 +17,8 @@
   {id:'royal',name:'Korona i Honor',color:'#eccd76'},
   {id:'forge',name:'Kuźnia i Technika',color:'#d99c7b'},
   {id:'desert',name:'Piaski i Szlaki',color:'#d8ba86'},
-  {id:'special',name:'Eksponaty Specjalne',color:'#76d5d9'}
+  {id:'special',name:'Eksponaty Specjalne',color:'#76d5d9'},
+  {id:'finishes',name:'Limitowane wykończenia',color:'#7ff0e0'}
  ].map(Object.freeze));
  function getCategory(id) { return categories.find(category=>category.id===id)||null; }
  const categoryNumbers=Object.freeze({
@@ -139,9 +140,13 @@
   {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:9000,pricePLN:199.99,
    description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
-   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})}
+   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
+  {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'finish',family:'finishes',group:'finishes',
+   description:'Osiem limitowanych wykończeń broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Wykończenie nakładasz na dowolną broń.',
+   guarantee:'1 nowe wykończenie · mityczne, limitowane',color:'#7ff0e0',glyph:'◆',
+   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:0,mythic:100})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic')})));
- const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'}]);
+ const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -150,7 +155,8 @@
   common: {name:'ZWYKŁY',color:'#b8c4cf'},
   rare: {name:'RZADKI',color:'#90cce8'},
   epic: {name:'EPICKI',color:'#c4a1f0'},
-  legendary: {name:'LEGENDARNY',color:'#f0ca72'}
+  legendary: {name:'LEGENDARNY',color:'#f0ca72'},
+  mythic: {name:'MITYCZNY',color:'#7ff0e0'}
  });
  const skins = Object.freeze([
   {id:'brass',name:'STARA GWARDIA',era:'STAL · KOLEKCJA PODSTAWOWA',rarity:'basic',weight:0},
@@ -164,20 +170,21 @@
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
  ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
  // One catalogue for everything a crate can drop or a player can sell.
- const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500});
+ const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
  const SELL_RATE=.4, UPGRADE_MAX=5;
  const items=Object.freeze([
   ...skins.map(skin=>({kind:'skin',...skin})),
   ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
-  ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'}))
+  ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
+  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:'mythic',summary:'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors}))
  ].map(Object.freeze));
  const itemsById=new Map(items.map(item=>[item.id,item]));
  function getItem(id){return itemsById.get(id)||null;}
  function value(item){const it=typeof item==='string'?getItem(item):item;return it&&!it.gift?values[it.rarity]||0:0;}
  function sellPrice(item){return Math.floor(value(item)*SELL_RATE);}
- function listFor(profile,kind){return kind==='weapon'?profile.weapons:kind==='card'?profile.cards:profile.owned;}
+ function listFor(profile,kind){return kind==='weapon'?profile.weapons:kind==='card'?profile.cards:kind==='finish'?(profile.finishes||[]):profile.owned;}
  function has(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&listFor(profile,it.kind).includes(it.id);}
- function equipped(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&(it.kind==='skin'?profile.skin===it.id:it.kind==='weapon'?profile.weapon===it.id:profile.card===it.id);}
+ function equipped(profile,item){const it=typeof item==='string'?getItem(item):item;return !!it&&(it.kind==='skin'?profile.skin===it.id:it.kind==='weapon'?profile.weapon===it.id:it.kind==='finish'?profile.finish===it.id:profile.card===it.id);}
  const integer = value => Number.isFinite(Number(value)) ? Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(Number(value)))) : 0;
  function migrate(saved) {
   const source = saved && typeof saved === 'object' ? saved : {};
@@ -185,8 +192,9 @@
   const owned = skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id);
   const weapons=['sword',...(Array.isArray(source.weapons)?source.weapons:[]).filter(id=>id!=='sword'&&weaponsApi.has(id))];
   const cards=(Array.isArray(source.cards)?source.cards:[]).filter(id=>cardsApi.get(id));
+  const finishes=(Array.isArray(source.finishes)?source.finishes:[]).filter(id=>finishesApi?.has(id));
   const pendingItem=getItem(source.pendingReward);
-  const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:cards).includes(pendingItem.id) ? pendingItem.id : null;
+  const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:pendingItem.kind==='finish'?finishes:cards).includes(pendingItem.id) ? pendingItem.id : null;
   const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(item&&item.kind===kind&&(kind==='skin'||kind==='weapon'))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}
   return {
    coins:integer(source.coins),owned,
@@ -199,6 +207,7 @@
    exhibit:typeof source.exhibit==='string' ? source.exhibit : null,
    weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
+   finishes,finish:finishes.includes(source.finish) ? source.finish : null,
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
@@ -211,7 +220,7 @@
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);
-  const result={common:0,rare:0,epic:0,legendary:0};
+  const result={common:0,rare:0,epic:0,legendary:0,mythic:0};
   if(!crate)return result;
   const tiers=Object.keys(crate.rarityWeights).filter(tier=>crate.rarityWeights[tier]>0&&pool.some(s=>s.rarity===tier));
   const total=tiers.reduce((sum,tier)=>sum+crate.rarityWeights[tier],0);
@@ -250,17 +259,18 @@
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
   const next={...profile,coins:profile.coins-cost,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
-  if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else next.cards=[...profile.cards,reward.id];
+  if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else if(reward.kind==='finish')next.finishes=[...(profile.finishes||[]),reward.id];else next.cards=[...profile.cards,reward.id];
   return {reward,cost,free,crate,profile:next};
  }
  function claim(profile, {equip=false}={}) {
   const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null};
-  if(equip&&reward&&has(profile,reward)){if(reward.kind==='skin')next.skin=reward.id;else if(reward.kind==='weapon')next.weapon=reward.id;else if(reward.type==='hero')next.card=reward.id;}
+  if(equip&&reward&&has(profile,reward)){if(reward.kind==='skin')next.skin=reward.id;else if(reward.kind==='weapon')next.weapon=reward.id;else if(reward.kind==='finish')next.finish=reward.id;else if(reward.type==='hero')next.card=reward.id;}
   return next;
  }
  function equip(profile,id){
   const item=getItem(id);if(!item||!has(profile,item))return null;
   if(item.kind==='skin')return {...profile,skin:item.id};if(item.kind==='weapon')return {...profile,weapon:item.id};
+  if(item.kind==='finish')return {...profile,finish:profile.finish===item.id?null:item.id};
   if(item.type==='hero')return {...profile,card:profile.card===item.id?null:item.id};return null;
  }
  // Selling: owned, not equipped, not a gift or basic item. Pays SELL_RATE of the value and forgets the upgrades.
@@ -268,7 +278,7 @@
  function sell(profile,id){
   if(!canSell(profile,id))return null;const item=getItem(id),price=sellPrice(item),upgrades={...profile.upgrades};delete upgrades[`${item.kind}:${item.id}`];
   const next={...profile,coins:profile.coins+price,upgrades};
-  if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
+  if(item.kind==='skin')next.owned=profile.owned.filter(x=>x!==item.id);else if(item.kind==='weapon')next.weapons=profile.weapons.filter(x=>x!==item.id);else if(item.kind==='finish')next.finishes=(profile.finishes||[]).filter(x=>x!==item.id);else next.cards=profile.cards.filter(x=>x!==item.id);
   return {profile:next,price,item};
  }
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.

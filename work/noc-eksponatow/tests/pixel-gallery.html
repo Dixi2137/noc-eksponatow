@@ -2,7 +2,7 @@
 <html lang="pl"><head><meta charset="utf-8"><title>Galeria pikselowa</title>
 <style>body{margin:0;background:#10120f;color:#eee;font:12px system-ui}.row{display:flex;flex-wrap:wrap;gap:6px;padding:10px}figure{margin:0;text-align:center}canvas{background:#1a2020;border:1px solid #333;image-rendering:pixelated;width:168px;height:216px}figcaption{font-size:10px;color:#aaa;margin-top:2px;max-width:168px}</style></head>
 <body><div class="row" id="row"></div>
-<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/cards.js"></script><script src="../dist/hall.js"></script><script src="../dist/art.js"></script><script src="../dist/pixel.js"></script>
+<script src="../dist/knights.js"></script><script src="../dist/perks.js"></script><script src="../dist/weapons.js"></script><script src="../dist/finishes.js"></script><script src="../dist/exhibits.js"></script><script src="../dist/levels.js"></script><script src="../dist/cards.js"></script><script src="../dist/hall.js"></script><script src="../dist/art.js"></script><script src="../dist/pixel.js"></script>
 <script>
 const P=window.MuseumPixel,pose=new URLSearchParams(location.search).get('pose')||'idle';
 for(const ex of window.MuseumExhibits.all()){const f=document.createElement('figure'),c=document.createElement('canvas');c.width=56;c.height=72;const x=c.getContext('2d');x.imageSmoothingEnabled=false;

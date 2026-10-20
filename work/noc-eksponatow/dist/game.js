@@ -466,7 +466,7 @@
     const pEvadeX = p.evade > 0 ? Math.max(LEFT - p.x, -Math.sin(clamp(playerProgress, 0, 1) * Math.PI) * 55) : 0;
     const rEvadeX = foePose === 'dodge' ? Math.min(RIGHT - r.x - 29, Math.sin(clamp(foeProgress, 0, 1) * Math.PI) * 48) : 0;
     const foeOpts = { facing: -1, pose: foePose, progress: clamp(foeProgress, 0, 1), phase: clamp(foeProgress, 0, 1), time: artTime, heavy: r.heavy, glow: r.hurt > 0 };
-    const playerOpts = { facing: 1, pose: playerPose, progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 };
+    const playerOpts = { facing: 1, pose: playerPose, progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, finish: state.finish || null, glow: p.hurt > 0 };
     const foeArt = state.exhibit.stats.art;
     const drawR = () => pix && (foeArt === 'rex' || foeArt === 'raptor') ? inPixels(() => pix.drawRex(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, skin: foeArt === 'raptor' ? 'raptor' : null, scale: foeArt === 'raptor' ? .9 : 1.4 }))
       : pix && foeArt === 'figure' ? inPixels(() => pix.drawFigure(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, figure: state.exhibit.stats.figure }))
@@ -551,7 +551,7 @@
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers); state.finish = options.finish || null; scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;
