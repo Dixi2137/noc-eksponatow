@@ -3018,7 +3018,9 @@ window.MuseumConfig = Object.freeze({
    description:'Osiem limitowanych wykończeń broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Wykończenie nakładasz na dowolną broń.',
    guarantee:'1 nowe wykończenie · mityczne, limitowane',color:'#7ff0e0',glyph:'◆',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:0,mythic:100})}
- ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic')})));
+ ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
+  rarityWeights:Object.freeze(crate.pool==='finish'?crate.rarityWeights:{...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
+ // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
  const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
@@ -3089,7 +3091,8 @@ window.MuseumConfig = Object.freeze({
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType) && !has(profile,s)) : [];
+  const fits=s=>s.kind==='finish'?crate.rarityWeights.mythic>0:(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
+  return crate ? items.filter(s => fits(s) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);
@@ -3257,7 +3260,7 @@ window.MuseumConfig = Object.freeze({
   $('shopSelectedCategory').textContent=selected.pool==='any'?'MIESZANA · STROJE, BROŃ I KARTY':category?`${category.name} · SKRZYNIA ${selected.pool==='card'?'KART':'TEMATYCZNA'}`:selected.pool==='weapon'?'BROŃ · ARSENAŁ':selected.pool==='card'?'KARTY BOHATERÓW I BRONI':'WSZYSTKIE KATEGORIE · SKRZYNIA KLASYCZNA';
   $('shopSummary').style.setProperty('--crate-color',selected.color);
   const available=loot.remaining(current,selected.id).length>0,odds=loot.odds(current,selected.id);
-  const tiers=['common','rare','epic','legendary'];
+  const tiers=['common','rare','epic','legendary',...(odds.mythic>0?['mythic']:[])];
   $('shopSelectedOdds').replaceChildren(...tiers.map(tier=>node('span','shop-odd',`${loot.rarities[tier].name} ${percent(odds[tier]||0)}`)));
   const entries=loot.entries(current,selected.id);
   $('shopContentsSummary').textContent=entries.length?`MOŻLIWE ODKRYCIA: ${entries.length} · SZANSA KAŻDEGO PRZEDMIOTU`:'ZAWARTOŚĆ ZEBRANA · 0 NOWYCH PRZEDMIOTÓW';
@@ -3652,8 +3655,8 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   $('crateBtn').innerHTML=all?'ZAWARTOŚĆ ZEBRANA <span>✓</span>':free?'OTWÓRZ GRATIS <span>◇</span>':`OTWÓRZ SKRZYNIĘ <span>${number(crate.cost)} ✦</span>`;
   const kindItems=loot.items.filter(i=>i.kind===collectionKind);$('collectionCount').textContent=`${kindItems.filter(i=>loot.has(profile,i)).length} / ${kindItems.length} ODKRYTYCH`;
   $('freeCrateCount').textContent=all?'ZEBRANO ZAWARTOŚĆ TEJ SKRZYNI':free?'1 DARMOWA SKRZYNIA GALERII NA START':`${number(crate.cost)} ✦${profile.freeCrates>0?' · PREZENT DOTYCZY GALERII':''}`;
-  const percent=n=>(Math.round(n*10)/10).toLocaleString('pl-PL')+'%';
-  $('crateOdds').textContent=all?'Zebrano wszystko z tej skrzyni. Wybierz inną skrzynię, aby sprawdzić pozostałe.':`Szanse w następnej skrzyni: zwykły ${percent(odds.common||0)} · rzadki ${percent(odds.rare)} · epicki ${percent(odds.epic)} · legendarny ${percent(odds.legendary)}. Bez duplikatów. Szanse przeliczają się po zebraniu całej rzadkości.`;
+  const percent=n=>(n>0&&n<1?Math.round(n*100)/100:Math.round(n*10)/10).toLocaleString('pl-PL')+'%';
+  $('crateOdds').textContent=all?'Zebrano wszystko z tej skrzyni. Wybierz inną skrzynię, aby sprawdzić pozostałe.':`Szanse w następnej skrzyni: zwykły ${percent(odds.common||0)} · rzadki ${percent(odds.rare)} · epicki ${percent(odds.epic)} · legendarny ${percent(odds.legendary)}${odds.mythic>0?` · mityczne wykończenie ${percent(odds.mythic)}`:''}. Bez duplikatów. Szanse przeliczają się po zebraniu całej rzadkości.`;
   $('collectionMessage').textContent=all?'Ta skrzynia nie pobierze kolejnych żetonów. Wybierz inny rodzaj albo załóż coś z kolekcji.':free?'Pierwsza Skrzynia Galerii czeka na ciebie. Otwórz ją za darmo i odkryj skin z bonusem do walki.':profile.coins<crate.cost?`Do tej skrzyni brakuje ${number(crate.cost-profile.coins)} żetonów. Zwycięstwo daje co najmniej 120 ✦, a zbędne przedmioty możesz sprzedać.`:'Każda skrzynia zawiera nowy przedmiot: strój, broń albo kartę. Jeden skin, jedna broń i jedna karta bohatera działają naraz.';
  }
  function setLootBusy(value){crateBusy=value;document.querySelectorAll('.close-modal').forEach(b=>b.disabled=value);$('startBtn').disabled=value;$('retryBtn').disabled=value;}

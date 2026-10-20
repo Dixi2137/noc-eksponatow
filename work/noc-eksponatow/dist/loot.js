@@ -145,7 +145,9 @@
    description:'Osiem limitowanych wykończeń broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Wykończenie nakładasz na dowolną broń.',
    guarantee:'1 nowe wykończenie · mityczne, limitowane',color:'#7ff0e0',glyph:'◆',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:0,mythic:100})}
- ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic')})));
+ ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
+  rarityWeights:Object.freeze(crate.pool==='finish'?crate.rarityWeights:{...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
+ // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
  const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
@@ -216,7 +218,8 @@
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType) && !has(profile,s)) : [];
+  const fits=s=>s.kind==='finish'?crate.rarityWeights.mythic>0:(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
+  return crate ? items.filter(s => fits(s) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);

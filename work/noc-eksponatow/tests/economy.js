@@ -6,6 +6,7 @@
   const fresh = () => loot.migrate(null);
   const rich = (coins = 100000) => ({ ...fresh(), coins });
   const seeded = () => { let k = 0; return () => ((k = (k * 9301 + 49297) % 233280) / 233280); };
+  const ownAll = p => ({ ...p, finishes: window.MuseumFinishes.all().map(f => f.id) });   // no mythic finishes left to drop
 
   test('Świeży profil ma miecz, brak kart, zero ulepszeń i pustą serię logowań', () => {
     const p = fresh();
@@ -44,7 +45,7 @@
     if (card.type === 'hero') assert.equal(p.card, card.id); else assert.equal(p.card, null);
   });
   test('Bez duplikatów: po wyczerpaniu puli broni skrzynia nie da się zarezerwować', () => {
-    let p = rich(500000); const total = weapons.all().length; for (let i = 0; i < total - 1; i++) { const r = loot.reserve(p, seeded(), 'armory'); assert.ok(r, `rezerwacja ${i}`); p = loot.claim(r.profile); }
+    let p = ownAll(rich(500000)); const total = weapons.all().length; for (let i = 0; i < total - 1; i++) { const r = loot.reserve(p, seeded(), 'armory'); assert.ok(r, `rezerwacja ${i}`); p = loot.claim(r.profile); }
     assert.equal(p.weapons.length, total); assert.equal(loot.remaining(p, 'armory').length, 0); assert.equal(loot.reserve(p, seeded(), 'armory'), null);
   });
   test('Sprzedaż: nie założonego, nie podstawowego, nie prezentu; płaci 40% i kasuje ulepszenie', () => {
@@ -124,8 +125,9 @@
   const { test, assert } = window.MuseumTests;
   const loot = window.MuseumLoot, art = window.MuseumArt;
   const seeded = () => { let k = 7; return () => ((k = (k * 9301 + 49297) % 233280) / 233280); };
+  const ownAll = p => ({ ...p, finishes: window.MuseumFinishes.all().map(f => f.id) });
   test('Skrzynie mieszane losują stroje, bronie i karty; startowa bez epików, legend tylko legendarne', () => {
-    const p = loot.migrate(null), random = seeded(), kinds = new Set();
+    const p = ownAll(loot.migrate(null)), random = seeded(), kinds = new Set();
     for (let i = 0; i < 60; i++) kinds.add(loot.draw(p, random, 'night').kind);
     assert.deepEqual([...kinds].sort(), ['card', 'skin', 'weapon']);
     for (let i = 0; i < 40; i++) assert.ok(['common', 'rare'].includes(loot.draw(p, random, 'starter').rarity), 'starter');
@@ -137,7 +139,9 @@
   test('Sejf Kolekcjonera: 8 mitycznych wykończeń, nakładanie na dowolną broń, sprzedaż za 6000, nic nie wypada z innych skrzyń', () => {
     const fin = window.MuseumFinishes; assert.equal(fin.count, 8); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
     const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.length, 8); assert.ok(pool.every(i => i.kind === 'finish' && i.rarity === 'mythic'));
-    for (const id of ['gallery', 'legends', 'armory', 'night']) assert.ok(loot.remaining(p, id).every(i => i.kind !== 'finish'), id);
+    for (const id of ['gallery', 'legends', 'armory', 'night']) { const o = loot.odds(p, id).mythic; assert.ok(o > 0 && o < 1.5, `${id}: mityczne ${o}%`); assert.ok(loot.remaining(p, id).some(i => i.kind === 'finish'), id); }
+    assert.ok(loot.odds(p, 'gallery').mythic < .4 && loot.odds(p, 'legends').mythic > 1, 'tanie ~0,35 %, legendy ~1,2 %');
+    assert.ok(loot.remaining(ownAll(p), 'gallery').every(i => i.kind !== 'finish'), 'po zebraniu wszystkich nic mitycznego nie zostaje');
     const r = loot.reserve(p, () => .5, 'collector'); assert.ok(r && r.reward.kind === 'finish'); assert.equal(r.cost, 12000); p = loot.claim(r.profile, { equip: true });
     assert.equal(p.finish, r.reward.id); assert.ok(loot.has(p, r.reward.id)); assert.ok(loot.equipped(p, r.reward.id));
     p = loot.equip(p, r.reward.id); assert.equal(p.finish, null, 'drugie kliknięcie zdejmuje'); assert.equal(loot.value(r.reward), 15000); assert.equal(loot.sellPrice(r.reward), 6000);
@@ -164,7 +168,7 @@
     for (const w of weapons.all()) { x.save(); x.translate(180, 180); art.drawWeaponIcon(x, w); x.restore(); assert.ok(loot.getCategory(w.categoryId), w.id); }
   });
   test('Skrzynie typu i epoki losują tylko pasujące bronie', () => {
-    const p = loot.migrate(null);
+    const p = { ...loot.migrate(null), finishes: window.MuseumFinishes.all().map(f => f.id) };
     for (const [crate, check] of [['blades', w => w.type === 'blade'], ['heavy', w => w.type === 'heavy'], ['polearms', w => w.type === 'polearm'], ['light', w => w.type === 'light'], ['bows', w => w.type === 'bow'], ['pistols', w => w.type === 'pistol'], ['rifles', w => w.type === 'rifle'],
       ['era-antiquity', w => w.categoryId === 'antiquity'], ['era-medieval', w => w.categoryId === 'medieval'], ['era-renaissance', w => w.categoryId === 'renaissance'], ['era-modern', w => w.categoryId === 'modern'], ['era-contemporary', w => w.categoryId === 'contemporary']]) {
       const pool = loot.remaining(p, crate); assert.ok(pool.length > 0, crate); assert.ok(pool.every(i => i.kind === 'weapon' && check(i)), crate);
