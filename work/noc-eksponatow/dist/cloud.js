@@ -61,7 +61,7 @@
   async function nicknameTaken(nickname) { const r = await request('/rest/v1/rpc/nickname_taken', { method: 'POST', body: { name: nickname }, auth: false }); return r.ok ? !!r.data : null; }
   async function fetchProfile() {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
-    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at`);
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at,role,banned_until,ban_reason`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
   }
   async function upsertProfile(fields) {
@@ -69,8 +69,21 @@
     return request('/rest/v1/profiles?on_conflict=id', { method: 'POST', body: { id: me.id, ...fields, updated_at: new Date().toISOString() }, prefer: 'resolution=merge-duplicates,return=representation' });
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
+  // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.
+  function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
+  const rpc = async (name, body) => modMessage(await request(`/rest/v1/rpc/${name}`, { method: 'POST', body }));
+  const mod = Object.freeze({
+    stats: () => rpc('mod_stats', {}),
+    list: (q = '', lim = 50) => rpc('mod_list', { q, lim }),
+    ban: (target, hours, reason = '') => rpc('mod_ban', { target, hours, reason }),
+    unban: target => rpc('mod_unban', { target }),
+    note: (target, note) => rpc('mod_note', { target, note }),
+    adjust: (target, coinsDelta = 0, balanceDelta = 0) => rpc('mod_adjust', { target, coins_delta: coinsDelta, balance_delta: balanceDelta }),
+    reset: target => rpc('mod_reset', { target }),
+    setRole: (target, role) => rpc('mod_set_role', { target, new_role: role })
+  });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();

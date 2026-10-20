@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="style.css?v=faza27">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="style.css?v=faza28">
 </head>
 <body>
  <div class="app">
@@ -143,10 +143,22 @@
    </div>
    <div id="accountUser" class="hidden">
     <p class="modal-lead">Zalogowano jako <strong id="accountWho"></strong>. Postęp zapisuje się w chmurze po każdej zmianie.</p>
-    <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button></div>
+    <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button><button id="accountModBtn" class="primary-btn hidden">PODGLĄD MODERATORA <span>↗</span></button></div>
+    <p id="accountRole" class="collection-footnote hidden"></p>
    </div>
    <p id="accountMsg" class="account-msg" aria-live="polite"></p>
    <p id="accountOffline" class="collection-footnote hidden">Chmura nie jest jeszcze skonfigurowana (dist/config.js). Gra działa w trybie gościa.</p>
+  </div>
+ </div>
+ <div id="moderation" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modTitle">
+  <div class="ranking-panel mod-panel">
+   <div class="modal-heading"><div><span class="eyebrow">MODERACJA / NOCNY NADZÓR</span><h2 id="modTitle">PODGLĄD MODERATORA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij moderację">✕</button></div>
+   <p id="modStats" class="modal-lead">Ładowanie statystyk…</p>
+   <form id="modSearch" class="mod-search" novalidate><input id="modQuery" type="search" placeholder="Szukaj po pseudonimie" aria-label="Szukaj gracza"><button type="submit" class="secondary-btn">SZUKAJ</button><button type="button" id="modRefresh" class="secondary-btn">ODŚWIEŻ</button></form>
+   <div class="mod-head"><span>STRÓŻ</span><span>ROLA</span><span>SALE</span><span>ŻETONY</span><span>SALDO</span><span>STATUS</span></div>
+   <div id="modList" class="mod-list" aria-live="polite"></div>
+   <p id="modMsg" class="account-msg" aria-live="polite"></p>
+   <p class="collection-footnote">Każda akcja idzie przez funkcję na serwerze sprawdzającą twoją rolę. Ban blokuje zapis w chmurze i logowanie do gry; reset czyści zapis, zostawia konto.</p>
   </div>
  </div>
  <div id="ranking" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rankingTitle">
@@ -160,5 +172,5 @@
   </div>
  </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="config.js?v=faza27"></script><script src="cloud.js?v=faza27"></script><script src="knights.js?v=faza27"></script><script src="perks.js?v=faza27"></script><script src="weapons.js?v=faza27"></script><script src="finishes.js?v=faza27"></script><script src="exhibits.js?v=faza27"></script><script src="levels.js?v=faza27"></script><script src="cards.js?v=faza27"></script><script src="hall.js?v=faza27"></script><script src="art.js?v=faza27"></script><script src="pixel.js?v=faza27"></script><script src="game.js?v=faza27"></script><script src="loot.js?v=faza27"></script><script src="shop.js?v=faza27"></script><script src="loot-show.js?v=faza27"></script><script src="ui.js?v=faza27"></script>
+ <script src="config.js?v=faza28"></script><script src="cloud.js?v=faza28"></script><script src="knights.js?v=faza28"></script><script src="perks.js?v=faza28"></script><script src="weapons.js?v=faza28"></script><script src="finishes.js?v=faza28"></script><script src="exhibits.js?v=faza28"></script><script src="levels.js?v=faza28"></script><script src="cards.js?v=faza28"></script><script src="hall.js?v=faza28"></script><script src="art.js?v=faza28"></script><script src="pixel.js?v=faza28"></script><script src="game.js?v=faza28"></script><script src="loot.js?v=faza28"></script><script src="shop.js?v=faza28"></script><script src="loot-show.js?v=faza28"></script><script src="ui.js?v=faza28"></script>
 </body></html>

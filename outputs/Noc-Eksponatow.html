@@ -130,6 +130,8 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
 .cash-count{position:relative;color:var(--gold)}.secret-cash{position:absolute;top:100%;left:0;width:100%;height:14px;border:0;padding:0;background:transparent;color:var(--gold);opacity:0;font-size:9px;line-height:14px;cursor:pointer}.secret-cash:hover:not(:disabled),.secret-cash:focus-visible{opacity:1;background:#d5b8780a}.secret-cash:disabled{opacity:0}.shop-wallet-panel{display:flex;flex-wrap:wrap;align-items:center;gap:18px;padding:18px 20px;background:#121810;border:1px solid var(--line)}.shop-wallet-balance{display:flex;flex-direction:column;gap:4px;min-width:150px}.shop-wallet-balance span{font-size:9px;letter-spacing:2px;color:var(--muted)}.shop-wallet-balance strong{font-family:'Barlow Condensed',Impact,sans-serif;font-size:34px;line-height:1;color:var(--gold)}.shop-deposit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1}.shop-deposit-btn{padding:9px 12px;background:transparent;border:1px solid var(--line);color:var(--cream);font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer}.shop-deposit-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}.shop-deposit-btn:disabled{opacity:.4;cursor:default}.shop-deposit-custom{display:flex;align-items:center;gap:8px;margin-left:auto}.shop-deposit-custom span{font-size:9px;letter-spacing:2px;color:var(--muted)}.shop-deposit-custom input{width:96px;padding:8px 10px;background:#0f140d;border:1px solid var(--line);color:var(--cream);font:inherit;font-size:13px}.shop-wallet-note{width:100%;margin:0;color:var(--muted);font-size:12px}.shop-finish-buy{margin-top:10px;width:100%}.shop-finish-missing{font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:6px}body.pixel .shop-wallet-balance strong{font-family:'Pixelify Sans',monospace}@media(max-width:700px){.shop-deposit-custom{margin-left:0;width:100%}}
 
 .loot-again{border-color:#5b6a44;color:var(--lime)}.loot-again:disabled{opacity:.5;color:var(--muted)}
+
+.mod-panel{width:min(980px,96vw)}.mod-search{display:flex;gap:8px;margin:0 0 12px}.mod-search input{flex:1;padding:10px 12px;background:#0f140d;border:1px solid var(--line);color:var(--cream);font:inherit}.mod-head,.mod-row{display:grid;grid-template-columns:1.6fr .8fr .5fr .8fr .8fr 1.2fr;gap:8px;align-items:center}.mod-head{font-size:7px;letter-spacing:2px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}.mod-row{padding:10px;border-bottom:1px solid #22281e;font-size:12px}.mod-row strong{display:block;color:var(--cream)}.mod-row small{display:block;color:var(--muted);font-size:9px;letter-spacing:.5px}.mod-row .mod-banned{color:#ff8c9a}.mod-row .mod-ok{color:#9ad28b}.mod-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding-top:6px}.mod-actions button{padding:6px 9px;background:transparent;border:1px solid var(--line);color:var(--cream);font-size:9px;letter-spacing:1px;cursor:pointer}.mod-actions button:hover:not(:disabled){border-color:var(--lime);color:var(--lime)}.mod-actions button.danger:hover:not(:disabled){border-color:#ff8c9a;color:#ff8c9a}.mod-actions button:disabled{opacity:.4;cursor:default}.mod-role{text-transform:uppercase;letter-spacing:1px;font-size:10px}.mod-role.admin{color:var(--gold)}.mod-role.moderator{color:#7ff0e0}@media(max-width:800px){.mod-head{display:none}.mod-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -270,10 +272,22 @@ body.pixel .menu-screen h1{font-size:76px;line-height:.98;font-weight:700}body.p
    </div>
    <div id="accountUser" class="hidden">
     <p class="modal-lead">Zalogowano jako <strong id="accountWho"></strong>. Postęp zapisuje się w chmurze po każdej zmianie.</p>
-    <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button></div>
+    <div class="account-actions"><button id="accountPush" class="secondary-btn">ZAPISZ TERAZ W CHMURZE</button><button id="accountPull" class="secondary-btn">WCZYTAJ Z CHMURY</button><button id="accountLogout" class="secondary-btn">WYLOGUJ</button><button id="accountModBtn" class="primary-btn hidden">PODGLĄD MODERATORA <span>↗</span></button></div>
+    <p id="accountRole" class="collection-footnote hidden"></p>
    </div>
    <p id="accountMsg" class="account-msg" aria-live="polite"></p>
    <p id="accountOffline" class="collection-footnote hidden">Chmura nie jest jeszcze skonfigurowana (dist/config.js). Gra działa w trybie gościa.</p>
+  </div>
+ </div>
+ <div id="moderation" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modTitle">
+  <div class="ranking-panel mod-panel">
+   <div class="modal-heading"><div><span class="eyebrow">MODERACJA / NOCNY NADZÓR</span><h2 id="modTitle">PODGLĄD MODERATORA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij moderację">✕</button></div>
+   <p id="modStats" class="modal-lead">Ładowanie statystyk…</p>
+   <form id="modSearch" class="mod-search" novalidate><input id="modQuery" type="search" placeholder="Szukaj po pseudonimie" aria-label="Szukaj gracza"><button type="submit" class="secondary-btn">SZUKAJ</button><button type="button" id="modRefresh" class="secondary-btn">ODŚWIEŻ</button></form>
+   <div class="mod-head"><span>STRÓŻ</span><span>ROLA</span><span>SALE</span><span>ŻETONY</span><span>SALDO</span><span>STATUS</span></div>
+   <div id="modList" class="mod-list" aria-live="polite"></div>
+   <p id="modMsg" class="account-msg" aria-live="polite"></p>
+   <p class="collection-footnote">Każda akcja idzie przez funkcję na serwerze sprawdzającą twoją rolę. Ban blokuje zapis w chmurze i logowanie do gry; reset czyści zapis, zostawia konto.</p>
   </div>
  </div>
  <div id="ranking" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rankingTitle">
@@ -356,7 +370,7 @@ window.MuseumConfig = Object.freeze({
   async function nicknameTaken(nickname) { const r = await request('/rest/v1/rpc/nickname_taken', { method: 'POST', body: { name: nickname }, auth: false }); return r.ok ? !!r.data : null; }
   async function fetchProfile() {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
-    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at`);
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at,role,banned_until,ban_reason`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
   }
   async function upsertProfile(fields) {
@@ -364,8 +378,21 @@ window.MuseumConfig = Object.freeze({
     return request('/rest/v1/profiles?on_conflict=id', { method: 'POST', body: { id: me.id, ...fields, updated_at: new Date().toISOString() }, prefer: 'resolution=merge-duplicates,return=representation' });
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
+  // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.
+  function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
+  const rpc = async (name, body) => modMessage(await request(`/rest/v1/rpc/${name}`, { method: 'POST', body }));
+  const mod = Object.freeze({
+    stats: () => rpc('mod_stats', {}),
+    list: (q = '', lim = 50) => rpc('mod_list', { q, lim }),
+    ban: (target, hours, reason = '') => rpc('mod_ban', { target, hours, reason }),
+    unban: target => rpc('mod_unban', { target }),
+    note: (target, note) => rpc('mod_note', { target, note }),
+    adjust: (target, coinsDelta = 0, balanceDelta = 0) => rpc('mod_adjust', { target, coins_delta: coinsDelta, balance_delta: balanceDelta }),
+    reset: target => rpc('mod_reset', { target }),
+    setRole: (target, role) => rpc('mod_set_role', { target, new_role: role })
+  });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();
@@ -3697,15 +3724,46 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  function hall(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Swoją salę urządzisz przed następnym pojedynkiem.');return;}closeModal();renderHall();openModal('hall');}
  let accountMode='login';
  function setAccountStatus(text,error=false){$('accountMsg').textContent=text;$('accountMsg').classList.toggle('error',!!error);}
- function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;
+ function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me)cloudRole='player';
   $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
  function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
  function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();}
+ // Moderator panel: stats, player list with search, and the actions (coins/balance, ban, reset, role, note). Server-side checks decide.
+ const plnText=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
+ function modMessage(text,error=false){$('modMsg').textContent=text;$('modMsg').classList.toggle('error',!!error);}
+ function moderation(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!cloud.user()||!isMod()){toast('Panel moderatora wymaga konta z rolą moderatora.');return;}if(!['menu','result'].includes(screen)){toast('Moderacja czeka na koniec pojedynku.');return;}closeModal();openModal('moderation');modMessage('');renderModeration();}
+ async function renderModeration(){
+  const stats=await cloud.mod.stats();
+  $('modStats').textContent=stats.ok?`Graczy: ${stats.data.players} · aktywnych dziś: ${stats.data.active_today} · zbanowanych: ${stats.data.banned} · moderatorów: ${stats.data.mods} · sal pokonanych łącznie: ${stats.data.halls}.`:`Statystyki niedostępne: ${stats.error}`;
+  const list=await cloud.mod.list($('modQuery').value.trim(),100);
+  if(!list.ok){modMessage(list.error,true);$('modList').replaceChildren();return;}
+  const me=cloud.user();
+  $('modList').replaceChildren(...(list.data||[]).map(p=>{
+   const row=document.createElement('div');row.className='mod-row';row.dataset.id=p.id;
+   const banned=p.banned_until&&new Date(p.banned_until)>new Date(),perm=banned&&new Date(p.banned_until).getFullYear()-new Date().getFullYear()>50;
+   row.innerHTML=`<div><strong></strong><small></small></div><span class="mod-role ${p.role}">${p.role}</span><span>${p.halls_cleared} / ${levels.count}</span><span>${number(p.coins)} ✦</span><span>${plnText(p.balance)}</span><span class="${banned?'mod-banned':'mod-ok'}"></span>`;
+   row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');row.querySelector('small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
+   row.querySelector('.mod-ok,.mod-banned').textContent=banned?`BAN ${perm?'∞':'do '+new Date(p.banned_until).toLocaleDateString('pl-PL')}${p.ban_reason?' · '+p.ban_reason:''}`:'AKTYWNY';
+   const actions=document.createElement('div');actions.className='mod-actions';const self=p.id===me?.id;
+   const act=(label,fn,danger=false,disabled=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;if(danger)b.className='danger';b.disabled=disabled;b.addEventListener('click',async()=>{const r=await fn();if(r===undefined)return;modMessage(r.ok?`${p.nickname}: zrobione.`:r.error||'Nie udało się.',!r.ok);if(r.ok)renderModeration();});actions.append(b);};
+   act('ŻETONY ±',()=>{const v=window.prompt(`Zmiana żetonów dla ${p.nickname} (np. 500 albo -500):`,'500');if(v===null||!Number.isFinite(Number(v)))return;return cloud.mod.adjust(p.id,Math.trunc(Number(v)),0);});
+   act('SALDO ±',()=>{const v=window.prompt(`Zmiana salda w zł dla ${p.nickname} (np. 50 albo -50):`,'50');if(v===null||!Number.isFinite(Number(v)))return;return cloud.mod.adjust(p.id,0,Math.round(Number(v)*100));});
+   act('NOTATKA',()=>{const v=window.prompt(`Notatka moderatora o ${p.nickname}:`,p.mod_note||'');if(v===null)return;return cloud.mod.note(p.id,v);});
+   if(banned)act('ODBANUJ',()=>cloud.mod.unban(p.id),false,self);
+   else act('BAN',()=>{const h=window.prompt(`Ban dla ${p.nickname}: na ile godzin? (0 = bezterminowo)`,'24');if(h===null||!Number.isFinite(Number(h)))return;const reason=window.prompt('Powód (widoczny dla gracza):','')||'';return cloud.mod.ban(p.id,Math.trunc(Number(h)),reason);},true,self);
+   act('RESET ZAPISU',()=>{if(!window.confirm(`Wyzerować zapis gry ${p.nickname}? Konto i pseudonim zostają.`))return;return cloud.mod.reset(p.id);},true);
+   if(cloudRole==='admin')act('ROLA',()=>{const v=window.prompt(`Nowa rola dla ${p.nickname}: player, moderator albo admin`,p.role);if(v===null)return;if(!['player','moderator','admin'].includes(v.trim())){modMessage('Rola musi być: player, moderator albo admin.',true);return;}return cloud.mod.setRole(p.id,v.trim());},false,self);
+   row.append(actions);return row;}));
+  if(!(list.data||[]).length)modMessage('Brak graczy pasujących do wyszukiwania.');
+ }
  function saveLooksEmpty(save){return !save||typeof save!=='object'||!Object.keys(save).length||(!(save.cleared||[]).length&&(Number(save.coins)||0)<100&&(save.owned||[]).length<=2);}
  function localLooksEmpty(){return !profile.cleared.length&&profile.coins<100&&profile.owned.length<=2;}
+ let cloudRole='player';
+ const isMod=()=>cloudRole==='moderator'||cloudRole==='admin';
  async function afterLogin(){
   const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
-  const remote=r.data;
+  const remote=r.data;cloudRole=remote?.role||'player';renderAccount();
+  if(remote?.banned_until&&new Date(remote.banned_until)>new Date()){const until=new Date(remote.banned_until);const perm=until.getFullYear()-new Date().getFullYear()>50;await cloud.signOut();cloudRole='player';renderAccount();setAccountStatus(`Konto zablokowane ${perm?'bezterminowo':'do '+until.toLocaleString('pl-PL')}${remote.ban_reason?`. Powód: ${remote.ban_reason}`:''}.`,true);return;}
   if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
   else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
   await claimServerDaily();renderAccount();
@@ -3738,7 +3796,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  }
  function ranking(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Ranking sprawdzisz przed następnym pojedynkiem.');return;}closeModal();openModal('ranking');renderRanking();}
  function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}
- function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall','account','ranking'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
+ function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall','account','ranking','moderation'])show(id,false);document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
  function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
  function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
@@ -3876,7 +3934,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  for(const category of [{id:'all',name:'Wszystkie kategorie'},...loot.categories]){const option=document.createElement('option');option.value=category.id;option.textContent=category.name;$('categoryFilter').append(option);}
  $('categoryFilter').value='all';
  window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,onDeposit:depositPLN,onBuyFinish:buyFinish,notify:toast});
- $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
+ $('shopTab').addEventListener('click',shop);$('crateShopBtn').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountModBtn').addEventListener('click',moderation);$('modRefresh').addEventListener('click',renderModeration);$('modSearch').addEventListener('submit',e=>{e.preventDefault();renderModeration();});$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
  $('secretCashBtn').addEventListener('click',()=>{if(!canOpenShop())return;depositPLN(21370);});
  $('secretCoinsBtn').addEventListener('click',()=>{if(!canOpenShop())return;profile.coins+=2137;persist();if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();toast('Sekret stróża odkryty. +2137 monet ✦');});
  $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);

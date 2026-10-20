@@ -48,3 +48,24 @@
     try { const r = await cloud.leaderboard(10); assert.equal(r.ok, true); assert.equal(r.data[0].nickname, 'A'); assert.ok(calls[0].url.includes('/rest/v1/leaderboard')); assert.ok(calls[0].url.includes('halls_cleared.desc')); assert.equal(calls[0].init.headers.Authorization, 'Bearer anon-key'); } finally { window.fetch = realFetch; }
   }));
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const cloud = window.MuseumCloud, realFetch = window.fetch;
+  function withConfig(fn) { const old = window.MuseumConfig; window.MuseumConfig = { supabaseUrl: 'https://example.supabase.co', supabaseAnonKey: 'anon-key' }; return Promise.resolve().then(fn).finally(() => { window.MuseumConfig = old; }); }
+  test('Moderacja: wywołania RPC niosą token i właściwe parametry, a odmowa serwera ma polski komunikat', () => withConfig(async () => {
+    const calls = [];
+    window.fetch = async (url, init) => { calls.push({ url, init }); const forbidden = url.includes('mod_set_role'); return { ok: !forbidden, status: forbidden ? 400 : 200, text: async () => JSON.stringify(forbidden ? { message: 'forbidden' } : url.includes('mod_list') ? [{ id: 'u2', nickname: 'Zbyszek', role: 'player', coins: 10, balance: 2137 }] : { ok: true }) }; };
+    try {
+      cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl', user_metadata: { nickname: 'Jakub' } } });
+      const list = await cloud.mod.list('zby', 20); assert.equal(list.ok, true); assert.equal(list.data[0].nickname, 'Zbyszek');
+      assert.ok(calls.at(-1).url.endsWith('/rest/v1/rpc/mod_list')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { q: 'zby', lim: 20 }); assert.equal(calls.at(-1).init.headers.Authorization, 'Bearer tok');
+      await cloud.mod.ban('u2', 24, 'spam'); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', hours: 24, reason: 'spam' });
+      await cloud.mod.adjust('u2', -500, 2137); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', coins_delta: -500, balance_delta: 2137 });
+      await cloud.mod.stats(); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_stats'));
+      const role = await cloud.mod.setRole('u2', 'moderator'); assert.equal(role.ok, false); assert.equal(role.error, 'Brak uprawnień moderatora.');
+      const profileCall = cloud.fetchProfile(); await profileCall; assert.ok(calls.at(-1).url.includes('role,banned_until,ban_reason'), 'profil niesie rolę i ban');
+      await cloud.signOut();
+    } finally { window.fetch = realFetch; }
+  }));
+})();

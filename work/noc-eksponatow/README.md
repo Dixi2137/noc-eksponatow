@@ -221,6 +221,12 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Moderacja (2026-10-21)
+
+Supabase: `supabase/schema.sql` ma sekcję „Moderacja”: kolumny `role` (player/moderator/admin), `banned_until`, `ban_reason`, `mod_note` w `profiles`; funkcje `is_mod()`/`is_admin()`; trigger `protect_mod_fields` (gracz nie zmieni sobie roli ani bana, rolę zmienia tylko admin albo SQL Editor); polityka odczytu wszystkich profili dla moderatorów; zbanowany nie zapisze w chmurze. RPC `mod_stats`, `mod_list(q, lim)`, `mod_ban(target, hours, reason)` (0 h = bezterminowo), `mod_unban`, `mod_note`, `mod_adjust(target, coins_delta, balance_delta)` (grosze), `mod_reset`, `mod_set_role` (tylko admin, nie sobie). Rolę admina nadaje się raz w SQL Editorze: `update public.profiles set role = 'admin' where nickname = '…';`.
+
+Gra: po zalogowaniu `fetchProfile` zwraca rolę i ban; zbanowany dostaje komunikat i jest wylogowany. Moderator widzi w KONCIE przycisk PODGLĄD MODERATORA: statystyki, wyszukiwarka graczy, lista z salami, żetonami, saldem i statusem, akcje ŻETONY ±, SALDO ±, NOTATKA, BAN/ODBANUJ, RESET ZAPISU, ROLA (admin). Klient (`MuseumCloud.mod`) tylko formuje wywołania; uprawnienia sprawdza serwer.
+
 ## Publikacja online (2026-10-21)
 
 Gra jest publikowana na GitHub Pages z folderu `dist/` przez workflow `.github/workflows/pages.yml` przy każdym pushu na `main` (repo `Dixi2137/noc-eksponatow`). Adres: https://dixi2137.github.io/noc-eksponatow/. Bez kluczy w `config.js` działa tryb gościa; po podaniu Supabase dojdą konta i ranking.
