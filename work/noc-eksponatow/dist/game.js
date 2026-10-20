@@ -345,10 +345,9 @@
         else hint(`TERAZ! ${alias()} odpoczywa — podejdź i przełam słabą gardę.`, 1.8);
       }
     } else if (r.state === 'recover') {
-      if (r.followUp) { r.followUp = false; r.quick = 1; startWindup(); }
-      else if (r.timer >= (r.heavy ? combat.heavyRecovery : combat.recovery)) {
-        setFoeState('reposition');
-        hint(`Złap oddech. ${alias()} ustawia się do kolejnego pojedynku.`, 1.7);
+      if (r.timer >= (r.heavy ? combat.heavyRecovery : combat.recovery)) {
+        if (r.followUp) { r.followUp = false; r.quick = 1; startWindup(); }   // the second blow of a double / burst
+        else { setFoeState('reposition'); hint(`Złap oddech. ${alias()} ustawia się do kolejnego pojedynku.`, 1.7); }
       }
     } else if (r.state === 'reposition') {
       // A short reset separates attacks. Never pursue during this safe interval.
