@@ -29,7 +29,8 @@
     const base = config().supabaseUrl.replace(/\/$/, '');
     const h = { apikey: config().supabaseAnonKey, 'Content-Type': 'application/json', ...headers };
     if (auth && session?.access_token) { if (expired()) await refresh(); if (session?.access_token) h.Authorization = `Bearer ${session.access_token}`; }
-    if (!h.Authorization) h.Authorization = `Bearer ${config().supabaseAnonKey}`;
+    // Legacy anon keys are JWTs and double as the bearer for anonymous calls; new publishable keys (sb_publishable_…) go in apikey only.
+    if (!h.Authorization && /^eyJ/.test(config().supabaseAnonKey)) h.Authorization = `Bearer ${config().supabaseAnonKey}`;
     if (prefer) h.Prefer = prefer;
     try {
       const response = await fetch(`${base}${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) });

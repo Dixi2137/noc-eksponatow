@@ -45,7 +45,7 @@
   }));
   test('Ranking jest pobierany bez logowania z właściwym porządkiem', () => withConfig(async () => {
     const calls = fakeFetch(() => ({ status: 200, body: [{ nickname: 'A', halls_cleared: 6, prestige: 90 }] }));
-    try { const r = await cloud.leaderboard(10); assert.equal(r.ok, true); assert.equal(r.data[0].nickname, 'A'); assert.ok(calls[0].url.includes('/rest/v1/leaderboard')); assert.ok(calls[0].url.includes('halls_cleared.desc')); assert.equal(calls[0].init.headers.Authorization, 'Bearer anon-key'); } finally { window.fetch = realFetch; }
+    try { const r = await cloud.leaderboard(10); assert.equal(r.ok, true); assert.equal(r.data[0].nickname, 'A'); assert.ok(calls[0].url.includes('/rest/v1/leaderboard')); assert.ok(calls[0].url.includes('halls_cleared.desc')); assert.equal(calls[0].init.headers.Authorization, undefined, 'klucz testowy nie jest JWT, więc bez Bearer'); } finally { window.fetch = realFetch; }
   }));
 })();
 (() => {
@@ -68,4 +68,19 @@
       await cloud.signOut();
     } finally { window.fetch = realFetch; }
   }));
+})();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const cloud = window.MuseumCloud, realFetch = window.fetch;
+  test('Nowy klucz sb_publishable idzie tylko w apikey; stary anon JWT także jako Bearer', async () => {
+    const old = window.MuseumConfig; const calls = [];
+    window.fetch = async (url, init) => { calls.push({ url, init }); return { ok: true, status: 200, text: async () => '[]' }; };
+    try {
+      window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'sb_publishable_abc' };
+      await cloud.leaderboard(5); assert.equal(calls.at(-1).init.headers.apikey, 'sb_publishable_abc'); assert.equal(calls.at(-1).init.headers.Authorization, undefined);
+      window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'eyJanon' };
+      await cloud.leaderboard(5); assert.equal(calls.at(-1).init.headers.Authorization, 'Bearer eyJanon');
+    } finally { window.fetch = realFetch; window.MuseumConfig = old; }
+  });
 })();
