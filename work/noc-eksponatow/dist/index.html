@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10120f"><meta name="description" content="Po zamknięciu muzeum zaczyna się walka. Zostań rycerzem i pokonaj T-rexa w klimatycznej bijatyce 2D.">
-  <title>Noc Eksponatów — muzealna arena</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="style.css?v=faza50">
+  <title>Noc Eksponatów — muzealna arena</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="style.css?v=faza51">
 </head>
 <body>
  <div class="app">
@@ -156,6 +156,7 @@
   <div class="ranking-panel mod-panel">
    <div class="modal-heading"><div><span class="eyebrow">MODERACJA / NOCNY NADZÓR</span><h2 id="modTitle">PODGLĄD MODERATORA.</h2></div><button class="close-modal icon-btn" aria-label="Zamknij moderację">✕</button></div>
    <p id="modStats" class="modal-lead">Ładowanie statystyk…</p>
+   <div id="modMaintenance" class="mod-maintenance"><div><span class="eyebrow">TRYB SERWISOWY</span><strong id="modMaintenanceState">…</strong></div><input id="modMaintenanceText" type="text" maxlength="200" placeholder="Komunikat dla graczy (opcjonalnie)" aria-label="Komunikat serwisowy"><button type="button" id="modMaintenanceOn" class="primary-btn">WŁĄCZ SERWIS</button><button type="button" id="modMaintenanceOff" class="secondary-btn">WYŁĄCZ</button></div>
    <form id="modAnnounce" class="mod-announce" novalidate><div class="mod-announce-row"><select id="modAnnounceKind" aria-label="Rodzaj ogłoszenia"><option value="info">INFO</option><option value="event">WYDARZENIE</option><option value="warning">OSTRZEŻENIE</option></select><input id="modAnnounceText" type="text" maxlength="300" placeholder="Ogłoszenie dla wszystkich graczy (do 300 znaków)" aria-label="Treść ogłoszenia"><select id="modAnnounceSeconds" aria-label="Jak długo widoczne"><option value="30">30 s</option><option value="60" selected>60 s</option><option value="300">5 min</option><option value="900">15 min</option><option value="3600">1 h</option><option value="21600">6 h</option><option value="86400">24 h</option><option value="604800">7 dni</option></select><button type="submit" class="primary-btn">WYŚLIJ</button></div><div id="modAnnounceList" class="mod-announce-list"></div></form>
    <form id="modSearch" class="mod-search" novalidate><input id="modQuery" type="search" placeholder="Szukaj po pseudonimie" aria-label="Szukaj gracza"><button type="submit" class="secondary-btn">SZUKAJ</button><button type="button" id="modRefresh" class="secondary-btn">ODŚWIEŻ</button></form>
    <div class="mod-head"><span>STRÓŻ</span><span>ROLA</span><span>SALE</span><span>ŻETONY</span><span>SALDO</span><span>STATUS</span></div>
@@ -175,5 +176,7 @@
   </div>
  </div>
  <div id="toast" class="toast hidden" role="status"></div>
- <script src="config.js?v=faza50"></script><script src="cloud.js?v=faza50"></script><script src="knights.js?v=faza50"></script><script src="perks.js?v=faza50"></script><script src="weapons.js?v=faza50"></script><script src="finishes.js?v=faza50"></script><script src="exhibits.js?v=faza50"></script><script src="twists.js?v=faza50"></script><script src="levels.js?v=faza50"></script><script src="cards.js?v=faza50"></script><script src="hall.js?v=faza50"></script><script src="art.js?v=faza50"></script><script src="pixel.js?v=faza50"></script><script src="game.js?v=faza50"></script><script src="loot.js?v=faza50"></script><script src="shop.js?v=faza50"></script><script src="loot-show.js?v=faza50"></script><script src="ui.js?v=faza50"></script>
+ <div id="maintenance" class="maintenance hidden" role="dialog" aria-modal="true" aria-labelledby="maintenanceTitle"><div class="maintenance-box"><span class="eyebrow">MUZEUM ZAMKNIĘTE</span><h2 id="maintenanceTitle">PRACE SERWISOWE.</h2><p id="maintenanceText">Kustosz przestawia eksponaty. Wracamy za chwilę.</p><small id="maintenanceSince"></small></div></div>
+ <div id="maintenanceMod" class="maintenance-mod hidden">TRYB SERWISOWY WŁĄCZONY · gracze widzą ekran serwisowy, ty grasz dalej jako moderator</div>
+ <script src="config.js?v=faza51"></script><script src="cloud.js?v=faza51"></script><script src="knights.js?v=faza51"></script><script src="perks.js?v=faza51"></script><script src="weapons.js?v=faza51"></script><script src="finishes.js?v=faza51"></script><script src="exhibits.js?v=faza51"></script><script src="twists.js?v=faza51"></script><script src="levels.js?v=faza51"></script><script src="cards.js?v=faza51"></script><script src="hall.js?v=faza51"></script><script src="art.js?v=faza51"></script><script src="pixel.js?v=faza51"></script><script src="game.js?v=faza51"></script><script src="loot.js?v=faza51"></script><script src="shop.js?v=faza51"></script><script src="loot-show.js?v=faza51"></script><script src="ui.js?v=faza51"></script>
 </body></html>

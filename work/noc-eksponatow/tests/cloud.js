@@ -139,3 +139,20 @@
     } finally { window.fetch = realFetch; window.MuseumConfig = old; }
   });
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const cloud = window.MuseumCloud, realFetch = window.fetch;
+  test('Tryb serwisowy: RPC admina, odczyt ustawienia bez logowania, zmiana dociera raz na wartość', async () => {
+    const old = window.MuseumConfig; window.MuseumConfig = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'sb_publishable_t' }; const calls = [];
+    window.fetch = async (url, init) => { calls.push({ url, init }); return { ok: true, status: 200, text: async () => url.includes('/settings') ? JSON.stringify([{ key: 'maintenance', value: { enabled: true, message: 'Serwis' } }]) : JSON.stringify({ enabled: true, message: 'Serwis' }) }; };
+    try {
+      const r = await cloud.announcements.maintenance(); assert.equal(r.ok, true); assert.equal(r.data[0].value.enabled, true); assert.ok(calls.at(-1).url.includes('/rest/v1/settings?key=eq.maintenance'));
+      cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl' } });
+      await cloud.mod.setMaintenance(true, 'Serwis'); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_set_maintenance')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { enabled: true, message: 'Serwis' });
+      let got = []; const un = cloud.announcements.onMaintenance(v => got.push(v.enabled));
+      cloud.announcements._test.emitSetting({ key: 'maintenance', value: { enabled: true, message: 'a' } }); cloud.announcements._test.emitSetting({ key: 'maintenance', value: { enabled: true, message: 'a' } }); cloud.announcements._test.emitSetting({ key: 'maintenance', value: { enabled: false, message: '' } }); cloud.announcements._test.emitSetting({ key: 'other', value: { enabled: true } });
+      assert.deepEqual(got, [true, false]); un(); await cloud.signOut();
+    } finally { window.fetch = realFetch; window.MuseumConfig = old; }
+  });
+})();

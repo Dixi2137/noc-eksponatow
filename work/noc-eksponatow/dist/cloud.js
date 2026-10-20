@@ -95,12 +95,16 @@
     setRole: (target, role) => rpc('mod_set_role', { target, new_role: role }),
     setTitle: (target, title) => rpc('mod_set_title', { target, new_title: title || '' }),
     announce: (body, kind = 'info', seconds = 60) => rpc('mod_announce', { body, kind, seconds }),
+    setMaintenance: (enabled, message = '') => rpc('mod_set_maintenance', { enabled: !!enabled, message }),
     unannounce: id => rpc('mod_unannounce', { target: id })
   });
   // Announcements for everyone: a public table, read without login. Live delivery over Supabase Realtime (Phoenix protocol
   // spoken by hand: join, heartbeat, postgres_changes) with a 15 s poll as the safety net, so no message is missed.
   const announcements = (() => {
-    const handlers = new Set(); const seen = new Set(); let socket = null, timer = null, poll = null, ref = 0, backoff = 2000;
+    const handlers = new Set(); const seen = new Set(); const settingHandlers = new Set(); let socket = null, timer = null, poll = null, ref = 0, backoff = 2000, lastMaintenance = null;
+    const settingsGet = key => request(`/rest/v1/settings?key=eq.${encodeURIComponent(key)}&select=key,value,updated_at`, { auth: false });
+    const emitSetting = row => { if (!row || row.key !== 'maintenance') return; const sig = JSON.stringify(row.value); if (sig === lastMaintenance) return; lastMaintenance = sig; for (const fn of settingHandlers) { try { fn(row.value || {}); } catch (_) {} } };
+    async function sweepSettings() { const r = await settingsGet('maintenance'); if (r.ok && Array.isArray(r.data) && r.data[0]) emitSetting(r.data[0]); }
     const list = () => request('/rest/v1/announcements?select=*&order=created_at.desc&limit=10', { auth: false });
     const deliver = (row, changed = false) => { if (!row) return; if (!changed) { if (seen.has(row.id)) return; seen.add(row.id); } for (const fn of handlers) { try { fn(row, changed); } catch (_) {} } };
     async function sweep() { const r = await list(); if (r.ok && Array.isArray(r.data)) for (const row of [...r.data].reverse()) { if (new Date(row.expires_at) > new Date()) deliver(row); else if (seen.has(row.id)) deliver(row, true); } }
@@ -109,12 +113,13 @@
       const url = `${config().supabaseUrl.replace(/^http/, 'ws').replace(/\/$/, '')}/realtime/v1/websocket?apikey=${encodeURIComponent(config().supabaseAnonKey)}&vsn=1.0.0`;
       try { socket = new WebSocket(url); } catch (_) { socket = null; return; }
       const send = msg => { try { socket.send(JSON.stringify({ ...msg, ref: String(++ref) })); } catch (_) {} };
-      socket.onopen = () => { backoff = 2000; send({ topic: 'realtime:announcements', event: 'phx_join', payload: { config: { broadcast: { self: false }, presence: { key: '' }, postgres_changes: [{ event: 'INSERT', schema: 'public', table: 'announcements' }, { event: 'UPDATE', schema: 'public', table: 'announcements' }] }, access_token: session?.access_token || config().supabaseAnonKey } }); timer = setInterval(() => send({ topic: 'phoenix', event: 'heartbeat', payload: {} }), 25000); };
-      socket.onmessage = e => { let m = null; try { m = JSON.parse(e.data); } catch (_) { return; } if (m?.event === 'postgres_changes') { const row = m.payload?.data?.record || m.payload?.record, type = m.payload?.data?.type || m.payload?.type; if (row) deliver(row, type === 'UPDATE'); } };
+      socket.onopen = () => { backoff = 2000; send({ topic: 'realtime:announcements', event: 'phx_join', payload: { config: { broadcast: { self: false }, presence: { key: '' }, postgres_changes: [{ event: 'INSERT', schema: 'public', table: 'announcements' }, { event: 'UPDATE', schema: 'public', table: 'announcements' }, { event: '*', schema: 'public', table: 'settings' }] }, access_token: session?.access_token || config().supabaseAnonKey } }); timer = setInterval(() => send({ topic: 'phoenix', event: 'heartbeat', payload: {} }), 25000); };
+      socket.onmessage = e => { let m = null; try { m = JSON.parse(e.data); } catch (_) { return; } if (m?.event === 'postgres_changes') { const row = m.payload?.data?.record || m.payload?.record, type = m.payload?.data?.type || m.payload?.type, table = m.payload?.data?.table || m.payload?.table; if (row && table === 'settings') emitSetting(row); else if (row) deliver(row, type === 'UPDATE'); } };
       socket.onclose = socket.onerror = () => { clearInterval(timer); timer = null; if (socket) { socket.onclose = socket.onerror = null; socket = null; } setTimeout(connect, backoff); backoff = Math.min(60000, backoff * 2); };
     }
-    function subscribe(fn) { handlers.add(fn); if (!poll) { sweep(); poll = setInterval(sweep, 15000); connect(); document.addEventListener('visibilitychange', () => { if (!document.hidden) sweep(); }); } return () => handlers.delete(fn); }
-    return Object.freeze({ list, subscribe, markSeen: id => seen.add(id), _test: { deliver, seen } });
+    function subscribe(fn) { handlers.add(fn); if (!poll) { sweep(); sweepSettings(); poll = setInterval(() => { sweep(); sweepSettings(); }, 15000); connect(); document.addEventListener('visibilitychange', () => { if (!document.hidden) { sweep(); sweepSettings(); } }); } return () => handlers.delete(fn); }
+    function onMaintenance(fn) { settingHandlers.add(fn); if (!poll) subscribe(() => {}); return () => settingHandlers.delete(fn); }
+    return Object.freeze({ list, subscribe, onMaintenance, maintenance: () => settingsGet('maintenance'), markSeen: id => seen.add(id), _test: { deliver, seen, emitSetting } });
   })();
   // Honorary titles a moderator can grant; 'first-to-arrive' is unique on the server.
   const titles = Object.freeze({
