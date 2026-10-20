@@ -447,7 +447,7 @@
     }
     labels.forEach(l => {
       ctx.save(); ctx.globalAlpha = clamp(l.life / .25, 0, 1); ctx.textAlign = 'center';
-      ctx.font = `800 ${l.size}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
+      ctx.font = `${uiFont.includes('Pixelify') ? 700 : 800} ${l.size}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
       ctx.fillStyle = l.color; ctx.fillText(l.text, clamp(l.x, 185, W - 185), l.y); ctx.restore();
     });
     ctx.restore();

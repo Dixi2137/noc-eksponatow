@@ -200,6 +200,9 @@ body.pixel .announce-bar{font-family:'Pixelify Sans',monospace;font-size:17px}
 .card-twist{display:flex;align-items:center;gap:10px;margin:10px 0 0;padding:8px 12px;border:1px solid #5b6a44;background:#141a12cc;font-size:11px}.card-twist span{font-size:7px;letter-spacing:2px;color:var(--muted)}.card-twist strong{color:var(--lime);letter-spacing:1px}.card-twist em{font-style:normal;color:#bdc1b2}body.pixel .card-twist strong{font-family:'Pixelify Sans',monospace}@media(max-width:650px){.card-twist{flex-wrap:wrap;font-size:9px}}
 
 .maintenance{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:#0b0d0a;background-image:radial-gradient(circle at 50% 30%,#1c2418,#0b0d0a 70%)}.maintenance-box{max-width:560px;padding:40px 36px;text-align:center;border:1px solid var(--line);background:#121810;box-shadow:0 30px 100px #000c}.maintenance-box h2{font-family:'Barlow Condensed',Impact,sans-serif;font-size:56px;line-height:.95;margin:12px 0 14px;color:var(--lime)}.maintenance-box p{margin:0 0 12px;font-size:14px;color:var(--cream)}.maintenance-box small{color:var(--muted);font-size:10px;letter-spacing:1.5px}body.pixel .maintenance-box h2{font-family:'Pixelify Sans',monospace}.maintenance-mod{position:fixed;left:0;right:0;top:0;z-index:290;padding:7px 12px;text-align:center;background:#ff6b7d;color:#1a0a0d;font-size:10px;font-weight:800;letter-spacing:1.5px}.mod-maintenance{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px;padding:12px 14px;border:1px solid #5b2a30;background:#1a1012}.mod-maintenance>div{display:flex;flex-direction:column;gap:2px;min-width:160px}.mod-maintenance strong{font-size:12px;letter-spacing:1px}.mod-maintenance strong.on{color:#ff8c9a}.mod-maintenance strong.off{color:#9ad28b}.mod-maintenance input{flex:1;min-width:180px;padding:9px 11px;background:#0f140d;border:1px solid var(--line);color:var(--cream);font:inherit}
+
+/* Pixelify Sans ma wagi 400–700: bez sztucznego pogrubienia (zamykało otwór litery C) i z lekkim światłem między literami. */
+body.pixel{font-synthesis:none}body.pixel .announce-bar,body.pixel .choice-box h2,body.pixel .maintenance-box h2,body.pixel .shop-finish-price strong{font-weight:700}body.pixel .announce-bar{letter-spacing:1px}body.pixel .menu-screen h1,body.pixel .dream-caption h2{letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -3031,7 +3034,7 @@ window.MuseumConfig = Object.freeze({
     }
     labels.forEach(l => {
       ctx.save(); ctx.globalAlpha = clamp(l.life / .25, 0, 1); ctx.textAlign = 'center';
-      ctx.font = `800 ${l.size}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
+      ctx.font = `${uiFont.includes('Pixelify') ? 700 : 800} ${l.size}px ${uiFont}`; ctx.shadowColor = '#07131a'; ctx.shadowBlur = 12;
       ctx.fillStyle = l.color; ctx.fillText(l.text, clamp(l.x, 185, W - 185), l.y); ctx.restore();
     });
     ctx.restore();
