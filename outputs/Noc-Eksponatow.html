@@ -493,8 +493,8 @@ window.MuseumConfig = Object.freeze({
     all() { return perks; }
   });
 })();
-</script><script>/* Weapons are data. Five types set the rhythm (blade, heavy, polearm, light, ranged), four eras sort them into crates,
-   rarity nudges the damage. Each entry: how the knight strikes, what a parry reflects, what the item is worth. */
+</script><script>/* Weapons are data. Seven types set the rhythm, five eras sort them into crates, rarity nudges the damage.
+   Each entry: how the knight strikes, what a parry reflects, what the item is worth. */
 (() => {
   'use strict';
   const baseline = Object.freeze({
@@ -502,61 +502,164 @@ window.MuseumConfig = Object.freeze({
     weakGuardDamage: 9, comboBonus: 3, comboAt: 3, parryDrain: 10,
     parryReflect: Object.freeze({ light: 20, heavy: 25 }), ammo: null, reload: 0
   });
+  const ranged = { kind: 'ranged', comboBonus: 0, comboAt: 99, parryDrain: 4, parryReflect: { light: 14, heavy: 18 } };
   const types = Object.freeze({
     blade:   { name: 'Ostrza', stats: {} },
     heavy:   { name: 'Broń ciężka', stats: { staminaCost: 16, swing: .46, contact: .3, cooldown: .6, weakGuardDamage: 13, comboBonus: 2, parryReflect: { light: 24, heavy: 30 } } },
     polearm: { name: 'Broń drzewcowa', stats: { range: 470, weakGuardDamage: 8, comboBonus: 2, parryDrain: 6, parryReflect: { light: 18, heavy: 23 } } },
-    light:   { name: 'Broń lekka', stats: { staminaCost: 9, swing: .28, contact: .17, cooldown: .34, weakGuardDamage: 7, comboBonus: 5, comboAt: 2, parryReflect: { light: 18, heavy: 22 } } },
-    ranged:  { name: 'Broń dystansowa', stats: { kind: 'ranged', range: 900, staminaCost: 6, swing: .42, contact: .2, cooldown: .55, weakGuardDamage: 14, comboBonus: 0, comboAt: 99, parryDrain: 4, parryReflect: { light: 14, heavy: 18 }, ammo: 6, reload: 1.6 } }
+    light:   { name: 'Noże i sztylety', stats: { staminaCost: 8, swing: .28, contact: .17, cooldown: .32, range: 350, weakGuardDamage: 7, comboBonus: 5, comboAt: 2, parryReflect: { light: 17, heavy: 21 } } },
+    bow:     { name: 'Łuki i kusze', stats: { ...ranged, range: 900, staminaCost: 6, swing: .5, contact: .25, cooldown: .6, weakGuardDamage: 10, ammo: 8, reload: 1.2 } },
+    pistol:  { name: 'Pistolety', stats: { ...ranged, range: 700, staminaCost: 6, swing: .42, contact: .2, cooldown: .5, weakGuardDamage: 14, ammo: 6, reload: 1.6 } },
+    rifle:   { name: 'Karabiny i strzelby', stats: { ...ranged, range: 900, staminaCost: 8, swing: .5, contact: .22, cooldown: .7, weakGuardDamage: 18, ammo: 5, reload: 2.2 } }
   });
-  const eras = Object.freeze({ antiquity: 'Starożytność', medieval: 'Średniowiecze', renaissance: 'Nowożytność', modern: 'Wiek XIX i XX' });
+  const eras = Object.freeze({ antiquity: 'Starożytność', medieval: 'Średniowiecze', renaissance: 'Nowożytność', modern: 'Wiek XIX i XX', contemporary: 'Współczesność' });
   const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3 };
-  // weapon(id, name, era, type, rarity, icon, flavour, overrides)
-  function w(id, name, era, type, rarity, icon, flavour, overrides = {}) {
-    return { id, name, era: `${eras[era].toUpperCase()} · ${({ basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT' })[rarity]}`,
-      categoryId: era, type, rarity, icon, flavour, overrides };
-  }
+  const rarityLabel = { basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT' };
+  // w(id, name, era, type, rarity, icon, flavour, overrides)
+  const w = (id, name, era, type, rarity, icon, flavour, overrides = {}) => ({ id, name, categoryId: era, type, rarity, icon, flavour, overrides });
+  const A = 'antiquity', M = 'medieval', R = 'renaissance', X = 'modern', C = 'contemporary';
   const definitions = [
-    // Blades
-    w('sword', 'MIECZ RYCERSKI', 'medieval', 'blade', 'basic', 'sword', 'Klasyczne ostrze muzealnego rycerza. Wszystko w nim jest średnie, i o to chodzi.'),
-    w('gladius', 'GLADIUS', 'antiquity', 'blade', 'common', 'shortsword', 'Krótki miecz legionisty. Szybszy od rycerskiego, ale sięga bliżej.', { swing: .32, contact: .2, cooldown: .42, range: 380 }),
-    w('scimitar', 'SZABLA DAMASCEŃSKA', 'medieval', 'blade', 'common', 'curved', 'Zakrzywiona klinga z damastu. Tnie w serii.', { comboBonus: 4 }),
-    w('claymore', 'CLAYMORE', 'medieval', 'blade', 'rare', 'greatsword', 'Dwuręczny miecz Highlandów. Wolniejszy, ale mocniejszy i dłuższy.', { staminaCost: 14, swing: .4, contact: .26, cooldown: .52, range: 440, weakGuardDamage: 11 }),
-    w('husaria', 'SZABLA HUSARSKA', 'renaissance', 'blade', 'rare', 'curved', 'Szabla skrzydlatej jazdy. Perfekcyjna parada odbija mocniej niż u miecza.', { parryReflect: { light: 24, heavy: 29 } }),
-    w('katana', 'KATANA', 'renaissance', 'blade', 'epic', 'curved', 'Stal składana tysiąc razy. Szybkie cięcia i wysoki bonus serii.', { swing: .3, contact: .19, cooldown: .38, comboBonus: 5, comboAt: 2 }),
-    // Heavy
-    w('axe', 'TOPÓR BOJOWY', 'medieval', 'heavy', 'common', 'axe', 'Wolny, ale 13 obrażeń w słabą gardę i mocniejsze odbicie parady.'),
-    w('warhammer', 'MŁOT BOJOWY', 'medieval', 'heavy', 'rare', 'hammer', 'Młot na zbroje. Ciężkie, rzadkie uderzenia, odbicie parady jak od ściany.', { parryReflect: { light: 28, heavy: 34 }, cooldown: .66 }),
-    w('morningstar', 'MORGENSZTERN', 'medieval', 'heavy', 'epic', 'mace', 'Kolczasta kula na łańcuchu. Największe obrażenia w słabą gardę wśród broni wręcz.', { weakGuardDamage: 15, comboBonus: 3 }),
-    w('berdysz', 'BERDYSZ', 'renaissance', 'heavy', 'rare', 'poleaxe', 'Topór na długim drzewcu. Zasięg drzewca, siła topora.', { range: 450, weakGuardDamage: 12 }),
-    w('labrys', 'LABRYS', 'antiquity', 'heavy', 'common', 'doubleaxe', 'Dwusieczny topór z Krety. Dwa ostrza, dwa razy więcej powodów, żeby się nie zbliżać.', { comboBonus: 3 }),
-    // Polearms
-    w('spear', 'WŁÓCZNIA HOPLITY', 'antiquity', 'polearm', 'rare', 'spear', 'Trafia przeciwnika, zanim ten wejdzie w zasięg własnego ciosu.'),
-    w('trident', 'TRÓJZĄB RETIARIUSA', 'antiquity', 'polearm', 'common', 'trident', 'Trzy groty gladiatora z siecią. Trochę krótszy od włóczni, ale tnie szerzej.', { range: 450, weakGuardDamage: 9 }),
-    w('halberd', 'HALABARDA', 'medieval', 'polearm', 'epic', 'halberd', 'Ostrze, hak i grot na jednym drzewcu. Daleko i boleśnie.', { range: 480, weakGuardDamage: 10, comboBonus: 3, parryReflect: { light: 21, heavy: 26 } }),
-    w('pike', 'PIKA', 'renaissance', 'polearm', 'common', 'pike', 'Najdłuższa broń w muzeum. Sięga najdalej, zadaje najmniej.', { range: 520, weakGuardDamage: 7 }),
-    // Light
-    w('rapier', 'RAPIER SZLACHECKI', 'renaissance', 'light', 'epic', 'rapier', 'Bardzo szybkie pchnięcia: 7 obrażeń, +5 już od drugiego trafienia.'),
-    w('dagger', 'SZTYLET', 'antiquity', 'light', 'common', 'dagger', 'Krótki i podstępny. Prawie nie kosztuje energii, ale musisz podejść bardzo blisko.', { staminaCost: 7, range: 340, cooldown: .3 }),
-    w('bayonet', 'BAGNET', 'modern', 'light', 'rare', 'dagger', 'Bagnet z okopów. Szybki jak sztylet, sięga jak miecz.', { range: 410 }),
-    w('stiletto', 'STYLET', 'renaissance', 'light', 'rare', 'dagger', 'Wąskie ostrze między płytami zbroi. Bonus serii od pierwszego powtórzenia.', { comboBonus: 6, comboAt: 2, range: 350 }),
-    // Ranged
-    w('revolver', 'REWOLWER KUSTOSZA', 'modern', 'ranged', 'legendary', 'revolver', 'Strzał z dystansu w słabą gardę: 17 obrażeń. 6 naboi na walkę, przeładowanie 1,6 s.'),
-    w('bow', 'ŁUK REFLEKSYJNY', 'medieval', 'ranged', 'rare', 'bow', 'Łuk ze stepu. Dużo strzał, mniejsze obrażenia, szybkie przeładowanie kołczanu.', { ammo: 10, reload: 1.0, weakGuardDamage: 10, swing: .5, contact: .25 }),
-    w('crossbow', 'KUSZA', 'medieval', 'ranged', 'epic', 'crossbow', 'Bełt przebija wszystko. Trzy strzały, długie naciąganie, największe obrażenia na dystans.', { ammo: 3, reload: 2.4, weakGuardDamage: 18 }),
-    w('musket', 'MUSZKIET', 'renaissance', 'ranged', 'rare', 'musket', 'Jeden strzał, chmura dymu i długie ładowanie przez lufę.', { ammo: 1, reload: 3.0, weakGuardDamage: 20 }),
-    w('shotgun', 'STRZELBA KUSTOSZA', 'modern', 'ranged', 'epic', 'shotgun', 'Dwie lufy. Z bliska bardzo boli, z daleka nie ma sensu.', { ammo: 2, reload: 1.3, weakGuardDamage: 17, range: 520 })
+    // ── Ostrza ───────────────────────────────────────────────────────────────
+    w('sword', 'MIECZ RYCERSKI', M, 'blade', 'basic', 'sword', 'Klasyczne ostrze muzealnego rycerza. Wszystko w nim jest średnie, i o to chodzi.'),
+    w('xiphos', 'XIPHOS', A, 'blade', 'common', 'shortsword', 'Krótki miecz hoplity, dobywany, gdy włócznia pęknie.', { range: 370, swing: .32, contact: .2, cooldown: .42 }),
+    w('gladius', 'GLADIUS', A, 'blade', 'common', 'shortsword', 'Krótki miecz legionisty. Szybszy od rycerskiego, ale sięga bliżej.', { swing: .32, contact: .2, cooldown: .42, range: 380 }),
+    w('spatha', 'SPATHA', A, 'blade', 'common', 'sword', 'Długi miecz jazdy rzymskiej. Przodek wszystkich mieczy średniowiecza.', { range: 420 }),
+    w('falcata', 'FALCATA', A, 'blade', 'rare', 'curved', 'Iberyjska klinga wygięta do przodu. Tnie jak topór, waży jak miecz.', { weakGuardDamage: 11, comboBonus: 2 }),
+    w('jian', 'JIAN', A, 'blade', 'rare', 'sword', 'Prosty miecz chińskich uczonych. Lekki, precyzyjny, szybki w serii.', { swing: .3, cooldown: .4, comboBonus: 4 }),
+    w('seax', 'SEAX', M, 'blade', 'common', 'shortsword', 'Nóż bojowy Sasów, prawie miecz. Tani i uczciwy.', { range: 360, swing: .3, cooldown: .4 }),
+    w('longsword', 'MIECZ DŁUGI', M, 'blade', 'common', 'sword', 'Oburęczny miecz z podręczników szermierki. Dłuższy zasięg, odrobinę wolniej.', { range: 440, swing: .38 }),
+    w('falchion', 'FALCHION', M, 'blade', 'common', 'curved', 'Szeroka, jednosieczna klinga piechoty. Prosta w obsłudze, ciężka w skutkach.', { weakGuardDamage: 10 }),
+    w('bastard', 'MIECZ PÓŁTORARĘCZNY', M, 'blade', 'rare', 'sword', 'Jedna ręka albo dwie. Wyważony we wszystkim.', { range: 430, parryReflect: { light: 22, heavy: 27 } }),
+    w('scimitar', 'SZABLA DAMASCEŃSKA', M, 'blade', 'common', 'curved', 'Zakrzywiona klinga z damastu. Tnie w serii.', { comboBonus: 4 }),
+    w('dao', 'DAO', M, 'blade', 'common', 'curved', 'Chińska szabla piechoty. Szerokie cięcia, niski koszt energii.', { staminaCost: 10 }),
+    w('tachi', 'TACHI', M, 'blade', 'epic', 'curved', 'Samurajski miecz noszony ostrzem w dół. Dłuższy i bardziej zakrzywiony od katany.', { range: 430, swing: .32, comboBonus: 5, comboAt: 2 }),
+    w('claymore', 'CLAYMORE', M, 'blade', 'rare', 'greatsword', 'Dwuręczny miecz Highlandów. Wolniejszy, ale mocniejszy i dłuższy.', { staminaCost: 14, swing: .4, contact: .26, cooldown: .52, range: 440, weakGuardDamage: 11 }),
+    w('szczerbiec', 'SZCZERBIEC', M, 'blade', 'legendary', 'sword', 'Miecz koronacyjny królów Polski. Szczerba w ostrzu, legenda w rękojeści.', { weakGuardDamage: 12, parryReflect: { light: 26, heavy: 32 }, comboBonus: 4 }),
+    w('zulfikar', 'ZULFIKAR', M, 'blade', 'legendary', 'curved', 'Rozdwojona klinga z legend Wschodu. Każde cięcie liczy się podwójnie.', { comboBonus: 6, comboAt: 2, weakGuardDamage: 11 }),
+    w('husaria', 'SZABLA HUSARSKA', R, 'blade', 'rare', 'curved', 'Szabla skrzydlatej jazdy. Perfekcyjna parada odbija mocniej niż u miecza.', { parryReflect: { light: 24, heavy: 29 } }),
+    w('palasz', 'PAŁASZ', R, 'blade', 'rare', 'sword', 'Prosty, ciężki miecz jazdy. Rąbie, nie tnie.', { weakGuardDamage: 11, swing: .38 }),
+    w('katana', 'KATANA', R, 'blade', 'epic', 'curved', 'Stal składana tysiąc razy. Szybkie cięcia i wysoki bonus serii.', { swing: .3, contact: .19, cooldown: .38, comboBonus: 5, comboAt: 2 }),
+    w('wakizashi', 'WAKIZASHI', R, 'blade', 'rare', 'curved', 'Krótszy towarzysz katany. W ciasnej sali lepszy od niej.', { range: 370, swing: .28, cooldown: .36, comboBonus: 4, comboAt: 2 }),
+    w('zweihander', 'ZWEIHÄNDER', R, 'blade', 'epic', 'greatsword', 'Półtora metra stali landsknechta. Najdłuższe ostrze w muzeum.', { staminaCost: 16, swing: .44, contact: .28, cooldown: .58, range: 470, weakGuardDamage: 13 }),
+    w('cutlass', 'KORDELAS', R, 'blade', 'common', 'curved', 'Krótka szabla piratów. W abordażu nikt nie pyta o technikę.', { range: 380, cooldown: .4 }),
+    w('cavalry', 'SZABLA KAWALERYJSKA', X, 'blade', 'common', 'curved', 'Szabla wz. 34 polskiej kawalerii. Ostatnia szabla, która walczyła.', { comboBonus: 4 }),
+    w('shashka', 'SZASZKA', X, 'blade', 'rare', 'curved', 'Kozacka szabla bez jelca. Dobywana i tnąca jednym ruchem.', { swing: .3, cooldown: .38 }),
+    // ── Broń ciężka ──────────────────────────────────────────────────────────
+    w('club', 'MACZUGA', A, 'heavy', 'common', 'mace', 'Najstarsza broń świata. Nie potrzebuje instrukcji.', { weakGuardDamage: 12, staminaCost: 14 }),
+    w('labrys', 'LABRYS', A, 'heavy', 'common', 'doubleaxe', 'Dwusieczny topór z Krety. Dwa ostrza, dwa razy więcej powodów, żeby się nie zbliżać.', { comboBonus: 3 }),
+    w('francisca', 'FRANCISKA', M, 'heavy', 'common', 'axe', 'Topór Franków do rzucania. Tu tylko do rąbania, ale rąbie dobrze.', { swing: .42, cooldown: .54 }),
+    w('axe', 'TOPÓR BOJOWY', M, 'heavy', 'common', 'axe', 'Wolny, ale 13 obrażeń w słabą gardę i mocniejsze odbicie parady.'),
+    w('daneaxe', 'TOPÓR DUŃSKI', M, 'heavy', 'rare', 'poleaxe', 'Dwuręczny topór wikingów na długim stylisku. Zasięg i siła w jednym.', { range: 440, weakGuardDamage: 14 }),
+    w('flail', 'KIŚCIEŃ', M, 'heavy', 'common', 'flail', 'Kolczasta kula na łańcuchu. Nie da się jej sparować elegancko.', { parryReflect: { light: 20, heavy: 26 }, weakGuardDamage: 13 }),
+    w('warflail', 'CEP BOJOWY', M, 'heavy', 'common', 'flail', 'Chłopski cep z okuciem. Husyci rozbijali nim rycerstwo.', { range: 440 }),
+    w('warhammer', 'MŁOT BOJOWY', M, 'heavy', 'rare', 'hammer', 'Młot na zbroje. Ciężkie, rzadkie uderzenia, odbicie parady jak od ściany.', { parryReflect: { light: 28, heavy: 34 }, cooldown: .66 }),
+    w('maul', 'MŁOT OBURĘCZNY', M, 'heavy', 'epic', 'hammer', 'Młot, który rozbija bramy. Najwolniejszy cios w muzeum i jeden z najmocniejszych.', { staminaCost: 18, swing: .52, contact: .34, cooldown: .7, weakGuardDamage: 16 }),
+    w('morningstar', 'MORGENSZTERN', M, 'heavy', 'epic', 'mace', 'Kolczasta kula na trzonku. Największe obrażenia w słabą gardę wśród broni wręcz.', { weakGuardDamage: 15, comboBonus: 3 }),
+    w('czekan', 'CZEKAN', R, 'heavy', 'common', 'hammer', 'Lekki młotek z dziobem. Szybszy od innych ciężkich.', { swing: .4, cooldown: .5, weakGuardDamage: 12 }),
+    w('nadziak', 'NADZIAK', R, 'heavy', 'rare', 'hammer', 'Szlachecki młotek z ostrym dziobem. Przebija blachę i dobre maniery.', { weakGuardDamage: 14, comboBonus: 3 }),
+    w('buzdygan', 'BUZDYGAN', R, 'heavy', 'rare', 'mace', 'Oznaka władzy i narzędzie jej egzekwowania.', { parryReflect: { light: 26, heavy: 31 } }),
+    w('berdysz', 'BERDYSZ', R, 'heavy', 'rare', 'poleaxe', 'Topór na długim drzewcu. Zasięg drzewca, siła topora.', { range: 450, weakGuardDamage: 12 }),
+    w('crowbar', 'ŁOM', X, 'heavy', 'common', 'club', 'Stalowy łom z zaplecza muzeum. Nie jest eksponatem, ale działa.', { swing: .42, cooldown: .5 }),
+    w('bat', 'KIJ BEJSBOLOWY', C, 'heavy', 'common', 'club', 'Drewniany kij z zaplecza. W niektórych muzeach to jednak eksponat.', { swing: .4, cooldown: .48, weakGuardDamage: 12 }),
+    w('sledge', 'MŁOT KOWALSKI', C, 'heavy', 'rare', 'hammer', 'Pięciokilogramowy młot z warsztatu. Przeciwnik też to czuje.', { weakGuardDamage: 15, staminaCost: 18 }),
+    // ── Broń drzewcowa ───────────────────────────────────────────────────────
+    w('pilum', 'PILUM', A, 'polearm', 'common', 'spear', 'Oszczep legionisty. Grot wygina się po trafieniu, żeby nikt go nie odrzucił.', { range: 450 }),
+    w('spear', 'WŁÓCZNIA HOPLITY', A, 'polearm', 'rare', 'spear', 'Trafia przeciwnika, zanim ten wejdzie w zasięg własnego ciosu.'),
+    w('sarissa', 'SARISSA', A, 'polearm', 'rare', 'pike', 'Sześciometrowa pika falangi macedońskiej. Zasięg bez konkurencji.', { range: 540, weakGuardDamage: 7 }),
+    w('trident', 'TRÓJZĄB RETIARIUSA', A, 'polearm', 'common', 'trident', 'Trzy groty gladiatora z siecią. Trochę krótszy od włóczni, ale tnie szerzej.', { range: 450, weakGuardDamage: 9 }),
+    w('warfork', 'WIDŁY BOJOWE', M, 'polearm', 'common', 'trident', 'Chłopskie widły z okuciem. Tanie i zaskakująco skuteczne.', { range: 440 }),
+    w('glaive', 'GLEWIA', M, 'polearm', 'rare', 'halberd', 'Jednosieczne ostrze na drzewcu. Tnie szeroko z dystansu.', { comboBonus: 3 }),
+    w('yari', 'YARI', M, 'polearm', 'rare', 'spear', 'Japońska włócznia piechoty ashigaru. Proste pchnięcia, szybka seria.', { swing: .32, cooldown: .42 }),
+    w('naginata', 'NAGINATA', M, 'polearm', 'epic', 'halberd', 'Zakrzywione ostrze na długim drzewcu. Łuk cięcia obejmuje całą arenę.', { range: 480, weakGuardDamage: 10, comboBonus: 4 }),
+    w('halberd', 'HALABARDA', M, 'polearm', 'epic', 'halberd', 'Ostrze, hak i grot na jednym drzewcu. Daleko i boleśnie.', { range: 480, weakGuardDamage: 10, comboBonus: 3, parryReflect: { light: 21, heavy: 26 } }),
+    w('rohatyna', 'ROHATYNA', R, 'polearm', 'common', 'spear', 'Włócznia myśliwska z poprzeczką. Dzik się nie przedrze, przeciwnik też nie.', { parryReflect: { light: 21, heavy: 26 } }),
+    w('partisan', 'PARTYZANA', R, 'polearm', 'common', 'halberd', 'Szerokie ostrze z dwoma skrzydełkami. Broń straży pałacowych.', { weakGuardDamage: 9 }),
+    w('pike', 'PIKA', R, 'polearm', 'common', 'pike', 'Najdłuższa broń piechoty. Sięga daleko, zadaje mało.', { range: 520, weakGuardDamage: 7 }),
+    w('kopia', 'KOPIA HUSARSKA', R, 'polearm', 'epic', 'pike', 'Pięć metrów drzewca i proporzec. Jedno uderzenie rozstrzyga szarżę.', { range: 560, weakGuardDamage: 12, comboBonus: 0, cooldown: .6 }),
+    w('lance', 'LANCA UŁAŃSKA', X, 'polearm', 'rare', 'pike', 'Lanca ułanów z proporczykiem. Ostatnia broń drzewcowa, która poszła na wojnę.', { range: 500, weakGuardDamage: 9 }),
+    // ── Noże i sztylety ──────────────────────────────────────────────────────
+    w('pugio', 'PUGIO', A, 'light', 'common', 'dagger', 'Sztylet legionisty. Tym Brutus załatwił sprawę z Cezarem.'),
+    w('sica', 'SICA', A, 'light', 'rare', 'karambit', 'Zakrzywiony sztylet Traków. Sięga za tarczę.', { comboBonus: 6 }),
+    w('dagger', 'SZTYLET', A, 'light', 'common', 'dagger', 'Krótki i podstępny. Prawie nie kosztuje energii, ale musisz podejść bardzo blisko.', { staminaCost: 7, range: 340, cooldown: .3 }),
+    w('misericordia', 'MIZERYKORDIA', M, 'light', 'common', 'dagger', 'Sztylet miłosierdzia. Wchodzi między płyty zbroi.', { weakGuardDamage: 8 }),
+    w('rondel', 'SZTYLET RONDELOWY', M, 'light', 'common', 'dagger', 'Długa, wąska klinga z tarczkami. Standard rycerza w XV wieku.', { range: 360 }),
+    w('tanto', 'TANTŌ', M, 'light', 'rare', 'dagger', 'Krótki nóż samuraja. Precyzyjne pchnięcia i wysoki bonus serii.', { comboBonus: 6, comboAt: 2 }),
+    w('kris', 'KRIS', R, 'light', 'rare', 'dagger', 'Falista klinga z Jawy. Rana po nim nie chce się zamknąć.', { weakGuardDamage: 8, comboBonus: 5 }),
+    w('stiletto', 'STYLET', R, 'light', 'rare', 'dagger', 'Wąskie ostrze między płytami zbroi. Bonus serii od pierwszego powtórzenia.', { comboBonus: 6, comboAt: 2, range: 350 }),
+    w('rapier', 'RAPIER SZLACHECKI', R, 'light', 'epic', 'rapier', 'Bardzo szybkie pchnięcia: 7 obrażeń, +5 już od drugiego trafienia.', { range: 410, staminaCost: 9 }),
+    w('smallsword', 'SZPADA', R, 'light', 'epic', 'rapier', 'Lżejsza i szybsza od rapiera. Broń pojedynków o honor.', { range: 400, swing: .26, cooldown: .3, comboBonus: 6, comboAt: 2 }),
+    w('bowie', 'NÓŻ BOWIE', X, 'light', 'rare', 'machete', 'Szeroki nóż z Dzikiego Zachodu. Bardziej tasak niż sztylet.', { weakGuardDamage: 9 }),
+    w('kukri', 'KUKRI', X, 'light', 'rare', 'kukri', 'Zakrzywiony nóż Gurkhów. Tnie jak mały topór.', { weakGuardDamage: 10, comboBonus: 4 }),
+    w('trench', 'NÓŻ SZTURMOWY', X, 'light', 'common', 'dagger', 'Nóż z okopów z kastetem w rękojeści. Dwie bronie w jednej.', { comboBonus: 6 }),
+    w('bayonet', 'BAGNET', X, 'light', 'rare', 'dagger', 'Bagnet z okopów. Szybki jak sztylet, sięga jak miecz.', { range: 410 }),
+    w('balisong', 'NÓŻ MOTYLKOWY', C, 'light', 'common', 'dagger', 'Balisong. Pół czasu walki to otwieranie go z fasonem.', { swing: .26, cooldown: .3 }),
+    w('karambit', 'KARAMBIT', C, 'light', 'epic', 'karambit', 'Zakrzywiony pazur z Sumatry. Trzymany odwrotnie, tnie w każdym ruchu.', { comboBonus: 7, comboAt: 2, weakGuardDamage: 8, cooldown: .28 }),
+    w('machete', 'MACZETA', C, 'light', 'common', 'machete', 'Długi tasak do trzciny. W muzeum trzciny nie ma, ale przeciwnicy są.', { range: 400, weakGuardDamage: 9, comboBonus: 3 }),
+    w('tactical', 'NÓŻ TAKTYCZNY', C, 'light', 'rare', 'dagger', 'Czarne ostrze, ząbkowana część, uchwyt G10. Produkt, nie eksponat, ale działa.', { comboBonus: 6 }),
+    w('m9', 'BAGNET M9', C, 'light', 'common', 'dagger', 'Bagnet do M16. Z pochwą robi za nożyce do drutu.', { range: 400 }),
+    // ── Łuki i kusze ─────────────────────────────────────────────────────────
+    w('sling', 'PROCA', A, 'bow', 'common', 'sling', 'Pasek skóry i kamień. Dawid też zaczynał skromnie.', { ammo: 12, reload: 1.0, weakGuardDamage: 8, range: 700 }),
+    w('composite', 'ŁUK KOMPOZYTOWY', A, 'bow', 'common', 'bow', 'Róg, drewno i ścięgno. Łuk Scytów i Persów.', { ammo: 10 }),
+    w('bow', 'ŁUK REFLEKSYJNY', M, 'bow', 'rare', 'bow', 'Łuk ze stepu. Dużo strzał, mniejsze obrażenia, szybkie przeładowanie kołczanu.', { ammo: 10, reload: 1.0 }),
+    w('longbow', 'ŁUK DŁUGI', M, 'bow', 'rare', 'bow', 'Angielski długi łuk z cisu. Pod Azincourt odebrał rycerstwu pewność siebie.', { weakGuardDamage: 13, ammo: 8, reload: 1.4 }),
+    w('yumi', 'YUMI', M, 'bow', 'rare', 'bow', 'Asymetryczny łuk samurajów. Dłuższy niż strzelec.', { weakGuardDamage: 12, ammo: 8 }),
+    w('stirrup', 'KUSZA STRZEMIONOWA', M, 'bow', 'common', 'crossbow', 'Naciągana nogą w strzemieniu. Mocniejsza od łuku, wolniejsza w ładowaniu.', { ammo: 4, reload: 2.0, weakGuardDamage: 15 }),
+    w('crossbow', 'KUSZA', M, 'bow', 'epic', 'crossbow', 'Bełt przebija wszystko. Trzy strzały, długie naciąganie, największe obrażenia na dystans.', { ammo: 3, reload: 2.4, weakGuardDamage: 18 }),
+    w('chukonu', 'CHU-KO-NU', M, 'bow', 'epic', 'crossbow', 'Chińska kusza powtarzalna. Dziesięć bełtów bez naciągania.', { ammo: 10, reload: 2.6, weakGuardDamage: 9, cooldown: .4 }),
+    w('arbalest', 'ARBALETA', R, 'bow', 'rare', 'crossbow', 'Kusza ze stalowym łuczyskiem i korbą. Jeden bełt, duża dziura.', { ammo: 2, reload: 2.8, weakGuardDamage: 21 }),
+    w('compound', 'ŁUK BLOCZKOWY', C, 'bow', 'epic', 'bow', 'Bloczki, linki, celownik. Łuk, który nie wymaga siły, tylko cierpliwości.', { weakGuardDamage: 14, ammo: 8, reload: 1.1 }),
+    // ── Pistolety ────────────────────────────────────────────────────────────
+    w('flintlock', 'PISTOLET SKAŁKOWY', R, 'pistol', 'common', 'flintlock', 'Jeden strzał, dym i modlitwa, żeby proch był suchy.', { ammo: 1, reload: 2.6, weakGuardDamage: 19, range: 500 }),
+    w('wheellock', 'PISTOLET KOŁOWY', R, 'pistol', 'rare', 'flintlock', 'Zamek kołowy nakręcany kluczykiem. Droższy od konia, na którym jechał jego właściciel.', { ammo: 1, reload: 2.4, weakGuardDamage: 20, range: 520 }),
+    w('duelling', 'PISTOLET POJEDYNKOWY', R, 'pistol', 'rare', 'flintlock', 'Para w mahoniowej skrzynce. Tu masz tylko jeden, i tylko jeden strzał.', { ammo: 1, reload: 2.2, weakGuardDamage: 22, range: 560 }),
+    w('derringer', 'DERRINGER', X, 'pistol', 'common', 'pistol', 'Mieści się w rękawie. Dwa strzały z bardzo bliska.', { ammo: 2, reload: 1.4, weakGuardDamage: 13, range: 420 }),
+    w('peacemaker', 'COLT PEACEMAKER', X, 'pistol', 'rare', 'revolver', 'Rewolwer Dzikiego Zachodu. Sześć naboi, które zakończyły wiele sporów.', { ammo: 6, reload: 1.8, weakGuardDamage: 15 }),
+    w('nagant', 'NAGANT', X, 'pistol', 'common', 'revolver', 'Rewolwer carskiej armii. Siedem naboi i spust twardy jak zima.', { ammo: 7, reload: 2.0, weakGuardDamage: 13 }),
+    w('revolver', 'REWOLWER KUSTOSZA', X, 'pistol', 'legendary', 'revolver', 'Strzał z całej areny w słabą gardę: 17 obrażeń. 6 naboi na walkę, przeładowanie 1,6 s.', { range: 900 }),
+    w('mauser', 'MAUSER C96', X, 'pistol', 'rare', 'pistol', 'Pistolet z drewnianą kolbą-kaburą. Dziesięć naboi z łódki.', { ammo: 10, reload: 1.8, weakGuardDamage: 13, range: 620 }),
+    w('luger', 'LUGER P08', X, 'pistol', 'epic', 'pistol', 'Kolankowy zamek i ósemka w magazynku. Najbardziej pożądane trofeum z okopów.', { ammo: 8, reload: 1.5, weakGuardDamage: 14 }),
+    w('colt1911', 'COLT 1911', X, 'pistol', 'epic', 'pistol', 'Kaliber .45. Sto lat w służbie i dalej aktualny.', { ammo: 7, reload: 1.4, weakGuardDamage: 16 }),
+    w('vis', 'VIS WZ. 35', X, 'pistol', 'epic', 'pistol', 'Polski pistolet z Radomia. Uznawany za jeden z najlepszych swojej epoki.', { ammo: 8, reload: 1.4, weakGuardDamage: 15 }),
+    w('p38', 'WALTHER P38', X, 'pistol', 'rare', 'pistol', 'Następca Lugera, prostszy i tańszy. Osiem naboi.', { ammo: 8, reload: 1.5, weakGuardDamage: 14 }),
+    w('glock', 'GLOCK 17', C, 'pistol', 'common', 'pistol', 'Polimerowa rama, siedemnaście naboi, zero ozdób.', { ammo: 17, reload: 1.3, weakGuardDamage: 12 }),
+    w('beretta', 'BERETTA 92', C, 'pistol', 'rare', 'pistol', 'Włoska elegancja i piętnaście naboi.', { ammo: 15, reload: 1.3, weakGuardDamage: 13 }),
+    w('magnum', 'MAGNUM .44', C, 'pistol', 'epic', 'revolver', 'Najpotężniejszy rewolwer, jak mawiał pewien inspektor. Sześć naboi.', { ammo: 6, reload: 1.9, weakGuardDamage: 19 }),
+    w('deagle', 'DESERT EAGLE', C, 'pistol', 'legendary', 'pistol', 'Pistolet, który wygląda, jakby wymyślono go dla filmów. Bo tak.', { ammo: 7, reload: 1.7, weakGuardDamage: 20, range: 650 }),
+    // ── Karabiny i strzelby ──────────────────────────────────────────────────
+    w('arquebus', 'ARKEBUZ', R, 'rifle', 'common', 'musket', 'Lont, proch i huk. Pierwsza broń palna piechoty.', { ammo: 1, reload: 3.2, weakGuardDamage: 20, range: 700 }),
+    w('musket', 'MUSZKIET', R, 'rifle', 'rare', 'musket', 'Jeden strzał, chmura dymu i długie ładowanie przez lufę.', { ammo: 1, reload: 3.0, weakGuardDamage: 22 }),
+    w('blunderbuss', 'GARŁACZ', R, 'rifle', 'rare', 'shotgun', 'Lejkowata lufa i garść siekańców. Z bliska nie trzeba celować.', { ammo: 1, reload: 2.8, weakGuardDamage: 24, range: 480 }),
+    w('brownbess', 'BROWN BESS', R, 'rifle', 'common', 'musket', 'Muszkiet brytyjskiej piechoty przez sto lat. Niezawodny jak herbata o piątej.', { ammo: 1, reload: 2.8, weakGuardDamage: 21 }),
+    w('sztucer', 'SZTUCER', X, 'rifle', 'common', 'rifle', 'Gwintowana lufa myśliwego. Celniejszy od muszkietu, wolniejszy od wszystkiego nowszego.', { ammo: 1, reload: 2.4, weakGuardDamage: 22 }),
+    w('winchester', 'WINCHESTER 1873', X, 'rifle', 'rare', 'rifle', 'Karabin, który zdobył Zachód. Dźwignia i dwanaście naboi.', { ammo: 12, reload: 2.4, weakGuardDamage: 14, cooldown: .5 }),
+    w('double', 'DUBELTÓWKA', X, 'rifle', 'common', 'shotgun', 'Dwie lufy, dwa strzały. Klasyka dworów i dworków.', { ammo: 2, reload: 1.6, weakGuardDamage: 19, range: 520 }),
+    w('mosin', 'MOSIN', X, 'rifle', 'common', 'rifle', 'Karabin trzech wojen. Pięć naboi i zamek, który działa w każdym błocie.', { ammo: 5, reload: 2.2, weakGuardDamage: 18 }),
+    w('springfield', 'SPRINGFIELD 1903', X, 'rifle', 'common', 'rifle', 'Amerykański karabin powtarzalny. Pięć naboi w łódce.', { ammo: 5, reload: 2.1, weakGuardDamage: 18 }),
+    w('leeenfield', 'LEE-ENFIELD', X, 'rifle', 'rare', 'rifle', 'Dziesięć naboi i zamek tak szybki, że Niemcy brali go za karabin maszynowy.', { ammo: 10, reload: 2.2, weakGuardDamage: 17, cooldown: .5 }),
+    w('mauser98', 'MAUSER 98K', X, 'rifle', 'rare', 'rifle', 'Wzorzec karabinu zamkowego. Pięć naboi, celność, waga.', { ammo: 5, reload: 2.0, weakGuardDamage: 19 }),
+    w('garand', 'M1 GARAND', X, 'rifle', 'epic', 'rifle', 'Samopowtarzalny, osiem naboi i słynne „ping" pustej łódki.', { ammo: 8, reload: 1.8, weakGuardDamage: 18, cooldown: .45 }),
+    w('shotgun', 'STRZELBA KUSTOSZA', X, 'rifle', 'epic', 'shotgun', 'Dwie lufy. Z bliska bardzo boli, z daleka nie ma sensu.', { ammo: 2, reload: 1.3, weakGuardDamage: 20, range: 520 }),
+    w('thompson', 'THOMPSON', X, 'rifle', 'epic', 'smg', 'Pistolet maszynowy Chicago. Bęben na pięćdziesiąt naboi, każdy osobno.', { ammo: 20, reload: 2.6, weakGuardDamage: 10, cooldown: .25, swing: .3, contact: .15 }),
+    w('mp40', 'MP 40', X, 'rifle', 'rare', 'smg', 'Pistolet maszynowy z blachy i rur. Trzydzieści dwa naboje.', { ammo: 16, reload: 2.4, weakGuardDamage: 9, cooldown: .25, swing: .3, contact: .15 }),
+    w('sten', 'STEN', X, 'rifle', 'common', 'smg', 'Najtańszy pistolet maszynowy wojny. Czasem strzela sam, czasem wcale.', { ammo: 14, reload: 2.2, weakGuardDamage: 8, cooldown: .25, swing: .3, contact: .15 }),
+    w('ppsh', 'PPSZ-41', X, 'rifle', 'rare', 'smg', 'Pepesza z bębnem na siedemdziesiąt jeden naboi. Tu dostajesz dwadzieścia pięć.', { ammo: 25, reload: 3.0, weakGuardDamage: 8, cooldown: .22, swing: .28, contact: .14 }),
+    w('pump', 'STRZELBA POMPKA', C, 'rifle', 'common', 'shotgun', 'Dźwięk przeładowania robi połowę roboty.', { ammo: 5, reload: 2.0, weakGuardDamage: 18, range: 500 }),
+    w('ak47', 'AK-47', C, 'rifle', 'epic', 'rifle', 'Najczęściej produkowany karabin świata. Działa po zakopaniu, zalaniu i upuszczeniu.', { ammo: 15, reload: 2.2, weakGuardDamage: 12, cooldown: .3, swing: .34, contact: .16 }),
+    w('m16', 'M16', C, 'rifle', 'epic', 'rifle', 'Lekki, celny, kapryśny w dżungli. Trzydzieści naboi.', { ammo: 15, reload: 2.0, weakGuardDamage: 11, cooldown: .28, swing: .32, contact: .15 }),
+    w('dragunov', 'DRAGUNOW SWD', C, 'rifle', 'legendary', 'sniper', 'Karabin wyborowy z lunetą. Dziesięć naboi, każdy w słabą gardę z drugiego końca sali.', { ammo: 10, reload: 2.4, weakGuardDamage: 22, range: 1000, cooldown: .9, swing: .6, contact: .3 }),
+    w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 })
   ];
   const weapons = Object.freeze(definitions.map(d => {
     const type = types[d.type], merged = { ...baseline, ...type.stats, ...d.overrides };
     merged.parryReflect = Object.freeze({ ...baseline.parryReflect, ...(type.stats.parryReflect || {}), ...(d.overrides.parryReflect || {}) });
     merged.weakGuardDamage += rarityBonus[d.rarity] || 0;
-    const r = merged.kind === 'ranged' ? `${merged.ammo} ${merged.ammo === 1 ? 'strzał' : merged.ammo < 5 ? 'strzały' : 'strzałów'}, przeładowanie ${merged.reload.toLocaleString('pl-PL')} s. ` : '';
-    const summary = `${type.name}. ${merged.weakGuardDamage} obrażeń w słabą gardę${merged.comboBonus ? `, +${merged.comboBonus} od ${merged.comboAt}. ciosu` : ''}. ${r}Zasięg ${merged.range}.`;
-    return Object.freeze({ id: d.id, name: d.name, era: d.era, categoryId: d.categoryId, type: d.type, typeName: type.name, rarity: d.rarity, icon: d.icon,
+    const shots = merged.kind === 'ranged' ? `${merged.ammo} ${merged.ammo === 1 ? 'strzał' : merged.ammo < 5 ? 'strzały' : 'strzałów'}, przeładowanie ${merged.reload.toLocaleString('pl-PL')} s. ` : '';
+    const summary = `${type.name}. ${merged.weakGuardDamage} obrażeń w słabą gardę${merged.comboBonus ? `, +${merged.comboBonus} od ${merged.comboAt}. ciosu` : ''}. ${shots}Zasięg ${merged.range}.`;
+    return Object.freeze({ id: d.id, name: d.name, era: `${eras[d.categoryId].toUpperCase()} · ${rarityLabel[d.rarity]}`, categoryId: d.categoryId, type: d.type, typeName: type.name, rarity: d.rarity, icon: d.icon,
       summary, details: Object.freeze([d.flavour]), stats: Object.freeze(merged) });
   }));
   const byId = new Map(weapons.map(weapon => [weapon.id, weapon]));
+  if (byId.size !== weapons.length) throw new Error('weapons.js: powtórzone id');
   window.MuseumWeapons = Object.freeze({
     baseline, types, eras,
     get(id) { return byId.get(id) || weapons[0]; },
@@ -1562,6 +1665,17 @@ window.MuseumConfig = Object.freeze({
       case 'bow':path(c,q=>{q.moveTo(0,110);q.bezierCurveTo(-60,50,-60,-50,0,-110)},null,'#5a3a22',9);path(c,q=>{q.moveTo(0,110);q.bezierCurveTo(-60,50,-60,-50,0,-110)},null,'#9a7a4a',5);line(c,0,110,0,-110,'#e8e2d0',1.5);rr(c,-7,-14,14,28,3,'#3a2416');line(c,-40,0,70,0,'#4a3420',3);poly(c,[[70,-5],[86,0],[70,5]],'#b6c0b5','#5b6660',1);poly(c,[[-40,-6],[-28,0],[-40,6]],'#c9643a');break;
       case 'crossbow':rr(c,-10,-20,20,130,3,'#5a3a22','#8a6a42',1.5);path(c,q=>{q.moveTo(-90,-30);q.bezierCurveTo(-60,-60,60,-60,90,-30)},null,'#3c555f',9);path(c,q=>{q.moveTo(-90,-30);q.bezierCurveTo(-60,-60,60,-60,90,-30)},null,'#8ca9ac',5);line(c,-90,-30,90,-30,'#e8e2d0',1.5);rr(c,-4,-60,8,80,2,'#2b2b2b','#6b6b6b',1);poly(c,[[-6,-62],[0,-78],[6,-62]],'#c0c6cc','#3c555f',1);rr(c,-18,40,36,12,3,'#2b2b2b','#6b6b6b',1);break;
       case 'revolver':c.scale(1.7,1.7);gun(72,false);break;
+      case 'pistol':c.rotate(.65);c.scale(1.7,1.7);rr(c,-36,-16,76,14,3,'#2b2b2b','#6b6b6b',1.5);rr(c,-30,-4,20,30,4,'#1f1f1f','#7a7a7a',1.5);rr(c,-27,-1,14,26,2,'#3a3a3a');path(c,q=>{q.moveTo(-8,0);q.bezierCurveTo(-4,12,4,14,8,6)},null,'#8a8a8a',3);rr(c,34,-20,6,6,1,'#444','#888',1);line(c,-32,-10,36,-10,'#9a9a9a',1);break;
+      case 'flintlock':c.rotate(.65);c.scale(1.5,1.5);poly(c,[[-30,-2],[-10,-2],[-6,8],[-18,30],[-40,34],[-46,18]],'#5a3a22','#8a6a42',1.5);rr(c,-20,-16,96,12,3,'#3a3a3a','#8a8a8a',1.5);rr(c,-14,-10,30,8,2,'#c9a94a','#e7d08a',1);poly(c,[[6,-18],[12,-30],[18,-26],[14,-16]],'#c9a94a','#8f7a3e',1);path(c,q=>{q.moveTo(-6,4);q.bezierCurveTo(-2,14,6,14,8,6)},null,'#c9a94a',2.5);break;
+      case 'rifle':c.rotate(.65);c.scale(1.15,1.15);poly(c,[[-96,-6],[-56,-6],[-52,14],[-78,30],[-100,26],[-104,8]],'#5a3a22','#8a6a42',1.5);rr(c,-60,-18,156,13,3,'#2b2b2b','#6b6b6b',1.5);rr(c,-56,-8,70,10,3,'#5a3a22','#8a6a42',1.5);rr(c,-20,0,16,26,3,'#1f1f1f','#7a7a7a',1.5);path(c,q=>{q.moveTo(-40,4);q.bezierCurveTo(-36,14,-28,16,-26,8)},null,'#8a8a8a',3);rr(c,88,-22,8,8,2,'#444','#888',1);rr(c,-30,-24,10,6,2,'#444','#888',1);line(c,-56,-12,94,-12,'#9a9a9a',1);break;
+      case 'smg':c.rotate(.65);c.scale(1.25,1.25);rr(c,-70,-14,120,16,4,'#2b2b2b','#6b6b6b',1.5);rr(c,-78,-10,20,10,2,'#3a3a3a','#7a7a7a',1);rr(c,-30,2,16,34,3,'#1f1f1f','#7a7a7a',1.5);rr(c,8,2,14,40,3,'#1f1f1f','#7a7a7a',1.5);path(c,q=>{q.moveTo(-12,4);q.bezierCurveTo(-8,14,0,16,2,8)},null,'#8a8a8a',3);for(let k=0;k<6;k++)ellipse(c,-56+k*16,-6,2.2,2.2,'#111');rr(c,46,-18,10,8,2,'#444','#888',1);break;
+      case 'sniper':c.rotate(.65);c.scale(1.1,1.1);poly(c,[[-104,-6],[-64,-6],[-60,14],[-86,32],[-108,28],[-112,8]],'#2a3a2a','#4a6a4a',1.5);rr(c,-66,-18,190,12,3,'#2b2b2b','#6b6b6b',1.5);rr(c,-60,-8,80,10,3,'#2a3a2a','#4a6a4a',1.5);rr(c,-24,0,16,24,3,'#1f1f1f','#7a7a7a',1.5);rr(c,-40,-36,58,12,5,'#1a1a1a','#8a8a8a',1.5);ellipse(c,-40,-30,6,6,'#8ac0e8','#1a1a1a',1);ellipse(c,18,-30,5,5,'#8ac0e8','#1a1a1a',1);rr(c,-36,-26,8,8,1,'#444');rr(c,120,-20,12,6,2,'#444','#888',1);poly(c,[[60,-6],[64,16],[58,16]],'#3a3a3a','#777',1);poly(c,[[76,-6],[80,16],[74,16]],'#3a3a3a','#777',1);break;
+      case 'karambit':c.rotate(-.3);rr(c,-6,20,12,60,5,'#1a1a1a','#555',1.5);ellipse(c,0,90,11,11,null,'#777',4);path(c,q=>{q.moveTo(-6,20);q.bezierCurveTo(-40,-10,-50,-60,-10,-100);q.bezierCurveTo(-26,-60,-18,-20,6,10);q.closePath()},steel,'#b6d9cc',1.2);break;
+      case 'kukri':grip(40,34);c.translate(0,36);path(c,q=>{q.moveTo(-8,0);q.bezierCurveTo(-30,-40,-44,-80,-18,-130);q.lineTo(-4,-126);q.bezierCurveTo(-20,-80,-4,-40,10,0);q.closePath()},steel,'#b6d9cc',1.2);break;
+      case 'machete':grip(40,34);c.translate(0,36);path(c,q=>{q.moveTo(-12,0);q.lineTo(-14,-110);q.bezierCurveTo(-14,-130,6,-136,14,-118);q.lineTo(12,0);q.closePath()},steel,'#b6d9cc',1.2);line(c,-6,-10,-8,-110,'#f5f6d3',1);break;
+      case 'flail':wood(-10,120,9);line(c,0,-10,0,-24,'#555',4);for(let k=0;k<8;k++)ellipse(c,Math.sin(k*.6)*10,-30-k*9,3,3,'#8a8a8a','#333',1);ellipse(c,8,-108,20,20,grad(c,-12,-128,28,-88,[[0,'#8a94a0'],[1,'#2e3640']]),'#1e2430',2);for(let k=0;k<8;k++){const a=k*Math.PI/4;poly(c,[[8+Math.cos(a)*17,-108+Math.sin(a)*17],[8+Math.cos(a)*32,-108+Math.sin(a)*32],[8+Math.cos(a+.4)*17,-108+Math.sin(a+.4)*17]],'#c0c6cc','#3c555f',1)}break;
+      case 'club':path(c,q=>{q.moveTo(-6,120);q.lineTo(-12,-60);q.bezierCurveTo(-14,-110,14,-110,12,-60);q.lineTo(6,120);q.closePath()},grad(c,-14,0,14,0,[[0,'#4a3420'],[.5,'#9a7a4a'],[1,'#4a3420']]),'#2a1a10',1.5);for(let k=0;k<4;k++)line(c,-10,-20+k*18,10,-24+k*18,'#3a2416',1);break;
+      case 'sling':path(c,q=>{q.moveTo(-40,100);q.bezierCurveTo(-30,20,-10,-40,0,-90)},null,'#8a6a42',3);path(c,q=>{q.moveTo(40,100);q.bezierCurveTo(30,20,10,-40,0,-90)},null,'#8a6a42',3);ellipse(c,0,-96,18,12,'#5a3a22','#8a6a42',1.5);ellipse(c,0,-96,8,8,'#7a7a7a','#444',1);break;
       case 'musket':gun(190,true);rr(c,120,-10,10,6,1,'#c9a94a');break;
       case 'shotgun':gun(150,true,2);break;
       default:grip(60,40);guard(55,28);c.translate(0,48);blade(145,8);
@@ -2193,6 +2307,7 @@ window.MuseumConfig = Object.freeze({
   {id:'medieval',name:'Średniowiecze',color:'#9fb8c9'},
   {id:'renaissance',name:'Nowożytność',color:'#c9a65a'},
   {id:'modern',name:'Wiek XIX i XX',color:'#8a9aa8'},
+  {id:'contemporary',name:'Współczesność',color:'#7ab0a0'},
   {id:'elements',name:'Smoki i Żywioły',color:'#f69b55'},
   {id:'shadow',name:'Mrok i Widma',color:'#b997ee'},
   {id:'nature',name:'Dzika Natura',color:'#84ca91'},
@@ -2255,7 +2370,7 @@ window.MuseumConfig = Object.freeze({
    rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
 ,
   {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:1500,pricePLN:39.99,
-   description:'Topór, włócznia, rapier albo rewolwer. Każda broń zmienia rytm walki.',
+   description:'Sto dwadzieścia broni od maczugi po Barretta. Każda zmienia rytm walki.',
    guarantee:'1 nowa broń · wszystkie rzadkości',glyph:'⚔',color:'#c9b37a',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
   {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:1200,pricePLN:34.99,
@@ -2271,8 +2386,8 @@ window.MuseumConfig = Object.freeze({
    guarantee:'1 nowa karta broni',color:'#9fb8c9',glyph:'✎',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
   {id:'blades',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'blade',name:'Zbrojownia Ostrzy',title:'Zbrojownia Ostrzy',tag:'OSTRZA',cost:1800,pricePLN:44.99,
-   description:'Gladius, claymore, szabla husarska, katana. Wszystko, co tnie.',guarantee:'1 nowa broń · tylko ostrza',color:'#c9d6dc',glyph:'⚔',
-   rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
+   description:'Od xiphosa i gladiusa po katanę, zweihänder i Szczerbiec. Wszystko, co tnie.',guarantee:'1 nowa broń · tylko ostrza',color:'#c9d6dc',glyph:'⚔',
+   rarityWeights:Object.freeze({common:42,rare:30,epic:20,legendary:8})},
   {id:'heavy',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'heavy',name:'Kuźnia Ciężka',title:'Kuźnia Ciężka',tag:'CIĘŻKA',cost:1800,pricePLN:44.99,
    description:'Topory, młoty, morgensztern. Wolne, ale po jednym ciosie nikt nie wstaje.',guarantee:'1 nowa broń · tylko ciężka',color:'#a8a8b0',glyph:'⚒',
    rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
@@ -2280,23 +2395,32 @@ window.MuseumConfig = Object.freeze({
    description:'Włócznie, trójząb, halabarda, pika. Trafiają, zanim przeciwnik dojdzie.',guarantee:'1 nowa broń · tylko drzewcowa',color:'#b89a6a',glyph:'↑',
    rarityWeights:Object.freeze({common:45,rare:32,epic:23,legendary:0})},
   {id:'light',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'light',name:'Gabinet Sztyletów',title:'Gabinet Sztyletów',tag:'LEKKA',cost:1600,pricePLN:39.99,
-   description:'Rapier, stylet, bagnet, sztylet. Szybko, blisko, w serii.',guarantee:'1 nowa broń · tylko lekka',color:'#9ab0c0',glyph:'/',
+   description:'Pugio, tantō, kris, kukri, karambit, nóż motylkowy, bagnety. Szybko, blisko, w serii.',guarantee:'1 nowa broń · noże i sztylety',color:'#9ab0c0',glyph:'/',
    rarityWeights:Object.freeze({common:40,rare:36,epic:24,legendary:0})},
-  {id:'ranged',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'ranged',name:'Strzelnica Kustosza',title:'Strzelnica Kustosza',tag:'DYSTANSOWA',cost:2600,pricePLN:64.99,
-   description:'Łuk, kusza, muszkiet, strzelba i rewolwer. Jedyne bronie, które działają z drugiego końca areny.',guarantee:'1 nowa broń · tylko dystansowa',color:'#d8a060',glyph:'◎',
-   rarityWeights:Object.freeze({common:0,rare:45,epic:40,legendary:15})},
+  {id:'bows',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'bow',name:'Łucznia',title:'Łucznia',tag:'ŁUKI I KUSZE',cost:1900,pricePLN:47.99,
+   description:'Proca, łuki długie i kompozytowe, kusze z korbą i powtarzalne. Cicho i z daleka.',guarantee:'1 nowa broń · tylko łuki i kusze',color:'#b89a6a',glyph:'⟩',
+   rarityWeights:Object.freeze({common:35,rare:40,epic:25,legendary:0})},
+  {id:'pistols',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'pistol',name:'Gabinet Pistoletów',title:'Gabinet Pistoletów',tag:'PISTOLETY',cost:2400,pricePLN:59.99,
+   description:'Od skałkowych pojedynkówek po Glocka i Desert Eagle. Rewolwer Kustosza też tu mieszka.',guarantee:'1 nowa broń · tylko pistolety',color:'#d8a060',glyph:'◎',
+   rarityWeights:Object.freeze({common:30,rare:35,epic:25,legendary:10})},
+  {id:'rifles',family:'weapons',group:'weapon-type',pool:'weapon',weaponType:'rifle',name:'Zbrojownia Karabinów',title:'Zbrojownia Karabinów',tag:'KARABINY',cost:2800,pricePLN:69.99,
+   description:'Arkebuz, Mosin, Thompson, AK-47, Barrett. Wszystko, co ma lufę dłuższą niż przedramię.',guarantee:'1 nowa broń · tylko karabiny i strzelby',color:'#8a9aa8',glyph:'▬',
+   rarityWeights:Object.freeze({common:30,rare:35,epic:25,legendary:10})},
   {id:'era-antiquity',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'antiquity',name:'Arsenał Antyku',title:'Arsenał Antyku',tag:'STAROŻYTNOŚĆ',cost:1700,pricePLN:42.99,
-   description:'Gladius, labrys, włócznia hoplity, trójząb, sztylet. Brąz i żelazo.',guarantee:'1 nowa broń · starożytność',color:'#d8ba86',glyph:'Λ',
+   description:'Xiphos, gladius, falcata, labrys, pilum, sarissa, pugio, proca. Brąz i żelazo.',guarantee:'1 nowa broń · starożytność',color:'#d8ba86',glyph:'Λ',
    rarityWeights:Object.freeze({common:55,rare:45,epic:0,legendary:0})},
   {id:'era-medieval',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'medieval',name:'Arsenał Średniowiecza',title:'Arsenał Średniowiecza',tag:'ŚREDNIOWIECZE',cost:2000,pricePLN:49.99,
-   description:'Claymore, młot, morgensztern, halabarda, łuk, kusza. Pełna zbrojownia zamku.',guarantee:'1 nowa broń · średniowiecze',color:'#9fb8c9',glyph:'♜',
-   rarityWeights:Object.freeze({common:40,rare:35,epic:25,legendary:0})},
+   description:'Miecze, topory, młoty, halabardy, łuki i kusze. Pełna zbrojownia zamku, ze Szczerbcem na czele.',guarantee:'1 nowa broń · średniowiecze',color:'#9fb8c9',glyph:'♜',
+   rarityWeights:Object.freeze({common:40,rare:32,epic:22,legendary:6})},
   {id:'era-renaissance',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'renaissance',name:'Arsenał Nowożytny',title:'Arsenał Nowożytny',tag:'NOWOŻYTNOŚĆ',cost:2000,pricePLN:49.99,
-   description:'Szabla husarska, katana, berdysz, pika, rapier, stylet, muszkiet.',guarantee:'1 nowa broń · nowożytność',color:'#c9a65a',glyph:'♛',
+   description:'Szabla husarska, katana, zweihänder, kopia, rapier, pistolety skałkowe, muszkiety.',guarantee:'1 nowa broń · nowożytność',color:'#c9a65a',glyph:'♛',
    rarityWeights:Object.freeze({common:35,rare:40,epic:25,legendary:0})},
   {id:'era-modern',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'modern',name:'Arsenał XX Wieku',title:'Arsenał XX Wieku',tag:'XIX–XX W.',cost:2800,pricePLN:69.99,
-   description:'Bagnet, strzelba i Rewolwer Kustosza. Proch zamiast stali.',guarantee:'1 nowa broń · XIX i XX wiek',color:'#8a9aa8',glyph:'●',
-   rarityWeights:Object.freeze({common:0,rare:40,epic:40,legendary:20})},
+   description:'Szable kawaleryjskie, bagnety, Mauser, Luger, Mosin, Thompson i Rewolwer Kustosza. Proch zamiast stali.',guarantee:'1 nowa broń · XIX i XX wiek',color:'#8a9aa8',glyph:'●',
+   rarityWeights:Object.freeze({common:30,rare:35,epic:25,legendary:10})},
+  {id:'era-contemporary',family:'weapons',group:'weapon-era',pool:'weapon',categoryId:'contemporary',name:'Arsenał Współczesny',title:'Arsenał Współczesny',tag:'WSPÓŁCZESNOŚĆ',cost:3000,pricePLN:74.99,
+   description:'Karambit, maczeta, Glock, AK-47, M16, Dragunow, Barrett. Najnowsze eksponaty muzeum.',guarantee:'1 nowa broń · współczesność',color:'#7ab0a0',glyph:'◈',
+   rarityWeights:Object.freeze({common:25,rare:35,epic:28,legendary:12})},
   {id:'starter',family:'mixed',pool:'any',name:'Skrzynia Startowa',title:'Skrzynia Startowa',tag:'START',cost:400,pricePLN:9.99,
    description:'Strój, broń albo karta na dobry początek. Tanio i bez niespodzianek.',
    guarantee:'1 nowy przedmiot · zwykły lub rzadki',color:'#a8d08d',glyph:'●',

@@ -44,8 +44,8 @@
     if (card.type === 'hero') assert.equal(p.card, card.id); else assert.equal(p.card, null);
   });
   test('Bez duplikatów: po wyczerpaniu puli broni skrzynia nie da się zarezerwować', () => {
-    let p = rich(); for (let i = 0; i < 23; i++) { const r = loot.reserve(p, seeded(), 'armory'); assert.ok(r, `rezerwacja ${i}`); p = loot.claim(r.profile); }
-    assert.equal(p.weapons.length, 24); assert.equal(loot.remaining(p, 'armory').length, 0); assert.equal(loot.reserve(p, seeded(), 'armory'), null);
+    let p = rich(500000); const total = weapons.all().length; for (let i = 0; i < total - 1; i++) { const r = loot.reserve(p, seeded(), 'armory'); assert.ok(r, `rezerwacja ${i}`); p = loot.claim(r.profile); }
+    assert.equal(p.weapons.length, total); assert.equal(loot.remaining(p, 'armory').length, 0); assert.equal(loot.reserve(p, seeded(), 'armory'), null);
   });
   test('Sprzedaż: nie założonego, nie podstawowego, nie prezentu; płaci 40% i kasuje ulepszenie', () => {
     let p = { ...rich(1000), weapons: ['sword', 'axe'], weapon: 'axe', upgrades: { 'weapon:axe': 2 } };
@@ -132,7 +132,7 @@
     for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
     assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
     assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
-    assert.equal(loot.crates.length, 26); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+    assert.equal(loot.crates.length, 29); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
   });
   test('Każdą skrzynię da się narysować', () => {
     const c = document.createElement('canvas'); c.width = 240; c.height = 200; const x = c.getContext('2d');
@@ -144,24 +144,25 @@
   'use strict';
   const { test, assert } = window.MuseumTests;
   const loot = window.MuseumLoot, weapons = window.MuseumWeapons, art = window.MuseumArt, g = window.MuseumGame, t = g._test;
-  test('24 bronie w 5 typach i 4 epokach, każda z ikoną do narysowania', () => {
-    assert.equal(weapons.all().length, 24);
+  test('Ponad 120 broni w 7 typach i 5 epokach, każda z ikoną do narysowania', () => {
+    assert.ok(weapons.all().length >= 120, String(weapons.all().length));
     const types = new Set(weapons.all().map(w => w.type)), eras = new Set(weapons.all().map(w => w.categoryId));
-    assert.deepEqual([...types].sort(), ['blade', 'heavy', 'light', 'polearm', 'ranged']); assert.deepEqual([...eras].sort(), ['antiquity', 'medieval', 'modern', 'renaissance']);
+    assert.deepEqual([...types].sort(), ['blade', 'bow', 'heavy', 'light', 'pistol', 'polearm', 'rifle']); assert.deepEqual([...eras].sort(), ['antiquity', 'contemporary', 'medieval', 'modern', 'renaissance']);
+    for (const type of Object.keys(weapons.types)) assert.ok(weapons.all().filter(w => w.type === type).length >= 10, `co najmniej 10 broni typu ${type}`);
     const c = document.createElement('canvas'); c.width = 360; c.height = 360; const x = c.getContext('2d');
     for (const w of weapons.all()) { x.save(); x.translate(180, 180); art.drawWeaponIcon(x, w); x.restore(); assert.ok(loot.getCategory(w.categoryId), w.id); }
   });
   test('Skrzynie typu i epoki losują tylko pasujące bronie', () => {
     const p = loot.migrate(null);
-    for (const [crate, check] of [['blades', w => w.type === 'blade'], ['heavy', w => w.type === 'heavy'], ['polearms', w => w.type === 'polearm'], ['light', w => w.type === 'light'], ['ranged', w => w.type === 'ranged'],
-      ['era-antiquity', w => w.categoryId === 'antiquity'], ['era-medieval', w => w.categoryId === 'medieval'], ['era-renaissance', w => w.categoryId === 'renaissance'], ['era-modern', w => w.categoryId === 'modern']]) {
+    for (const [crate, check] of [['blades', w => w.type === 'blade'], ['heavy', w => w.type === 'heavy'], ['polearms', w => w.type === 'polearm'], ['light', w => w.type === 'light'], ['bows', w => w.type === 'bow'], ['pistols', w => w.type === 'pistol'], ['rifles', w => w.type === 'rifle'],
+      ['era-antiquity', w => w.categoryId === 'antiquity'], ['era-medieval', w => w.categoryId === 'medieval'], ['era-renaissance', w => w.categoryId === 'renaissance'], ['era-modern', w => w.categoryId === 'modern'], ['era-contemporary', w => w.categoryId === 'contemporary']]) {
       const pool = loot.remaining(p, crate); assert.ok(pool.length > 0, crate); assert.ok(pool.every(i => i.kind === 'weapon' && check(i)), crate);
     }
-    assert.equal(loot.remaining(p, 'armory').length, 23, 'cały arsenał bez miecza podstawowego');
+    assert.equal(loot.remaining(p, 'armory').length, weapons.all().length - 1, 'cały arsenał bez miecza podstawowego');
   });
   test('Każda broń dystansowa ma amunicję i przeładowanie, każda wręcz nie', () => {
     for (const w of weapons.all()) {
-      if (w.type === 'ranged') { assert.ok(w.stats.ammo > 0 && w.stats.reload > 0, w.id); assert.equal(w.stats.kind, 'ranged'); } else assert.equal(w.stats.ammo, null, w.id);
+      if (['bow', 'pistol', 'rifle'].includes(w.type)) { assert.ok(w.stats.ammo > 0 && w.stats.reload > 0, w.id); assert.equal(w.stats.kind, 'ranged'); } else { assert.equal(w.stats.ammo, null, w.id); assert.equal(w.stats.kind, 'melee'); }
       g.reset(); const s = g.start({ sound: false, skin: 'verdigris', weapon: w.id }); assert.equal(s.weapon.id, w.id);
       t.setState({ foe: { x: 365 + 330 + 10, state: 'recover', timer: 0 }, player: { x: 365 } }); t.input('attack', true); t.step(.05); t.input('attack', false); t.step(w.stats.swing + .1);
       const hit = g.getState().foe.hp < 160; assert.equal(hit, w.stats.range >= 340, `${w.id}: zasięg ${w.stats.range} vs dystans 340`);

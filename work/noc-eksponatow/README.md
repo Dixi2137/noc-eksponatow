@@ -200,3 +200,23 @@ Epoki: starożytność, średniowiecze, nowożytność, wiek XIX i XX. Każda br
 **Cennik.** Żetony za salę: 120–645 plus 20 za paradę, więc pełna noc daje kilkanaście tysięcy. Ceny skrzyń podniesione mniej więcej półtora do dwóch razy: Galeria 900 (29,99 zł), tematyczne 1500–2200, Skarbiec Królów 3000 (79,99 zł), Relikwiarz 7500 (149,99 zł), broń według typu 1600–2600, według epoki 1700–2800, karty 800–1500, startowa 400, Nocnej Zmiany 1200, Skarbiec Kustosza 4000, Legend 9000 (199,99 zł). Reguła: około 40 żetonów za złotówkę. Wartości przedmiotów: zwykły 240, rzadki 700, epicki 1800, legendarny 4500 (sprzedaż 40%). Ulepszenia 400 + 600·poziom. Bonus dzienny 80 + 40 za dzień serii, do 500.
 
 Testy: 64.
+
+## Faza 8 — 122 bronie (2026-10-21)
+
+Zbrojownia urosła z 24 do 122 sztuk (`dist/weapons.js`), siedem typów i pięć epok:
+
+| Typ | Ile | Przykłady |
+| --- | --- | --- |
+| Ostrza | 24 | xiphos, gladius, spatha, falcata, jian, seax, miecz długi, falchion, półtorak, tachi, claymore, Szczerbiec, Zulfikar, szabla husarska, pałasz, katana, wakizashi, zweihänder, kordelas, szabla kawaleryjska, szaszka |
+| Broń ciężka | 16 | maczuga, labrys, franciska, topór duński, kiścień, cep bojowy, młot bojowy, młot oburęczny, morgensztern, czekan, nadziak, buzdygan, berdysz, łom, kij bejsbolowy, młot kowalski |
+| Broń drzewcowa | 14 | pilum, sarissa, trójząb, widły, glewia, yari, naginata, halabarda, rohatyna, partyzana, pika, kopia husarska, lanca |
+| Noże i sztylety | 19 | pugio, sica, mizerykordia, sztylet rondelowy, tantō, kris, stylet, rapier, szpada, nóż Bowie, kukri, nóż szturmowy, bagnet, nóż motylkowy, karambit, maczeta, nóż taktyczny, bagnet M9 |
+| Łuki i kusze | 10 | proca, łuk kompozytowy, refleksyjny, długi, yumi, kusza strzemionowa, kusza, chu-ko-nu, arbaleta, łuk bloczkowy |
+| Pistolety | 16 | skałkowy, kołowy, pojedynkowy, derringer, Peacemaker, Nagant, Rewolwer Kustosza, Mauser C96, Luger, Colt 1911, VIS, P38, Glock, Beretta, Magnum .44, Desert Eagle |
+| Karabiny i strzelby | 23 | arkebuz, muszkiet, garłacz, Brown Bess, sztucer, Winchester, dubeltówka, Mosin, Springfield, Lee-Enfield, Mauser 98k, Garand, strzelba, Thompson, MP 40, STEN, PPSz, pompka, AK-47, M16, Dragunow, Barrett |
+
+Epoki: starożytność, średniowiecze, nowożytność, wiek XIX i XX, współczesność. Broń dystansowa to trzy typy o różnym rytmie: łuki (dużo strzał, szybkie ładowanie), pistolety (średnio), karabiny (mocno, wolno; pistolety maszynowe strzelają seriami z małymi obrażeniami). Ikony: 31 kształtów w `drawWeaponIcon`, w tym karambit, kukri, maczeta, kiścień, pistolet, skałkowy, karabin, pistolet maszynowy, karabin wyborowy. Podgląd: `tests/weapons.html`.
+
+Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia Karabinów; doszedł Arsenał Współczesny. Testy: 64.
+
+Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
