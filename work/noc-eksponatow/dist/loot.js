@@ -32,50 +32,74 @@
  const crates = Object.freeze([
   {id:'gallery',name:'Skrzynia Galerii',title:'Skrzynia Galerii',tag:'KLASYK',cost:600,pricePLN:19.99,
    description:'Nowy strój z całej kolekcji muzealnej. Od klasycznej stali po legendarny blask.',
-   guarantee:'1 nowy skin · wszystkie rzadkości',color:'#90cce8',
+   guarantee:'1 nowy skin · wszystkie rzadkości',glyph:'✦',color:'#90cce8',
    rarityWeights:Object.freeze({common:55,rare:28,epic:14,legendary:3})},
   {id:'treasury',name:'Skarbiec Królów',title:'Skarbiec Królów',tag:'EPICKA+',cost:1800,pricePLN:49.99,
    description:'Królewski wybór wyłącznie spośród epickich i legendarnych zbroi.',
-   guarantee:'1 nowy skin · minimum epicki',color:'#c4a1f0',
+   guarantee:'1 nowy skin · minimum epicki',glyph:'♜',color:'#c4a1f0',
    rarityWeights:Object.freeze({common:0,rare:0,epic:85,legendary:15})},
   {id:'relic',name:'Relikwiarz Legend',title:'Relikwiarz Legend',tag:'LEGENDA',cost:4500,pricePLN:99.99,
    description:'Najrzadsze eksponaty w jednym relikwiarzu. Każde otwarcie to nowa legenda.',
-   guarantee:'1 nowy skin · gwarantowany legendarny',color:'#f0ca72',
+   guarantee:'1 nowy skin · gwarantowany legendarny',glyph:'✪',color:'#f0ca72',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
   {id:'elements',categoryId:'elements',name:'Archiwum Żywiołów',title:'Archiwum Żywiołów',tag:'ŻYWIOŁY',cost:1200,pricePLN:34.99,
    description:'Smoczy ogień, lodowe pancerze i potęga burzy. Zbroje władające siłami natury.',
-   guarantee:'1 nowy skin · tylko smoki i żywioły',color:'#f69b55',
+   guarantee:'1 nowy skin · tylko smoki i żywioły',glyph:'⚡',color:'#f69b55',
    rarityWeights:Object.freeze({common:35,rare:38,epic:22,legendary:5})},
   {id:'shadow',categoryId:'shadow',name:'Sarkofag Cieni',title:'Sarkofag Cieni',tag:'MROK',cost:1000,pricePLN:29.99,
    description:'Widmowe pancerze, krucze płaszcze i tajemnice nocnej straży.',
-   guarantee:'1 nowy skin · tylko mrok i widma',color:'#b997ee',
+   guarantee:'1 nowy skin · tylko mrok i widma',glyph:'☾',color:'#b997ee',
    rarityWeights:Object.freeze({common:40,rare:42,epic:18,legendary:0})},
   {id:'nature',categoryId:'nature',name:'Skrzynia Pradawnej Puszczy',title:'Skrzynia Pradawnej Puszczy',tag:'NATURA',cost:1100,pricePLN:32.99,
    description:'Leśni obrońcy, dzikie bestie i zbroje z najdalszych zakątków puszczy.',
-   guarantee:'1 nowy skin · tylko dzika natura',color:'#84ca91',
+   guarantee:'1 nowy skin · tylko dzika natura',glyph:'✿',color:'#84ca91',
    rarityWeights:Object.freeze({common:38,rare:40,epic:18,legendary:4})},
   {id:'royal',categoryId:'royal',name:'Królewski Arsenał',title:'Królewski Arsenał',tag:'KORONA',cost:1500,pricePLN:44.99,
    description:'Herby wielkich rodów, królewskie płaszcze i stal zaprzysiężonej gwardii.',
-   guarantee:'1 nowy skin · tylko korona i honor',color:'#eccd76',
+   guarantee:'1 nowy skin · tylko korona i honor',glyph:'♛',color:'#eccd76',
    rarityWeights:Object.freeze({common:30,rare:40,epic:24,legendary:6})},
   {id:'forge',categoryId:'forge',name:'Warsztat Mechanika',title:'Warsztat Mechanika',tag:'KUŹNIA',cost:1300,pricePLN:39.99,
    description:'Miedź, kryształ i maszyny. Pancerze wykute z pomysłowości muzealnych mistrzów.',
-   guarantee:'1 nowy skin · tylko kuźnia i technika',color:'#d99c7b',
+   guarantee:'1 nowy skin · tylko kuźnia i technika',glyph:'⚙',color:'#d99c7b',
    rarityWeights:Object.freeze({common:30,rare:42,epic:23,legendary:5})},
   {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1000,pricePLN:29.99,
    description:'Wędrowcy, błędni rycerze i złote skorpiony ze szlaków poza horyzontem.',
-   guarantee:'1 nowy skin · tylko piaski i szlaki',color:'#d8ba86',
+   guarantee:'1 nowy skin · tylko piaski i szlaki',glyph:'✧',color:'#d8ba86',
    rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
 ,
   {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:900,pricePLN:24.99,
    description:'Topór, włócznia, rapier albo rewolwer. Każda broń zmienia rytm walki.',
-   guarantee:'1 nowa broń · wszystkie rzadkości',color:'#c9b37a',
+   guarantee:'1 nowa broń · wszystkie rzadkości',glyph:'⚔',color:'#c9b37a',
    rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
   {id:'heroes',family:'cards',pool:'card',name:'Archiwum Bohaterów',title:'Archiwum Bohaterów',tag:'KARTY',cost:800,pricePLN:22.99,
    description:'Karty prawdziwych bohaterów historii z pasywnym bonusem oraz karty broni.',
-   guarantee:'1 nowa karta · bohaterowie i broń',color:'#d9a0c6',
-   rarityWeights:Object.freeze({common:40,rare:35,epic:19,legendary:6})}
- ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',...crate})));
+   guarantee:'1 nowa karta · bohaterowie i broń',color:'#d9a0c6',glyph:'♞',
+   rarityWeights:Object.freeze({common:40,rare:35,epic:19,legendary:6})},
+  {id:'pantheon',family:'cards',pool:'card',categoryId:'heroes',name:'Panteon Bohaterów',title:'Panteon Bohaterów',tag:'KARTY',cost:1000,pricePLN:27.99,
+   description:'Tylko karty bohaterów: Sobieski, Joanna d\u2019Arc, Chrobry i reszta panteonu. Każda z pasywnym bonusem.',
+   guarantee:'1 nowa karta · tylko bohaterowie',color:'#e8a0c8',glyph:'♚',
+   rarityWeights:Object.freeze({common:35,rare:35,epic:22,legendary:8})},
+  {id:'blueprints',family:'cards',pool:'card',categoryId:'arsenal',name:'Plany Broni',title:'Plany Broni',tag:'KARTY',cost:500,pricePLN:14.99,
+   description:'Karty broni: +10% obrażeń do pasującej broni, rewolwer dostaje dodatkowe naboje.',
+   guarantee:'1 nowa karta broni',color:'#9fb8c9',glyph:'✎',
+   rarityWeights:Object.freeze({common:45,rare:30,epic:18,legendary:7})},
+  {id:'starter',family:'mixed',pool:'any',name:'Skrzynia Startowa',title:'Skrzynia Startowa',tag:'START',cost:300,pricePLN:9.99,
+   description:'Strój, broń albo karta na dobry początek. Tanio i bez niespodzianek.',
+   guarantee:'1 nowy przedmiot · zwykły lub rzadki',color:'#a8d08d',glyph:'●',
+   rarityWeights:Object.freeze({common:70,rare:30,epic:0,legendary:0})},
+  {id:'night',family:'mixed',pool:'any',name:'Skrzynia Nocnej Zmiany',title:'Skrzynia Nocnej Zmiany',tag:'MIESZANA',cost:700,pricePLN:19.99,
+   description:'Wszystko, co może wypaść w muzeum po zmroku: stroje, bronie i karty w jednej skrzyni.',
+   guarantee:'1 nowy przedmiot · wszystkie rodzaje i rzadkości',color:'#d5ed71',glyph:'☆',
+   rarityWeights:Object.freeze({common:50,rare:30,epic:15,legendary:5})},
+  {id:'vault',family:'mixed',pool:'any',name:'Skarbiec Kustosza',title:'Skarbiec Kustosza',tag:'EPICKA+',cost:2500,pricePLN:59.99,
+   description:'Epickie i legendarne przedmioty każdego rodzaju. Klucz ma tylko kustosz.',
+   guarantee:'1 nowy przedmiot · minimum epicki',color:'#c4a1f0',glyph:'◆',
+   rarityWeights:Object.freeze({common:0,rare:0,epic:80,legendary:20})},
+  {id:'legends',family:'mixed',pool:'any',name:'Skrzynia Legend',title:'Skrzynia Legend',tag:'LEGENDA',cost:6000,pricePLN:129.99,
+   description:'Wyłącznie legendy: najrzadsze stroje, rewolwer, karta Chrobrego. Jedno otwarcie, jedna historia.',
+   guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
+   rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})}
+ ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',...crate})));
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -141,7 +165,7 @@
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  return crate ? items.filter(s => s.kind===crate.pool && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && !has(profile,s)) : [];
+  return crate ? items.filter(s => (crate.pool==='any' || s.kind===crate.pool) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && (!crate.categoryId||s.categoryId===crate.categoryId) && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
   const crate=getCrate(crateId),pool=remaining(profile,crateId);

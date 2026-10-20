@@ -119,3 +119,23 @@
     assert.equal(loot.dailyBonus({ ...fresh(), login: { last: '2026-12-31', streak: 1 } }, day(2027, 1, 1)).streak, 2, 'przełom roku');
   });
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const loot = window.MuseumLoot, art = window.MuseumArt;
+  const seeded = () => { let k = 7; return () => ((k = (k * 9301 + 49297) % 233280) / 233280); };
+  test('Skrzynie mieszane losują stroje, bronie i karty; startowa bez epików, legend tylko legendarne', () => {
+    const p = loot.migrate(null), random = seeded(), kinds = new Set();
+    for (let i = 0; i < 60; i++) kinds.add(loot.draw(p, random, 'night').kind);
+    assert.deepEqual([...kinds].sort(), ['card', 'skin', 'weapon']);
+    for (let i = 0; i < 40; i++) assert.ok(['common', 'rare'].includes(loot.draw(p, random, 'starter').rarity), 'starter');
+    for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
+    assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
+    assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
+    assert.equal(loot.crates.length, 17); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0));
+  });
+  test('Każdą skrzynię da się narysować', () => {
+    const c = document.createElement('canvas'); c.width = 240; c.height = 200; const x = c.getContext('2d');
+    for (const crate of loot.crates) art.drawCrate(x, crate, 240, 200, { time: 1 });
+  });
+})();

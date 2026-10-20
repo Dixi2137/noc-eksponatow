@@ -173,3 +173,10 @@ Do sześciu sal doszło trzydzieści nowych z antagonistami z historii, wpiętyc
 ## Porządki (2026-10-21)
 
 Z areny zniknął plakat reklamowy piwa Kustosz i napis o sponsorze walki; usunięty też obrazek `assets/kustosz-reklama.png` i jego osadzanie w buildzie offline. Nazwa Kustosz zostaje tylko tam, gdzie znaczy kustosza muzeum (sklep, rewolwer, arsenał).
+
+## Faza 6 — witryna skrzyń (2026-10-21)
+
+- **Siedemnaście skrzyń.** Do 11 dotychczasowych doszły: Skrzynia Startowa (300 ✦, tylko zwykłe i rzadkie), Skrzynia Nocnej Zmiany (700 ✦, mieszana), Skarbiec Kustosza (2500 ✦, mieszana, minimum epicki), Skrzynia Legend (6000 ✦, mieszana, tylko legendarne), Panteon Bohaterów (1000 ✦, tylko karty bohaterów) i Plany Broni (500 ✦, tylko karty broni). Pole `pool: 'any'` w `loot.js` losuje z wszystkich rodzajów przedmiotów; rodzina `mixed` ma własny filtr w sklepie.
+- **Grafika skrzyń** jest rysowana na canvasie (`MuseumArt.drawCrate`): materiał zależy od rodziny (drewno, lakier w kolorze kategorii, stal dla broni, ozdobna szkatuła dla kart, ciemna z poświatą dla mieszanych), okucia i emblemat w kolorze skrzyni (`glyph` w danych), iskry. Ta sama grafika w sklepie i w kolekcji.
+- **Witryna w kolekcji** zastępuje listę rozwijaną: przewijany rząd kart skrzyń z nazwą, ceną i plakietką (DARMOWA, NAJLEPSZA OFERTA, TYLKO LEGENDY, NOWOŚĆ, ZEBRANA). Kliknięcie wybiera skrzynię, a duży rysunek i szczegóły pod spodem się aktualizują.
+- Testy: 60.

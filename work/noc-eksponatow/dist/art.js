@@ -602,5 +602,34 @@
     [['trophy-1',660],['trophy-2',782]].forEach(([id,x])=>{const item=at(id);rr(c,x-48,392,96,150,3,'#2a2219','#a08a60',1.5);c.save();c.globalAlpha=.18;rr(c,x-44,396,88,120,2,'#9ad0e8');c.restore();rr(c,x-44,396,88,120,2,null,'rgba(190,230,255,.35)',1);if(item){c.save();c.translate(x,480);drawTrophy(c,item,{size:.8});c.restore();rr(c,x-44,520,88,18,2,'#120f0b','#8a7352',1);txt(c,item.name.split(' ')[0],x,533,8,'#d9c89a','center','Arial')}else{txt(c,'GABLOTA',x,460,9,'#6a5a46','center','Arial');txt(c,'WOLNA',x,474,9,'#6a5a46','center','Arial')}});
     c.restore();
   }
-  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,drawTrophy,drawHall,fighters,themes,drawGuardScene};
+  // A loot crate drawn to fit a w x h box. Family picks the material; crate.color tints bands, glow and the emblem.
+  function drawCrate(c,crate,w=240,h=200,o={}){
+    const col=crate?.color||'#c9b37a',fam=crate?.family||'classic',t=o.time||0,open=o.open||0;
+    const wood=fam==='weapons'?'#4a4f58':fam==='cards'?'#3b2a4a':fam==='mixed'?'#1e2a22':fam==='themed'?mixColor(col,'#000',.62):'#5a3c22';
+    const woodHi=mixColor(wood,'#fff',.22),woodLo=mixColor(wood,'#000',.35),band=fam==='weapons'?'#9aa3ad':col,bandLo=mixColor(band,'#000',.4);
+    c.save();c.translate(w/2,h*.58);const sx=w/240,sy=h/200;c.scale(sx,sy);
+    glow(c,0,-10,120,mixColor(col,'#000',.1)+'55');
+    ellipse(c,0,62,88,12,'rgba(0,0,0,.45)');
+    // Body.
+    rr(c,-84,-20,168,80,8,grad(c,-84,-20,84,60,[[0,woodHi],[.5,wood],[1,woodLo]]),woodLo,2);
+    for(let k=0;k<4;k++)line(c,-80,-2+k*16,80,-2+k*16,'rgba(0,0,0,.18)',1);
+    // Lid, lifted when opening.
+    c.save();c.translate(0,-20);c.rotate(-open*.9);
+    path(c,q=>{q.moveTo(-86,0);q.lineTo(-86,-26);q.bezierCurveTo(-86,-58,86,-58,86,-26);q.lineTo(86,0);q.closePath()},grad(c,-86,-58,86,0,[[0,woodHi],[.6,wood],[1,woodLo]]),woodLo,2);
+    [-56,56].forEach(x=>{rr(c,x-8,-50,16,52,2,band,bandLo,1.5);line(c,x-3,-46,x-3,-2,mixColor(band,'#fff',.4),1)});
+    c.restore();
+    [-56,56].forEach(x=>{rr(c,x-8,-20,16,80,2,band,bandLo,1.5);line(c,x-3,-16,x-3,56,mixColor(band,'#fff',.4),1);[[x,-12],[x,52]].forEach(([px,py])=>ellipse(c,px,py,2.5,2.5,bandLo))});
+    rr(c,-84,-22,168,6,2,band,bandLo,1);
+    // Lock plate with the emblem.
+    ellipse(c,0,10,24,24,grad(c,-24,-14,24,34,[[0,mixColor(col,'#fff',.35)],[1,mixColor(col,'#000',.3)]]),bandLo,2);
+    ellipse(c,0,10,17,17,'#0f140f',mixColor(col,'#000',.2),1.5);
+    c.save();c.shadowColor=col;c.shadowBlur=12;txt(c,crate?.glyph||'✦',0,19,22,mixColor(col,'#fff',.2),'center','Georgia');c.restore();
+    if(fam==='weapons')[-30,30].forEach(x=>{line(c,x-10,30,x+10,30,'#c0c6cc',3);line(c,x,20,x,40,'#c0c6cc',3)});
+    if(fam==='cards'){rr(c,-70,-12,22,30,2,mixColor(col,'#fff',.1),bandLo,1);rr(c,48,-12,22,30,2,mixColor(col,'#fff',.1),bandLo,1)}
+    if(fam==='mixed'||fam==='classic'&&crate?.id!=='gallery'){for(let k=0;k<5;k++){const a=t*.7+k*1.26,r=100+Math.sin(t*2+k)*6;ellipse(c,Math.cos(a)*r,-10+Math.sin(a)*r*.5,2+(k%2),2+(k%2),mixColor(col,'#fff',.5))}}
+    // Sparkles.
+    [[-96,-66],[98,-40],[-70,-80]].forEach(([x,y],k)=>{const sIz=4+Math.sin(t*3+k)*1.5;poly(c,[[x,y-sIz*2],[x+sIz*.6,y],[x,y+sIz*2],[x-sIz*.6,y]],mixColor(col,'#fff',.5));poly(c,[[x-sIz*2,y],[x,y+sIz*.6],[x+sIz*2,y],[x,y-sIz*.6]],mixColor(col,'#fff',.5))});
+    c.restore();
+  }
+  window.MuseumArt={drawArena,drawKnight,drawRex,drawFigure,drawExhibit,drawWeaponIcon,drawCardArt,drawTrophy,drawHall,drawCrate,fighters,themes,drawGuardScene};
 })();
