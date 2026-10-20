@@ -417,9 +417,12 @@
       art.drawGuardScene(ctx, W, H, visualTime); ctx.restore(); return;
     }
     const artTime = state.status === 'idle' ? visualTime : state.elapsed;
-    if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
+    const pix = art?.pixelFactor && window.MuseumPixel ? window.MuseumPixel : null;
+    const inPixels = fn => { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); fn(); ctx.restore(); };
+    if (pix) inPixels(() => pix.drawArena(ctx, artTime, state.theme));
+    else if (art?.drawArena) art.drawArena(ctx, W, H, artTime, state.theme); else fallbackArena();
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats;
-    shadow(p.x, 94); shadow(r.x, state.exhibit.stats.shadow);
+    if (!pix) { shadow(p.x, 94); shadow(r.x, state.exhibit.stats.shadow); }
     drawTelegraph();
     let foePose = r.walk ? 'walk' : 'idle', foeProgress = r.timer;
     if (r.state === 'windup') { foePose = 'guard'; foeProgress = r.timer / (r.heavy ? combat.heavyWindup : combat.windup); }
@@ -437,10 +440,13 @@
     if (p.hp <= 0) { playerPose = 'dead'; playerProgress = 1; }
     const pEvadeX = p.evade > 0 ? Math.max(LEFT - p.x, -Math.sin(clamp(playerProgress, 0, 1) * Math.PI) * 55) : 0;
     const rEvadeX = foePose === 'dodge' ? Math.min(RIGHT - r.x - 29, Math.sin(clamp(foeProgress, 0, 1) * Math.PI) * 48) : 0;
-    const drawR = () => art?.drawExhibit ? art.drawExhibit(ctx, state.exhibit, r.x + rEvadeX, FLOOR, { facing: -1, pose: foePose,
-      progress: clamp(foeProgress, 0, 1), phase: clamp(foeProgress, 0, 1), time: artTime, heavy: r.heavy, glow: r.hurt > 0 }) : fallbackFighter(r.x, foePose, true);
-    const drawP = () => art?.drawKnight ? art.drawKnight(ctx, p.x + pEvadeX, FLOOR, { facing: 1, pose: playerPose,
-      progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 }) : fallbackFighter(p.x, playerPose);
+    const foeOpts = { facing: -1, pose: foePose, progress: clamp(foeProgress, 0, 1), phase: clamp(foeProgress, 0, 1), time: artTime, heavy: r.heavy, glow: r.hurt > 0 };
+    const playerOpts = { facing: 1, pose: playerPose, progress: clamp(playerProgress, 0, 1), phase: clamp(playerProgress, 0, 1), time: artTime, skin: state.skin, weapon: state.weapon.id, glow: p.hurt > 0 };
+    const foeArt = state.exhibit.stats.art;
+    const drawR = () => pix && (foeArt === 'rex' || foeArt === 'raptor') ? inPixels(() => pix.drawRex(ctx, (r.x + rEvadeX) / pix.PX, pix.FLOOR, { ...foeOpts, skin: foeArt === 'raptor' ? 'raptor' : null, scale: foeArt === 'raptor' ? .9 : 1.4 }))
+      : art?.drawExhibit ? art.drawExhibit(ctx, state.exhibit, r.x + rEvadeX, FLOOR, foeOpts) : fallbackFighter(r.x, foePose, true);
+    const drawP = () => pix ? inPixels(() => pix.drawKnight(ctx, (p.x + pEvadeX) / pix.PX, pix.FLOOR, playerOpts))
+      : art?.drawKnight ? art.drawKnight(ctx, p.x + pEvadeX, FLOOR, playerOpts) : fallbackFighter(p.x, playerPose);
     drawR(); drawP();
     if (p.guarding || p.defense > 0 && p.evade <= 0) drawGuard(p.x, state.elapsed - p.guardSince < state.perk.stats.perfectParryWindow);
     if (w.kind === 'ranged') {

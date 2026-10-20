@@ -221,6 +221,11 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
-## Tryb pikselowy (2026-10-21, prototyp)
+## Tryb pikselowy (2026-10-21)
 
-Przycisk ▦ w górnym pasku przełącza grafikę w tryb pikselowy (`profile.pixel`). Cała grafika canvasowa (arena, postacie, skrzynie, karty, sala) jest rysowana na małym płótnie o 4× mniejszej rozdzielczości i powiększana bez wygładzania (`MuseumArt.pixelFrame`, `setPixelFactor`), więc proceduralny rysunek wygląda jak pixel art bez zmiany ani jednej funkcji rysującej. W tym trybie HUD, tytuły i przyciski używają fontu Pixelify Sans (Google Fonts, z polskimi znakami).
+Przycisk ▦ w górnym pasku przełącza grę w prawdziwy pixel art (`profile.pixel`). Rysowanie przejmuje `dist/pixel.js` (`window.MuseumPixel`): scena ma 288 × 162 pikseli (czynnik 5 względem 1440 × 810), rysowana na małym płótnie i powiększana bez wygładzania przez `MuseumArt.pixelFrame`.
+
+- **Sala** jest składana z kafli paczki **Kenney Tiny Dungeon** (CC0, `dist/assets/kenney/`, licencja obok): ceglane ściany, kolumny, wielkie drewniane drzwi w wejściu, herby, skrzynie, kamienna podłoga. Motywy scenerii to tinty, okna (księżyc, słońce, śnieg, zamurowane) i sztandary rysowane pikselami. Tilesheet jest wbudowany w `pixel.js` jako data URL, więc build offline działa.
+- **Rycerz** (28 × 40 px) i **szkielet T-rexa** (60 × 40 px, Velociraptor to ten sam szkielet w skali 0,9 w innym odcieniu) to sprite'y z warstw tekstowych (`blit`), z obrysem i trzema tonami cienia, składane z części (głowa, pióropusz, tors, ręce, nogi, miecz, tarcza, peleryna) w pozach idle, walk, attack, guard, dodge, hurt, dead. Paleta rycerza pochodzi z kolorów skina, więc wszystkie 58 strojów działa od razu.
+- Czego jeszcze nie ma w pikselach: 34 bossów-ludzi (w trybie ▦ rysują się nadal wektorowo, tylko zpikselizowani), miniatury skrzyń i kart, sala prywatna. Rig pikselowy człowieka ma zjeść te same dane kostiumów co `drawFigure`, więc to jedna robota na wszystkich.
+- HUD, tytuły i przyciski w tym trybie używają fontu Pixelify Sans (Google Fonts, z polskimi znakami).
