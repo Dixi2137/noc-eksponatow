@@ -113,7 +113,7 @@ Zakładka **04 MOJA SALA** otwiera prywatną salę gracza (`dist/hall.js`, `wind
 - **Trofea** to przedmioty limitowane: po jednym za każdą pokonaną salę (`trophies`, klucz `level`), nie ma ich w katalogu skrzyń, nie da się ich kupić ani sprzedać. Posiadanie wynika z `profile.cleared`, więc nic dodatkowego nie trzeba zapisywać.
 - **Prestiż** (`summary()`): punkty za rzadkość wystawionych przedmiotów (podstawowy 1, zwykły 2, rzadki 4, epicki 8, legendarny 16, trofeum 12) + 2 za każdy poziom ulepszenia + 20 za pełną salę. **Wartość ekspozycji** to suma wartości wystawionych przedmiotów (trofea 0).
 - Nazwa sali (do 28 znaków) jest wypisana nad wejściem; zapis w `profile.hall = {name, slots}` (migracja w `loot.migrate` przez `MuseumHall.migrate`).
-- Rysowanie: `art.js` ma motyw `hall` (bez reklamy sponsora i bez reliefów), `drawHall(ctx, w, h, t, ekspozycja, {name})` i `drawTrophy`. Panel sali: pole nazwy, podgląd na canvasie, lista miejsc z wyborem, siatka trofeów (nieodkryte jako „???" z nazwą sali do pokonania).
+- Rysowanie: `art.js` ma motyw `hall` (bez reliefów), `drawHall(ctx, w, h, t, ekspozycja, {name})` i `drawTrophy`. Panel sali: pole nazwy, podgląd na canvasie, lista miejsc z wyborem, siatka trofeów (nieodkryte jako „???" z nazwą sali do pokonania).
 - Kolejność skryptów: `hall.js` po `cards.js`, przed `art.js` i `loot.js`.
 - Testy: `tests/hall.js` (8 testów), łącznie 52.
 
@@ -169,3 +169,7 @@ Do sześciu sal doszło trzydzieści nowych z antagonistami z historii, wpiętyc
 - **Trofea**: po jednym za każdą z 36 sal (`hall.js`).
 - Wszyscy nowi są wyłącznie bossami; nie ma ich w skrzynkach ani kartach. Wybrani: postacie historyczne powszechnie uznawane za tyranów, zbrodniarzy lub bandytów, żadna żyjąca.
 - `tests/gallery.html?compact` pokazuje wszystkich 36 w jednej siatce.
+
+## Porządki (2026-10-21)
+
+Z areny zniknął plakat reklamowy piwa Kustosz i napis o sponsorze walki; usunięty też obrazek `assets/kustosz-reklama.png` i jego osadzanie w buildzie offline. Nazwa Kustosz zostaje tylko tam, gdzie znaczy kustosza muzeum (sklep, rewolwer, arsenał).

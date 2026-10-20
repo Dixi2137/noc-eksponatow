@@ -3,8 +3,6 @@
   'use strict';
   const TAU=Math.PI*2;
   const knightLooks=new Map((window.MuseumKnights?.skins||[]).map(s=>[s.id,s]));
-  const sponsorImage=typeof Image==='function'?new Image():null;
-  if(sponsorImage){sponsorImage.decoding='async';sponsorImage.src=document.currentScript?.dataset.sponsorImage||'assets/kustosz-reklama.png';}
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   function path(c,pts,fill,stroke,lw=1){c.beginPath();pts(c);if(fill){c.fillStyle=fill;c.fill()}if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.stroke()}}
   function poly(c,p,fill,stroke,lw=1){path(c,q=>{q.moveTo(...p[0]);for(let i=1;i<p.length;i++)q.lineTo(...p[i]);q.closePath()},fill,stroke,lw)}
@@ -20,7 +18,7 @@
     sparta:{bg:[[0,'#140b05'],[.65,'#3b2a1b'],[1,'#130c07']],wall:['#2b2219','#27201a'],sign:['ΘΕΡΜΟΠΥΛΑΙ','SALA ANTYKU · 480 P.N.E.'],consoles:['SPARTA','HOPLITAI'],floor:[[0,'#4d3d27'],[.25,'#3f3121'],[1,'#1a130d']],window:'sun',particles:'dust',light:'rgba(255,176,96,.12)',banner:{color:'#8b1a1a',edge:'#d08a4a',glyph:'Λ'}},
     napoleon:{bg:[[0,'#0a0e15'],[.65,'#27313e'],[1,'#0c1118']],wall:['#1d2531','#1b222d'],sign:['BORODINO','SALA EMPIRE · 1812'],consoles:['GRANDE ARMÉE','1812'],floor:[[0,'#d6dbe0'],[.25,'#b4bcc5'],[1,'#56606b']],window:'snow',particles:'snow',light:'rgba(200,222,255,.10)',banner:{color:'#1f3a6b',edge:'#d4af37',glyph:'N'}},
     bunker:{bg:[[0,'#0f0f0e'],[.65,'#2b2b27'],[1,'#121211']],wall:['#3b3b37','#373733'],sign:['FÜHRERBUNKER','BERLIN · 1945'],consoles:['1945','BERLIN'],floor:[[0,'#3c3b36'],[.25,'#34332f'],[1,'#17171a']],window:'none',particles:'ash',light:'rgba(255,222,160,.07)',banner:{color:'#4d4634',edge:'#8a7f5e',glyph:''}},
-    hall:{bg:[[0,'#0c0a06'],[.65,'#2d2416'],[1,'#0e0b07']],wall:['#2a2219','#271f18'],sign:['SALA PRYWATNA','KOLEKCJA NOCNEGO STRÓŻA'],consoles:['ZBROJE','BROŃ'],floor:[[0,'#3a2f1f'],[.25,'#32291c'],[1,'#15100b']],window:'moon',particles:'dust',light:'rgba(255,214,140,.11)',banner:null,sponsor:false},
+    hall:{bg:[[0,'#0c0a06'],[.65,'#2d2416'],[1,'#0e0b07']],wall:['#2a2219','#271f18'],sign:['SALA PRYWATNA','KOLEKCJA NOCNEGO STRÓŻA'],consoles:['ZBROJE','BROŃ'],floor:[[0,'#3a2f1f'],[.25,'#32291c'],[1,'#15100b']],window:'moon',particles:'dust',light:'rgba(255,214,140,.11)',banner:null},
     rome:{bg:[[0,'#1a1410'],[.65,'#4a3a2a'],[1,'#171210']],wall:['#4a4238','#453d34'],sign:['SPQR','SALA CESARSKA'],consoles:['ROMA','AVE'],floor:[[0,'#6a5a48'],[.25,'#5a4c3c'],[1,'#241c14']],window:'sun',particles:'dust',light:'rgba(255,200,120,.12)',banner:{color:'#8b1a1a',edge:'#d4af37',glyph:'SPQR'}},
     persia:{bg:[[0,'#120a1a'],[.65,'#3a2050'],[1,'#120a18']],wall:['#3a2a4a','#352644'],sign:['ΠΕΡΣΙΣ','SALA PERSKA'],consoles:['PARSA','ŠĀH'],floor:[[0,'#5a4a30'],[.25,'#4a3c28'],[1,'#1e180f']],window:'sun',particles:'dust',light:'rgba(255,214,120,.12)',banner:{color:'#4a1f6b',edge:'#d4af37',glyph:'☀'}},
     china:{bg:[[0,'#1a0808'],[.65,'#4a1414'],[1,'#160606']],wall:['#4a1a1a','#441818'],sign:['秦','SALA TERAKOTOWA'],consoles:['秦','兵'],floor:[[0,'#3a3028'],[.25,'#302820'],[1,'#141010']],window:'none',particles:'dust',light:'rgba(255,180,100,.12)',banner:{color:'#8a1a1a',edge:'#d4af37',glyph:'龍'}},
@@ -105,13 +103,6 @@
     ellipse(c,720,281,29,29,'#26392f','#8a7a50',2);ellipse(c,720,281,22,22,null,'#53634a');
     path(c,q=>{q.moveTo(720,262);q.lineTo(720,282);q.lineTo(734,290)},null,'#d9c28a',2);
     txt(c,T.sign[0],720,187,22,'#a8a17c');txt(c,T.sign[1],720,206,8,'#7f8a73','center','Arial');
-    // The supplied advertisement is mounted in the back wall, behind the fighters.
-    if(T.sponsor!==false&&sponsorImage?.complete&&sponsorImage.naturalWidth>0){
-      c.save();c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=15;c.shadowOffsetY=5;
-      rr(c,602,302,236,246,2,'#151a15','#b9a36d',3);c.shadowBlur=0;c.shadowOffsetY=0;
-      c.imageSmoothingEnabled=true;c.drawImage(sponsorImage,608,308,224,234);
-      rr(c,606,306,228,238,1,null,'#d2bc82',1);c.restore();
-    }
     // Exhibit consoles.
     [176,1280].forEach((x,i)=>{rr(c,x-45,501,90,63,3,'#182824','#4e5643');rr(c,x-50,495,100,8,2,'#66715b','#888b6b');line(c,x-41,508,x+41,508,'#9b9771',1);txt(c,T.consoles[i],x,533,9,'#939875','center','Arial');line(c,x-25,544,x+25,544,'#454d3d',1)});
     [128,421,1019,1312].forEach(x=>column(c,x));
@@ -594,7 +585,7 @@
     c.save();c.shadowColor=col;c.shadowBlur=18;txt(c,trophy?.glyph||'?',0,-2,54,mixColor(col,'#fff',.45),'center','Georgia');c.restore();
     c.restore();
   }
-  // The player's hall: the arena room without the sponsor, filled with their exhibition. `shown` comes from MuseumHall.exhibition().
+  // The player's hall: the arena room filled with their exhibition. `shown` comes from MuseumHall.exhibition().
   function drawHall(c,w=1440,h=810,t=0,shown=[],o={}){
     drawArena(c,w,h,t,'hall',{sign:[o.name||'SALA PRYWATNA','KOLEKCJA NOCNEGO STRÓŻA'],frames:false});
     c.save();c.scale(w/1440,h/810);
