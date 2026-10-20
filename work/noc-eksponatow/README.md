@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Publikacja online (2026-10-21)
+
+Gra jest publikowana na GitHub Pages z folderu `dist/` przez workflow `.github/workflows/pages.yml` przy każdym pushu na `main` (repo `Dixi2137/noc-eksponatow`). Adres: https://dixi2137.github.io/noc-eksponatow/. Bez kluczy w `config.js` działa tryb gościa; po podaniu Supabase dojdą konta i ranking.
+
 ## Otwórz ponownie (2026-10-21)
 
 Po odsłonięciu nagrody okno losowania ma trzeci przycisk **OTWÓRZ PONOWNIE** (`lootAgainBtn`, `openAgain` w `ui.js`): zachowuje nagrodę w kolekcji (bez zakładania), pobiera cenę tej samej skrzyni i od razu kręci następne losowanie, bez zamykania okna. Etykieta pokazuje koszt albo GRATIS (darmowa skrzynia Galerii), a przy braku żetonów lub wyczerpanej puli przycisk jest wyłączony z informacją ile brakuje.
