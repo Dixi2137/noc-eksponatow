@@ -20,6 +20,14 @@
     assert.deepEqual(p.cards, ['card-zawisza']); assert.equal(p.card, null, 'karta broni nie może być aktywną kartą bohatera');
     assert.deepEqual(p.upgrades, { 'skin:frost': 3, 'weapon:axe': 5 }); assert.equal(p.login.streak, 4);
   });
+  test('Karty: 33 bohaterów i 20 kart broni, każda z działającym modyfikatorem, karty broni wskazują istniejącą broń', () => {
+    const all = cards.all(); assert.equal(cards.heroes().length, 33); assert.equal(cards.weaponCards().length, 20);
+    const keys = ['staminaRegenMultiplier', 'maxStamina', 'maxHP', 'defenseCostMultiplier', 'perfectParryWindow', 'weakGuardDamageMultiplier', 'perfectParryHeal', 'incomingDamageMultiplier', 'ammo', 'weaponDamageMultiplier'];
+    for (const c of all) { const ks = Object.keys(c.modifiers); assert.ok(ks.length >= 1 && ks.every(k => keys.includes(k)), `${c.id}: ${ks}`); assert.ok(c.initials && c.summary && c.description && c.color, c.id); if (c.type === 'weapon') assert.ok(weapons.has(c.weapon), c.id); }
+    assert.equal(new Set(all.map(c => c.id)).size, all.length);
+    g.reset(); let s = g.start({ sound: false, skin: 'verdigris', weapon: 'ak47', modifiers: cards.get('card-ak47').modifiers }); assert.equal(s.weapon.maxAmmo, weapons.get('ak47').stats.ammo + 5, 'karta AK: +5 naboi');
+    g.reset(); s = g.start({ sound: false, skin: 'verdigris', modifiers: cards.get('card-pilsudski').modifiers }); assert.equal(s.player.maxHP, 140, 'Piłsudski: +20 HP');
+  });
   test('Katalog przedmiotów: każdy skin, broń i karta ma unikalne id, rzadkość i wartość', () => {
     const ids = new Set();
     for (const item of loot.items) { assert.ok(!ids.has(item.id), `duplikat ${item.id}`); ids.add(item.id); assert.ok(loot.rarities[item.rarity], item.id); assert.ok(loot.value(item) >= 0); }
