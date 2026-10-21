@@ -142,9 +142,17 @@
    guarantee:'1 nowy przedmiot · gwarantowany legendarny',color:'#f0ca72',glyph:'★',
    rarityWeights:Object.freeze({common:0,rare:0,epic:0,legendary:100})},
   {id:'collector',name:'Sejf Kolekcjonera',title:'Sejf Kolekcjonera',tag:'LIMITOWANE',cost:12000,pricePLN:199.99,pool:'any',family:'finishes',group:'finishes',
-   description:'Stroje, bronie i karty wymieszane z ośmioma limitowanymi wykończeniami broni: diament i szmaragd, złoty marmur, tytan, hologram, obsydian z rubinem, stal damasceńska, różowe złoto i nocna pustka. Najwyższa szansa na mityczne w całym muzeum, ale wciąż tylko 3%.',
+   description:'Stroje, bronie i karty wymieszane z mitycznymi wykończeniami broni: diament i szmaragd, złoty marmur, hologram, aurora, plazma, pieczęć kustosza i reszta limitowanej dwudziestki ósemki. Najwyższa szansa na mityczne poza Atelier, ale wciąż tylko 3%.',
    guarantee:'1 nowy przedmiot · 3% na mityczne wykończenie',color:'#7ff0e0',glyph:'◆',
-   rarityWeights:Object.freeze({common:40,rare:30,epic:20,legendary:7,mythic:3})}
+   rarityWeights:Object.freeze({common:40,rare:30,epic:20,legendary:7,mythic:3})},
+  {id:'lacquer',name:'Lakiernia Muzealna',title:'Lakiernia Muzealna',tag:'WYKOŃCZENIA',cost:1200,pricePLN:34.99,pool:'finish',family:'finishes',group:'finishes',
+   description:'Cały katalog wykończeń broni w jednej skrzyni: od farby z puszki za parę złotych, przez paski i kropki, po klejnoty, żywioły i mityczne powłoki. Prawie czterysta powłok, większość to bieda.',
+   guarantee:'1 nowe wykończenie · wszystkie rzadkości',color:'#e0b060',glyph:'✎',
+   rarityWeights:Object.freeze({common:55,rare:28,epic:12,legendary:4.5,mythic:.5})},
+  {id:'atelier',name:'Atelier Płatnerza',title:'Atelier Płatnerza',tag:'EPICKIE+',cost:6000,pricePLN:129.99,pool:'finish',family:'finishes',group:'finishes',
+   description:'Tylko klejnoty, żywioły i mityczne powłoki. Żadnej farby z puszki, ale mityczne wciąż tylko 3%.',
+   guarantee:'1 nowe wykończenie · minimum epickie',color:'#c4a1f0',glyph:'◈',
+   rarityWeights:Object.freeze({common:0,rare:0,epic:72,legendary:25,mythic:3})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
   rarityWeights:Object.freeze({...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
  // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
@@ -179,7 +187,7 @@
   ...skins.map(skin=>({kind:'skin',...skin})),
   ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
-  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:'mythic',summary:'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
+  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
  ].map(Object.freeze));
  const itemsById=new Map(items.map(item=>[item.id,item]));
  function getItem(id){return itemsById.get(id)||null;}
@@ -220,7 +228,7 @@
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  const fits=s=>s.kind==='finish'?crate.rarityWeights.mythic>0:(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
+  const fits=s=>s.kind==='finish'?(crate.pool==='finish'||(s.rarity==='mythic'&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
   return crate ? items.filter(s => fits(s) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {

@@ -135,11 +135,25 @@
     for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
     assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
     assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
-    assert.equal(loot.crates.length, 30); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+    assert.equal(loot.crates.length, 32); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
   });
-  test('Sejf Kolekcjonera: 8 mitycznych wykończeń, nakładanie na dowolną broń, sprzedaż za 6000, nic nie wypada z innych skrzyń', () => {
-    const fin = window.MuseumFinishes; assert.equal(fin.count, 8); assert.ok(fin.all().every(f => f.pricePLN >= 400 && f.pricePLN <= 4000), 'ceny od kilkuset do kilku tysięcy zł'); assert.equal(fin.get('gold-marble').pricePLN, 1499); assert.equal(loot.getItem('gold-marble').pricePLN, 1499); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
-    const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.filter(i => i.kind === 'finish').length, 8); assert.ok(pool.some(i => i.kind === 'skin') && pool.some(i => i.kind === 'weapon') && pool.some(i => i.kind === 'card'), 'sejf miesza mityczne ze zwykłymi');
+  test('Lakiernia: ~390 wykończeń w pięciu rzadkościach, dwie skrzynie tylko z wykończeniami, ceny od groszy do tysięcy', () => {
+    const F = window.MuseumFinishes, all = F.all(); assert.ok(all.length >= 380 && all.length <= 400, String(all.length));
+    const n = r => F.byRarity(r).length; assert.ok(n('common') >= 100 && n('rare') >= 100 && n('epic') >= 70 && n('legendary') >= 40 && n('mythic') >= 20, JSON.stringify({ c: n('common'), r: n('rare'), e: n('epic'), l: n('legendary'), m: n('mythic') }));
+    assert.equal(new Set(all.map(x => x.id)).size, all.length, 'unikalne id'); assert.equal(new Set(all.map(x => x.name)).size, all.length, 'unikalne nazwy');
+    const cheapest = Math.min(...F.byRarity('common').map(x => x.pricePLN)), dearest = Math.max(...F.byRarity('mythic').map(x => x.pricePLN)); assert.ok(cheapest < 5 && dearest >= 3499, `${cheapest} – ${dearest}`);
+    assert.ok(F.byRarity('rare').every(x => x.pricePLN > 9.99) && F.byRarity('epic').every(x => x.pricePLN > 39.99) && F.byRarity('legendary').every(x => x.pricePLN >= 199), 'ceny rosną z rzadkością');
+    for (const x of all) { const pal = F.palette(x.id, 1.3); assert.ok(pal && pal.M && pal.W && pal.S, x.id); F.overlay(x.id, 'M', 3, 4, 1.3); F.overlay(x.id, 'W', 0, 0, 0); }
+    const p = { ...loot.migrate(null), coins: 50000 }; const pool = loot.remaining(p, 'lacquer'); assert.equal(pool.length, all.length, 'lakiernia ma cały katalog'); assert.ok(pool.every(i => i.kind === 'finish'), 'tylko wykończenia');
+    const o = loot.odds(p, 'lacquer'); assert.ok(o.common > 50 && o.mythic < 1 && Math.abs(o.mythic - .5) < .01, JSON.stringify(o));
+    const r = loot.reserve(p, () => .1, 'lacquer'); assert.ok(r && r.reward.kind === 'finish' && r.reward.rarity === 'common', 'dół losowania to bieda'); assert.equal(r.cost, 1200);
+    const at = loot.remaining(p, 'atelier'); assert.ok(at.length && at.every(i => i.kind === 'finish' && ['epic', 'legendary', 'mythic'].includes(i.rarity)), 'atelier: minimum epickie'); assert.ok(Math.abs(loot.odds(p, 'atelier').mythic - 3) < .01);
+    const c = loot.getItem(F.byRarity('common')[0].id); assert.equal(loot.value(c), 240); assert.equal(loot.sellPrice(c), 96); assert.equal(loot.pricePLN(c), Math.round(c.pricePLN * 100));
+    assert.ok(loot.remaining(p, 'gallery').every(i => i.kind !== 'finish' || i.rarity === 'mythic'), 'do zwykłych skrzyń wpadają tylko mityczne');
+  });
+  test('Sejf Kolekcjonera: mityczne wykończenia, nakładanie na dowolną broń, sprzedaż za 6000, nic nie wypada z innych skrzyń', () => {
+    const fin = window.MuseumFinishes; assert.equal(fin.handmade.length, 8); assert.ok(fin.byRarity('mythic').every(f => f.pricePLN >= 400 && f.pricePLN <= 5000), 'mityczne: od kilkuset do kilku tysięcy zł'); assert.equal(fin.get('gold-marble').pricePLN, 1499); assert.equal(loot.getItem('gold-marble').pricePLN, 1499); assert.ok(fin.palette('holo', 1).M && fin.palette('gold-marble').M === '#efe9dc');
+    const rich = (coins) => ({ ...loot.migrate(null), coins }); let p = rich(50000); const pool = loot.remaining(p, 'collector'); assert.equal(pool.filter(i => i.kind === 'finish').length, window.MuseumFinishes.byRarity('mythic').length); assert.ok(pool.every(i => i.kind !== 'finish' || i.rarity === 'mythic'), 'do sejfu wpadają tylko mityczne wykończenia'); assert.ok(pool.some(i => i.kind === 'skin') && pool.some(i => i.kind === 'weapon') && pool.some(i => i.kind === 'card'), 'sejf miesza mityczne ze zwykłymi');
     assert.ok(Math.abs(loot.odds(p, 'collector').mythic - 3) < .01, 'sejf: 3 % na mityczne');
     for (const id of ['gallery', 'legends', 'armory', 'night']) { const o = loot.odds(p, id).mythic; assert.ok(o > 0 && o < 1.5, `${id}: mityczne ${o}%`); assert.ok(loot.remaining(p, id).some(i => i.kind === 'finish'), id); }
     assert.ok(loot.odds(p, 'gallery').mythic < .4 && loot.odds(p, 'legends').mythic > 1 && loot.odds(p, 'collector').mythic > loot.odds(p, 'legends').mythic, 'tanie ~0,35 %, legendy ~1,2 %, sejf 3 %');

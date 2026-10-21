@@ -47,7 +47,8 @@
    const price=node('span','shop-product-price');price.append(node('strong','',currency.format(crate.pricePLN)),node('small','shop-product-planned','PLANOWANA CENA'));
    button.append(heading,art,node('h3','',crate.name),node('p','shop-product-guarantee',crate.guarantee));
    if(category&&crate.pool==='skin'){const pool=loot.items.filter(item=>item.kind===crate.pool&&item.categoryId===category.id&&item.weight>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} STROJÓW W KATEGORII`));}
-   else if(crate.id==='collector'){const pool=loot.items.filter(item=>item.kind==='finish'),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} WYKOŃCZEŃ LIMITOWANYCH`));}
+   else if(crate.id==='collector'){const pool=loot.items.filter(item=>item.kind==='finish'&&item.rarity==='mythic'),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} WYKOŃCZEŃ MITYCZNYCH`));}
+   else if(crate.pool==='finish'){const pool=loot.remaining(current,crate.id),all=loot.items.filter(item=>item.kind==='finish'&&crate.rarityWeights[item.rarity]>0);button.append(node('span','shop-product-progress',`${all.length-pool.length} / ${all.length} WYKOŃCZEŃ`));}
    else if(crate.pool==='weapon'&&(crate.weaponType||category)){const pool=loot.items.filter(item=>item.kind==='weapon'&&item.weight>0&&(!crate.weaponType||item.type===crate.weaponType)&&(!category||item.categoryId===category.id)),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} BRONI W PULI`));}
    else if(crate.pool!=='skin'){const pool=loot.items.filter(item=>(crate.pool==='any'||item.kind===crate.pool)&&item.weight>0&&crate.rarityWeights[item.rarity]>0),owned=pool.filter(item=>loot.has(current,item)).length;button.append(node('span','shop-product-progress',`${owned} / ${pool.length} ${crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':'PRZEDMIOTÓW'} W PULI`));}
    else button.append(node('span','shop-product-progress','WSZYSTKIE KATEGORIE STROJÓW'));
@@ -63,7 +64,7 @@
   $('shopOffers').replaceChildren(...products);
   renderFinishes(current);
   if(focused)products.find(product=>product.dataset.crateId===focused)?.focus({preventScroll:true});
-  for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed']])$(id).setAttribute('aria-pressed',String(familyFilter===filter));
+  for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed'],['shopFilterFinishes','finishes']])$(id).setAttribute('aria-pressed',String(familyFilter===filter));
   $('shopOffersCount').textContent=`${products.length} / ${loot.crates.length} SKRZYŃ`;
   $('shopBalance').textContent=`${number.format(coins)} ✦`;
   $('shopSelectedName').textContent=selected.name;
@@ -89,7 +90,7 @@
  const plain=new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN',maximumFractionDigits:0});
  function renderFinishes(current){
   const root=$('shopFinishes');if(!root||!window.MuseumFinishes)return;
-  const list=loot.items.filter(item=>item.kind==='finish');
+  const list=loot.items.filter(item=>item.kind==='finish'&&item.rarity==='mythic');
   const cards=list.map((item,index)=>{
    const owned=loot.has(current,item),equipped=current.finish===item.id,card=node('article',`shop-product shop-finish${owned?' is-owned':''}`);
    card.style.setProperty('--crate-color',item.colors?.steel||'#7ff0e0');
@@ -109,7 +110,7 @@
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];
   if(!mounted){
-   for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed']])$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
+   for(const [id,filter]of [['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed'],['shopFilterFinishes','finishes']])$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
    for(const b of document.querySelectorAll('.shop-deposit-btn'))b.addEventListener('click',()=>{if(!callbacks.canOpen())return;callbacks.onDeposit(Number(b.dataset.amount)||0);});
    $('shopDepositBtn')?.addEventListener('click',()=>{if(!callbacks.canOpen())return;const zl=Number($('shopDepositInput').value);if(!(zl>0&&zl<=100000)){callbacks.notify('Podaj kwotę od 1 do 100 000 zł.');return;}$('shopDepositInput').value='';callbacks.onDeposit(Math.round(zl*100));});
    $('shopTokenBtn')?.addEventListener('click',()=>{
