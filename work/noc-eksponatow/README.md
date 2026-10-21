@@ -221,6 +221,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Finał: Walka z Belzebubem (2026-10-21)
+
+Sala 37 `hell` (rok 9999, „POZA CZASEM”, sceneria `hell`): Belzebub (`exhibits.js`, rig człowieka z nowym nakryciem `horns`, czerwona skóra, peleryna, włócznia; tyran tier 8 z 380 HP, ciężki cios co drugi zamach, obrażenia 20/34) i warunek sali DRUGI ODDECH ustawiony wprost w definicji poziomu (`levels.js` honoruje `twist` z definicji, inaczej cykl). Sceneria piekła: czerwony tint, zamurowane okna, sztandary „666”, tabliczka PIEKŁO, migoczące płomienie przy cokole i pęknięcia lawy w podłodze (`fire: true` w `pixel.js`), wektorowy motyw `hell` w `art.js`. Trofeum RÓG BELZEBUBA. Kaddafi przestał być „ostatnim bossem”.
+
 ## Ekran startowy (2026-10-21)
 
 Po otwarciu strony pełnoekranowy `#boot` (z-index nad wszystkim): 1) „GAME BY / AFTER DARK STUDIO” z limonkową linią (2,3 s), 2) pieczęć kustosza wbijana jak stempel + tytuł NOC EKSPONATÓW / MUZEUM PO GODZINACH (3,3 s), 3) karta „Księga gości”: ZALOGUJ SIĘ, ZAŁÓŻ KONTO (otwierają okno konta w odpowiednim trybie), KONTYNUUJ JAKO GOŚĆ. Klik, Esc albo POMIŃ skraca do karty; przywrócona sesja pokazuje „Witaj, …” i WEJDŹ DO MUZEUM; bez konfiguracji chmury zostaje tylko gość; `prefers-reduced-motion` pomija animacje. Scanlines i przejścia w CSS (`boot-*` keyframes).

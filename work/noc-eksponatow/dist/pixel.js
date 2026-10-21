@@ -38,10 +38,11 @@
     church: generic('#121212', '✝', 'rgba(50,40,30,.45)'), aztec: generic('#1f6b4a', '☉', 'rgba(60,110,70,.35)'), tsar: generic('#8a1a1a', '☦', 'rgba(120,70,30,.4)'),
     pirate: generic('#111111', '☠', 'rgba(40,70,90,.4)'), revolution: generic('#1f3a6b', '⚜', 'rgba(50,60,90,.35)'), jungle: generic('#1a2a4a', '✶', 'rgba(30,90,40,.4)'),
     speakeasy: generic('#4a4a52', '$', 'rgba(110,50,20,.45)'), fascist: generic('#111111', '⚒', 'rgba(60,60,60,.5)'), japan: generic('#e8e2d0', '●', 'rgba(180,60,60,.3)'),
-    desert: generic('#2a8a4a', '☾', 'rgba(170,140,70,.4)'), cartel: generic('#2a3a6a', '$', 'rgba(90,40,110,.4)'), palace: generic('#8a1a1a', '☭', 'rgba(70,70,70,.45)')
+    desert: generic('#2a8a4a', '☾', 'rgba(170,140,70,.4)'), cartel: generic('#2a3a6a', '$', 'rgba(90,40,110,.4)'), palace: generic('#8a1a1a', '☭', 'rgba(70,70,70,.45)'),
+    hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true }
   });
   // Door signs per era, so the same hall does not read MUSEUM in Sparta, Rome and the bunker alike.
-  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hall: 'SALA' };
+  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA' };
   function drawArena(c, t = 0, themeKey = 'museum', o = {}) {
     const th = themes[themeKey] || themes.museum;
     c.fillStyle = '#0a1014'; c.fillRect(0, 0, W, H);
@@ -87,6 +88,11 @@
     px(c, 144 - sw / 2 - 1, 44, '#3b352a', sw + 2, 13); px(c, 144 - sw / 2, 45, '#1a1612', sw, 11); px(c, 144 - sw / 2, 45, '#5a5040', sw, 1);
     if (o.texts) o.texts.push({ x: 144, y: 54, text: sign, size: 7, color: '#e2cf8f', plaque: false });
     else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 54); }
+    if (th.fire) {   // hell: lava cracks on the floor and flames licking the plinth, flickering with time
+      for (let col = 0; col < 18; col++) { const f = Math.floor(Math.sin(t * 7 + col * 1.7) * 2 + 3); px(c, col * T + 3, 127 - f, '#ff8a2a', 4, f); px(c, col * T + 4, 127 - Math.max(1, f - 2), '#ffd36a', 2, Math.max(1, f - 2)); px(c, col * T + 9, 129 - (f >> 1), '#ff5a1a', 3, f >> 1); }
+      for (let k = 0; k < 9; k++) px(c, 8 + k * 32 + ((k * 7) % 5), 140 + (k % 3) * 6, '#ff7a2a', 10 + (k % 4) * 3, 1);
+      for (let k = 0; k < 6; k++) px(c, 30 + k * 44, 150 + (k % 2) * 5, '#ffb24a', 6, 1);
+    }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.
@@ -394,6 +400,7 @@
       crown: ["G..G..G..G", "GG.GG.GG.GG", "GGGGGGGGGGG", "GRGGRGGRGGG", "GGGGGGGGGGG"],
       mianguan: ["GGGGGGGGGGGGGG", ".G..G..G..G..G", "..OOOOOOOOOO..", "..OPPPPPPPPO..", "..OPPPPPPPPO.."],
       laurel: ["..LL....LL..", ".LLL....LLL.", "LLL......LLL"],
+      horns: ["O..........O", "OO........OO", ".OO......OO.", ".OPO....OPO.", "..OPPOOOOPPO", "..OOPPPPPPO."],
       turban: ["...OOOOOO...", "..OWWWWWWO..", ".OWWRWWWWWO.", "OWWWWWWWWWWO", "OWWWWWWWWWWO", ".OOWWWWWWOO."],
       furhat: ["...OOOOOO...", "..OPPPPPPO..", ".OPPPPPPPPO.", "OpppppppppppO", "OpppppppppppO", ".OOOOOOOOOO."],
       hood: ["....OOOO....", "...OPPPPO...", "..OPPPPPPO..", ".OPPPPPPPPO.", "OPPPPPPPPPPO", "OPPOOOOOOPPO", "OPPO....OPPO", "OPPO....OPPO", "OPPO....OPPO", "OPPO....OPPO"],

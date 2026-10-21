@@ -1094,7 +1094,12 @@ window.MuseumConfig = Object.freeze({
       'Ukryty w jaskiniach. Karabin z dystansu, chwila słabości po każdej serii.'),
     villain('gaddafi', 'MUAMMAR KADDAFI', 'Kaddafi', 'Kaddafiego', 'SYRTA · 2011', 'Syrta, 2011 r.', 'brute', 6,
       { skin: '#c89a74', hair: '#1a1a1a', coat: '#6b4a2a', coatDark: '#44301a', trousers: '#6b4a2a', boots: '#1a1010', hat: 'peaked', hatColor: '#6b4a2a', weapon: 'pistol', epaulettes: '#d4af37', sash: '#2a8a4a' },
-      'Ostatni boss nocy. Złoty pistolet, ciężka ręka i najwięcej HP w muzeum.'),
+      'Ostatni z ludzi. Złoty pistolet i ciężka ręka. Dalej jest już tylko ogień.'),
+    // The final exhibit: not from any museum. Tier 8 tyrant with extra HP and a heavy blow every second attack.
+    (() => { const b = villain('beelzebub', 'BELZEBUB', 'Belzebub', 'Belzebuba', 'PIEKŁO · POZA CZASEM', 'Piekło, poza czasem', 'tyrant', 8,
+      { skin: '#8a1a1a', hair: '#1a0606', coat: '#2a0808', coatDark: '#140303', trousers: '#1a0606', boots: '#0d0303', hat: 'horns', hatColor: '#3a2a1a', beard: 'goatee', weapon: 'spear', cloak: '#4a0a0a', armor: '#3a1010', armorDark: '#1a0606', sash: '#ff6a3a' },
+      'Władca much. Nikt go nie wystawiał, sam przyszedł. Więcej zdrowia niż ktokolwiek, ciężki cios co drugi zamach, a przy jednej trzeciej sił łapie drugi oddech.');
+      b.stats.hp = 380; b.stats.combat = { ...b.stats.combat, heavyEvery: 2, recovery: 1.5 }; b.stats.damage = { ...b.stats.damage, light: 20, heavy: 34, lightBlocked: 15, heavyBlocked: 22 }; return b; })(),
     { id: 'napoleon', name: 'NAPOLEON BONAPARTE', alias: 'Napoleon', aliasGen: 'Napoleona', tag: 'CESARSTWO · 1812', era: 'Borodino, 1812', kind: 'postać historyczna',
       description: 'Cesarz Francuzów. Szybka szabla, krótkie przerwy między natarciami.',
       stats: { ...human, hp: 170, combat: { ...human.combat, approachSpeed: 95, windup: .9, heavyWindup: 1.2, strikeDuration: .38, recovery: 1.4, heavyRecovery: 1.8, heavyEvery: 3, idleDelay: .6 },
@@ -1229,12 +1234,14 @@ window.MuseumConfig = Object.freeze({
     { id: 'tora-bora', year: 2001, yearLabel: '2001', title: 'TORA BORA', hall: 'SALA PUSTYNI', exhibit: 'binladen', theme: 'desert',
       tagline: 'Jaskinie w górach.<br>Karabin i echo.', card: 'Jaskinia w Tora Bora. Bin Laden odbezpiecza karabin.' },
     { id: 'sirte', year: 2011, yearLabel: '2011', title: 'SYRTA', hall: 'OSTATNIA SALA', exhibit: 'gaddafi', theme: 'desert',
-      tagline: 'Ostatni boss nocy.<br>Złoty pistolet i koniec obchodu.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. To ostatnia sala.' }
+      tagline: 'Ostatni z ludzi.<br>Złoty pistolet i ostatnie drzwi.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. Za nim podłoga muzeum zaczyna pękać.' },
+    { id: 'hell', year: 9999, yearLabel: 'POZA CZASEM', title: 'WALKA Z BELZEBUBEM', hall: 'PIEKŁO', exhibit: 'beelzebub', theme: 'hell', twist: 'second-wind',
+      tagline: 'Finał. Nie ma już sal.<br>Jest tylko ogień i Belzebub.', card: 'Podłoga muzeum pęka. Pod nią nie ma piwnicy. Jest piekło, a w nim czeka Belzebub.' }
   ];
   const sorted = [...definitions].sort((a, b) => a.year - b.year);
   const levels = Object.freeze(sorted.map((level, index) => Object.freeze({
-    ...level, number: index + 1, twist: window.MuseumTwists ? window.MuseumTwists.forIndex(index) : null,
-    reward: Math.round((120 + index * 15) * (window.MuseumTwists && window.MuseumTwists.forIndex(index) ? 1.2 : 1)),
+    ...level, number: index + 1, twist: level.twist !== undefined ? level.twist : (window.MuseumTwists ? window.MuseumTwists.forIndex(index) : null),
+    reward: Math.round((120 + index * 15) * ((level.twist !== undefined ? level.twist : window.MuseumTwists?.forIndex(index)) ? 1.2 : 1)),
     prologue: Object.freeze((level.prologue || []).map(Object.freeze))
   })));
   const byId = new Map(levels.map(level => [level.id, level]));
@@ -1315,6 +1322,7 @@ window.MuseumConfig = Object.freeze({
     { id: 'trophy-leonidas', level: 'thermopylae', name: 'PIÓROPUSZ LEONIDASA', era: 'TROFEUM · 480 P.N.E.', glyph: 'Λ', color: '#b3202a', description: 'Czerwony grzebień z korynckiego hełmu. Trzystu go nie oddało, król też nie.' },
     { id: 'trophy-hitler', level: 'berlin', name: 'KLUCZ DO BUNKRA', era: 'TROFEUM · 1945', glyph: '⚿', color: '#6b6349', description: 'Ostatni klucz z Kancelarii Rzeszy. Drzwi już nikogo nie chronią.' },
     { id: 'trophy-stalin', level: 'moscow', name: 'FAJKA Z KREMLA', era: 'TROFEUM · 1953', glyph: '★', color: '#b3202a', description: 'Zgaszona na dobre.' },
+    { id: 'trophy-beelzebub', level: 'hell', name: 'RÓG BELZEBUBA', era: 'TROFEUM · POZA CZASEM', glyph: '♆', color: '#ff4a3a', description: 'Odłamany w finale. Jeszcze ciepły.' },
     { id: 'trophy-xerxes', level: 'plataea', name: 'TIARA KSERKSESA', era: 'TROFEUM · 479 P.N.E.', glyph: '♛', color: '#d4af37', description: 'Złota tiara króla królów. Morze jej nie chciało.' },
     { id: 'trophy-qin', level: 'xianyang', name: 'TERAKOTOWY ŻOŁNIERZ', era: 'TROFEUM · 210 P.N.E.', glyph: '卒', color: '#b08a5a', description: 'Jeden z ośmiu tysięcy. Ten jeden jest twój.' },
     { id: 'trophy-herod', level: 'jerusalem', name: 'PIECZĘĆ HERODA', era: 'TROFEUM · 4 P.N.E.', glyph: '✡', color: '#c9a040', description: 'Pieczęć króla, który nie ufał nikomu.' },
@@ -1429,6 +1437,7 @@ window.MuseumConfig = Object.freeze({
     speakeasy:{bg:[[0,'#0e0806'],[.65,'#3a1a10'],[1,'#0e0806']],wall:['#4a2a1a','#442616'],sign:['SPEAKEASY','SALA PROHIBICJI'],consoles:['1929','GIN'],floor:[[0,'#3a2a1a'],[.25,'#302216'],[1,'#140e0a']],window:'none',particles:'ash',light:'rgba(255,160,80,.14)',banner:{color:'#4a4a52',edge:'#d4af37',glyph:'$'}},
     fascist:{bg:[[0,'#0c0c0c'],[.65,'#2a2a2a'],[1,'#0c0c0c']],wall:['#3a3a3a','#343434'],sign:['PALAZZO VENEZIA','SALA FASZYZMU'],consoles:['DUX','1940'],floor:[[0,'#4a4a4a'],[.25,'#3c3c3c'],[1,'#181818']],window:'none',particles:'ash',light:'rgba(255,220,180,.08)',banner:{color:'#111111',edge:'#8a8a90',glyph:'⚒'}},
     japan:{bg:[[0,'#140808'],[.65,'#3a1414'],[1,'#120606']],wall:['#e8e2d0','#dcd6c4'],sign:['大本営','SALA PACYFIKU'],consoles:['東京','1941'],floor:[[0,'#4a3a2a'],[.25,'#3c2e22'],[1,'#181210']],window:'sun',particles:'dust',light:'rgba(255,200,200,.10)',banner:{color:'#e8e2d0',edge:'#b3202a',glyph:'●'}},
+    hell:{bg:[[0,'#1a0404'],[.6,'#5a1010'],[1,'#120202']],wall:['#4a1a1a','#3a1414'],sign:['INFERNO','PIEKŁO'],consoles:['∞','666'],floor:[[0,'#8a2a10'],[.25,'#6a2010'],[1,'#200404']],window:'none',particles:'ash',light:'rgba(255,120,60,.16)',banner:{color:'#2a0606',edge:'#ff6a3a',glyph:'666'}},
     desert:{bg:[[0,'#1a1408'],[.65,'#5a4a28'],[1,'#1a1408']],wall:['#6a5a3a','#645434'],sign:['الصحراء','SALA PUSTYNI'],consoles:['1991','2011'],floor:[[0,'#8a7a50'],[.25,'#7a6a44'],[1,'#2e2816']],window:'sun',particles:'dust',light:'rgba(255,230,160,.12)',banner:{color:'#2a8a4a',edge:'#d4af37',glyph:'☾'}},
     cartel:{bg:[[0,'#0c0a14'],[.65,'#2a1a3a'],[1,'#0c0a12']],wall:['#3a2a4a','#342644'],sign:['MEDELLÍN','SALA KARTELI'],consoles:['PLATA','PLOMO'],floor:[[0,'#4a3a3a'],[.25,'#3c2e2e'],[1,'#181212']],window:'moon',particles:'dust',light:'rgba(255,120,200,.12)',banner:{color:'#2a3a6a',edge:'#f0f0f0',glyph:'$'}},
     palace:{bg:[[0,'#0c0c10'],[.65,'#2a2a30'],[1,'#0c0c0e']],wall:['#4a4a4a','#444444'],sign:['CASA POPORULUI','SALA DYKTATORÓW'],consoles:['1989','KC'],floor:[[0,'#5a5a5a'],[.25,'#4a4a4a'],[1,'#1c1c1c']],window:'none',particles:'ash',light:'rgba(255,220,180,.08)',banner:{color:'#8a1a1a',edge:'#d4af37',glyph:'☭'}},
@@ -2118,10 +2127,11 @@ window.MuseumConfig = Object.freeze({
     church: generic('#121212', '✝', 'rgba(50,40,30,.45)'), aztec: generic('#1f6b4a', '☉', 'rgba(60,110,70,.35)'), tsar: generic('#8a1a1a', '☦', 'rgba(120,70,30,.4)'),
     pirate: generic('#111111', '☠', 'rgba(40,70,90,.4)'), revolution: generic('#1f3a6b', '⚜', 'rgba(50,60,90,.35)'), jungle: generic('#1a2a4a', '✶', 'rgba(30,90,40,.4)'),
     speakeasy: generic('#4a4a52', '$', 'rgba(110,50,20,.45)'), fascist: generic('#111111', '⚒', 'rgba(60,60,60,.5)'), japan: generic('#e8e2d0', '●', 'rgba(180,60,60,.3)'),
-    desert: generic('#2a8a4a', '☾', 'rgba(170,140,70,.4)'), cartel: generic('#2a3a6a', '$', 'rgba(90,40,110,.4)'), palace: generic('#8a1a1a', '☭', 'rgba(70,70,70,.45)')
+    desert: generic('#2a8a4a', '☾', 'rgba(170,140,70,.4)'), cartel: generic('#2a3a6a', '$', 'rgba(90,40,110,.4)'), palace: generic('#8a1a1a', '☭', 'rgba(70,70,70,.45)'),
+    hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true }
   });
   // Door signs per era, so the same hall does not read MUSEUM in Sparta, Rome and the bunker alike.
-  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hall: 'SALA' };
+  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA' };
   function drawArena(c, t = 0, themeKey = 'museum', o = {}) {
     const th = themes[themeKey] || themes.museum;
     c.fillStyle = '#0a1014'; c.fillRect(0, 0, W, H);
@@ -2167,6 +2177,11 @@ window.MuseumConfig = Object.freeze({
     px(c, 144 - sw / 2 - 1, 44, '#3b352a', sw + 2, 13); px(c, 144 - sw / 2, 45, '#1a1612', sw, 11); px(c, 144 - sw / 2, 45, '#5a5040', sw, 1);
     if (o.texts) o.texts.push({ x: 144, y: 54, text: sign, size: 7, color: '#e2cf8f', plaque: false });
     else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 54); }
+    if (th.fire) {   // hell: lava cracks on the floor and flames licking the plinth, flickering with time
+      for (let col = 0; col < 18; col++) { const f = Math.floor(Math.sin(t * 7 + col * 1.7) * 2 + 3); px(c, col * T + 3, 127 - f, '#ff8a2a', 4, f); px(c, col * T + 4, 127 - Math.max(1, f - 2), '#ffd36a', 2, Math.max(1, f - 2)); px(c, col * T + 9, 129 - (f >> 1), '#ff5a1a', 3, f >> 1); }
+      for (let k = 0; k < 9; k++) px(c, 8 + k * 32 + ((k * 7) % 5), 140 + (k % 3) * 6, '#ff7a2a', 10 + (k % 4) * 3, 1);
+      for (let k = 0; k < 6; k++) px(c, 30 + k * 44, 150 + (k % 2) * 5, '#ffb24a', 6, 1);
+    }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     // Vignette.
@@ -2474,6 +2489,7 @@ window.MuseumConfig = Object.freeze({
       crown: ["G..G..G..G", "GG.GG.GG.GG", "GGGGGGGGGGG", "GRGGRGGRGGG", "GGGGGGGGGGG"],
       mianguan: ["GGGGGGGGGGGGGG", ".G..G..G..G..G", "..OOOOOOOOOO..", "..OPPPPPPPPO..", "..OPPPPPPPPO.."],
       laurel: ["..LL....LL..", ".LLL....LLL.", "LLL......LLL"],
+      horns: ["O..........O", "OO........OO", ".OO......OO.", ".OPO....OPO.", "..OPPOOOOPPO", "..OOPPPPPPO."],
       turban: ["...OOOOOO...", "..OWWWWWWO..", ".OWWRWWWWWO.", "OWWWWWWWWWWO", "OWWWWWWWWWWO", ".OOWWWWWWOO."],
       furhat: ["...OOOOOO...", "..OPPPPPPO..", ".OPPPPPPPPO.", "OpppppppppppO", "OpppppppppppO", ".OOOOOOOOOO."],
       hood: ["....OOOO....", "...OPPPPO...", "..OPPPPPPO..", ".OPPPPPPPPO.", "OPPPPPPPPPPO", "OPPOOOOOOPPO", "OPPO....OPPO", "OPPO....OPPO", "OPPO....OPPO", "OPPO....OPPO"],

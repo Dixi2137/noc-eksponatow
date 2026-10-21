@@ -79,12 +79,14 @@
     { id: 'tora-bora', year: 2001, yearLabel: '2001', title: 'TORA BORA', hall: 'SALA PUSTYNI', exhibit: 'binladen', theme: 'desert',
       tagline: 'Jaskinie w górach.<br>Karabin i echo.', card: 'Jaskinia w Tora Bora. Bin Laden odbezpiecza karabin.' },
     { id: 'sirte', year: 2011, yearLabel: '2011', title: 'SYRTA', hall: 'OSTATNIA SALA', exhibit: 'gaddafi', theme: 'desert',
-      tagline: 'Ostatni boss nocy.<br>Złoty pistolet i koniec obchodu.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. To ostatnia sala.' }
+      tagline: 'Ostatni z ludzi.<br>Złoty pistolet i ostatnie drzwi.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. Za nim podłoga muzeum zaczyna pękać.' },
+    { id: 'hell', year: 9999, yearLabel: 'POZA CZASEM', title: 'WALKA Z BELZEBUBEM', hall: 'PIEKŁO', exhibit: 'beelzebub', theme: 'hell', twist: 'second-wind',
+      tagline: 'Finał. Nie ma już sal.<br>Jest tylko ogień i Belzebub.', card: 'Podłoga muzeum pęka. Pod nią nie ma piwnicy. Jest piekło, a w nim czeka Belzebub.' }
   ];
   const sorted = [...definitions].sort((a, b) => a.year - b.year);
   const levels = Object.freeze(sorted.map((level, index) => Object.freeze({
-    ...level, number: index + 1, twist: window.MuseumTwists ? window.MuseumTwists.forIndex(index) : null,
-    reward: Math.round((120 + index * 15) * (window.MuseumTwists && window.MuseumTwists.forIndex(index) ? 1.2 : 1)),
+    ...level, number: index + 1, twist: level.twist !== undefined ? level.twist : (window.MuseumTwists ? window.MuseumTwists.forIndex(index) : null),
+    reward: Math.round((120 + index * 15) * ((level.twist !== undefined ? level.twist : window.MuseumTwists?.forIndex(index)) ? 1.2 : 1)),
     prologue: Object.freeze((level.prologue || []).map(Object.freeze))
   })));
   const byId = new Map(levels.map(level => [level.id, level]));

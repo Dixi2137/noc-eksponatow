@@ -63,3 +63,16 @@
     assert.equal(s.theme, 'sparta'); assert.equal(g.getState().exhibit.name, 'LEONIDAS I');
   });
 })();
+(() => {
+  'use strict';
+  const { test, assert } = window.MuseumTests;
+  const exhibits = window.MuseumExhibits, g = window.MuseumGame, t = g._test, pix = window.MuseumPixel;
+  test('Belzebub: finał w piekle, 380 HP, ciężki cios co drugi, rogi i ogień w scenerii', () => {
+    const b = exhibits.get('beelzebub'); assert.equal(b.name, 'BELZEBUB'); assert.equal(b.stats.hp, 380); assert.equal(b.stats.combat.heavyEvery, 2); assert.equal(b.stats.figure.hat, 'horns');
+    const s = g.start({ skin: 'brass', exhibit: 'beelzebub', weapon: 'sword', theme: 'hell', twist: 'second-wind', specials: true }); assert.equal(s.foe.maxHP, 380); assert.equal(s.special, 'double'); assert.equal(s.twist.id, 'second-wind');
+    const c = document.createElement('canvas'); c.width = 288; c.height = 162; const x = c.getContext('2d');
+    pix.drawArena(x, 1, 'hell'); pix.drawFigure(x, 200, 133, { pose: 'attack', progress: .5, figure: b.stats.figure, facing: -1 });
+    const d = x.getImageData(0, 118, 288, 12).data; let fire = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 220 && d[i + 1] > 100 && d[i + 2] < 120) fire++; assert.ok(fire > 40, `płomienie: ${fire}`);
+    assert.ok(window.MuseumArt.themes.hell && window.MuseumHall.trophies.some(tr => tr.level === 'hell'));
+  });
+})();
