@@ -363,3 +363,7 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 
 /* Okno losowania zawsze nad sklepem i kolekcją (oba to modale z z-index 50). */
 #loot.modal{z-index:70}
+
+/* Wpłaty: zapowiedź, bez doliczania. */
+.shop-deposit-btn,#shopDepositBtn{opacity:.6}
+.shop-deposit-btn:hover,#shopDepositBtn:hover{opacity:.85}
