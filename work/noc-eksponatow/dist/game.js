@@ -217,6 +217,13 @@
       damageFoe(amount);
       label(ranged ? 'CELNY STRZAŁ' : 'SŁABA GARDA', r.x - 80, FLOOR - 255, '#edc37d', 19);
       hint(ranged ? `Celny strzał! ${alias()} nie ma czym się zasłonić.` : `Słaba garda! Atakuj, dopóki ${alias()} odzyskuje siły.`, 1.5);
+    } else if ((r.state === 'windup' || r.state === 'strike') && w.pierce) {
+      // Experimental weapons burn straight through a raised guard: no parry, reduced but guaranteed damage.
+      r.defenseKind = 'guard';
+      const amount = Math.max(1, Math.ceil(w.weakGuardDamage * .6 * state.perk.stats.weakGuardDamageMultiplier));
+      damageFoe(amount); burst(r.x - 120, FLOOR - 160, '#9ff7ff', 16, .8);
+      label('PRZEPALONA GARDA', r.x - 95, FLOOR - 285, '#9ff7ff', 20);
+      hint(`Wiązka przechodzi przez gardę ${gen()}.`, 1.3);
     } else if (r.state === 'windup' && !r.heavy && state.elapsed >= r.poiseUntil && state.rng() < (ranged ? .75 : .55) * (1 - state.pressure * .85)) {
       // An early hit breaks the telegraph: the blow never comes. Heavy attacks and high-pressure halls hold their ground.
       r.defenseKind = 'guard';

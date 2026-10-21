@@ -66,6 +66,7 @@
   const byId = new Map(perks.map(perk => [perk.id, perk]));
   window.MuseumPerks = Object.freeze({
     get(id) { return byId.get(id) || perks[0]; },
-    all() { return perks; }
+    all() { return perks; },
+    register(definition) { if (byId.has(definition.id)) return byId.get(definition.id); const perk = Object.freeze({ ...definition, details: Object.freeze([...(definition.details || [])]), stats: Object.freeze({ ...baseline, ...definition.stats }) }); byId.set(perk.id, perk); return perk; }
   });
 })();

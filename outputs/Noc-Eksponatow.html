@@ -372,6 +372,14 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 /* Wpłaty: zapowiedź, bez doliczania. */
 .shop-deposit-btn,#shopDepositBtn{opacity:.6}
 .shop-deposit-btn:hover,#shopDepositBtn:hover{opacity:.85}
+
+/* Kod dostępu (ukryte pakiety) w oknie konta. */
+.secret-form{display:flex;gap:8px;align-items:flex-end;margin:18px 0 6px;padding-top:14px;border-top:1px dashed #34382c}
+.secret-form label{flex:1;display:flex;flex-direction:column;gap:5px}
+.secret-form label span{font-size:7px;letter-spacing:1.6px;color:var(--lime);font-weight:800}
+.secret-form input{width:100%;background:#0c130b;border:1px solid #34382c;color:var(--cream);padding:10px 12px;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+.secret-form .secondary-btn{min-height:40px;font-size:8px}
+.account-msg.error{color:#ff9d8e}
 </style>
 </head>
 <body>
@@ -518,6 +526,8 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
     <p id="accountTitle" class="account-title hidden"></p>
     <p id="accountRole" class="collection-footnote hidden"></p>
    </div>
+   <form id="secretForm" class="secret-form" novalidate><label><span>KOD DOSTĘPU</span><input id="secretCode" type="text" autocomplete="off" spellcheck="false" maxlength="64" placeholder="Masz kod? Wpisz go tutaj."></label><button id="secretSubmit" type="submit" class="secondary-btn">ODBLOKUJ</button></form>
+   <p id="secretMsg" class="account-msg" aria-live="polite"></p>
    <p id="accountMsg" class="account-msg" aria-live="polite"></p>
    <p id="accountOffline" class="collection-footnote hidden">Chmura nie jest jeszcze skonfigurowana (dist/config.js). Gra działa w trybie gościa.</p>
   </div>
@@ -843,7 +853,8 @@ window.MuseumConfig = Object.freeze({
   const byId = new Map(perks.map(perk => [perk.id, perk]));
   window.MuseumPerks = Object.freeze({
     get(id) { return byId.get(id) || perks[0]; },
-    all() { return perks; }
+    all() { return perks; },
+    register(definition) { if (byId.has(definition.id)) return byId.get(definition.id); const perk = Object.freeze({ ...definition, details: Object.freeze([...(definition.details || [])]), stats: Object.freeze({ ...baseline, ...definition.stats }) }); byId.set(perk.id, perk); return perk; }
   });
 })();
 </script><script>/* Weapons are data. Seven types set the rhythm, five eras sort them into crates, rarity nudges the damage.
@@ -866,8 +877,8 @@ window.MuseumConfig = Object.freeze({
     rifle:   { name: 'Karabiny i strzelby', stats: { ...ranged, range: 900, staminaCost: 8, swing: .5, contact: .22, cooldown: .7, weakGuardDamage: 18, ammo: 5, reload: 2.2 } }
   });
   const eras = Object.freeze({ antiquity: 'Starożytność', medieval: 'Średniowiecze', renaissance: 'Nowożytność', modern: 'Wiek XIX i XX', contemporary: 'Współczesność' });
-  const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3 };
-  const rarityLabel = { basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT' };
+  const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
+  const rarityLabel = { basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT', mythic: 'EKSPONAT EKSPERYMENTALNY' };
   // w(id, name, era, type, rarity, icon, flavour, overrides)
   const w = (id, name, era, type, rarity, icon, flavour, overrides = {}) => ({ id, name, categoryId: era, type, rarity, icon, flavour, overrides });
   const A = 'antiquity', M = 'medieval', R = 'renaissance', X = 'modern', C = 'contemporary';
@@ -1002,22 +1013,25 @@ window.MuseumConfig = Object.freeze({
     w('dragunov', 'DRAGUNOW SWD', C, 'rifle', 'legendary', 'sniper', 'Karabin wyborowy z lunetą. Dziesięć naboi, każdy w słabą gardę z drugiego końca sali.', { ammo: 10, reload: 2.4, weakGuardDamage: 22, range: 1000, cooldown: .9, swing: .6, contact: .3 }),
     w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 })
   ];
-  const weapons = Object.freeze(definitions.map(d => {
+  function build(d) {
     const type = types[d.type], merged = { ...baseline, ...type.stats, ...d.overrides };
     merged.parryReflect = Object.freeze({ ...baseline.parryReflect, ...(type.stats.parryReflect || {}), ...(d.overrides.parryReflect || {}) });
     merged.weakGuardDamage += rarityBonus[d.rarity] || 0;
     const shots = merged.kind === 'ranged' ? `${merged.ammo} ${merged.ammo === 1 ? 'strzał' : merged.ammo < 5 ? 'strzały' : 'strzałów'}, przeładowanie ${merged.reload.toLocaleString('pl-PL')} s. ` : '';
     const summary = `${type.name}. ${merged.weakGuardDamage} obrażeń w słabą gardę${merged.comboBonus ? `, +${merged.comboBonus} od ${merged.comboAt}. ciosu` : ''}. ${shots}Zasięg ${merged.range}.`;
     return Object.freeze({ id: d.id, name: d.name, era: `${eras[d.categoryId].toUpperCase()} · ${rarityLabel[d.rarity]}`, categoryId: d.categoryId, type: d.type, typeName: type.name, rarity: d.rarity, icon: d.icon,
-      summary, details: Object.freeze([d.flavour]), stats: Object.freeze(merged) });
-  }));
+      summary, details: Object.freeze([d.flavour]), stats: Object.freeze(merged), ...(d.sprite ? { sprite: d.sprite } : {}), ...(d.palette ? { palette: d.palette } : {}), ...(d.glow ? { glow: true } : {}), ...(d.hidden ? { hidden: true } : {}) });
+  }
+  const weapons = definitions.map(build);   // mutable: hidden packs register more at runtime
   const byId = new Map(weapons.map(weapon => [weapon.id, weapon]));
   if (byId.size !== weapons.length) throw new Error('weapons.js: powtórzone id');
   window.MuseumWeapons = Object.freeze({
     baseline, types, eras,
     get(id) { return byId.get(id) || weapons[0]; },
     has(id) { return byId.has(id); },
-    all() { return weapons; }
+    all() { return weapons; },
+    // Hidden packs (secret.js) add weapons after a code is entered. Same build as the catalogue; duplicates are ignored.
+    register(d) { if (byId.has(d.id)) return byId.get(d.id); const weapon = build({ ...d, hidden: true }); weapons.push(weapon); byId.set(weapon.id, weapon); return weapon; }
   });
 })();
 </script><script>/* Limited weapon finishes: cosmetic coats that re-colour any weapon in hand and in the collection.
@@ -2511,12 +2525,14 @@ window.MuseumConfig = Object.freeze({
     shield: [".OOOOOOO.", "OGBBBBBGO", "OBBCCCBBO", "OBCCGCCBO", "OBCCGCCBO", "OBBCCCBBO", "OBBBBBBBO", ".OBBBBBO.", "..OBBBO..", "...OOO..."],
     cape: ["CCCCCC", "CCCCCCC", "cCCCCCCC", "cCCCCCCC", "ccCCCCCC", "ccCCCCCC", "cccCCCCC", "cccCCCCC", "ccccCCCC", "ccccCCCC", "cccccCCC", "cccccCCC", "ccccccCC", "ccccccCC", "cccccccC", "cccccccC", "ccccccc.", "cccccc..", "ccccc...", "cccc...."]
   };
+  const extraPalettes = {};   // knight palettes added by hidden packs: [base, dark, light, glint, cloth, clothDark]
   function knightPalette(skin) {
     let base = '#687b7e', dark = '#172b36', light = '#bad2c8', glint = '#e5dfab', cloth = ['#581e32', '#26182b'];
     const special = { brass: ['#947247', '#302b29', '#d9b773', '#ffe1a0', '#581e32', '#26182b'], frost: ['#6c9ca5', '#193747', '#c5f6ed', '#e5ffff', '#35708a', '#16293e'], obsidian: ['#353d55', '#111a29', '#9c8bc1', '#d7b4ff', '#4d2f62', '#1b162a'],
       verdigris: ['#4a947b', '#152f29', '#b8dfad', '#e5ffc5', '#22624e', '#12291f'], ember: ['#a54e37', '#351b24', '#ffc187', '#fff1b7', '#a43127', '#36151d'], royal: ['#67528b', '#211c3c', '#dbb9ef', '#ffebff', '#62408a', '#241637'], solar: ['#b7953c', '#3e321b', '#fff0ac', '#ffffe1', '#b28c38', '#44311e'],
       'stachu-jones': ['#77858b', '#263742', '#c6d1cc', '#dfe8e2', '#18283f', '#0d192b'], 'jan-pawel-ii': ['#f4f1e8', '#5a5046', '#ffffff', '#ffe9a8', '#b3202a', '#7a1119'] }[skin];
-    if (special) [base, dark, light, glint, cloth[0], cloth[1]] = special;
+    const registered = extraPalettes[skin];
+    if (registered) [base, dark, light, glint, cloth[0], cloth[1]] = registered; else if (special) [base, dark, light, glint, cloth[0], cloth[1]] = special;
     const look = window.MuseumKnights?.skins?.find(s => s.id === skin);
     if (look) { base = look.colors[0]; dark = mix(base, '#07111c', .7); light = mix(base, '#f3f5e7', .5); glint = look.colors[3] || mix(look.colors[2], '#fff9e4', .55); cloth = [look.colors[1], mix(look.colors[1], '#071016', .6)]; }
     return { O: mix(dark, '#000000', .55), B: base, D: dark, L: light, G: '#c9a94a', C: cloth[0], c: cloth[1], K: '#0c2530', E: '#b7f9d5', W: '#f5f6d3' };
@@ -2574,8 +2590,8 @@ window.MuseumConfig = Object.freeze({
     const oy = -35 - bob;
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(popeParts.armBack, 4, 12);
-    const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };
+    const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type, held = wdef?.sprite && human.weapons[wdef.sprite] ? human.weapons[wdef.sprite] : wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
     // The cassock reaches the shoes: a long skirt instead of greaves, shoes peeking out underneath.
@@ -2604,8 +2620,8 @@ window.MuseumConfig = Object.freeze({
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
-    const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
+    const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type, held = wdef?.sprite && human.weapons[wdef.sprite] ? human.weapons[wdef.sprite] : wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
     const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
@@ -2855,7 +2871,7 @@ window.MuseumConfig = Object.freeze({
     pump: ["........................", "........................", "..........OOOOOOOOOOOOO.", ".OOOOOOOOOMMMMMWWWWWWWMO", "ODDDDDDDOOMMMMDDDDDDMMMO", "ODDDDDDOSSSSSSDDDDDDOOO.", ".OOOOOOOSSOOOOOOOOOOO...", "......OSSO.OSO..........", "......OOO..OOO..........", "........................", "........................", "........................", "........................", "........................"],
     blunderbuss: ["........................", "........................", "...................OOO..", "..........OOOOOOOOOGGGO.", "......OOOOMMMWWWWWWGGGGO", ".OOOOODDDDMMMMMMMMMGGGGO", "ODDDDDDDDDDOOOOOOOOGGGO.", "ODDDDDDDDOOOOSO....OOO..", "ODDDDDOOO...OO..........", ".OOOOO..................", "........................", "........................", "........................", "........................"]
   };
-  const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72' };
+  const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72', mythic: '#7ff0e0' };
   // Finish overlay: per-pixel colours from MuseumFinishes (sparkles, veins, holographic bands) on top of the recoloured sprite.
   function finishPass(c, rows, x, y, finish, time) {
     const F = window.MuseumFinishes; if (!F || !finish) return;
@@ -2864,7 +2880,7 @@ window.MuseumConfig = Object.freeze({
   function drawWeaponIcon(c, weapon, x, y, scale = 1, o = {}) {
     const rows = I[weapon?.icon] || I.sword, tint = rarityTint[weapon?.rarity] || '#c9d6dc';
     const fin = o.finish ? window.MuseumFinishes?.palette(o.finish, o.time || 0) : null;
-    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37', ...(fin || {}) };
+    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37', ...(weapon?.palette || {}), ...(weapon?.glow ? { L: mix(weapon.palette?.L || '#6ff6ff', '#ffffff', (Math.sin((o.time || 0) * 7) + 1) / 4) } : {}), ...(fin || {}) };
     const w = rows[0].length, h = rows.length, s = w > 16 ? Math.max(1, Math.floor(scale * 16 / w)) : scale;   // wide gun glyphs shrink to an integer factor
     const ox = Math.round((16 * scale - w * s) / 2), oy = Math.round((16 * scale - h * s) / 2);                  // ...and sit centred in the 16-unit box callers expect
     c.save(); c.translate(x + ox, y + oy); c.scale(s, s); blit(c, rows, 0, 0, pal); if (fin) finishPass(c, rows, 0, 0, o.finish, o.time || 0); c.restore();
@@ -2931,7 +2947,9 @@ window.MuseumConfig = Object.freeze({
     }
     c.restore();
   }
-  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, drawGuardRoom, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
+  // Hidden packs register their art at runtime: a 24-wide icon, an in-hand sprite (hold/fwd rows) and a knight palette.
+  const registerArt = ({ icons = {}, held = {}, palettes = {} } = {}) => { for (const [k, rows] of Object.entries(icons)) I[k] = rows; for (const [k, v] of Object.entries(held)) human.weapons[k] = v; for (const [k, v] of Object.entries(palettes)) extraPalettes[k] = v; };
+  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, drawGuardRoom, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, registerArt, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();
 </script><script>/* Noc Eksponatów — two-fighter canvas combat. No external runtime.
    The knight's weapon (MuseumWeapons) and the opponent (MuseumExhibits) are data; this file is the rhythm. */
@@ -3152,6 +3170,13 @@ window.MuseumConfig = Object.freeze({
       damageFoe(amount);
       label(ranged ? 'CELNY STRZAŁ' : 'SŁABA GARDA', r.x - 80, FLOOR - 255, '#edc37d', 19);
       hint(ranged ? `Celny strzał! ${alias()} nie ma czym się zasłonić.` : `Słaba garda! Atakuj, dopóki ${alias()} odzyskuje siły.`, 1.5);
+    } else if ((r.state === 'windup' || r.state === 'strike') && w.pierce) {
+      // Experimental weapons burn straight through a raised guard: no parry, reduced but guaranteed damage.
+      r.defenseKind = 'guard';
+      const amount = Math.max(1, Math.ceil(w.weakGuardDamage * .6 * state.perk.stats.weakGuardDamageMultiplier));
+      damageFoe(amount); burst(r.x - 120, FLOOR - 160, '#9ff7ff', 16, .8);
+      label('PRZEPALONA GARDA', r.x - 95, FLOOR - 285, '#9ff7ff', 20);
+      hint(`Wiązka przechodzi przez gardę ${gen()}.`, 1.3);
     } else if (r.state === 'windup' && !r.heavy && state.elapsed >= r.poiseUntil && state.rng() < (ranged ? .75 : .55) * (1 - state.pressure * .85)) {
       // An early hit breaks the telegraph: the blow never comes. Heavy attacks and high-pressure halls hold their ground.
       r.defenseKind = 'guard';
@@ -3764,7 +3789,7 @@ window.MuseumConfig = Object.freeze({
   legendary: {name:'LEGENDARNY',color:'#f0ca72'},
   mythic: {name:'MITYCZNY',color:'#7ff0e0'}
  });
- const skins = Object.freeze([
+ const skins = [
   {id:'brass',name:'STARA GWARDIA',era:'STAL · KOLEKCJA PODSTAWOWA',rarity:'basic',weight:0},
   {id:'stachu-jones',name:'Stachu Jones',era:'EKSPONAT SPECJALNY · PREZENT DLA CIEBIE',description:'Siwy wąs, granatowy płaszcz i kosa. Rycerz ostatniego obchodu.',rarity:'legendary',weight:0,gift:true},
   {id:'jan-pawel-ii',name:'Jan Paweł II',era:'EKSPONAT SPECJALNY · PREZENT DLA CIEBIE',description:'Biała sutanna, czerwona mucet i złoty krzyż. Papież Polak na nocnym obchodzie.',rarity:'legendary',weight:0,gift:true},
@@ -3775,17 +3800,25 @@ window.MuseumConfig = Object.freeze({
   {id:'royal',name:'KRÓLEWSKA WARTA',era:'AMETYST · EPICKI EKSPONAT',rarity:'epic',weight:15},
   {id:'solar',name:'SŁONECZNY PALADYN',era:'ZŁOTO · LEGENDARNY EKSPONAT',rarity:'legendary',weight:10},
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
- ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
+ ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
  // One catalogue for everything a crate can drop or a player can sell.
  const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
  const SELL_RATE=.4, UPGRADE_MAX=5;
- const items=Object.freeze([
+ const weaponItem=w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'||w.hidden?0:rarityWeights[w.rarity],categoryId:w.categoryId,...(w.hidden?{hidden:true,gift:true}:{})});
+ const items=[
   ...skins.map(skin=>({kind:'skin',...skin})),
-  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
+  ...weaponsApi.all().map(weaponItem),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
   ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
- ].map(Object.freeze));
+ ].map(Object.freeze);
  const itemsById=new Map(items.map(item=>[item.id,item]));
+ // Hidden packs: a weapon or skin registered after the catalogue was built. Weight 0 keeps them out of every crate; gift keeps them unsellable and auto-owned once unlocked.
+ function register(pack){
+  const added=[];
+  for(const w of pack.weapons||[]){if(itemsById.has(w.id))continue;const weapon=weaponsApi.register(w);const item=Object.freeze(weaponItem(weapon));items.push(item);itemsById.set(item.id,item);added.push(item);}
+  for(const sk of pack.skins||[]){if(itemsById.has(sk.id))continue;const skin=Object.freeze({id:sk.id,name:sk.name,era:sk.era||'EKSPONAT EKSPERYMENTALNY · ODBLOKOWANY KODEM',description:sk.description||'',rarity:sk.rarity||'mythic',weight:0,gift:true,hidden:true,categoryId:'special'});skins.push(skin);const item=Object.freeze({kind:'skin',...skin});items.push(item);itemsById.set(item.id,item);added.push(item);}
+  return added;
+ }
  function getItem(id){return itemsById.get(id)||null;}
  function value(item){const it=typeof item==='string'?getItem(item):item;return it&&!it.gift?values[it.rarity]||0:0;}
  function sellPrice(item){return Math.floor(value(item)*SELL_RATE);}
@@ -3819,6 +3852,7 @@ window.MuseumConfig = Object.freeze({
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
+   secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
  }
@@ -3932,7 +3966,57 @@ window.MuseumConfig = Object.freeze({
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+})();
+</script><script>/* Hidden packs. Each pack is an AES-GCM blob whose key comes from an access code (PBKDF2). Without the code the source
+   holds only ciphertext: no names, stats or art. A correct code decrypts the pack and registers its weapons, skins, art
+   and perks in the live catalogues; the code is kept in the profile so the pack unlocks again on the next visit. */
+(() => {
+  'use strict';
+  const PACKS = [
+    {"id":"x1","hash":"409e818eef636bbfa3deeda361332e61d9545b2281b16b81dbb47d5f0d1d4a51","salt":"pjLvtPy417NPQZT/ody5sA==","iv":"zT5eGltEHbkxqZ8Q","data":"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"}
+  ];
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const norm = code => String(code || '').trim().toUpperCase().replace(/\s+/g, '');
+  const b64 = { to: bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))), from: text => Uint8Array.from(atob(text), ch => ch.charCodeAt(0)) };
+  const hex = bytes => [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, '0')).join('');
+  const subtle = () => (window.crypto && window.crypto.subtle) || null;
+  async function digest(code) { return hex(await subtle().digest('SHA-256', enc.encode(norm(code)))); }
+  async function keyFor(code, salt) {
+    const base = await subtle().importKey('raw', enc.encode(norm(code)), 'PBKDF2', false, ['deriveKey']);
+    return subtle().deriveKey({ name: 'PBKDF2', salt, iterations: 120000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function encrypt(code, pack) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await keyFor(code, salt);
+    const data = await subtle().encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(pack)));
+    return { id: pack.id, hash: await digest(code), salt: b64.to(salt), iv: b64.to(iv), data: b64.to(data) };
+  }
+  async function decrypt(code, blob) {
+    const key = await keyFor(code, b64.from(blob.salt));
+    const plain = await subtle().decrypt({ name: 'AES-GCM', iv: b64.from(blob.iv) }, key, b64.from(blob.data));
+    return JSON.parse(dec.decode(plain));
+  }
+  const unlocked = new Map();   // pack id -> { pack, items }
+  function apply(pack) {
+    if (unlocked.has(pack.id)) return unlocked.get(pack.id);
+    window.MuseumPixel?.registerArt?.(pack.art || {});
+    for (const perk of pack.perks || []) window.MuseumPerks?.register?.(perk);
+    const items = window.MuseumLoot.register({ weapons: pack.weapons || [], skins: pack.skins || [] });
+    const entry = { pack, items }; unlocked.set(pack.id, entry); return entry;
+  }
+  // Try a code against every pack. Resolves { ok, pack, items, already } or { ok: false, reason }.
+  async function unlock(code, packs = PACKS) {
+    if (!subtle()) return { ok: false, reason: 'crypto' };
+    const clean = norm(code); if (!clean) return { ok: false, reason: 'empty' };
+    const hash = await digest(clean), blob = packs.find(p => p.hash === hash);
+    if (!blob) return { ok: false, reason: 'unknown' };
+    if (unlocked.has(blob.id)) return { ok: true, already: true, ...unlocked.get(blob.id) };
+    try { const pack = await decrypt(clean, blob); return { ok: true, already: false, ...apply(pack) }; }
+    catch (_) { return { ok: false, reason: 'corrupt' }; }
+  }
+  async function restore(codes) { const out = []; for (const code of codes || []) { const r = await unlock(code); if (r.ok) out.push(r); } return out; }
+  window.MuseumSecret = Object.freeze({ unlock, restore, norm, count: () => PACKS.length, unlockedIds: () => [...unlocked.keys()], _test: { encrypt, digest, apply } });
 })();
 </script><script>/* Store preview. PLN prices are a catalogue only; earned tokens open crates in the collection. */
 (() => {
@@ -4344,7 +4428,14 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me);show('accountUser',!!me);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me){cloudRole='player';cloudTitle=null;}const tt=cloud.titles?.[cloudTitle];show('accountTitle',!!me&&!!tt);if(me&&tt){$('accountTitle').textContent=`${tt.name} · ${tt.note}`;$('accountTitle').style.color=tt.color;}
   $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
  function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
- function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();}
+ function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();applySecrets();}
+ // Hidden packs: codes stored in the profile unlock their content again on every load; a newly entered code adds it.
+ async function applySecrets(){const secret=window.MuseumSecret;if(!secret||!profile.secrets?.length)return;const results=await secret.restore(profile.secrets);if(results.length){profile=loot.migrate({...profile,weapons:[...profile.weapons,...results.flatMap(r=>r.items.filter(i=>i.kind==='weapon').map(i=>i.id))]});persist();refreshStores();}}
+ async function enterSecret(code){const secret=window.MuseumSecret;const msg=$('secretMsg');if(!secret){msg.textContent='Kody dostępu nie są dostępne w tej przeglądarce.';return;}const r=await secret.unlock(code);
+  if(!r.ok){msg.textContent=r.reason==='empty'?'Wpisz kod.':r.reason==='crypto'?'Ta przeglądarka nie obsługuje szyfrowania.':'Nieznany kod.';msg.classList.add('error');return;}
+  msg.classList.remove('error');const clean=secret.norm(code);const names=r.items.map(i=>i.name).join(', ');
+  if(!profile.secrets.includes(clean))profile=loot.migrate({...profile,secrets:[...profile.secrets,clean],weapons:[...profile.weapons,...r.items.filter(i=>i.kind==='weapon').map(i=>i.id)]});
+  persist();refreshStores();updateLoadout();$('secretCode').value='';msg.textContent=r.already?`Ten pakiet jest już odblokowany: ${names}.`:`Odblokowano: ${names}. Znajdziesz je w kolekcji.`;toast(r.already?'Pakiet już odblokowany.':`Odblokowano: ${names}.`);}
  // Maintenance mode: an admin flips one setting; players get a full-screen stop (the game is paused and every panel closed),
  // moderators keep playing behind a red banner. Arrives live over Realtime, with the 15 s poll as backup.
  let maintenance={enabled:false,message:''};
@@ -4562,6 +4653,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  for(const category of [{id:'all',name:'Wszystkie kategorie'},...loot.categories]){const option=document.createElement('option');option.value=category.id;option.textContent=category.name;$('categoryFilter').append(option);}
  $('categoryFilter').value='all';
  window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,onBuyFinish:buyFinish,notify:toast});
+ $('secretForm').addEventListener('submit',event=>{event.preventDefault();enterSecret($('secretCode').value);});
  $('shopTab').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountModBtn').addEventListener('click',moderation);$('modRefresh').addEventListener('click',renderModeration);$('modSearch').addEventListener('submit',e=>{e.preventDefault();renderModeration();});$('modMaintenanceOn').addEventListener('click',()=>{if(!window.confirm('Włączyć tryb serwisowy? Wszyscy gracze poza moderatorami zobaczą ekran serwisowy i nie zagrają.'))return;setMaintenance(true);});$('modMaintenanceOff').addEventListener('click',()=>setMaintenance(false));$('maintenanceLoginBtn').addEventListener('click',maintenanceLogin);$('modAnnounce').addEventListener('submit',async e=>{e.preventDefault();const body=$('modAnnounceText').value.trim();if(!body){modMessage('Wpisz treść ogłoszenia.',true);return;}const r=await cloud.mod.announce(body,$('modAnnounceKind').value,Number($('modAnnounceSeconds').value)||60);if(!r.ok){modMessage(r.error,true);return;}$('modAnnounceText').value='';modMessage('Ogłoszenie wysłane do wszystkich graczy.');renderAnnouncements();});$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
  $('skinSearch').addEventListener('input',changeCollectionFilter);$('categoryFilter').addEventListener('change',changeCollectionFilter);$('rarityFilter').addEventListener('change',changeCollectionFilter);$('ownershipFilter').addEventListener('change',changeCollectionFilter);
  $('newSkinsOnly').addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionFilters.newOnly=!collectionFilters.newOnly;collectionPage=0;renderSkins();});
@@ -4600,7 +4692,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
    if(['menu','intro','card','timejump','ending','result'].includes(screen))renderScene(now/1000);}requestAnimationFrame(loop);}
  const daily=cloud.user()?null:loot.dailyBonus(profile);if(daily){profile=daily.profile;}
  function renderDaily(){const streak=profile.login?.streak||0;$('dailyLine').textContent=streak?`SERIA LOGOWAŃ: ${streak} ${streak===1?'DZIEŃ':'DNI'} · JUTRO +${Math.min(300,50+streak*25)} ✦`:'';show('dailyLine',streak>0);}
- persist();pixelUI();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
+ persist();pixelUI();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');applySecrets();if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
  // Fit the stage to the window: the frame shrinks to the free height (top bar + section line + controls take --chrome),
  // and the in-frame UI zooms by the ratio of the frame to the full content width, so nothing is ever clipped.
  function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(1,frame.clientWidth/Math.max(1,parent.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}

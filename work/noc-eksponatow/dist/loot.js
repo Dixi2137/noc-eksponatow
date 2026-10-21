@@ -168,7 +168,7 @@
   legendary: {name:'LEGENDARNY',color:'#f0ca72'},
   mythic: {name:'MITYCZNY',color:'#7ff0e0'}
  });
- const skins = Object.freeze([
+ const skins = [
   {id:'brass',name:'STARA GWARDIA',era:'STAL · KOLEKCJA PODSTAWOWA',rarity:'basic',weight:0},
   {id:'stachu-jones',name:'Stachu Jones',era:'EKSPONAT SPECJALNY · PREZENT DLA CIEBIE',description:'Siwy wąs, granatowy płaszcz i kosa. Rycerz ostatniego obchodu.',rarity:'legendary',weight:0,gift:true},
   {id:'jan-pawel-ii',name:'Jan Paweł II',era:'EKSPONAT SPECJALNY · PREZENT DLA CIEBIE',description:'Biała sutanna, czerwona mucet i złoty krzyż. Papież Polak na nocnym obchodzie.',rarity:'legendary',weight:0,gift:true},
@@ -179,17 +179,25 @@
   {id:'royal',name:'KRÓLEWSKA WARTA',era:'AMETYST · EPICKI EKSPONAT',rarity:'epic',weight:15},
   {id:'solar',name:'SŁONECZNY PALADYN',era:'ZŁOTO · LEGENDARNY EKSPONAT',rarity:'legendary',weight:10},
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
- ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)})));
+ ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
  // One catalogue for everything a crate can drop or a player can sell.
  const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
  const SELL_RATE=.4, UPGRADE_MAX=5;
- const items=Object.freeze([
+ const weaponItem=w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'||w.hidden?0:rarityWeights[w.rarity],categoryId:w.categoryId,...(w.hidden?{hidden:true,gift:true}:{})});
+ const items=[
   ...skins.map(skin=>({kind:'skin',...skin})),
-  ...weaponsApi.all().map(w=>({kind:'weapon',id:w.id,name:w.name,era:w.era,rarity:w.rarity,icon:w.icon,type:w.type,typeName:w.typeName,summary:w.summary,description:(w.details&&w.details[0])||w.summary,weight:w.rarity==='basic'?0:rarityWeights[w.rarity],categoryId:w.categoryId})),
+  ...weaponsApi.all().map(weaponItem),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
   ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
- ].map(Object.freeze));
+ ].map(Object.freeze);
  const itemsById=new Map(items.map(item=>[item.id,item]));
+ // Hidden packs: a weapon or skin registered after the catalogue was built. Weight 0 keeps them out of every crate; gift keeps them unsellable and auto-owned once unlocked.
+ function register(pack){
+  const added=[];
+  for(const w of pack.weapons||[]){if(itemsById.has(w.id))continue;const weapon=weaponsApi.register(w);const item=Object.freeze(weaponItem(weapon));items.push(item);itemsById.set(item.id,item);added.push(item);}
+  for(const sk of pack.skins||[]){if(itemsById.has(sk.id))continue;const skin=Object.freeze({id:sk.id,name:sk.name,era:sk.era||'EKSPONAT EKSPERYMENTALNY · ODBLOKOWANY KODEM',description:sk.description||'',rarity:sk.rarity||'mythic',weight:0,gift:true,hidden:true,categoryId:'special'});skins.push(skin);const item=Object.freeze({kind:'skin',...skin});items.push(item);itemsById.set(item.id,item);added.push(item);}
+  return added;
+ }
  function getItem(id){return itemsById.get(id)||null;}
  function value(item){const it=typeof item==='string'?getItem(item):item;return it&&!it.gift?values[it.rarity]||0:0;}
  function sellPrice(item){return Math.floor(value(item)*SELL_RATE);}
@@ -223,6 +231,7 @@
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
+   secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
  }
@@ -336,5 +345,5 @@
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();

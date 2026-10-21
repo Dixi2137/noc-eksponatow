@@ -367,3 +367,11 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 /* Wpłaty: zapowiedź, bez doliczania. */
 .shop-deposit-btn,#shopDepositBtn{opacity:.6}
 .shop-deposit-btn:hover,#shopDepositBtn:hover{opacity:.85}
+
+/* Kod dostępu (ukryte pakiety) w oknie konta. */
+.secret-form{display:flex;gap:8px;align-items:flex-end;margin:18px 0 6px;padding-top:14px;border-top:1px dashed #34382c}
+.secret-form label{flex:1;display:flex;flex-direction:column;gap:5px}
+.secret-form label span{font-size:7px;letter-spacing:1.6px;color:var(--lime);font-weight:800}
+.secret-form input{width:100%;background:#0c130b;border:1px solid #34382c;color:var(--cream);padding:10px 12px;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+.secret-form .secondary-btn{min-height:40px;font-size:8px}
+.account-msg.error{color:#ff9d8e}

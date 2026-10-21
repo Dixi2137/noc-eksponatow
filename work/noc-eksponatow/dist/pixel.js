@@ -244,12 +244,14 @@
     shield: [".OOOOOOO.", "OGBBBBBGO", "OBBCCCBBO", "OBCCGCCBO", "OBCCGCCBO", "OBBCCCBBO", "OBBBBBBBO", ".OBBBBBO.", "..OBBBO..", "...OOO..."],
     cape: ["CCCCCC", "CCCCCCC", "cCCCCCCC", "cCCCCCCC", "ccCCCCCC", "ccCCCCCC", "cccCCCCC", "cccCCCCC", "ccccCCCC", "ccccCCCC", "cccccCCC", "cccccCCC", "ccccccCC", "ccccccCC", "cccccccC", "cccccccC", "ccccccc.", "cccccc..", "ccccc...", "cccc...."]
   };
+  const extraPalettes = {};   // knight palettes added by hidden packs: [base, dark, light, glint, cloth, clothDark]
   function knightPalette(skin) {
     let base = '#687b7e', dark = '#172b36', light = '#bad2c8', glint = '#e5dfab', cloth = ['#581e32', '#26182b'];
     const special = { brass: ['#947247', '#302b29', '#d9b773', '#ffe1a0', '#581e32', '#26182b'], frost: ['#6c9ca5', '#193747', '#c5f6ed', '#e5ffff', '#35708a', '#16293e'], obsidian: ['#353d55', '#111a29', '#9c8bc1', '#d7b4ff', '#4d2f62', '#1b162a'],
       verdigris: ['#4a947b', '#152f29', '#b8dfad', '#e5ffc5', '#22624e', '#12291f'], ember: ['#a54e37', '#351b24', '#ffc187', '#fff1b7', '#a43127', '#36151d'], royal: ['#67528b', '#211c3c', '#dbb9ef', '#ffebff', '#62408a', '#241637'], solar: ['#b7953c', '#3e321b', '#fff0ac', '#ffffe1', '#b28c38', '#44311e'],
       'stachu-jones': ['#77858b', '#263742', '#c6d1cc', '#dfe8e2', '#18283f', '#0d192b'], 'jan-pawel-ii': ['#f4f1e8', '#5a5046', '#ffffff', '#ffe9a8', '#b3202a', '#7a1119'] }[skin];
-    if (special) [base, dark, light, glint, cloth[0], cloth[1]] = special;
+    const registered = extraPalettes[skin];
+    if (registered) [base, dark, light, glint, cloth[0], cloth[1]] = registered; else if (special) [base, dark, light, glint, cloth[0], cloth[1]] = special;
     const look = window.MuseumKnights?.skins?.find(s => s.id === skin);
     if (look) { base = look.colors[0]; dark = mix(base, '#07111c', .7); light = mix(base, '#f3f5e7', .5); glint = look.colors[3] || mix(look.colors[2], '#fff9e4', .55); cloth = [look.colors[1], mix(look.colors[1], '#071016', .6)]; }
     return { O: mix(dark, '#000000', .55), B: base, D: dark, L: light, G: '#c9a94a', C: cloth[0], c: cloth[1], K: '#0c2530', E: '#b7f9d5', W: '#f5f6d3' };
@@ -307,8 +309,8 @@
     const oy = -35 - bob;
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(popeParts.armBack, 4, 12);
-    const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };
+    const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type, held = wdef?.sprite && human.weapons[wdef.sprite] ? human.weapons[wdef.sprite] : wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
     // The cassock reaches the shoes: a long skirt instead of greaves, shoes peeking out underneath.
@@ -337,8 +339,8 @@
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
-    const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
+    const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type, held = wdef?.sprite && human.weapons[wdef.sprite] ? human.weapons[wdef.sprite] : wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
     const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
@@ -588,7 +590,7 @@
     pump: ["........................", "........................", "..........OOOOOOOOOOOOO.", ".OOOOOOOOOMMMMMWWWWWWWMO", "ODDDDDDDOOMMMMDDDDDDMMMO", "ODDDDDDOSSSSSSDDDDDDOOO.", ".OOOOOOOSSOOOOOOOOOOO...", "......OSSO.OSO..........", "......OOO..OOO..........", "........................", "........................", "........................", "........................", "........................"],
     blunderbuss: ["........................", "........................", "...................OOO..", "..........OOOOOOOOOGGGO.", "......OOOOMMMWWWWWWGGGGO", ".OOOOODDDDMMMMMMMMMGGGGO", "ODDDDDDDDDDOOOOOOOOGGGO.", "ODDDDDDDDOOOOSO....OOO..", "ODDDDDOOO...OO..........", ".OOOOO..................", "........................", "........................", "........................", "........................"]
   };
-  const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72' };
+  const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72', mythic: '#7ff0e0' };
   // Finish overlay: per-pixel colours from MuseumFinishes (sparkles, veins, holographic bands) on top of the recoloured sprite.
   function finishPass(c, rows, x, y, finish, time) {
     const F = window.MuseumFinishes; if (!F || !finish) return;
@@ -597,7 +599,7 @@
   function drawWeaponIcon(c, weapon, x, y, scale = 1, o = {}) {
     const rows = I[weapon?.icon] || I.sword, tint = rarityTint[weapon?.rarity] || '#c9d6dc';
     const fin = o.finish ? window.MuseumFinishes?.palette(o.finish, o.time || 0) : null;
-    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37', ...(fin || {}) };
+    const pal = { O: '#141216', M: mix(tint, '#5a6a70', .35), W: mix(tint, '#ffffff', .5), S: mix(tint, '#101418', .5), D: '#8a6a42', G: '#d4af37', ...(weapon?.palette || {}), ...(weapon?.glow ? { L: mix(weapon.palette?.L || '#6ff6ff', '#ffffff', (Math.sin((o.time || 0) * 7) + 1) / 4) } : {}), ...(fin || {}) };
     const w = rows[0].length, h = rows.length, s = w > 16 ? Math.max(1, Math.floor(scale * 16 / w)) : scale;   // wide gun glyphs shrink to an integer factor
     const ox = Math.round((16 * scale - w * s) / 2), oy = Math.round((16 * scale - h * s) / 2);                  // ...and sit centred in the 16-unit box callers expect
     c.save(); c.translate(x + ox, y + oy); c.scale(s, s); blit(c, rows, 0, 0, pal); if (fin) finishPass(c, rows, 0, 0, o.finish, o.time || 0); c.restore();
@@ -664,5 +666,7 @@
     }
     c.restore();
   }
-  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, drawGuardRoom, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
+  // Hidden packs register their art at runtime: a 24-wide icon, an in-hand sprite (hold/fwd rows) and a knight palette.
+  const registerArt = ({ icons = {}, held = {}, palettes = {} } = {}) => { for (const [k, rows] of Object.entries(icons)) I[k] = rows; for (const [k, v] of Object.entries(held)) human.weapons[k] = v; for (const [k, v] of Object.entries(palettes)) extraPalettes[k] = v; };
+  window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, drawGuardRoom, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, registerArt, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();

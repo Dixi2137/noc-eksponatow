@@ -18,8 +18,8 @@
     rifle:   { name: 'Karabiny i strzelby', stats: { ...ranged, range: 900, staminaCost: 8, swing: .5, contact: .22, cooldown: .7, weakGuardDamage: 18, ammo: 5, reload: 2.2 } }
   });
   const eras = Object.freeze({ antiquity: 'Starożytność', medieval: 'Średniowiecze', renaissance: 'Nowożytność', modern: 'Wiek XIX i XX', contemporary: 'Współczesność' });
-  const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3 };
-  const rarityLabel = { basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT' };
+  const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
+  const rarityLabel = { basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT', mythic: 'EKSPONAT EKSPERYMENTALNY' };
   // w(id, name, era, type, rarity, icon, flavour, overrides)
   const w = (id, name, era, type, rarity, icon, flavour, overrides = {}) => ({ id, name, categoryId: era, type, rarity, icon, flavour, overrides });
   const A = 'antiquity', M = 'medieval', R = 'renaissance', X = 'modern', C = 'contemporary';
@@ -154,21 +154,24 @@
     w('dragunov', 'DRAGUNOW SWD', C, 'rifle', 'legendary', 'sniper', 'Karabin wyborowy z lunetą. Dziesięć naboi, każdy w słabą gardę z drugiego końca sali.', { ammo: 10, reload: 2.4, weakGuardDamage: 22, range: 1000, cooldown: .9, swing: .6, contact: .3 }),
     w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 })
   ];
-  const weapons = Object.freeze(definitions.map(d => {
+  function build(d) {
     const type = types[d.type], merged = { ...baseline, ...type.stats, ...d.overrides };
     merged.parryReflect = Object.freeze({ ...baseline.parryReflect, ...(type.stats.parryReflect || {}), ...(d.overrides.parryReflect || {}) });
     merged.weakGuardDamage += rarityBonus[d.rarity] || 0;
     const shots = merged.kind === 'ranged' ? `${merged.ammo} ${merged.ammo === 1 ? 'strzał' : merged.ammo < 5 ? 'strzały' : 'strzałów'}, przeładowanie ${merged.reload.toLocaleString('pl-PL')} s. ` : '';
     const summary = `${type.name}. ${merged.weakGuardDamage} obrażeń w słabą gardę${merged.comboBonus ? `, +${merged.comboBonus} od ${merged.comboAt}. ciosu` : ''}. ${shots}Zasięg ${merged.range}.`;
     return Object.freeze({ id: d.id, name: d.name, era: `${eras[d.categoryId].toUpperCase()} · ${rarityLabel[d.rarity]}`, categoryId: d.categoryId, type: d.type, typeName: type.name, rarity: d.rarity, icon: d.icon,
-      summary, details: Object.freeze([d.flavour]), stats: Object.freeze(merged) });
-  }));
+      summary, details: Object.freeze([d.flavour]), stats: Object.freeze(merged), ...(d.sprite ? { sprite: d.sprite } : {}), ...(d.palette ? { palette: d.palette } : {}), ...(d.glow ? { glow: true } : {}), ...(d.hidden ? { hidden: true } : {}) });
+  }
+  const weapons = definitions.map(build);   // mutable: hidden packs register more at runtime
   const byId = new Map(weapons.map(weapon => [weapon.id, weapon]));
   if (byId.size !== weapons.length) throw new Error('weapons.js: powtórzone id');
   window.MuseumWeapons = Object.freeze({
     baseline, types, eras,
     get(id) { return byId.get(id) || weapons[0]; },
     has(id) { return byId.has(id); },
-    all() { return weapons; }
+    all() { return weapons; },
+    // Hidden packs (secret.js) add weapons after a code is entered. Same build as the catalogue; duplicates are ignored.
+    register(d) { if (byId.has(d.id)) return byId.get(d.id); const weapon = build({ ...d, hidden: true }); weapons.push(weapon); byId.set(weapon.id, weapon); return weapon; }
   });
 })();
