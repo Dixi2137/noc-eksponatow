@@ -161,10 +161,12 @@
       "OUUUUUUUUUUUUUUUUuuUUUUUUUUUUUUUUUUO"],
     hand: [".OOOOO.", "OSSSSSO", "OSSSSSO", ".OOOOO."],
     mug: ["OOOOOOO..", "OLLLLLOO.", "OLLLLLOLO", "OLLLLLOLO", "OLLLLLOO.", ".OOOOO..."],
+    can: [".OOOOOOOOOOOO.", "OMMMMMMMMMMMMO", "OMMMMMMOOMMMMO", ".OMMMMMMMMMMO.", ".OWGGGGGGGGGO.", ".OWGGGGGGGGGO.", ".OWGGGGGGGGGO.", ".OKKKKKKKKKKO.", ".OKKKKKKKKKKO.", ".OKKKKKKKKKKO.", ".OKKKKKKKKKKO.", ".OWGGGGGGGGGO.", ".OWGGGGGGGGGO.", ".OWGGGGGGGGGO.", ".OWGGGGGGGGGO.", ".OMMMMMMMMMMO.", ".OMMMMMMMMMMO.", "..OOOOOOOOOO.."],
     lampShade: ["....OOOOOOOOOOOO....", "...OJJJJJJJJJJJJO...", "..OJJJJJJJJJJJJJJO..", ".OJJJJJJJJJJJJJJJJO.", "OjjjjjjjjjjjjjjjjjjO", "OOOOOOOOOOOOOOOOOOOO"],
     key: [".OO.", "OGGO", "OGGO", ".OO.", ".OG.", ".OG.", ".OGG", ".OG."]
   };
   const guardPal = { O: '#0b1418', C: '#203a49', u: '#152b39', G: '#c9b591', S: '#b9a07e', s: '#8e806b', W: '#e0d8b9', K: '#293c38', M: '#5a4a35', U: '#2a4350', L: '#d9d3b6', J: '#2e554c', j: '#91a78a' };
+  const canPal = { O: '#0b1418', M: '#c9d2d4', G: '#d9b24a', W: '#f3e2a0', K: '#1b2a22' };   // beer can: silver rim, gold body, dark label band
   function drawGuardRoom(c, t, o = {}) {
     const awake = !!o.awake;
     // Walls: dark teal with a lighter dado band.
@@ -192,8 +194,10 @@
     // Desk, hands, mug with steam, paper, lamp.
     px(c, 40, 128, '#a28f60', 208, 1); px(c, 38, 129, '#58604a', 212, 10); px(c, 30, 139, '#35433a', 228, 23); px(c, 30, 139, '#1f2d2a', 228, 1);
     blit(c, guardParts.hand, 128, 124, guardPal); blit(c, guardParts.hand, 150, 124, guardPal);
-    blit(c, guardParts.mug, 82, 118, guardPal); px(c, 83, 119, '#3c3830', 5, 1);
-    for (let i = 0; i < 3; i++) { const yy = 112 - ((t * 6 + i * 3) % 9), xx = 84 + i * 2 + Math.round(Math.sin(t * 2 + i) * 1.5); px(c, xx, yy, 'rgba(210,219,197,.25)', 1, 2); }
+    // A cold can of Kustosz on the desk (the watchman's beer), with condensation instead of coffee steam; the label text is drawn crisp by the text layer.
+    blit(c, guardParts.can, 78, 110, canPal);
+    for (let i = 0; i < 3; i++) { const yy = 114 + ((t * 3 + i * 5) % 11), xx = 81 + i * 4; px(c, xx, yy, 'rgba(230,240,255,.35)', 1, 2); }
+    if (o.texts) o.texts.push({ x: 85, y: 120.5, text: 'KUSTOSZ', size: 2.6, color: '#f3e2a0', plaque: false });
     px(c, 100, 144, '#b9b195', 70, 10); px(c, 104, 147, '#364c49', 40, 1); px(c, 104, 150, '#364c49', 54, 1);
     px(c, 203, 125, '#8d8963', 20, 3); px(c, 212, 96, '#5a6654', 2, 29); blit(c, guardParts.lampShade, 203, 88, guardPal);
     const g = c.createRadialGradient(213, 96, 2, 213, 96, 64); g.addColorStop(0, 'rgba(230,200,120,.34)'); g.addColorStop(1, 'rgba(230,200,120,0)'); c.fillStyle = g; c.fillRect(140, 40, 148, 125);

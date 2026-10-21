@@ -233,6 +233,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Puszka Kustosza na biurku strażnika (faza82)
+
+W pokoju strażnika (prolog i epilog) zamiast kubka kawy z parą stoi wysoka puszka piwa Kustosz (`guardParts.can`, paleta `canPal`: srebrny rant, złoty korpus, ciemna etykieta) z kropelkami skroplin; napis KUSTOSZ na etykiecie rysuje warstwa tekstowa (`o.texts`), więc jest ostry w pełnej rozdzielczości. `drawGuardRoom` dostaje `texts` z `renderScene` (ui) i z `drawScene` (game, `arenaTexts`). Wygląd puszki jest umowny: nie wzorowany na realnym opakowaniu.
+
 ## Pikselowe trofea (faza81)
 
 37 trofeów z Mojej Sali ma własne sprite'y 16×16 w `pixel.js` (`trophySprites`, klucz = id bez `trophy-`): pazur, ząb, pióropusz na hełmie, klucz, fajka, róg, tiara, terakotowy żołnierz, pieczęć, podkowa, lira, hełm gladiatora, bicz, łuk, turban, pal, kaptur, morion, sztabka, laska, lustro, trójgraniasty z czaszką, kokarda, dwuróg, korona, krzyż prawosławny, fedora, fez, katana, czerwona książeczka, ordery, chusta w kratę, mikrofon, beret, dachówka, kamień, złoty pistolet. `MuseumPixel.drawTrophy(c, trophy, x, y, scale, {locked})` rysuje sprite na pikselowym postumencie z poświatą w kolorze trofeum; zablokowane to szary znak zapytania. Karty trofeów w Mojej Sali i gabloty w scenie sali używają tych sprite'ów zamiast wektorowych glifów Unicode (`art.drawTrophy` zostaje tylko jako zapas).
