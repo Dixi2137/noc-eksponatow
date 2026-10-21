@@ -27,8 +27,8 @@
   // Boss specials by archetype: a feint (windup broken off, then a quick one) or a double strike (second windup right after the first).
   const specialsByArchetype = { duelist: 'feint', trickster: 'feint', brute: 'double', tyrant: 'double', gunman: 'burst' };
   // Pressure grows with the hall number: faster, pushier, harder-hitting foes that shrug off knock-back.
-  // Hall 1 is the tutorial (0); hall 2 starts at 0.3 and the curve reaches 1 by hall 18.
-  function pressureFor(level) { const n = Number(level); return n <= 1 || !Number.isFinite(n) ? 0 : clamp(.3 + (n - 2) / 22, 0, 1); }
+  // Hall 1 is the tutorial (0); hall 2 starts at 0.45 and the curve reaches 1 by hall 12.
+  function pressureFor(level) { const n = Number(level); return n <= 1 || !Number.isFinite(n) ? 0 : clamp(.45 + (n - 2) / 18, 0, 1); }
   function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false, difficulty = 1) {
     const exhibit = window.MuseumExhibits.get(exhibitId);
     const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
@@ -43,17 +43,19 @@
     }
     const pressure = pressureFor(difficulty);
     if (pressure > 0) {
-      combat.approachSpeed *= 1 + pressure; combat.retreatSpeed *= 1 + pressure * .4;
+      combat.approachSpeed *= 1 + pressure * 1.4; combat.retreatSpeed *= 1 + pressure * .4;
       combat.idleDelay *= 1 - pressure * .5; combat.repositionTime *= 1 - pressure * .5; combat.retreatTime *= 1 - pressure * .4;
-      combat.windup *= 1 - pressure * .2; combat.heavyWindup *= 1 - pressure * .2;
+      combat.windup *= 1 - pressure * .3; combat.heavyWindup *= 1 - pressure * .3;
       combat.recovery *= 1 - pressure * .25; combat.heavyRecovery *= 1 - pressure * .25;
       combat.preferredGap = Math.max(combat.minGap + 24, combat.preferredGap * (1 - pressure * .2)); combat.repositionGap = Math.max(combat.minGap + 30, combat.repositionGap * (1 - pressure * .2));
       if (pressure >= .6) combat.heavyEvery = Math.max(2, combat.heavyEvery - 1);
       // Blows hurt more and cost more stamina to block; the knight's reflexes stay the same.
-      for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * (1 + pressure * .45));
-      for (const key of ['blockCostLight', 'blockCostHeavy']) damage[key] = Math.round(damage[key] * (1 + pressure * .3));
+      for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * (1 + pressure * .7));
+      for (const key of ['blockCostLight', 'blockCostHeavy']) damage[key] = Math.round(damage[key] * (1 + pressure * .5));
+      // Tighter perfect-parry timing and a tougher foe.
+      stats.perfectParryWindow = (stats.perfectParryWindow ?? .27) * (1 - pressure * .3);
     }
-    const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1));
+    const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1) * (1 + pressure * .3));
     const special = specials && exhibit.stats.archetype ? specialsByArchetype[exhibit.stats.archetype] || null : null;
     return {
       status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, damage, theme, twist, special, pressure, secondWindUsed: false, clockWarned: false,
@@ -239,7 +241,7 @@
       const amount = Math.max(1, Math.ceil(w.weakGuardDamage * .3 * state.perk.stats.weakGuardDamageMultiplier));
       damageFoe(amount);
       const moved = pushFoe((ranged ? 56 : state.weapon.type === 'heavy' || state.weapon.type === 'polearm' ? 36 : 24) * (1 - state.pressure * .6));
-      const stopped = r.state !== 'stagger' && staggerFoe(.42 * (1 - state.pressure * .5));
+      const stopped = r.state !== 'stagger' && staggerFoe(.42 * (1 - state.pressure * .6));
       label(moved > 4 ? 'ODRZUT' : 'DRAŚNIĘCIE', r.x - 70, FLOOR - 285, '#ffd27a', 20);
       hint(stopped ? (ranged ? `Trafiony! ${alias()} cofa się pod ostrzałem.` : `Trafiony! ${alias()} cofa się o krok.`) : `${alias()} trzyma się na nogach i idzie dalej. Czekaj na jego cios.`, 1.4);
     }
@@ -276,15 +278,18 @@
       tone('parry'); burst(p.x + 65, FLOOR - 130, '#b8daef', 16, .7);
       if (p.stamina >= cost) {
         p.stamina -= cost;
-        label('BLOK', p.x, FLOOR - 260, '#bed8e2', 22);
-        hint('Blok! Naciśnij gardę tuż przed ciosem, żeby go odbić.', 1.8);
+        // A plain block still lets part of the blow through under pressure; only a perfect parry takes nothing.
+        const chip = Math.round((r.heavy ? dmg.heavyBlocked : dmg.lightBlocked) * state.pressure * .5);
+        if (chip > 0) damagePlayer(chip);
+        label(chip > 0 ? 'BLOK −' + chip : 'BLOK', p.x, FLOOR - 260, '#bed8e2', 22);
+        hint(chip > 0 ? 'Blok przepuszcza część ciosu. Garda tuż przed uderzeniem odbija go w całości.' : 'Blok! Naciśnij gardę tuż przed ciosem, żeby go odbić.', 1.8);
       } else {
         p.stamina = 0; damagePlayer(r.heavy ? dmg.heavyBlocked : dmg.lightBlocked);
         label('OSŁABIONA GARDA', p.x + 50, FLOOR - 300, '#ff9d8e', 21);
         hint('Brakuje wytrzymałości. Odstąp i pozwól jej wrócić.', 2);
       }
-    } else if (p.stamina >= cost && p.attack <= 0 && state.rng() >= state.pressure * .6) {
-      // The free reflex dodge gets unreliable as the pressure rises: up to 60% of unguarded blows land.
+    } else if (p.stamina >= cost && p.attack <= 0 && state.rng() >= .5 + state.pressure * .5) {
+      // The free reflex dodge is a coin flip in the first hall and gone under full pressure: an unguarded blow lands.
       p.stamina -= cost; p.evade = .42;
       label('UNIK', p.x, FLOOR - 265, '#9bd9d1', 22); tone('dodge');
       hint(`Automatyczny unik. Atakuj teraz — garda ${gen()} jest słaba!`, 1.8);
