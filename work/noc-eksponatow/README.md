@@ -233,6 +233,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Pikselowe trofea (faza81)
+
+37 trofeów z Mojej Sali ma własne sprite'y 16×16 w `pixel.js` (`trophySprites`, klucz = id bez `trophy-`): pazur, ząb, pióropusz na hełmie, klucz, fajka, róg, tiara, terakotowy żołnierz, pieczęć, podkowa, lira, hełm gladiatora, bicz, łuk, turban, pal, kaptur, morion, sztabka, laska, lustro, trójgraniasty z czaszką, kokarda, dwuróg, korona, krzyż prawosławny, fedora, fez, katana, czerwona książeczka, ordery, chusta w kratę, mikrofon, beret, dachówka, kamień, złoty pistolet. `MuseumPixel.drawTrophy(c, trophy, x, y, scale, {locked})` rysuje sprite na pikselowym postumencie z poświatą w kolorze trofeum; zablokowane to szary znak zapytania. Karty trofeów w Mojej Sali i gabloty w scenie sali używają tych sprite'ów zamiast wektorowych glifów Unicode (`art.drawTrophy` zostaje tylko jako zapas).
+
 ## Ukryte pakiety na kod dostępu (faza79)
 
 `dist/secret.js` (`window.MuseumSecret`) trzyma pakiety zaszyfrowane AES-GCM 256; klucz pochodzi z kodu dostępu (PBKDF2, 120 000 iteracji, SHA-256), a kod jest porównywany przez SHA-256. W źródle jest wyłącznie szyfrogram: bez kodu nie ma nazw, statystyk ani grafik, przedmioty nie istnieją w katalogu, nie wypadają ze skrzyń, nie ma ich w kolekcji ani w wyszukiwarce. Kod wpisuje się w oknie Konto (pole KOD DOSTĘPU, działa też jako gość); wielkość liter i spacje nie mają znaczenia. Poprawny kod odszyfrowuje pakiet i rejestruje jego zawartość w locie: `MuseumWeapons.register`, `MuseumLoot.register` (waga 0, prezent: nie do sprzedania, skin od razu w szafie), `MuseumPerks.register`, `MuseumPixel.registerArt` (ikona, sprite w ręce, paleta rycerza). Kody zapisują się w profilu (`profile.secrets`, lokalnie i w chmurze), więc pakiet odblokowuje się ponownie przy każdym wejściu i na innym urządzeniu po zalogowaniu.
