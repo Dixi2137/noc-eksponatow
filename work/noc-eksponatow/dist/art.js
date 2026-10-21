@@ -552,7 +552,7 @@
   }
   // Collection thumbnails for weapons and cards. Centered on (0,0), roughly 200 units tall.
   function drawWeaponIcon(c,weapon,o={}){
-    const key=weapon?.icon||weapon?.id||'sword';
+    const key=({lever:'rifle',bolt:'rifle',garand:'rifle',assault:'rifle',modern:'pistol',mp:'smg',pump:'shotgun',blunderbuss:'shotgun'})[weapon?.icon]||weapon?.icon||weapon?.id||'sword';
     c.save();c.lineCap='round';c.lineJoin='round';
     const steel=grad(c,-10,0,10,0,[[0,'#627d85'],[.46,'#d8e8de'],[.52,'#eff8df'],[.6,'#8ca9ac'],[1,'#3c555f']]);
     const wood=(y0,y1,wdt=8)=>{line(c,0,y0,0,y1,'#4a3420',wdt+3);line(c,0,y0,0,y1,'#8a6a42',wdt-2)};

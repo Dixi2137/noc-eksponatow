@@ -233,6 +233,10 @@ Skrzynie: 29. Strzelnicę zastąpiły Łucznia, Gabinet Pistoletów i Zbrojownia
 
 Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej broni (rysunek w `drawKnight`); rysowanie 122 broni w dłoni to osobne zadanie.
 
+## Ikony broni palnej (faza75)
+
+Broń palna ma własne, szerokie glify 24×14 px w `pixel.js` (`I`): `flintlock`, `revolver`, `pistol` (klasyczne samopowtarzalne), `modern` (Glock/Beretta/Desert Eagle), `smg` (Thompson z bębnem), `mp` (MP 40/Sten), `musket`, `bolt` (zamkowe: Mosin, Springfield, Lee-Enfield, Mauser 98k, sztucer), `lever` (Winchester), `garand`, `assault` (AK-47, M16), `shotgun` (dubeltówka, Strzelba Kustosza), `pump`, `blunderbuss`, `sniper`. `drawWeaponIcon` skaluje glify szersze niż 16 px do całkowitego mnożnika i centruje je w polu 16×16, więc wywołania się nie zmieniły. Karabin w ręce rycerza ma kolbę, komorę i kabłąk zamiast patyka. Wektorowy zapas mapuje nowe klucze na najbliższe stare rysunki.
+
 ## Finał: Walka z Belzebubem (2026-10-21)
 
 Sala 37 `hell` (rok 9999, „POZA CZASEM”, sceneria `hell`): Belzebub (`exhibits.js`, rig człowieka z nowym nakryciem `horns`, czerwona skóra, peleryna, włócznia; tyran tier 8 z 380 HP, ciężki cios co drugi zamach, obrażenia 20/34) i warunek sali DRUGI ODDECH ustawiony wprost w definicji poziomu (`levels.js` honoruje `twist` z definicji, inaczej cykl). Sceneria piekła: czerwony tint, zamurowane okna, sztandary „666”, tabliczka PIEKŁO, migoczące płomienie przy cokole i pęknięcia lawy w podłodze (`fire: true` w `pixel.js`), wektorowy motyw `hell` w `art.js`. Trofeum RÓG BELZEBUBA. Kaddafi przestał być „ostatnim bossem”.

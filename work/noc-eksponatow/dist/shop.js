@@ -110,8 +110,8 @@
   const cards=list.map(item=>{
    const owned=loot.has(current,item),equipped=current.finish===item.id,card=node('article',`shop-fin${owned?' is-owned':''}`);
    card.style.setProperty('--crate-color',item.colors?.edge||item.colors?.steel||'#7ff0e0');
-   const art=node('span','shop-fin-art');const canvas=document.createElement('canvas');canvas.width=canvas.height=80;art.append(canvas);
-   const ctx=canvas.getContext('2d');if(ctx&&window.MuseumPixel){ctx.imageSmoothingEnabled=false;window.MuseumPixel.drawWeaponIcon(ctx,weapon,8,8,4,{finish:item.id,time:1});}
+   const art=node('span','shop-fin-art');const canvas=document.createElement('canvas');canvas.width=canvas.height=88;art.append(canvas);
+   const ctx=canvas.getContext('2d');if(ctx&&window.MuseumPixel){ctx.imageSmoothingEnabled=false;window.MuseumPixel.drawWeaponIcon(ctx,weapon,12,12,4,{finish:item.id,time:1});}
    const body=node('span','shop-fin-body');body.append(node('strong','shop-fin-name',item.name),node('small','shop-fin-flavour',item.description||''));
    const foot=node('span','shop-fin-foot');foot.append(node('strong','shop-fin-price',plain.format(item.pricePLN||0)));
    if(owned)foot.append(node('span','shop-fin-state',equipped?'● NAŁOŻONE':'✓ MASZ'));
