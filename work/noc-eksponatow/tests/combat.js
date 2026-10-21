@@ -52,10 +52,36 @@
     start(); hold('attack', .16); const s = g.getState();
     assert.equal(s.foe.hp, 160); assert.equal(s.foe.defenseKind, 'dodge'); assert.ok(s.foe.defense > 0);
   });
-  test('T-rex paruje ataki podczas zamachu bez utraty HP', () => {
-    start(); t.setState({ foe: { x: 650, state: 'windup', timer: 0 }, player: { x: 365 } });
+  test('T-rex paruje ataki podczas zamachu bez utraty HP (gdy los nie przerwie zamachu)', () => {
+    start({ rng: () => .99 }); t.setState({ foe: { x: 650, state: 'windup', timer: 0 }, player: { x: 365 } });
     hold('attack', .16); const s = g.getState();
     assert.equal(s.foe.hp, 160); assert.equal(s.foe.defenseKind, 'guard');
+  });
+  test('Presja: trafiony w marszu wróg cofa się i chwieje; zamach da się przerwać; w sali 37 jest szybszy, unika i trzyma równowagę', () => {
+    // Hall 1: a sword hit on the advancing T-rex shoves it back, chips HP and stops it for a moment.
+    let s = start({ difficulty: 1, rng: () => .9 }); assert.equal(s.pressure, 0);
+    const base = s.combat.approachSpeed, baseIdle = s.combat.idleDelay;
+    t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } });
+    hold('attack', .16); s = g.getState();
+    assert.ok(s.foe.hp < 160 && s.foe.hp >= 154, `draśnięcie: ${s.foe.hp}`); assert.ok(s.foe.x > 740, `odrzut: ${s.foe.x}`); assert.equal(s.foeState, 'stagger');
+    t.step(.6); s = g.getState(); assert.ok(s.foeState !== 'stagger', 'chwianie mija');
+    // Right after a stagger the foe keeps its footing: another hit still pushes, but no second stagger.
+    t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } }); hold('attack', .16); s = g.getState(); assert.ok(s.foeState !== 'stagger', 'bez stun-locka'); assert.ok(s.foe.x > 720, 'ale odrzut dalej działa');
+    // A light windup can be interrupted when the dice say so.
+    s = start({ difficulty: 1, rng: () => 0 }); t.setState({ foe: { x: 720, state: 'windup', timer: 0, heavy: false }, player: { x: 365, stamina: 100 } }); hold('attack', .16); s = g.getState();
+    assert.equal(s.foeState, 'stagger', 'PRZERWANY'); assert.ok(s.foe.hp < 160);
+    // Heavy windups are never interrupted.
+    s = start({ difficulty: 1, rng: () => 0 }); t.setState({ foe: { x: 720, state: 'windup', timer: 0, heavy: true }, player: { x: 365, stamina: 100 } }); hold('attack', .16); s = g.getState();
+    assert.equal(s.foeState, 'windup', 'ciężki zamach trwa'); assert.equal(s.foe.hp, 160);
+    // Hall 37: full pressure — twice the approach speed, half the idle delay, dodges and an unbreakable windup.
+    s = start({ difficulty: 37, rng: () => .1 }); assert.equal(s.pressure, 1); assert.ok(Math.abs(s.combat.approachSpeed - base * 2) < .01, 'dwa razy szybszy'); assert.ok(Math.abs(s.combat.idleDelay - baseIdle * .5) < .001, 'pół przerwy');
+    t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } }); hold('attack', .16); s = g.getState();
+    assert.equal(s.foe.hp, 160); assert.equal(s.foe.defenseKind, 'dodge', 'pod presją unika');
+    s = start({ difficulty: 37, rng: () => .5 }); t.setState({ foe: { x: 720, state: 'windup', timer: 0, heavy: false }, player: { x: 365, stamina: 100 } }); hold('attack', .16); s = g.getState();
+    assert.equal(s.foeState, 'windup', 'pod presją zamach trwa'); assert.equal(s.foe.hp, 160);
+    s = start({ difficulty: 37, rng: () => .9 }); t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } }); hold('attack', .16); s = g.getState();
+    assert.ok(s.foe.x > 725 && s.foe.x - 720 < 20, `mniejszy odrzut: ${s.foe.x - 720}`);
+    assert.ok(window.MuseumLevels.all().every(l => l.number >= 1), 'numer sali to poziom presji');
   });
   test('Zmęczona parada T-rexa w czasie odpoczynku przepuszcza 9 obrażeń miecza', () => {
     start(); t.setState({ foe: { x: 650, state: 'recover', timer: 0 }, player: { x: 365 } });

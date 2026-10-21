@@ -52,6 +52,12 @@ Otwarcie trwa około 8,2 sekundy: pieczęć (0,9 s), przewijanie z wyhamowaniem 
 
 58. strój, specjalny prezent dostępny od razu w kolekcji. Inspirowany zdjęciem przekazanym przez użytkownika: siwe włosy i wąs, granatowy płaszcz, bordowa tunika, zużyta zbroja i kosa na drewnianym trzonie. Zdolność UPÓR STACHA daje +30 maks. HP (150 HP). Prezent nie zmienia istniejącego wyboru stroju ani szans skrzyń.
 
+## Presja: trudność rosnąca z salą
+
+`MuseumGame.start` dostaje `difficulty` (numer sali); `pressure = clamp((sala − 1) / 32, 0, 1)`, więc sala 1 to 0, a od sali 33 pełna presja. Presja skaluje tempo przeciwnika: szybkość marszu ×(1+p), przerwy (`idleDelay`, `repositionTime`, `retreatTime`) i odpoczynek po ciosie krótsze, zamach krótszy, mniejszy dystans, jaki lubi trzymać; pod presją zamiast grzecznie się cofać, gdy gracz podejdzie, często od razu atakuje.
+
+Trafienie wroga, który idzie na gracza (stan idle/approach/retreat/reposition), to **cios presji**: drobne obrażenia (30% obrażeń słabej gardy), **odrzut** (strzał 64 px, broń ciężka/drzewcowa 40, reszta 26, malejący z presją) i **chwianie** (`stagger`, 0,42 s, krótsze z presją), po którym wróg przez ~1,1 s trzyma równowagę (bez stun-locka: kolejne trafienia tylko odrzucają). Lekki zamach da się **przerwać** (75% szansy strzałem, 55% bronią białą, malejąco z presją, nigdy ciężkiego). Pod presją rośnie szansa, że wróg **uniknie** ciosu w marszu (do 50%). Etykiety: ODRZUT, DRAŚNIĘCIE, PRZERWANY, UNIK.
+
 ## Jan Paweł II
 
 Drugi eksponat specjalny, dostępny od razu dla każdego gracza: biała sutanna, czerwona mucet ze złotym obszyciem, piuska i złoty krzyż na piersi. W pikselowym trybie ma własnego sprite'a (długa sutanna zamiast nagolenników), a w walce trzyma dowolną wybraną broń. Perk „Nie lękajcie się”: +3 HP za każdą perfekcyjną paradę i 130 HP na start.

@@ -2826,7 +2826,9 @@ window.MuseumConfig = Object.freeze({
   }
   // Boss specials by archetype: a feint (windup broken off, then a quick one) or a double strike (second windup right after the first).
   const specialsByArchetype = { duelist: 'feint', trickster: 'feint', brute: 'double', tyrant: 'double', gunman: 'burst' };
-  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false) {
+  // Pressure grows with the hall number: faster, pushier foes that shrug off knock-back. 0 in the first hall, 1 from hall 33 on.
+  function pressureFor(level) { return clamp((Number(level) - 1) / 32, 0, 1); }
+  function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false, difficulty = 1) {
     const exhibit = window.MuseumExhibits.get(exhibitId);
     const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
     const stats = perk.stats, twist = window.MuseumTwists?.get(twistId) || null, combat = { ...exhibit.stats.combat }, damage = { ...exhibit.stats.damage };
@@ -2838,16 +2840,24 @@ window.MuseumConfig = Object.freeze({
       if (twist.playerDamage) weapon.stats.weakGuardDamage = Math.ceil(weapon.stats.weakGuardDamage * twist.playerDamage);
       if (twist.staminaRegen) stats.staminaRegenMultiplier = (stats.staminaRegenMultiplier ?? 1) * twist.staminaRegen;
     }
+    const pressure = pressureFor(difficulty);
+    if (pressure > 0) {
+      combat.approachSpeed *= 1 + pressure; combat.retreatSpeed *= 1 + pressure * .4;
+      combat.idleDelay *= 1 - pressure * .5; combat.repositionTime *= 1 - pressure * .5; combat.retreatTime *= 1 - pressure * .4;
+      combat.windup *= 1 - pressure * .2; combat.heavyWindup *= 1 - pressure * .2;
+      combat.recovery *= 1 - pressure * .25; combat.heavyRecovery *= 1 - pressure * .25;
+      combat.preferredGap = Math.max(combat.minGap + 24, combat.preferredGap * (1 - pressure * .2)); combat.repositionGap = Math.max(combat.minGap + 30, combat.repositionGap * (1 - pressure * .2));
+    }
     const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1));
     const special = specials && exhibit.stats.archetype ? specialsByArchetype[exhibit.stats.archetype] || null : null;
     return {
-      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, damage, theme, twist, special, secondWindUsed: false, clockWarned: false,
+      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, damage, theme, twist, special, pressure, secondWindUsed: false, clockWarned: false,
       hint: `Zbliż się do ${exhibit.aliasGen || exhibit.alias + 'a'}. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
         ammo: weapon.stats.ammo, maxAmmo: weapon.stats.ammo, reload: 0, shots: 0 },
       foe: { x: twist?.foeStart || 1060, hp: foeHP, maxHP: foeHP, state: 'idle', timer: 0, cycle: 0, attackTargetX: null,
-        heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false, feint: false, quick: 0, followUp: false }
+        heavy: false, hurt: 0, defense: 0, defenseKind: 'guard', attackDone: false, walk: false, feint: false, quick: 0, followUp: false, poiseUntil: 0, pushed: 0 }
     };
   }
   const alias = () => state.exhibit.alias;
@@ -2865,7 +2875,7 @@ window.MuseumConfig = Object.freeze({
       player: { ...state.player }, foe: { ...state.foe }, skin: state.skin, perk: state.perk, scene,
       exhibit: { id: state.exhibit.id, name: state.exhibit.name, alias: state.exhibit.alias, tag: state.exhibit.tag, maxHP: state.exhibit.stats.hp },
       weapon: { id: state.weapon.id, name: state.weapon.name, kind: state.weapon.stats.kind, ammo: state.player.ammo, maxAmmo: state.player.maxAmmo, reload: state.player.reload }, theme: state.theme,
-      combat: { ...state.combat }, twist: state.twist ? { id: state.twist.id || null, name: state.twist.name, blurb: state.twist.blurb } : null, special: state.special || null
+      combat: { ...state.combat }, twist: state.twist ? { id: state.twist.id || null, name: state.twist.name, blurb: state.twist.blurb } : null, special: state.special || null, pressure: state.pressure || 0
     };
   }
   function updateEvent(force = false) {
@@ -2940,6 +2950,20 @@ window.MuseumConfig = Object.freeze({
     impact(r.x - 100, FLOOR - 155, perfect ? '#9affdf' : '#f8cf88', perfect ? 1.1 : .8);
     tone(perfect ? 'parry' : 'hit');
   }
+  // A hit that lands while the foe is closing in shoves it back and makes it flinch; the push shrinks and the flinch
+  // shortens as the pressure rises, and a staggered foe keeps its footing for a moment afterwards (no stun-lock).
+  function pushFoe(amount) {
+    const r = state.foe, before = r.x;
+    r.x = clamp(r.x + amount, state.player.x + state.combat.minGap, RIGHT); r.pushed = .25;
+    return r.x - before;
+  }
+  function staggerFoe(seconds) {
+    const r = state.foe;
+    if (state.elapsed < r.poiseUntil) return false;
+    r.state = 'stagger'; r.timer = 0; r.staggerFor = seconds; r.feint = false; r.followUp = false; r.quick = 0;
+    r.poiseUntil = state.elapsed + seconds + 1.1;
+    return true;
+  }
   function finish(win) {
     if (state.status !== 'running') return;
     state.status = win ? 'won' : 'lost';
@@ -2986,16 +3010,33 @@ window.MuseumConfig = Object.freeze({
       damageFoe(amount);
       label(ranged ? 'CELNY STRZAŁ' : 'SŁABA GARDA', r.x - 80, FLOOR - 255, '#edc37d', 19);
       hint(ranged ? `Celny strzał! ${alias()} nie ma czym się zasłonić.` : `Słaba garda! Atakuj, dopóki ${alias()} odzyskuje siły.`, 1.5);
+    } else if (r.state === 'windup' && !r.heavy && state.elapsed >= r.poiseUntil && state.rng() < (ranged ? .75 : .55) * (1 - state.pressure * .85)) {
+      // An early hit breaks the telegraph: the blow never comes. Heavy attacks and high-pressure halls hold their ground.
+      r.defenseKind = 'guard';
+      const amount = Math.max(1, Math.ceil(w.weakGuardDamage * .35 * state.perk.stats.weakGuardDamageMultiplier));
+      damageFoe(amount); pushFoe((ranged ? 50 : 30) * (1 - state.pressure * .5)); staggerFoe(.5 * (1 - state.pressure * .4));
+      label('PRZERWANY', r.x - 75, FLOOR - 285, '#ffd27a', 21);
+      hint(ranged ? `Przerwałeś zamach! ${alias()} chwieje się na nogach.` : `Przerwałeś zamach ${gen()}! Nie daj mu odzyskać równowagi.`, 1.5);
     } else if (r.state === 'windup' || r.state === 'strike') {
       r.defenseKind = 'guard';
       burst(r.x - 135, FLOOR - 155, '#eac584', 14, .7); tone('parry');
       label(ranged ? 'ODBITY' : 'PAROWANIE', r.x - 65, FLOOR - 285, '#efc27c', 20);
       p.stamina = Math.max(0, p.stamina - w.parryDrain);
       hint(ranged ? 'Odbił kulę! Strzelaj tylko w osłabioną gardę.' : 'Twarda garda! Poczekaj na jego atak, potem odpowiedz.');
-    } else {
+    } else if (state.rng() < state.pressure * .5) {
+      // The pushier the hall, the more often a shot at an advancing foe is simply side-stepped.
       r.defenseKind = 'dodge'; tone('dodge');
       label('UNIK', r.x - 70, FLOOR - 285, '#adb6b9', 20);
-      hint(ranged ? `${alias()} uskoczył przed kulą. Czekaj na jego cios, potem strzelaj.` : `${alias()} unika. Sprowokuj go i uderz po jego ataku.`);
+      hint(ranged ? `${alias()} uskoczył przed kulą. Celuj, kiedy się zamachnie albo odpoczywa.` : `${alias()} unika. Uderz, kiedy się zamachnie albo po jego ataku.`);
+    } else {
+      // Pressure hit: the foe was walking in, so the blow lands, shoves it back and stops the advance for a moment.
+      r.defenseKind = 'guard';
+      const amount = Math.max(1, Math.ceil(w.weakGuardDamage * .3 * state.perk.stats.weakGuardDamageMultiplier));
+      damageFoe(amount);
+      const moved = pushFoe((ranged ? 64 : state.weapon.type === 'heavy' || state.weapon.type === 'polearm' ? 40 : 26) * (1 - state.pressure * .55));
+      const stopped = r.state !== 'stagger' && staggerFoe(.42 * (1 - state.pressure * .5));
+      label(moved > 4 ? 'ODRZUT' : 'DRAŚNIĘCIE', r.x - 70, FLOOR - 285, '#ffd27a', 20);
+      hint(stopped ? (ranged ? `Trafiony! ${alias()} cofa się pod ostrzałem.` : `Trafiony! ${alias()} cofa się o krok.`) : `${alias()} trzyma się na nogach i idzie dalej. Czekaj na jego cios.`, 1.4);
     }
     checkEnd();
   }
@@ -3081,7 +3122,7 @@ window.MuseumConfig = Object.freeze({
     p.cooldown = Math.max(0, p.cooldown - dt); p.hurt = Math.max(0, p.hurt - dt);
     p.evade = Math.max(0, p.evade - dt); p.defense = Math.max(0, p.defense - dt);
     if (p.reload > 0) { p.reload = Math.max(0, p.reload - dt); if (p.reload <= 0 && p.maxAmmo != null) { p.ammo = p.maxAmmo; hint('Bęben pełny. Czekaj na osłabioną gardę.', 1.5); updateEvent(true); } }
-    r.hurt = Math.max(0, r.hurt - dt); r.defense = Math.max(0, r.defense - dt);
+    r.hurt = Math.max(0, r.hurt - dt); r.defense = Math.max(0, r.defense - dt); r.pushed = Math.max(0, r.pushed - dt);
     p.guarding = input.guard && p.attack <= 0 && p.evade <= 0;
     if (input.attack && !p.guarding) attack();
     const dodgeCost = 20 * state.perk.stats.defenseCostMultiplier;
@@ -3114,9 +3155,11 @@ window.MuseumConfig = Object.freeze({
       const next = clamp(r.x + amount, p.x + GAP, RIGHT);
       r.walk = Math.abs(next - r.x) > .01; r.x = next;
     };
-    if (r.state === 'idle') {
-      // Give the player breathing room before choosing the next attack.
-      if (distance < GAP + 22 && r.x < RIGHT - 1) setFoeState('retreat');
+    if (r.state === 'stagger') {
+      if (r.timer >= (r.staggerFor || .4)) { setFoeState('idle'); r.timer = combat.idleDelay * .5; }
+    } else if (r.state === 'idle') {
+      // Give the player breathing room before choosing the next attack; pushy halls punish hugging with a strike instead.
+      if (distance < GAP + 22 && r.x < RIGHT - 1 && !(state.pressure > 0 && r.timer >= combat.idleDelay * .5 && state.rng() < state.pressure * .7)) setFoeState('retreat');
       else if (r.timer >= combat.idleDelay) {
         if (distance <= combat.engageRange) startWindup();
         else setFoeState('approach');
@@ -3282,6 +3325,7 @@ window.MuseumConfig = Object.freeze({
     if (r.state === 'windup') { foePose = 'guard'; foeProgress = r.timer / (r.heavy ? combat.heavyWindup : combat.windup); }
     if (r.state === 'strike') { foePose = 'attack'; foeProgress = r.timer / combat.strikeDuration; }
     if (r.state === 'recover') { foePose = 'hurt'; foeProgress = r.timer / (r.heavy ? combat.heavyRecovery : combat.recovery); }
+    if (r.state === 'stagger') { foePose = 'hurt'; foeProgress = r.timer / (r.staggerFor || .4); }
     if (r.defense > 0) { foePose = r.defenseKind; foeProgress = 1 - r.defense / .35; }
     if (r.hurt > 0) { foePose = 'hurt'; foeProgress = 1 - r.hurt / .3; }
     if (r.hp <= 0) { foePose = 'dead'; foeProgress = 1; }
@@ -3380,7 +3424,7 @@ window.MuseumConfig = Object.freeze({
 
   window.MuseumGame = {
     start(options = {}) {
-      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers, options.twist || null, !!options.specials); state.finish = options.finish || null; state.rng = typeof options.rng === 'function' ? options.rng : Math.random; scene = 'arena'; state.status = 'running';
+      state = fresh(options.skin, options.exhibit, options.weapon, options.theme, options.modifiers, options.twist || null, !!options.specials, options.difficulty ?? 1); state.finish = options.finish || null; state.rng = typeof options.rng === 'function' ? options.rng : Math.random; scene = 'arena'; state.status = 'running';
       if (typeof options.sound === 'boolean') soundEnabled = options.sound;
       for (const key in input) input[key] = false;
       particles.length = labels.length = rings.length = 0; shake = flash = hitstop = 0; lastHint = ''; eventClock = 0;
@@ -4070,7 +4114,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   $('playerName').textContent=profile.skin==='stachu-jones'?'STACHU JONES':profile.skin==='jan-pawel-ii'?'JAN PAWEŁ II':'ŻELAZNY RYCERZ';$('foeName').textContent=exhibit.name;
   $('stageHall').textContent=twistOf(level)?`${level.hall} · ${twistOf(level).name}`:level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
   $('topStatus').textContent=`SALA ${String(level.number).padStart(2,'0')} / RYCERZ KONTRA ${exhibit.alias.toLocaleUpperCase('pl-PL')}`;stageState();
-  show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',finish:profile.finish||null,theme:level.theme,twist:level.twist||null,specials:level.number>3,modifiers:loot.modifiers(profile),sound:profile.sound});
+  show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',finish:profile.finish||null,theme:level.theme,twist:level.twist||null,specials:level.number>3,difficulty:level.number,modifiers:loot.modifiers(profile),sound:profile.sound});
  }
  function pause(){if(screen!=='fight')return;screen='paused';window.MuseumGame.pause();renderPauseInfo();show('pause');stageState();}
  // Esc shows who you are fighting: name, era, how he fights (numbers from his combat profile) and what beats him.

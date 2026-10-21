@@ -93,18 +93,19 @@
       assert.equal(g.getState().foe.hp < 160, hits, id);
     }
   });
-  test('Rewolwer: 6 strzałów, potem przeładowanie 1,6 s bez strzelania, trafia z 800 tylko w słabą gardę', () => {
-    g.reset(); let s = g.start({ sound: false, skin: 'verdigris', weapon: 'revolver' });
+  test('Rewolwer: 6 strzałów, potem przeładowanie 1,6 s bez strzelania, z 800 bezczynnego tylko draśnie i odrzuci, pełne obrażenia w słabą gardę', () => {
+    g.reset(); let s = g.start({ sound: false, skin: 'verdigris', weapon: 'revolver', rng: () => .9 });
     assert.equal(s.weapon.ammo, 6);
     // A tap, not a hold: holding the trigger would fire again after the cooldown.
     const shoot = (foe, after = .5) => { t.setState({ foe, player: { x: 365, cooldown: 0, stamina: 100 } }); t.input('attack', true); t.step(.05); t.input('attack', false); t.step(after); return g.getState(); };
-    // Idle foe dodges the bullet.
+    // Idle foe is only grazed and shoved back by the bullet (pressure hit), never hit for full damage.
     s = shoot({ x: 365 + 800, state: 'idle', timer: 0, defense: 0 });
-    assert.equal(s.foe.hp, 160); assert.equal(s.foe.defenseKind, 'dodge'); assert.equal(s.weapon.ammo, 5);
+    assert.ok(s.foe.hp < 160 && s.foe.hp >= 160 - 7, `draśnięcie: ${s.foe.hp}`); assert.equal(s.foe.defenseKind, 'guard'); assert.equal(s.weapon.ammo, 5); t.setState({ foe: { hp: 160 } });
     // Recovering foe takes 14 from across the arena.
     s = shoot({ x: 365 + 800, state: 'recover', timer: 0, defense: 0 });
     assert.equal(s.foe.hp, 143, 'rewolwer: 14 + 3 za legendę'); assert.equal(s.weapon.ammo, 4);
     for (let i = 0; i < 4; i++) s = shoot({ x: 1000, state: 'idle', timer: 0, defense: 0 }, .6);
+    t.setState({ foe: { hp: 143 } });   // the four idle shots only grazed the foe
     assert.equal(s.weapon.ammo, 0); assert.equal(s.weapon.reload, 0, 'przeładowanie nie zaczyna się samo');
     s = shoot({ x: 1000, state: 'recover', timer: -5, defense: 0 }, 0);
     assert.ok(s.weapon.reload > 1.4, 'przeładowanie trwa'); assert.equal(s.foe.hp, 143, 'bez strzału w czasie przeładowania');
