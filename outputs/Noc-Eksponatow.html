@@ -2643,8 +2643,18 @@ window.MuseumConfig = Object.freeze({
       axe: { hold: ["....ODO", "..OOODO", ".OMMMDO", "OWMMMDO", "OMMMMDO", ".OMMMDO", "..OOODO", "....ODO", "....ODO", "....ODO", "....ODO", "....ODO", "....ODO", "....OO."], fwd: ["..........OOOOO.", "OODDDDDDDOOMMMWO", "ODDDDDDDDDOMMMMO", "OO........OMMMMO", "...........OOOO."] },
       staff: { hold: [".GG.", "GGGG", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD."], fwd: ["DDDDDDDDDDDDDDDDDDGG", "..................GG"] },
       pistol: { hold: [".OMO.", ".OWO.", ".OMO.", ".OMO.", "OMMMO", "OMMMO", "ODDO.", "ODDO.", "OOO.."], fwd: ["...OOOOOOOO", "...OMWWWWMO", "OOMMMOOOOOO", "ODDOOO.....", "ODDO.......", "OOO........"] },
-      minigun: { hold: [".OMMO.", "OMWMMO", "OMMMMO", "OMWMMO", "OMMMMO", "OMWMMO", ".OMMO.", ".OMMO.", "OGGGGO", "OGDDGO", "OGDDGO", ".ODDO.", ".ODO..", ".OO..."],
-        fwd: ["....OOOOOO..............", "...OGGGGGGOMMMMMMMMMMMO.", "OOOGDDDDGGOMWWWWWWWWWWMO", "ODDOGGGGGGOMMMMMMMMMMMMO", "ODDO.OOOOOOMWWWWWWWWWWMO", "OOO....ODO.OOOOOOOOOOOO.", ".......OO..............."] },
+      // Gatling: three visible barrels with a muzzle ring, a motor block, a grip and an ammo box feeding a brass belt. Carried level at the hip.
+      minigun: (() => { const level = [
+        "...........OOOOOOOOOOOOOOOOOOOOOOOO..",
+        "......OOOOOMWWMMMWWMMMWWMMMWWMMMWMMOO",
+        ".....OGGGGOOOOOOOOOOOOOOOOOOOOOOOOMWO",
+        "OOOOOOGaaGOMMMMMMMMMMMMMMMMMMMMMMMMMO",
+        "OkkkkOGGGGOOOOOOOOOOOOOOOOOOOOOOOOMWO",
+        "OkkkkOGaaGOMWWMMMWWMMMWWMMMWWMMMWMMOO",
+        "OkkkkOGGGGOOOOOOOOOOOOOOOOOOOOOOOOO..",
+        "OkGGGGGGGO....OOOO...................",
+        "OOOOOOOOOO....OGGO...................",
+        "..............OOOO..................."]; return { hold: level, fwd: level }; })(),
       rifle: { hold: [".OMO", ".OWO", ".OMO", ".OMO", ".OMO", ".OMO", ".OMO", "OMMO", "ODDO", "ODDO", "ODDO", "ODDO", ".ODO", ".OO."], fwd: ["OODDDDOOMMMMMMMMMMMMO", "ODDDDDDOMWWWWWWWWWWMO", ".ODDDDOOOOOOOOOOOOOO.", "..OOO.ODO............", "......OO............."] },
       bow: { hold: ["..O.", ".OD.", "OD..", "OD..", "OD..", "OD..", ".OD.", "..O.", ".OD.", "OD..", "OD..", "OD..", "OD..", ".OD.", "..O."], fwd: ["OD..........", ".OD.........", "..ODDDDDDOMO", ".OD.........", "OD.........."] }
     }

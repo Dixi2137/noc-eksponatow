@@ -235,7 +235,7 @@ Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej bro
 
 Sala 37 `hell` (rok 9999, „POZA CZASEM”, sceneria `hell`): Belzebub (`exhibits.js`, rig człowieka z nowym nakryciem `horns`, czerwona skóra, peleryna, włócznia; tyran tier 8 z 380 HP, ciężki cios co drugi zamach, obrażenia 20/34) i warunek sali DRUGI ODDECH ustawiony wprost w definicji poziomu (`levels.js` honoruje `twist` z definicji, inaczej cykl). Sceneria piekła: czerwony tint, zamurowane okna, sztandary „666”, tabliczka PIEKŁO, migoczące płomienie przy cokole i pęknięcia lawy w podłodze (`fire: true` w `pixel.js`), wektorowy motyw `hell` w `art.js`. Trofeum RÓG BELZEBUBA. Kaddafi przestał być „ostatnim bossem”.
 
-Belzebub ma miniguna (`figure.weapon: 'minigun'`, nowy sprite w `human.weapons` z sześcioma lufami i skrzynką amunicji; w trybie wektorowym rysowany jak karabin). Archetyp `gunman`: strzela z 420 px, specjal `burst` (seria: drugi strzał zaraz po pierwszym), nadal 380 HP i ciężki strzał co drugi.
+Belzebub ma miniguna (`figure.weapon: 'minigun'`, nowy sprite gatlinga w `human.weapons`: pakiet trzech luf z pierścieniem wylotowym, korpus z silnikiem, chwyt i skrzynka amunicji z mosiężną taśmą, noszony poziomo przy biodrze; w trybie wektorowym rysowany jak karabin). Archetyp `gunman`: strzela z 420 px, specjal `burst` (seria: drugi strzał zaraz po pierwszym), nadal 380 HP i ciężki strzał co drugi.
 
 ## Ekran startowy (2026-10-21)
 
