@@ -139,10 +139,10 @@
       { skin: '#c89a74', hair: '#1a1a1a', coat: '#6b4a2a', coatDark: '#44301a', trousers: '#6b4a2a', boots: '#1a1010', hat: 'peaked', hatColor: '#6b4a2a', weapon: 'pistol', epaulettes: '#d4af37', sash: '#2a8a4a' },
       'Ostatni z ludzi. Złoty pistolet i ciężka ręka. Dalej jest już tylko ogień.'),
     // The final exhibit: not from any museum. Tier 8 tyrant with extra HP and a heavy blow every second attack.
-    (() => { const b = villain('beelzebub', 'BELZEBUB', 'Belzebub', 'Belzebuba', 'PIEKŁO · POZA CZASEM', 'Piekło, poza czasem', 'tyrant', 8,
-      { skin: '#8a1a1a', hair: '#1a0606', coat: '#2a0808', coatDark: '#140303', trousers: '#1a0606', boots: '#0d0303', hat: 'horns', hatColor: '#3a2a1a', beard: 'goatee', weapon: 'spear', cloak: '#4a0a0a', armor: '#3a1010', armorDark: '#1a0606', sash: '#ff6a3a' },
+    (() => { const b = villain('beelzebub', 'BELZEBUB', 'Belzebub', 'Belzebuba', 'PIEKŁO · POZA CZASEM', 'Piekło, poza czasem', 'gunman', 8,
+      { skin: '#8a1a1a', hair: '#1a0606', coat: '#2a0808', coatDark: '#140303', trousers: '#1a0606', boots: '#0d0303', hat: 'horns', hatColor: '#3a2a1a', beard: 'goatee', weapon: 'minigun', cloak: '#4a0a0a', armor: '#3a1010', armorDark: '#1a0606', sash: '#ff6a3a' },
       'Władca much. Nikt go nie wystawiał, sam przyszedł. Więcej zdrowia niż ktokolwiek, ciężki cios co drugi zamach, a przy jednej trzeciej sił łapie drugi oddech.');
-      b.stats.hp = 380; b.stats.combat = { ...b.stats.combat, heavyEvery: 2, recovery: 1.5 }; b.stats.damage = { ...b.stats.damage, light: 20, heavy: 34, lightBlocked: 15, heavyBlocked: 22 }; return b; })(),
+      b.stats.hp = 380; b.stats.combat = { ...b.stats.combat, heavyEvery: 2, recovery: 1.5, range: 420, engageRange: 440 }; b.stats.damage = { ...b.stats.damage, light: 20, heavy: 34, lightBlocked: 15, heavyBlocked: 22 }; return b; })(),
     { id: 'napoleon', name: 'NAPOLEON BONAPARTE', alias: 'Napoleon', aliasGen: 'Napoleona', tag: 'CESARSTWO · 1812', era: 'Borodino, 1812', kind: 'postać historyczna',
       description: 'Cesarz Francuzów. Szybka szabla, krótkie przerwy między natarciami.',
       stats: { ...human, hp: 170, combat: { ...human.combat, approachSpeed: 95, windup: .9, heavyWindup: 1.2, strikeDuration: .38, recovery: 1.4, heavyRecovery: 1.8, heavyEvery: 3, idleDelay: .6 },

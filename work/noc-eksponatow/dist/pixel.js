@@ -487,6 +487,8 @@
       axe: { hold: ["....ODO", "..OOODO", ".OMMMDO", "OWMMMDO", "OMMMMDO", ".OMMMDO", "..OOODO", "....ODO", "....ODO", "....ODO", "....ODO", "....ODO", "....ODO", "....OO."], fwd: ["..........OOOOO.", "OODDDDDDDOOMMMWO", "ODDDDDDDDDOMMMMO", "OO........OMMMMO", "...........OOOO."] },
       staff: { hold: [".GG.", "GGGG", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD."], fwd: ["DDDDDDDDDDDDDDDDDDGG", "..................GG"] },
       pistol: { hold: [".OMO.", ".OWO.", ".OMO.", ".OMO.", "OMMMO", "OMMMO", "ODDO.", "ODDO.", "OOO.."], fwd: ["...OOOOOOOO", "...OMWWWWMO", "OOMMMOOOOOO", "ODDOOO.....", "ODDO.......", "OOO........"] },
+      minigun: { hold: [".OMMO.", "OMWMMO", "OMMMMO", "OMWMMO", "OMMMMO", "OMWMMO", ".OMMO.", ".OMMO.", "OGGGGO", "OGDDGO", "OGDDGO", ".ODDO.", ".ODO..", ".OO..."],
+        fwd: ["....OOOOOO..............", "...OGGGGGGOMMMMMMMMMMMO.", "OOOGDDDDGGOMWWWWWWWWWWMO", "ODDOGGGGGGOMMMMMMMMMMMMO", "ODDO.OOOOOOMWWWWWWWWWWMO", "OOO....ODO.OOOOOOOOOOOO.", ".......OO..............."] },
       rifle: { hold: [".OMO", ".OWO", ".OMO", ".OMO", ".OMO", ".OMO", ".OMO", "OMMO", "ODDO", "ODDO", "ODDO", "ODDO", ".ODO", ".OO."], fwd: ["OODDDDOOMMMMMMMMMMMMO", "ODDDDDDOMWWWWWWWWWWMO", ".ODDDDOOOOOOOOOOOOOO.", "..OOO.ODO............", "......OO............."] },
       bow: { hold: ["..O.", ".OD.", "OD..", "OD..", "OD..", "OD..", ".OD.", "..O.", ".OD.", "OD..", "OD..", "OD..", "OD..", ".OD.", "..O."], fwd: ["OD..........", ".OD.........", "..ODDDDDDOMO", ".OD.........", "OD.........."] }
     }
