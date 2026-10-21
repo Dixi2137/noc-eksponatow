@@ -347,3 +347,19 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
  .shop-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
  #shopViewFinishes,#shopViewWallet{padding:14px}
 }
+
+/* Kolekcja: nieodkryte eksponaty są zablokowane (rozmyta grafika, kłódka), w osobnej sekcji za odkrytymi. Skrzynie wyłącznie w sklepie. */
+.skin-divider{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:6px 0 2px;padding-bottom:6px;border-bottom:1px solid #2c3626;font-size:9px;font-weight:800;letter-spacing:1.6px;color:var(--cream)}
+.skin-divider small{font-size:8px;letter-spacing:1px;color:#7f8c74}
+.skin-card.locked{filter:none;background:#0d130c;border-style:dashed;border-color:#3a4532;cursor:help}
+.skin-art{position:relative;display:block}
+.skin-card.locked canvas,.collection-panel .skin-card.locked canvas{opacity:1;filter:blur(7px) saturate(.25) brightness(.45);transform:scale(1.04)}
+.skin-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#c9d2bd;font-size:8px;font-weight:800;letter-spacing:1.8px;text-shadow:0 2px 8px #000}
+.skin-lock svg{width:34px;height:34px;filter:drop-shadow(0 2px 6px #000)}
+.skin-card.locked strong{color:#8f9b84;letter-spacing:4px}
+.skin-card.locked .skin-state{display:inline-flex;align-items:center;gap:5px;color:#9ca690}
+.skin-card.locked .skin-state svg{width:11px;height:11px}
+.skin-card.locked .skin-perk strong{color:var(--rarity)}
+
+/* Okno losowania zawsze nad sklepem i kolekcją (oba to modale z z-index 50). */
+#loot.modal{z-index:70}
