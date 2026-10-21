@@ -267,7 +267,7 @@ grant execute on function public.mod_list(text, int) to authenticated;
 create table if not exists public.announcements (
   id bigint generated always as identity primary key,
   body text not null check (char_length(body) between 1 and 300),
-  kind text not null default 'info' check (kind in ('info', 'warning', 'event')),
+  kind text not null default 'info' check (kind in ('info', 'warning', 'event', 'sponsored')),
   author text,
   created_at timestamptz not null default now(),
   expires_at timestamptz not null default now() + interval '1 day'

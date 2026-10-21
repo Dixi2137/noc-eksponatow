@@ -130,6 +130,7 @@
     try {
       const l = await cloud.announcements.list(); assert.equal(l.ok, true); assert.equal(l.data[0].body, 'Turniej o 20:00'); assert.ok(calls.at(-1).url.includes('order=created_at.desc')); assert.equal(calls.at(-1).init.headers.Authorization, undefined, 'publicznie, bez tokena');
       cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl' } });
+      await cloud.mod.announce('Reklama', 'sponsored', 120); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { body: 'Reklama', kind: 'sponsored', seconds: 120 }, 'materiał sponsorowany idzie do RPC');
       await cloud.mod.announce('Hej', 'warning', 60); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_announce')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { body: 'Hej', kind: 'warning', seconds: 60 });
       await cloud.mod.unannounce(7); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 7 });
       let got = 0, changes = 0; const un = cloud.announcements.subscribe((row, changed) => changed ? changes++ : got++);

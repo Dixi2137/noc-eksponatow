@@ -146,7 +146,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
  async function setMaintenance(enabled){const r=await cloud.mod.setMaintenance(enabled,$('modMaintenanceText').value.trim());if(!r.ok){modMessage(r.error,true);return;}onMaintenance(r.data);modMessage(enabled?'Tryb serwisowy włączony: gracze widzą ekran serwisowy.':'Tryb serwisowy wyłączony.');}
  // Announcements ticker: active rows (live over Realtime or caught by the poll) take turns flying across the bar above the arena,
  // one pass every few seconds, until each one expires or is withdrawn. Closing the bar hides it until the next new announcement.
- const announceKinds={info:'OGŁOSZENIE',event:'WYDARZENIE',warning:'OSTRZEŻENIE'};
+ const announceKinds={info:'OGŁOSZENIE',event:'WYDARZENIE',warning:'OSTRZEŻENIE',sponsored:'MATERIAŁ SPONSOROWANY'};
  const ticker={active:new Map(),order:[],index:0,anim:null,timer:null};
  function announceRows(){const now=Date.now();for(const [id,row] of ticker.active)if(new Date(row.expires_at).getTime()<=now)ticker.active.delete(id);return [...ticker.active.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));}
  function onAnnouncement(row,changed){const live=new Date(row.expires_at)>new Date();if(live){const fresh=!ticker.active.has(row.id);ticker.active.set(row.id,row);if(fresh&&!changed){if(['menu','result'].includes(screen))toast(`${announceKinds[row.kind]||'Ogłoszenie'}: ${row.body.slice(0,80)}${row.body.length>80?'…':''}`);ticker.index=Math.max(0,announceRows().indexOf(row));runTicker(true);const b=$('announceBar');b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse');}}else ticker.active.delete(row.id);if(!announceRows().length)stopTicker();}
