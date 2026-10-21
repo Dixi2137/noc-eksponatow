@@ -40,6 +40,8 @@ Dane nowej kolekcji: dist/knights.js. Moduł musi być załadowany przed perks.j
 
 ## Sklep — przygotowanie płatności
 
+
+Układ sklepu (faza73): trzy zakładki. **SKRZYNIE**: po lewej katalog kompaktowych kafelków (pikselowa skrzynia, numer, kategoria, nazwa, koszt w ✦, planowana cena w zł, postęp puli) pogrupowany w sekcje według `crateGroups`, z filtrami rodzin nad listą; po prawej przyklejony panel wybranej skrzyni (grafika, opis, szanse na rzadkości, rozwijana zawartość, przycisk otwarcia za żetony, planowana cena). Poniżej 900 px panel schodzi pod katalog. **WYKOŃCZENIA**: siatka 28 mitycznych powłok z ikoną na aktualnej broni, ceną i przyciskiem KUP z salda. **PORTFEL**: saldo, wpłaty demo i notka o płatnościach. Żetony i saldo są zawsze widoczne w nagłówku sklepu.
 Planowane ceny skrzyń: Galeria 19,99 zł, Skarbiec Królów 49,99 zł, Relikwiarz Legend 99,99 zł. Ceny PLN są wyłącznie zapowiedzią; przycisk płatności jest wyłączony i nie pobiera pieniędzy ani nie przyznaje nagród. Działa otwieranie za żetony.
 
 Uruchomienie prawdziwych zakupów wymaga konta sprzedawcy i integracji operatora z backendem: ceny i zamówienia po stronie serwera, potwierdzony webhook płatności, jednokrotne przyznanie nagrody oraz konto gracza z zapisem na serwerze. Obecny zapis localStorage służy rozgrywce lokalnej; nie jest autorytatywnym portfelem zakupów. Konfiguracja ofert: dist/loot.js. Widok sklepu: dist/shop.js.
