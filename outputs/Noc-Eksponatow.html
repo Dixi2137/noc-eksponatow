@@ -2826,8 +2826,9 @@ window.MuseumConfig = Object.freeze({
   }
   // Boss specials by archetype: a feint (windup broken off, then a quick one) or a double strike (second windup right after the first).
   const specialsByArchetype = { duelist: 'feint', trickster: 'feint', brute: 'double', tyrant: 'double', gunman: 'burst' };
-  // Pressure grows with the hall number: faster, pushier foes that shrug off knock-back. 0 in the first hall, 1 from hall 33 on.
-  function pressureFor(level) { return clamp((Number(level) - 1) / 32, 0, 1); }
+  // Pressure grows with the hall number: faster, pushier, harder-hitting foes that shrug off knock-back.
+  // Hall 1 is the tutorial (0); hall 2 starts at 0.3 and the curve reaches 1 by hall 18.
+  function pressureFor(level) { const n = Number(level); return n <= 1 || !Number.isFinite(n) ? 0 : clamp(.3 + (n - 2) / 22, 0, 1); }
   function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false, difficulty = 1) {
     const exhibit = window.MuseumExhibits.get(exhibitId);
     const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
@@ -2847,6 +2848,10 @@ window.MuseumConfig = Object.freeze({
       combat.windup *= 1 - pressure * .2; combat.heavyWindup *= 1 - pressure * .2;
       combat.recovery *= 1 - pressure * .25; combat.heavyRecovery *= 1 - pressure * .25;
       combat.preferredGap = Math.max(combat.minGap + 24, combat.preferredGap * (1 - pressure * .2)); combat.repositionGap = Math.max(combat.minGap + 30, combat.repositionGap * (1 - pressure * .2));
+      if (pressure >= .6) combat.heavyEvery = Math.max(2, combat.heavyEvery - 1);
+      // Blows hurt more and cost more stamina to block; the knight's reflexes stay the same.
+      for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * (1 + pressure * .45));
+      for (const key of ['blockCostLight', 'blockCostHeavy']) damage[key] = Math.round(damage[key] * (1 + pressure * .3));
     }
     const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1));
     const special = specials && exhibit.stats.archetype ? specialsByArchetype[exhibit.stats.archetype] || null : null;
@@ -3033,7 +3038,7 @@ window.MuseumConfig = Object.freeze({
       r.defenseKind = 'guard';
       const amount = Math.max(1, Math.ceil(w.weakGuardDamage * .3 * state.perk.stats.weakGuardDamageMultiplier));
       damageFoe(amount);
-      const moved = pushFoe((ranged ? 64 : state.weapon.type === 'heavy' || state.weapon.type === 'polearm' ? 40 : 26) * (1 - state.pressure * .55));
+      const moved = pushFoe((ranged ? 56 : state.weapon.type === 'heavy' || state.weapon.type === 'polearm' ? 36 : 24) * (1 - state.pressure * .6));
       const stopped = r.state !== 'stagger' && staggerFoe(.42 * (1 - state.pressure * .5));
       label(moved > 4 ? 'ODRZUT' : 'DRAŚNIĘCIE', r.x - 70, FLOOR - 285, '#ffd27a', 20);
       hint(stopped ? (ranged ? `Trafiony! ${alias()} cofa się pod ostrzałem.` : `Trafiony! ${alias()} cofa się o krok.`) : `${alias()} trzyma się na nogach i idzie dalej. Czekaj na jego cios.`, 1.4);
@@ -3078,7 +3083,8 @@ window.MuseumConfig = Object.freeze({
         label('OSŁABIONA GARDA', p.x + 50, FLOOR - 300, '#ff9d8e', 21);
         hint('Brakuje wytrzymałości. Odstąp i pozwól jej wrócić.', 2);
       }
-    } else if (p.stamina >= cost && p.attack <= 0) {
+    } else if (p.stamina >= cost && p.attack <= 0 && state.rng() >= state.pressure * .6) {
+      // The free reflex dodge gets unreliable as the pressure rises: up to 60% of unguarded blows land.
       p.stamina -= cost; p.evade = .42;
       label('UNIK', p.x, FLOOR - 265, '#9bd9d1', 22); tone('dodge');
       hint(`Automatyczny unik. Atakuj teraz — garda ${gen()} jest słaba!`, 1.8);
@@ -3443,7 +3449,7 @@ window.MuseumConfig = Object.freeze({
     frame(dt = 1 / 60) { step(dt); draw(); return snapshot(); },
     input: setInput,
     setState(patch) { for (const key in patch) { if (key === 'player' || key === 'foe') Object.assign(state[key], patch[key]); else state[key] = patch[key]; } return snapshot(); },
-    playerHit, foeHit
+    playerHit, foeHit, state: () => state
   };
   // Tests drive time by hand; the live loop would race them.
   if (typeof requestAnimationFrame === 'function' && !window.__MUSEUM_TEST__) frame = requestAnimationFrame(loop);

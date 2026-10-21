@@ -74,6 +74,8 @@
     s = start({ difficulty: 1, rng: () => 0 }); t.setState({ foe: { x: 720, state: 'windup', timer: 0, heavy: true }, player: { x: 365, stamina: 100 } }); hold('attack', .16); s = g.getState();
     assert.equal(s.foeState, 'windup', 'ciężki zamach trwa'); assert.equal(s.foe.hp, 160);
     // Hall 37: full pressure — twice the approach speed, half the idle delay, dodges and an unbreakable windup.
+    s = start({ difficulty: 2 }); assert.ok(Math.abs(s.pressure - .3) < .001, 'sala 2 już z presją'); s = start({ difficulty: 18 }); assert.equal(s.pressure, 1, 'sala 18 pełna');
+    const trex = window.MuseumExhibits.get('trex').stats; s = start({ difficulty: 37 }); assert.equal(g._test.state().damage.light, Math.round(trex.damage.light * 1.45), 'cios boli o 45% więcej'); assert.equal(s.combat.heavyEvery, Math.max(2, trex.combat.heavyEvery - 1), 'częstsze ciężkie');
     s = start({ difficulty: 37, rng: () => .1 }); assert.equal(s.pressure, 1); assert.ok(Math.abs(s.combat.approachSpeed - base * 2) < .01, 'dwa razy szybszy'); assert.ok(Math.abs(s.combat.idleDelay - baseIdle * .5) < .001, 'pół przerwy');
     t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } }); hold('attack', .16); s = g.getState();
     assert.equal(s.foe.hp, 160); assert.equal(s.foe.defenseKind, 'dodge', 'pod presją unika');
@@ -81,6 +83,9 @@
     assert.equal(s.foeState, 'windup', 'pod presją zamach trwa'); assert.equal(s.foe.hp, 160);
     s = start({ difficulty: 37, rng: () => .9 }); t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } }); hold('attack', .16); s = g.getState();
     assert.ok(s.foe.x > 725 && s.foe.x - 720 < 20, `mniejszy odrzut: ${s.foe.x - 720}`);
+    // Under full pressure the free reflex dodge fails on a low roll and the blow lands; hall 1 still dodges it.
+    const strikeAt = (difficulty, roll) => { s = start({ difficulty, rng: () => roll }); t.setState({ foe: { x: 365 + 330, state: 'strike', timer: 0, attackDone: false, attackTargetX: 365, heavy: false }, player: { x: 365, stamina: 100, guarding: false } }); t.step(STRIKE); return g.getState(); };
+    assert.equal(strikeAt(1, .1).player.hp, 120, 'sala 1: odruchowy unik'); assert.ok(strikeAt(37, .1).player.hp < 120, 'sala 37: cios dochodzi'); assert.equal(strikeAt(37, .9).player.hp, 120, 'sala 37: unik przy dobrym rzucie');
     assert.ok(window.MuseumLevels.all().every(l => l.number >= 1), 'numer sali to poziom presji');
   });
   test('Zmęczona parada T-rexa w czasie odpoczynku przepuszcza 9 obrażeń miecza', () => {
