@@ -57,6 +57,12 @@
     hold('attack', .16); const s = g.getState();
     assert.equal(s.foe.hp, 160); assert.equal(s.foe.defenseKind, 'guard');
   });
+  test('Regresja: po trafieniu wroga jego ciosy dalej odejmują HP (klucz damage nie miesza licznika z tabelą obrażeń)', () => {
+    start({ rng: () => .1 }); t.setState({ foe: { x: 650, state: 'recover', timer: 0 }, player: { x: 365, stamina: 100 } }); hold('attack', .16);
+    let s = g.getState(); assert.ok(s.foe.hp < 160, 'rycerz trafił'); assert.equal(typeof t.state().damage, 'number', 'licznik obrażeń to liczba');
+    t.setState({ foe: { x: 650, state: 'strike', timer: 0, attackDone: false, attackTargetX: 365 }, player: { x: 365, stamina: 100, attack: 0, cooldown: 0 } }); t.step(STRIKE);
+    s = g.getState(); assert.ok(Number.isFinite(s.player.hp) && s.player.hp < 120, `HP po ciosie: ${s.player.hp}`);
+  });
   test('Presja: trafiony w marszu wróg cofa się i chwieje; zamach da się przerwać; w sali 37 jest szybszy, unika i trzyma równowagę', () => {
     // Hall 1: a sword hit on the advancing T-rex shoves it back, chips HP and stops it for a moment.
     let s = start({ difficulty: 1, rng: () => .9 }); assert.equal(s.pressure, 0);
@@ -75,7 +81,7 @@
     assert.equal(s.foeState, 'windup', 'ciężki zamach trwa'); assert.equal(s.foe.hp, 160);
     // Hall 37: full pressure — twice the approach speed, half the idle delay, dodges and an unbreakable windup.
     s = start({ difficulty: 2 }); assert.ok(Math.abs(s.pressure - .45) < .001, 'sala 2 już z presją'); s = start({ difficulty: 12 }); assert.equal(s.pressure, 1, 'sala 12 pełna');
-    const trex = window.MuseumExhibits.get('trex').stats; s = start({ difficulty: 37 }); assert.equal(g._test.state().damage.light, Math.round(trex.damage.light * 1.7), 'cios boli o 70% więcej'); assert.equal(s.foe.maxHP, Math.round(trex.hp * 1.3), 'wróg ma 30% więcej HP'); assert.ok(Math.abs(g._test.state().perk.stats.perfectParryWindow - .27 * .7) < .001, 'ciaśniejsza perfekcyjna parada'); assert.equal(s.combat.heavyEvery, Math.max(2, trex.combat.heavyEvery - 1), 'częstsze ciężkie');
+    const trex = window.MuseumExhibits.get('trex').stats; s = start({ difficulty: 37 }); assert.equal(g._test.state().foeDamage.light, Math.round(trex.damage.light * 1.5), 'cios boli o 50% więcej'); assert.equal(s.foe.maxHP, Math.round(trex.hp * 1.3), 'wróg ma 30% więcej HP'); assert.ok(Math.abs(g._test.state().perk.stats.perfectParryWindow - .27 * .7) < .001, 'ciaśniejsza perfekcyjna parada'); assert.equal(s.combat.heavyEvery, Math.max(2, trex.combat.heavyEvery - 1), 'częstsze ciężkie');
     s = start({ difficulty: 37, rng: () => .1 }); assert.equal(s.pressure, 1); assert.ok(Math.abs(s.combat.approachSpeed - base * 2.4) < .01, '2,4 razy szybszy'); assert.ok(Math.abs(s.combat.idleDelay - baseIdle * .5) < .001, 'pół przerwy');
     t.setState({ foe: { x: 720, state: 'approach', timer: .3 }, player: { x: 365, stamina: 100, cooldown: 0 } }); hold('attack', .16); s = g.getState();
     assert.equal(s.foe.hp, s.foe.maxHP); assert.equal(s.foe.defenseKind, 'dodge', 'pod presją unika');
@@ -105,7 +111,7 @@
     t.step(STRIKE); let s = g.getState();
     assert.equal(s.player.hp, 120); assert.ok(s.player.evade > 0); assert.ok(s.player.stamina < 100);
     start({ rng: () => .1 }); t.setState({ foe: { x: 650, state: 'strike', timer: 0, attackDone: false }, player: { x: 365, stamina: 100 } });
-    t.step(STRIKE); s = g.getState(); assert.equal(s.player.hp, 120 - t.state().damage.light, 'spóźnione parowanie: pełne obrażenia');
+    t.step(STRIKE); s = g.getState(); assert.equal(s.player.hp, 120 - t.state().foeDamage.light, 'spóźnione parowanie: pełne obrażenia');
   });
   test('Świeża garda odbija cios i rani wyłącznie T-rexa (20 HP)', () => {
     start(); t.setState({ elapsed: 2, foe: { x: 650, state: 'strike', timer: 0, attackDone: false }, player: { x: 365, stamina: 100 } });

@@ -50,7 +50,7 @@
       combat.preferredGap = Math.max(combat.minGap + 24, combat.preferredGap * (1 - pressure * .2)); combat.repositionGap = Math.max(combat.minGap + 30, combat.repositionGap * (1 - pressure * .2));
       if (pressure >= .6) combat.heavyEvery = Math.max(2, combat.heavyEvery - 1);
       // Blows hurt more and cost more stamina to block; the knight's reflexes stay the same.
-      for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * (1 + pressure * .7));
+      for (const key of ['light', 'heavy', 'lightBlocked', 'heavyBlocked']) damage[key] = Math.round(damage[key] * (1 + pressure * .5));
       for (const key of ['blockCostLight', 'blockCostHeavy']) damage[key] = Math.round(damage[key] * (1 + pressure * .5));
       // Tighter perfect-parry timing and a tougher foe.
       stats.perfectParryWindow = (stats.perfectParryWindow ?? .27) * (1 - pressure * .3);
@@ -58,7 +58,7 @@
     const foeHP = Math.round(exhibit.stats.hp * (twist?.foeHP || 1) * (1 + pressure * .3));
     const special = specials && exhibit.stats.archetype ? specialsByArchetype[exhibit.stats.archetype] || null : null;
     return {
-      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, damage, theme, twist, special, pressure, secondWindUsed: false, clockWarned: false,
+      status: 'idle', elapsed: 0, combo: 0, parries: 0, damage: 0, skin: perk.id, perk, exhibit, weapon, combat, foeDamage: damage, theme, twist, special, pressure, secondWindUsed: false, clockWarned: false,
       hint: `Zbliż się do ${exhibit.aliasGen || exhibit.alias + 'a'}. Obserwuj jego ruchy.`, hintUntil: 0,
       player: { x: 365, hp: stats.maxHP, maxHP: stats.maxHP, stamina: stats.maxStamina, maxStamina: stats.maxStamina, facing: 1, attack: 0, attackDone: false,
         cooldown: 0, guardSince: -99, guarding: false, hurt: 0, evade: 0, defense: 0, step: 0, lastDamage: -99,
@@ -251,7 +251,7 @@
   function foeHit() {
     if (state.status !== 'running' || state.player.hp <= 0 || state.foe.hp <= 0) return;
     const p = state.player, r = state.foe;
-    const stats = state.perk.stats, combat = state.combat, dmg = state.damage || state.exhibit.stats.damage, reflect = state.weapon.stats.parryReflect;
+    const stats = state.perk.stats, combat = state.combat, dmg = state.foeDamage || state.exhibit.stats.damage, reflect = state.weapon.stats.parryReflect;
     // A strike is committed when the tell begins; it cannot home in on a retreating knight.
     const target = r.attackTargetX ?? p.x;
     const inRange = r.x - p.x <= combat.range && Math.abs(p.x - target) <= combat.strikeReach;
@@ -279,7 +279,7 @@
       if (p.stamina >= cost) {
         p.stamina -= cost;
         // A plain block still lets part of the blow through under pressure; only a perfect parry takes nothing.
-        const chip = Math.round((r.heavy ? dmg.heavyBlocked : dmg.lightBlocked) * state.pressure * .5);
+        const chip = Math.round((r.heavy ? dmg.heavyBlocked : dmg.lightBlocked) * state.pressure * .4);
         if (chip > 0) damagePlayer(chip);
         label(chip > 0 ? 'BLOK −' + chip : 'BLOK', p.x, FLOOR - 260, '#bed8e2', 22);
         hint(chip > 0 ? 'Blok przepuszcza część ciosu. Garda tuż przed uderzeniem odbija go w całości.' : 'Blok! Naciśnij gardę tuż przed ciosem, żeby go odbić.', 1.8);
