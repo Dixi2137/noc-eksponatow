@@ -307,7 +307,7 @@ Katalog wykończeń (`dist/finishes.js`, `window.MuseumFinishes`) ma ~388 powło
 
 ## Tryb pikselowy (2026-10-21)
 
-Przycisk ▦ w górnym pasku przełącza grę w prawdziwy pixel art (`profile.pixel`). Rysowanie przejmuje `dist/pixel.js` (`window.MuseumPixel`): scena ma 288 × 162 pikseli (czynnik 5 względem 1440 × 810), rysowana na małym płótnie i powiększana bez wygładzania przez `MuseumArt.pixelFrame`.
+Gra działa wyłącznie w pixel arcie (`profile.pixel` jest zawsze `true`, przycisk ▦ został usunięty na życzenie; wektorowy renderer w `art.js` zostaje tylko jako zapas kodu). Rysowanie przejmuje `dist/pixel.js` (`window.MuseumPixel`): scena ma 288 × 162 pikseli (czynnik 5 względem 1440 × 810), rysowana na małym płótnie i powiększana bez wygładzania przez `MuseumArt.pixelFrame`.
 
 - **Sala** jest składana z kafli paczki **Kenney Tiny Dungeon** (CC0, `dist/assets/kenney/`, licencja obok): ceglane ściany, kolumny, wielkie drewniane drzwi w wejściu, herby, skrzynie, kamienna podłoga. Motywy scenerii to tinty, okna (księżyc, słońce, śnieg, zamurowane) i sztandary rysowane pikselami. Tilesheet jest wbudowany w `pixel.js` jako data URL, więc build offline działa.
 - **Rycerz** (28 × 40 px) i **szkielet T-rexa** (60 × 40 px, Velociraptor to ten sam szkielet w skali 0,9 w innym odcieniu) to sprite'y z warstw tekstowych (`blit`), z obrysem i trzema tonami cienia, składane z części (głowa, pióropusz, tors, ręce, nogi, miecz, tarcza, peleryna) w pozach idle, walk, attack, guard, dodge, hurt, dead. Paleta rycerza pochodzi z kolorów skina, więc wszystkie 58 strojów działa od razu.

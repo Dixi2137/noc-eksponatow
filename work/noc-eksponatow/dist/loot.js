@@ -209,7 +209,7 @@
   const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(item&&item.kind===kind&&(kind==='skin'||kind==='weapon'))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}
   return {
    coins:integer(source.coins),owned,
-   skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,pixel:source.pixel===undefined?true:!!source.pixel,   // pixel art is the default look; ▦ switches to the vector version
+   skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,pixel:true,   // pixel art is the only look
    lootVersion:2,freeCrates:Number(source.lootVersion)>=2 ? Math.min(1,integer(source.freeCrates)) : 1,
    pendingReward,pendingCrateId:pendingReward ? (getCrate(source.pendingCrateId)||crates[0]).id : null,
    // Night patrol progress: ids of cleared levels and the level chosen for the next night.
