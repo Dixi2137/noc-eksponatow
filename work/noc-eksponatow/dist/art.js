@@ -309,10 +309,10 @@
     if(o.skin==='brass'){base='#947247';dark='#302b29';light='#d9b773';edge='#c4a668';glint='#ffe1a0'}
     if(o.skin==='frost'){base='#6c9ca5';dark='#193747';light='#c5f6ed';edge='#92e8e5';glint='#e5ffff'}
     if(o.skin==='obsidian'){base='#353d55';dark='#111a29';light='#9c8bc1';edge='#9d83bd';glint='#d7b4ff'}
-    const special={verdigris:['#4a947b','#152f29','#b8dfad','#91c9a4','#e5ffc5'],ember:['#a54e37','#351b24','#ffc187','#d88c57','#fff1b7'],royal:['#67528b','#211c3c','#dbb9ef','#bba0df','#ffebff'],solar:['#b7953c','#3e321b','#fff0ac','#edcf76','#ffffe1']}[o.skin];
+    const special={verdigris:['#4a947b','#152f29','#b8dfad','#91c9a4','#e5ffc5'],ember:['#a54e37','#351b24','#ffc187','#d88c57','#fff1b7'],royal:['#67528b','#211c3c','#dbb9ef','#bba0df','#ffebff'],solar:['#b7953c','#3e321b','#fff0ac','#edcf76','#ffffe1'],'jan-pawel-ii':['#f4f1e8','#5a5046','#ffffff','#e6dcc2','#ffe9a8']}[o.skin];
     if(special)[base,dark,light,edge,glint]=special;
     if(look){base=look.colors[0];dark=mixColor(base,'#07111c',.76);light=mixColor(base,'#f3f5e7',.53);edge=look.colors[2];glint=look.colors[3]||mixColor(edge,'#fff9e4',.55)}
-    const cloth=look?[look.colors[1],mixColor(look.colors[1],'#071016',.67),mixColor(look.colors[1],look.colors[2],.35)]:({brass:['#581e32','#26182b','#7a3041'],frost:['#35708a','#16293e','#77b7bd'],obsidian:['#4d2f62','#1b162a','#805e91'],verdigris:['#22624e','#12291f','#6f9f60'],ember:['#a43127','#36151d','#e77b37'],royal:['#62408a','#241637','#a46ace'],solar:['#b28c38','#44311e','#e9cf7d']}[o.skin]||['#581e32','#26182b','#7a3041']);
+    const cloth=look?[look.colors[1],mixColor(look.colors[1],'#071016',.67),mixColor(look.colors[1],look.colors[2],.35)]:({brass:['#581e32','#26182b','#7a3041'],frost:['#35708a','#16293e','#77b7bd'],obsidian:['#4d2f62','#1b162a','#805e91'],verdigris:['#22624e','#12291f','#6f9f60'],ember:['#a43127','#36151d','#e77b37'],royal:['#62408a','#241637','#a46ace'],solar:['#b28c38','#44311e','#e9cf7d'],'jan-pawel-ii':['#b3202a','#7a1119','#d9b24a']}[o.skin]||['#581e32','#26182b','#7a3041']);
     c.save();c.translate(x,y);ellipse(c,0,0,77,13,'rgba(0,0,0,.49)');c.scale(f,1);
     if(look?.motif==='ghost')c.globalAlpha*=.82;
     if(pose==='dead'){c.translate(-35,-10);c.rotate(-1.44)}else if(pose==='dodge'){c.translate(-23,25);c.rotate(-.16)}else if(pose==='hurt'){c.translate(-12,3);c.rotate(-.08)}

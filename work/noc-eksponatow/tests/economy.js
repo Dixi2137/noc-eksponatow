@@ -25,7 +25,8 @@
     for (const item of loot.items) { assert.ok(!ids.has(item.id), `duplikat ${item.id}`); ids.add(item.id); assert.ok(loot.rarities[item.rarity], item.id); assert.ok(loot.value(item) >= 0); }
     assert.equal(loot.items.filter(i => i.kind === 'weapon').length, weapons.all().length);
     assert.equal(loot.items.filter(i => i.kind === 'card').length, cards.all().length);
-    assert.equal(loot.value('brass'), 0, 'podstawowy strój nic nie jest wart'); assert.equal(loot.value('stachu-jones'), 0, 'prezent nie jest na sprzedaż');
+    assert.equal(loot.value('brass'), 0, 'podstawowy strój nic nie jest wart'); assert.equal(loot.value('stachu-jones'), 0, 'prezent nie jest na sprzedaż'); assert.equal(loot.value('jan-pawel-ii'), 0, 'Jan Paweł II też jest prezentem');
+    const jp2 = loot.migrate({}); assert.ok(jp2.owned.includes('jan-pawel-ii'), 'Jan Paweł II od razu w szafie'); assert.equal(window.MuseumPerks.get('jan-pawel-ii').stats.perfectParryHeal, 3, 'perk NIE LĘKAJCIE SIĘ');
     assert.equal(loot.value('revolver'), 4500); assert.equal(loot.sellPrice('revolver'), 1800);
   });
   test('Skrzynia broni losuje tylko bronie, skrzynia kart tylko karty, galeria tylko stroje', () => {

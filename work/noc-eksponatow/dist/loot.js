@@ -29,7 +29,7 @@
   forge:[14,19,29,30,36,37,49],
   desert:[9,20,26,48]
  });
- const originalCategories=Object.freeze({brass:'forge',frost:'elements',obsidian:'shadow',verdigris:'nature',ember:'elements',royal:'royal',solar:'royal','stachu-jones':'special'});
+ const originalCategories=Object.freeze({brass:'forge',frost:'elements',obsidian:'shadow',verdigris:'nature',ember:'elements',royal:'royal',solar:'royal','stachu-jones':'special','jan-pawel-ii':'special'});
  function skinCategory(id) {
   if(Object.hasOwn(originalCategories,id))return originalCategories[id];
   const number=Number(id.replace(/^knight-/,''));
@@ -163,6 +163,7 @@
  const skins = Object.freeze([
   {id:'brass',name:'STARA GWARDIA',era:'STAL · KOLEKCJA PODSTAWOWA',rarity:'basic',weight:0},
   {id:'stachu-jones',name:'Stachu Jones',era:'EKSPONAT SPECJALNY · PREZENT DLA CIEBIE',description:'Siwy wąs, granatowy płaszcz i kosa. Rycerz ostatniego obchodu.',rarity:'legendary',weight:0,gift:true},
+  {id:'jan-pawel-ii',name:'Jan Paweł II',era:'EKSPONAT SPECJALNY · PREZENT DLA CIEBIE',description:'Biała sutanna, czerwona mucet i złoty krzyż. Papież Polak na nocnym obchodzie.',rarity:'legendary',weight:0,gift:true},
   {id:'frost',name:'MROŹNY RELIKT',era:'SREBRO · RZADKI EKSPONAT',rarity:'rare',weight:20},
   {id:'obsidian',name:'CZARNY KUSTOSZ',era:'OBSYDIAN · RZADKI EKSPONAT',rarity:'rare',weight:20},
   {id:'verdigris',name:'PATYNA WIEKÓW',era:'PATYNA · RZADKI EKSPONAT',rarity:'rare',weight:20},

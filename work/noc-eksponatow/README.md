@@ -14,7 +14,7 @@ Grafika powstaje bezpośrednio na canvasie, dźwięki są syntezowane przez Web 
 
 T-rex pilnuje dystansu między sylwetkami, zapowiada każdy atak i zatrzymuje się na czas zamachu. Po ciosie ma okres słabej gardy, a potem odzyskuje dystans przed kolejnym atakiem.
 
-Skrzynki zawierają 56 dodatkowych skinów w czterech rzadkościach. Osobno dostępny jest bezpłatny eksponat specjalny Stachu Jones. Pierwsza Skrzynia Galerii jest darmowa; następne kosztują 600 żetonów. Skarbiec Królów kosztuje 1800 żetonów i gwarantuje co najmniej epicki strój; Relikwiarz Legend kosztuje 4500 żetonów i gwarantuje legendarny strój. Żetony zdobywasz w grze. Brak duplikatów; aktualne szanse są pokazane przed otwarciem. Nagroda zapisuje się przed animacją i jest odzyskiwana po odświeżeniu. Założenie skina jest osobną decyzją przed walką.
+Skrzynki zawierają 56 dodatkowych skinów w czterech rzadkościach. Osobno dostępne są bezpłatne eksponaty specjalne: Stachu Jones i Jan Paweł II. Pierwsza Skrzynia Galerii jest darmowa; następne kosztują 600 żetonów. Skarbiec Królów kosztuje 1800 żetonów i gwarantuje co najmniej epicki strój; Relikwiarz Legend kosztuje 4500 żetonów i gwarantuje legendarny strój. Żetony zdobywasz w grze. Brak duplikatów; aktualne szanse są pokazane przed otwarciem. Nagroda zapisuje się przed animacją i jest odzyskiwana po odświeżeniu. Założenie skina jest osobną decyzją przed walką.
 
 ## Zdolności skinów
 
@@ -51,6 +51,10 @@ Otwarcie trwa około 8,2 sekundy: pieczęć (0,9 s), przewijanie z wyhamowaniem 
 ## Stachu Jones
 
 58. strój, specjalny prezent dostępny od razu w kolekcji. Inspirowany zdjęciem przekazanym przez użytkownika: siwe włosy i wąs, granatowy płaszcz, bordowa tunika, zużyta zbroja i kosa na drewnianym trzonie. Zdolność UPÓR STACHA daje +30 maks. HP (150 HP). Prezent nie zmienia istniejącego wyboru stroju ani szans skrzyń.
+
+## Jan Paweł II
+
+Drugi eksponat specjalny, dostępny od razu dla każdego gracza: biała sutanna, czerwona mucet ze złotym obszyciem, piuska i złoty krzyż na piersi. W pikselowym trybie ma własnego sprite'a (długa sutanna zamiast nagolenników), a w walce trzyma dowolną wybraną broń. Perk „Nie lękajcie się”: +3 HP za każdą perfekcyjną paradę i 130 HP na start.
 
 ## Faza 0 — fundament (2026-10-19)
 

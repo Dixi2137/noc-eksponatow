@@ -72,7 +72,7 @@ function pixelUI(){const on=!!profile.pixel;window.MuseumArt?.setPixelFactor(on?
   if(!(screen==='intro'&&introTime>=totalIntro)&&!(screen==='card'&&cardTime>=totalCard)&&!(screen==='timejump'&&jumpTime>=totalJump))return;
   const level=levels.get(night.levelId),exhibit=levelExhibit(level);
   screen='fight';['intro','card','timejump'].forEach(id=>show(id,false));show('hud');show('combatHint');show('stageMeta');
-  $('playerName').textContent=profile.skin==='stachu-jones'?'STACHU JONES':'ŻELAZNY RYCERZ';$('foeName').textContent=exhibit.name;
+  $('playerName').textContent=profile.skin==='stachu-jones'?'STACHU JONES':profile.skin==='jan-pawel-ii'?'JAN PAWEŁ II':'ŻELAZNY RYCERZ';$('foeName').textContent=exhibit.name;
   $('stageHall').textContent=twistOf(level)?`${level.hall} · ${twistOf(level).name}`:level.hall;$('stageYear').innerHTML=`${level.yearLabel} <span class="meta-live">●</span>`;
   $('topStatus').textContent=`SALA ${String(level.number).padStart(2,'0')} / RYCERZ KONTRA ${exhibit.alias.toLocaleUpperCase('pl-PL')}`;stageState();
   show('ammoRow',false);window.MuseumGame.start({skin:profile.skin,exhibit:exhibit.id,weapon:profile.weapon||'sword',finish:profile.finish||null,theme:level.theme,twist:level.twist||null,specials:level.number>3,modifiers:loot.modifiers(profile),sound:profile.sound});

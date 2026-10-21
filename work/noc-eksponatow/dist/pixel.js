@@ -248,13 +248,81 @@
     let base = '#687b7e', dark = '#172b36', light = '#bad2c8', glint = '#e5dfab', cloth = ['#581e32', '#26182b'];
     const special = { brass: ['#947247', '#302b29', '#d9b773', '#ffe1a0', '#581e32', '#26182b'], frost: ['#6c9ca5', '#193747', '#c5f6ed', '#e5ffff', '#35708a', '#16293e'], obsidian: ['#353d55', '#111a29', '#9c8bc1', '#d7b4ff', '#4d2f62', '#1b162a'],
       verdigris: ['#4a947b', '#152f29', '#b8dfad', '#e5ffc5', '#22624e', '#12291f'], ember: ['#a54e37', '#351b24', '#ffc187', '#fff1b7', '#a43127', '#36151d'], royal: ['#67528b', '#211c3c', '#dbb9ef', '#ffebff', '#62408a', '#241637'], solar: ['#b7953c', '#3e321b', '#fff0ac', '#ffffe1', '#b28c38', '#44311e'],
-      'stachu-jones': ['#77858b', '#263742', '#c6d1cc', '#dfe8e2', '#18283f', '#0d192b'] }[skin];
+      'stachu-jones': ['#77858b', '#263742', '#c6d1cc', '#dfe8e2', '#18283f', '#0d192b'], 'jan-pawel-ii': ['#f4f1e8', '#5a5046', '#ffffff', '#ffe9a8', '#b3202a', '#7a1119'] }[skin];
     if (special) [base, dark, light, glint, cloth[0], cloth[1]] = special;
     const look = window.MuseumKnights?.skins?.find(s => s.id === skin);
     if (look) { base = look.colors[0]; dark = mix(base, '#07111c', .7); light = mix(base, '#f3f5e7', .5); glint = look.colors[3] || mix(look.colors[2], '#fff9e4', .55); cloth = [look.colors[1], mix(look.colors[1], '#071016', .6)]; }
     return { O: mix(dark, '#000000', .55), B: base, D: dark, L: light, G: '#c9a94a', C: cloth[0], c: cloth[1], K: '#0c2530', E: '#b7f9d5', W: '#f5f6d3' };
   }
+
+  // ── Jan Paweł II: white cassock, red mozzetta with gold trim, zucchetto and pectoral cross ──
+  const popeParts = {
+    head: [
+      "...OOOOOO...",
+      "..OWWWWWWO..",
+      ".OHWWWWWWHO.",
+      ".OHSSSSSSHO.",
+      "OHSSSSSSSSHO",
+      "OHSSKSSSSKHO",
+      "OHSSSSSSSSHO",
+      "OSSSSSNSSSSO",
+      ".OSSSSSSSSO.",
+      ".OSSSSSSSSO.",
+      "..OOOOOOOO..",
+    ],
+    torso: [
+      "..OOOOOOOOOO..",
+      ".ORRRRRRRRRRO.",
+      "ORRRRRRRRRRRRO",
+      "ORRRRRGRRRRRRO",
+      "ORRRRRGRRRRRRO",
+      "ORRRRGGGRRRRRO",
+      "OGGGGGGGGGGGGO",
+      ".OCCCCCCCCCCO.",
+      ".OCCCCcCCCCCO.",
+      ".OCCCCcCCCCCO.",
+      ".OcCCCcCCCCcO.",
+      ".OcCCCcCCCCcO.",
+      "..OOOOOOOOOO..",
+    ],
+    armBack: ["OOOO", "ORRO", "ORRO", "OCCO", "OcCO", "OccO", "OSSO", ".OO."],
+    armFront: ["OOOOO", "ORRRO", "ORRRO", "OCCCO", "OcCCO", "OccCO", "OSSSO", ".OOO."],
+    armRaised: [".OOO.", "OSSSO", "OccCO", "OcCCO", "OCCCO", "ORRRO", "ORRRO", "OOOOO"],
+    armFwd: ["OOOOOOOO.", "ORRCCCcSO", "ORRCCCcSO", "ORRCCccSO", ".OOOOOOO."],
+    skirt: ["OCCCCCCCCCCCCO", "OCCCCcCCCCCCCO", "OcCCCcCCCCCcCO", "OcCCCcCCCCCcCO", "OcCCCcCCCCCcCO", "OccCCcCCCCccCO", "OccccccccccccO", "OOOOOOOOOOOOOO"],
+    shoe: ["OBBBBO", "ObbbbO", "OOOOOO"]
+  };
+  const popePalette = { O: '#1a1416', S: '#e6c1a2', s: '#c49a7c', N: '#b98a6c', K: '#2a2420', H: '#e8e4dc', W: '#f8f6f0', R: '#b3202a', r: '#7a1119', G: '#d9b24a', C: '#f4f1e8', c: '#d2ccbc', B: '#4a2a22', b: '#6b3f34', E: '#b7f9d5' };
+  function drawPope(c, x, y, o = {}) {
+    const pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0;
+    const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
+    const flip = o.facing === -1, pal = { ...popePalette };
+    pal.E = pose === 'attack' ? '#eff8df' : pal.E;
+    c.save(); c.translate(Math.round(x), Math.round(y));
+    if (flip) c.scale(-1, 1);
+    c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(-9, -1, 18, 2);
+    if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
+    else if (pose === 'dodge') c.translate(-4, 2);
+    else if (pose === 'hurt') c.translate(-2, 0);
+    const oy = -35 - bob;
+    const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
+    B(popeParts.armBack, 4, 12);
+    const wtype = window.MuseumWeapons?.get(o.weapon)?.type, held = wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };
+    const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
+    if (pose === 'attack') c.translate(lunge(p), 0);
+    // The cassock reaches the shoes: a long skirt instead of greaves, shoes peeking out underneath.
+    B(popeParts.shoe, -6 + (walk > 0 ? 1 : 0), 32); B(popeParts.shoe, 0 + (walk < 0 ? 1 : 0), 32);
+    B(popeParts.skirt, -7, 24);
+    B(popeParts.torso, -7, 11);
+    B(human.neck, -2, 10);
+    B(popeParts.head, -6, 0);
+    if (pose === 'attack') swing(B, p, { raised: popeParts.armRaised, fwd: popeParts.armFwd }, hold, fwd, wpal);
+    else holdIdle(B, popeParts.armFront, hold, wpal);
+    c.restore();
+  }
   function drawKnight(c, x, y, o = {}) {
+    if (o.skin === 'jan-pawel-ii') { drawPope(c, x, y, o); return; }
     const pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0, pal = knightPalette(o.skin);
     pal.E = pose === 'attack' ? '#eff8df' : pal.E;
     const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
