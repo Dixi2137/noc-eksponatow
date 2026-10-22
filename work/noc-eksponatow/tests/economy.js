@@ -21,7 +21,8 @@
     assert.deepEqual(p.upgrades, { 'skin:frost': 3, 'weapon:axe': 5 }); assert.equal(p.login.streak, 4);
   });
   test('Karty: 33 bohaterów i 20 kart broni, każda z działającym modyfikatorem, karty broni wskazują istniejącą broń', () => {
-    const all = cards.all(); assert.equal(cards.heroes().length, 33); assert.equal(cards.weaponCards().length, 20);
+    const all = cards.all(); assert.equal(cards.heroes().length, 33); assert.equal(cards.weaponCards().length, 21);
+    const fer = weapons.get('ferula'); assert.equal(fer.type, 'polearm'); assert.equal(fer.rarity, 'legendary'); assert.equal(fer.sprite, 'ferula'); assert.equal(fer.stats.parryReflect.light, 30, 'ferula: mocne odbicie parady'); assert.ok(loot.getItem('ferula') && loot.getItem('ferula').weight > 0, 'ferula wypada ze skrzyń');
     const keys = ['staminaRegenMultiplier', 'maxStamina', 'maxHP', 'defenseCostMultiplier', 'perfectParryWindow', 'weakGuardDamageMultiplier', 'perfectParryHeal', 'incomingDamageMultiplier', 'ammo', 'weaponDamageMultiplier'];
     for (const c of all) { const ks = Object.keys(c.modifiers); assert.ok(ks.length >= 1 && ks.every(k => keys.includes(k)), `${c.id}: ${ks}`); assert.ok(c.initials && c.summary && c.description && c.color, c.id); if (c.type === 'weapon') assert.ok(weapons.has(c.weapon), c.id); }
     assert.equal(new Set(all.map(c => c.id)).size, all.length);

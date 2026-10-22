@@ -103,7 +103,7 @@ Noc to obchód po salach. Jeden poziom = jedna epoka = jeden przeciwnik:
 
 ## Faza 2 — ekonomia, broń, karty (2026-10-19)
 
-Jeden katalog przedmiotów (`MuseumLoot.items`): 58 strojów, 122 bronie, 53 karty (33 bohaterów, 20 kart broni). Każdy ma rzadkość i wartość (`values`: zwykły 150, rzadki 400, epicki 1000, legendarny 2500; podstawowy i prezent 0).
+Jeden katalog przedmiotów (`MuseumLoot.items`): 58 strojów, 122 bronie, 54 karty (33 bohaterów, 21 kart broni). Każdy ma rzadkość i wartość (`values`: zwykły 150, rzadki 400, epicki 1000, legendarny 2500; podstawowy i prezent 0).
 
 - **Broń** (`dist/weapons.js`): miecz (podstawowy), topór (wolny, 13 obrażeń, mocniejsze odbicie), włócznia (zasięg 470), rapier (szybki, bonus serii od 2. ciosu), rewolwer (legendarny, dystansowy). Każda ma własny zasięg, koszt energii, czas zamachu, obrażenia w słabą gardę, bonus serii i odbicie parady.
 - **Rewolwer**: 6 naboi na walkę, strzał trafia z całej areny, ale tylko w osłabioną gardę; zamach i cios przeciwnik odbija, w ruchu uskakuje. Po wystrzelaniu bębna próba strzału uruchamia przeładowanie 1,6 s (bez strzałów, parada działa). HUD pokazuje naboje. Stan w `getState().weapon` (`ammo`, `maxAmmo`, `reload`).
@@ -235,7 +235,7 @@ Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej bro
 
 ## Więcej kart (faza83)
 
-`cards.js` ma 33 karty bohaterów i 20 kart broni (53 łącznie, 13 pierwotnych + 40 nowych). Nowi bohaterowie: Leonidas, Aleksander Wielki, Cezar, Boudika, Saladyn, Ryszard Lwie Serce, El Cid, Roland, Wilhelm Tell, Jagiełło, Žižka, Musashi, Tomoe Gozen, Chodkiewicz, Czarniecki, Washington, Dąbrowski, Plater, Bolívar, Kopernik, Skłodowska-Curie, Piłsudski, Sendlerowa, Pilecki, Mieszko I; bonusy to HP, energia, regeneracja, koszt obrony, okno parady, obrażenia w słabą gardę, leczenie za paradę, redukcja obrażeń, +1 strzał. Nowe karty broni: katana, halabarda, młot bojowy, szabla husarska, Szczerbiec, Zulfikar, kukri, sztylet, maczuga (+10–20% obrażeń) oraz łuk długi, kusza, muszkiet, Glock, AK-47, Barrett (+1 do +5 amunicji); każda karta broni może mieć własne `modifiers`, domyślnie +10% obrażeń. Przy starcie moduł sprawdza unikalność id i czy broń z karty istnieje.
+`cards.js` ma 33 karty bohaterów i 21 kart broni (54 łącznie, 13 pierwotnych + 41 nowych). Nowi bohaterowie: Leonidas, Aleksander Wielki, Cezar, Boudika, Saladyn, Ryszard Lwie Serce, El Cid, Roland, Wilhelm Tell, Jagiełło, Žižka, Musashi, Tomoe Gozen, Chodkiewicz, Czarniecki, Washington, Dąbrowski, Plater, Bolívar, Kopernik, Skłodowska-Curie, Piłsudski, Sendlerowa, Pilecki, Mieszko I; bonusy to HP, energia, regeneracja, koszt obrony, okno parady, obrażenia w słabą gardę, leczenie za paradę, redukcja obrażeń, +1 strzał. Ferula Jana Pawła II (`ferula`, broń drzewcowa, legendarna, współczesność): pastorał z krzyżem, 14 obrażeń +4 od trzeciego ciosu, zasięg 480, odbicie parady 30/40, własny sprite w ręce i ikona; ma też kartę (+20%). Nowe karty broni: katana, halabarda, młot bojowy, szabla husarska, Szczerbiec, Zulfikar, kukri, sztylet, maczuga (+10–20% obrażeń) oraz łuk długi, kusza, muszkiet, Glock, AK-47, Barrett (+1 do +5 amunicji); każda karta broni może mieć własne `modifiers`, domyślnie +10% obrażeń. Przy starcie moduł sprawdza unikalność id i czy broń z karty istnieje.
 
 ## Puszka Kustosza na biurku strażnika (faza82)
 
