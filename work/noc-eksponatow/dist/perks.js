@@ -18,11 +18,6 @@
       stats: { maxHP: 150 }
     },
     {
-      id: 'jan-pawel-ii', title: 'NIE LĘKAJCIE SIĘ', summary: '+3 HP za perfekcyjną paradę, +10 maks. HP',
-      details: ['Każde perfekcyjne parowanie przywraca 3 HP, do maksymalnego zdrowia. Leczenie nie wskrzesza pokonanej postaci.', 'Zaczynasz każdą walkę ze 130 HP zamiast 120.'],
-      stats: { perfectParryHeal: 3, maxHP: 130 }
-    },
-    {
       id: 'frost', title: 'ZIMNA KREW', summary: '+0,12 s na perfekcyjną paradę',
       details: ['Okno perfekcyjnego parowania trwa 0,39 s zamiast 0,27 s.'],
       stats: { perfectParryWindow: .39 }

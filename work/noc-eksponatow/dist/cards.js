@@ -123,7 +123,6 @@
     { id: 'card-musket', weapon: 'musket', name: 'KARTA: MUSZKIET', era: 'KARTA BRONI', rarity: 'rare', initials: 'MU', color: '#5a4a3a', summary: '+1 strzał w muszkiecie', description: 'Założony muszkiet ma jeden strzał więcej przed przeładowaniem.', modifiers: { ammo: 1 } },
     { id: 'card-glock', weapon: 'glock', name: 'KARTA: GLOCK 17', era: 'KARTA BRONI', rarity: 'common', initials: 'G1', color: '#3a3a3a', summary: '+3 naboje w Glocku', description: 'Założony Glock ma 3 naboje więcej w magazynku.', modifiers: { ammo: 3 } },
     { id: 'card-ak47', weapon: 'ak47', name: 'KARTA: AK-47', era: 'KARTA BRONI', rarity: 'epic', initials: 'AK', color: '#5a4a2a', summary: '+5 naboi w AK-47', description: 'Założony AK-47 ma 5 naboi więcej w magazynku.', modifiers: { ammo: 5 } },
-    { id: 'card-ferula', weapon: 'ferula', name: 'KARTA: FERULA', era: 'KARTA BRONI', rarity: 'legendary', initials: '✝', color: '#c9a040', summary: '+20% obrażeń ferulą', description: 'Założona ferula zadaje o 20% więcej w słabą gardę.', modifiers: { weaponDamageMultiplier: 1.2 } },
     { id: 'card-barrett', weapon: 'barrett', name: 'KARTA: BARRETT M82', era: 'KARTA BRONI', rarity: 'legendary', initials: 'BM', color: '#2a3a2a', summary: '+2 naboje w Barrettcie', description: 'Założony Barrett ma 2 naboje więcej w magazynku.', modifiers: { ammo: 2 } }
   ];
   const cards = Object.freeze([...heroes.map(c => ({ ...c, type: 'hero' })), ...weaponCards.map(c => ({ ...c, type: 'weapon', modifiers: c.modifiers || { weaponDamageMultiplier: 1.1 } }))]

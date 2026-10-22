@@ -152,8 +152,7 @@
     w('ak47', 'AK-47', C, 'rifle', 'epic', 'assault', 'Najczęściej produkowany karabin świata. Działa po zakopaniu, zalaniu i upuszczeniu.', { ammo: 15, reload: 2.2, weakGuardDamage: 12, cooldown: .3, swing: .34, contact: .16 }),
     w('m16', 'M16', C, 'rifle', 'epic', 'assault', 'Lekki, celny, kapryśny w dżungli. Trzydzieści naboi.', { ammo: 15, reload: 2.0, weakGuardDamage: 11, cooldown: .28, swing: .32, contact: .15 }),
     w('dragunov', 'DRAGUNOW SWD', C, 'rifle', 'legendary', 'sniper', 'Karabin wyborowy z lunetą. Dziesięć naboi, każdy w słabą gardę z drugiego końca sali.', { ammo: 10, reload: 2.4, weakGuardDamage: 22, range: 1000, cooldown: .9, swing: .6, contact: .3 }),
-    w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 }),
-    { ...w('ferula', 'FERULA JANA PAWŁA II', C, 'polearm', 'legendary', 'ferula', 'Pastorał z krzyżem, na którym opierał się papież Polak. Nie lękajcie się: parada tym kijem oddaje ciosy z nawiązką.', { weakGuardDamage: 14, comboBonus: 4, range: 480, parryDrain: 4, parryReflect: { light: 30, heavy: 40 } }), sprite: 'ferula' },
+    w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 })
   ];
   function build(d) {
     const type = types[d.type], merged = { ...baseline, ...type.stats, ...d.overrides };

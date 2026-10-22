@@ -253,7 +253,7 @@
     let base = '#687b7e', dark = '#172b36', light = '#bad2c8', glint = '#e5dfab', cloth = ['#581e32', '#26182b'];
     const special = { brass: ['#947247', '#302b29', '#d9b773', '#ffe1a0', '#581e32', '#26182b'], frost: ['#6c9ca5', '#193747', '#c5f6ed', '#e5ffff', '#35708a', '#16293e'], obsidian: ['#353d55', '#111a29', '#9c8bc1', '#d7b4ff', '#4d2f62', '#1b162a'],
       verdigris: ['#4a947b', '#152f29', '#b8dfad', '#e5ffc5', '#22624e', '#12291f'], ember: ['#a54e37', '#351b24', '#ffc187', '#fff1b7', '#a43127', '#36151d'], royal: ['#67528b', '#211c3c', '#dbb9ef', '#ffebff', '#62408a', '#241637'], solar: ['#b7953c', '#3e321b', '#fff0ac', '#ffffe1', '#b28c38', '#44311e'],
-      'stachu-jones': ['#77858b', '#263742', '#c6d1cc', '#dfe8e2', '#18283f', '#0d192b'], 'jan-pawel-ii': ['#f4f1e8', '#5a5046', '#ffffff', '#ffe9a8', '#b3202a', '#7a1119'] }[skin];
+      'stachu-jones': ['#77858b', '#263742', '#c6d1cc', '#dfe8e2', '#18283f', '#0d192b'], 'cassock': ['#f4f1e8', '#5a5046', '#ffffff', '#ffe9a8', '#b3202a', '#7a1119'] }[skin];
     const registered = extraPalettes[skin];
     if (registered) [base, dark, light, glint, cloth[0], cloth[1]] = registered; else if (special) [base, dark, light, glint, cloth[0], cloth[1]] = special;
     const look = window.MuseumKnights?.skins?.find(s => s.id === skin);
@@ -261,7 +261,7 @@
     return { O: mix(dark, '#000000', .55), B: base, D: dark, L: light, G: '#c9a94a', C: cloth[0], c: cloth[1], K: '#0c2530', E: '#b7f9d5', W: '#f5f6d3' };
   }
 
-  // ── Jan Paweł II: white cassock, red mozzetta with gold trim, zucchetto and pectoral cross ──
+  // ── Special figure 'cassock': white cassock, red mozzetta with gold trim, zucchetto and pectoral cross (content arrives from a hidden pack) ──
   const popeParts = {
     head: [
       "...OOOOOO...",
@@ -328,7 +328,7 @@
     c.restore();
   }
   function drawKnight(c, x, y, o = {}) {
-    if (o.skin === 'jan-pawel-ii') { drawPope(c, x, y, o); return; }
+    if (o.skin === 'cassock') { drawPope(c, x, y, o); return; }
     const pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0, pal = knightPalette(o.skin);
     pal.E = pose === 'attack' ? '#eff8df' : pal.E;
     const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
@@ -491,7 +491,6 @@
       sabre: { hold: [".OO.", "OMMO", "OMMO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", "OMWO", ".OWO", ".OGO", ".GGG", ".OO."], fwd: ["GGOMWWWWWWWWWWMO", "GG.OMMMMMMMMMMO."] },
       dagger: { hold: ["OMO", "OMO", "OWO", "OWO", "OWO", "OGO", "GGG", "ODO", "ODO"], fwd: ["ODOGGOWWWWMO"] },
       axe: { hold: ["....ODO", "..OOODO", ".OMMMDO", "OWMMMDO", "OMMMMDO", ".OMMMDO", "..OOODO", "....ODO", "....ODO", "....ODO", "....ODO", "....ODO", "....ODO", "....OO."], fwd: ["..........OOOOO.", "OODDDDDDDOOMMMWO", "ODDDDDDDDDOMMMMO", "OO........OMMMMO", "...........OOOO."] },
-      ferula: { hold: ["..OO..", ".OGGO.", "OGGGGO", "OGGGGO", ".OGGO.", ".OGGO.", ".OGGO.", "..OO..", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", ".ODDO.", "..OO.."], fwd: ["...................OO..", "..................OGGO.", "OOOOOOOOOOOOOOOOOOGGGGO", "ODDDDDDDDDDDDDDDDDGGGGO", "OOOOOOOOOOOOOOOOOOGGOO.", "...................OO.."] },
       staff: { hold: [".GG.", "GGGG", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD."], fwd: ["DDDDDDDDDDDDDDDDDDGG", "..................GG"] },
       pistol: { hold: [".OMO.", ".OWO.", ".OMO.", ".OMO.", "OMMMO", "OMMMO", "ODDO.", "ODDO.", "OOO.."], fwd: ["...OOOOOOOO", "...OMWWWWMO", "OOMMMOOOOOO", "ODDOOO.....", "ODDO.......", "OOO........"] },
       // Gatling: three visible barrels with a muzzle ring, a motor block, a grip and an ammo box feeding a brass belt. Carried level at the hip.
@@ -593,7 +592,6 @@
     garand: ["........................", "........................", "...........OOOOOOOOOOOO.", "........OOOMSMMMWWWWWWMO", ".OOOOOOODDDDMMMMDDDDDMMO", "ODDDDDDDDDDDDOOOODDDDOO.", "ODDDDDDDDDDDDDDOOOOOOO..", "ODDDDDDOOOOOOSO.........", ".ODDDDO.....OO..........", "..OOOO..................", "........................", "........................", "........................", "........................"],
     assault: ["........................", "........................", "..........OOOOOOOOOOOOO.", ".OOOOOOOOOSMMMMMWWWWWWMO", "ODDDDDDOOSSMMMMDDDDMMMMO", "ODDDDDOSSSSSSSSDDDDOOOO.", ".OOOOOOSSOOOOSSOOOOO....", "......OSSO.OSMMO........", "......OSSO..OSMMO.......", "......OOO....OSMMO......", "..............OOOO......", "........................", "........................", "........................"],
     pump: ["........................", "........................", "..........OOOOOOOOOOOOO.", ".OOOOOOOOOMMMMMWWWWWWWMO", "ODDDDDDDOOMMMMDDDDDDMMMO", "ODDDDDDOSSSSSSDDDDDDOOO.", ".OOOOOOOSSOOOOOOOOOOO...", "......OSSO.OSO..........", "......OOO..OOO..........", "........................", "........................", "........................", "........................", "........................"],
-    ferula: ["........OO......", ".......OGGO.....", "....OOOOGGOOOO..", "...OGGGGGGGGGGO.", "....OOOOGGOOOO..", ".......OGGO.....", ".......OGGO.....", ".......OGGO.....", "........OO......", ".......ODDO.....", ".......ODDO.....", ".......ODDO.....", ".......ODDO.....", ".......ODDO.....", ".......ODDO.....", "........OO......"],
     blunderbuss: ["........................", "........................", "...................OOO..", "..........OOOOOOOOOGGGO.", "......OOOOMMMWWWWWWGGGGO", ".OOOOODDDDMMMMMMMMMGGGGO", "ODDDDDDDDDDOOOOOOOOGGGO.", "ODDDDDDDDOOOOSO....OOO..", "ODDDDDOOO...OO..........", ".OOOOO..................", "........................", "........................", "........................", "........................"]
   };
   const rarityTint = { basic: '#c9d6dc', common: '#c9d6dc', rare: '#90cce8', epic: '#c4a1f0', legendary: '#f0ca72', mythic: '#7ff0e0' };

@@ -14,7 +14,7 @@ Grafika powstaje bezpośrednio na canvasie, dźwięki są syntezowane przez Web 
 
 T-rex pilnuje dystansu między sylwetkami, zapowiada każdy atak i zatrzymuje się na czas zamachu. Po ciosie ma okres słabej gardy, a potem odzyskuje dystans przed kolejnym atakiem.
 
-Skrzynki zawierają 56 dodatkowych skinów w czterech rzadkościach. Osobno dostępne są bezpłatne eksponaty specjalne: Stachu Jones i Jan Paweł II. Pierwsza Skrzynia Galerii jest darmowa; następne kosztują 600 żetonów. Skarbiec Królów kosztuje 1800 żetonów i gwarantuje co najmniej epicki strój; Relikwiarz Legend kosztuje 4500 żetonów i gwarantuje legendarny strój. Żetony zdobywasz w grze. Brak duplikatów; aktualne szanse są pokazane przed otwarciem. Nagroda zapisuje się przed animacją i jest odzyskiwana po odświeżeniu. Założenie skina jest osobną decyzją przed walką.
+Skrzynki zawierają 56 dodatkowych skinów w czterech rzadkościach. Osobno dostępny jest bezpłatny eksponat specjalny Stachu Jones; kolejne eksponaty specjalne odblokowują kody dostępu (sekcja „Ukryte pakiety”). Pierwsza Skrzynia Galerii jest darmowa; następne kosztują 600 żetonów. Skarbiec Królów kosztuje 1800 żetonów i gwarantuje co najmniej epicki strój; Relikwiarz Legend kosztuje 4500 żetonów i gwarantuje legendarny strój. Żetony zdobywasz w grze. Brak duplikatów; aktualne szanse są pokazane przed otwarciem. Nagroda zapisuje się przed animacją i jest odzyskiwana po odświeżeniu. Założenie skina jest osobną decyzją przed walką.
 
 ## Zdolności skinów
 
@@ -60,10 +60,6 @@ Otwarcie trwa około 8,2 sekundy: pieczęć (0,9 s), przewijanie z wyhamowaniem 
 
 Trafienie wroga, który idzie na gracza (stan idle/approach/retreat/reposition), to **cios presji**: drobne obrażenia (30% obrażeń słabej gardy), **odrzut** (strzał 56 px, broń ciężka/drzewcowa 36, reszta 24, malejący z presją do 40%) i **chwianie** (`stagger`, 0,42 s, krótsze z presją), po którym wróg przez ~1,1 s trzyma równowagę (bez stun-locka: kolejne trafienia tylko odrzucają). Lekki zamach da się **przerwać** (75% szansy strzałem, 55% bronią białą, malejąco z presją, nigdy ciężkiego). Pod presją rośnie szansa, że wróg **uniknie** ciosu w marszu (do 50%). Etykiety: ODRZUT, DRAŚNIĘCIE, PRZERWANY, UNIK.
 
-## Jan Paweł II
-
-Drugi eksponat specjalny, dostępny od razu dla każdego gracza: biała sutanna, czerwona mucet ze złotym obszyciem, piuska i złoty krzyż na piersi. W pikselowym trybie ma własnego sprite'a (długa sutanna zamiast nagolenników), a w walce trzyma dowolną wybraną broń. Perk „Nie lękajcie się”: +3 HP za każdą perfekcyjną paradę i 130 HP na start.
-
 ## Faza 0 — fundament (2026-10-19)
 
 Przeciwnik i broń są danymi, nie kodem walki:
@@ -103,7 +99,7 @@ Noc to obchód po salach. Jeden poziom = jedna epoka = jeden przeciwnik:
 
 ## Faza 2 — ekonomia, broń, karty (2026-10-19)
 
-Jeden katalog przedmiotów (`MuseumLoot.items`): 58 strojów, 122 bronie, 54 karty (33 bohaterów, 21 kart broni). Każdy ma rzadkość i wartość (`values`: zwykły 150, rzadki 400, epicki 1000, legendarny 2500; podstawowy i prezent 0).
+Jeden katalog przedmiotów (`MuseumLoot.items`): 58 strojów, 122 bronie, 53 karty (33 bohaterów, 20 kart broni). Każdy ma rzadkość i wartość (`values`: zwykły 150, rzadki 400, epicki 1000, legendarny 2500; podstawowy i prezent 0).
 
 - **Broń** (`dist/weapons.js`): miecz (podstawowy), topór (wolny, 13 obrażeń, mocniejsze odbicie), włócznia (zasięg 470), rapier (szybki, bonus serii od 2. ciosu), rewolwer (legendarny, dystansowy). Każda ma własny zasięg, koszt energii, czas zamachu, obrażenia w słabą gardę, bonus serii i odbicie parady.
 - **Rewolwer**: 6 naboi na walkę, strzał trafia z całej areny, ale tylko w osłabioną gardę; zamach i cios przeciwnik odbija, w ruchu uskakuje. Po wystrzelaniu bębna próba strzału uruchamia przeładowanie 1,6 s (bez strzałów, parada działa). HUD pokazuje naboje. Stan w `getState().weapon` (`ammo`, `maxAmmo`, `reload`).
@@ -235,7 +231,7 @@ Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej bro
 
 ## Więcej kart (faza83)
 
-`cards.js` ma 33 karty bohaterów i 21 kart broni (54 łącznie, 13 pierwotnych + 41 nowych). Nowi bohaterowie: Leonidas, Aleksander Wielki, Cezar, Boudika, Saladyn, Ryszard Lwie Serce, El Cid, Roland, Wilhelm Tell, Jagiełło, Žižka, Musashi, Tomoe Gozen, Chodkiewicz, Czarniecki, Washington, Dąbrowski, Plater, Bolívar, Kopernik, Skłodowska-Curie, Piłsudski, Sendlerowa, Pilecki, Mieszko I; bonusy to HP, energia, regeneracja, koszt obrony, okno parady, obrażenia w słabą gardę, leczenie za paradę, redukcja obrażeń, +1 strzał. Ferula Jana Pawła II (`ferula`, broń drzewcowa, legendarna, współczesność): pastorał z krzyżem, 14 obrażeń +4 od trzeciego ciosu, zasięg 480, odbicie parady 30/40, własny sprite w ręce i ikona; ma też kartę (+20%). Nowe karty broni: katana, halabarda, młot bojowy, szabla husarska, Szczerbiec, Zulfikar, kukri, sztylet, maczuga (+10–20% obrażeń) oraz łuk długi, kusza, muszkiet, Glock, AK-47, Barrett (+1 do +5 amunicji); każda karta broni może mieć własne `modifiers`, domyślnie +10% obrażeń. Przy starcie moduł sprawdza unikalność id i czy broń z karty istnieje.
+`cards.js` ma 33 karty bohaterów i 20 kart broni (53 łącznie, 13 pierwotnych + 40 nowych). Nowi bohaterowie: Leonidas, Aleksander Wielki, Cezar, Boudika, Saladyn, Ryszard Lwie Serce, El Cid, Roland, Wilhelm Tell, Jagiełło, Žižka, Musashi, Tomoe Gozen, Chodkiewicz, Czarniecki, Washington, Dąbrowski, Plater, Bolívar, Kopernik, Skłodowska-Curie, Piłsudski, Sendlerowa, Pilecki, Mieszko I; bonusy to HP, energia, regeneracja, koszt obrony, okno parady, obrażenia w słabą gardę, leczenie za paradę, redukcja obrażeń, +1 strzał. Nowe karty broni: katana, halabarda, młot bojowy, szabla husarska, Szczerbiec, Zulfikar, kukri, sztylet, maczuga (+10–20% obrażeń) oraz łuk długi, kusza, muszkiet, Glock, AK-47, Barrett (+1 do +5 amunicji); każda karta broni może mieć własne `modifiers`, domyślnie +10% obrażeń. Przy starcie moduł sprawdza unikalność id i czy broń z karty istnieje.
 
 ## Puszka Kustosza na biurku strażnika (faza82)
 
@@ -249,7 +245,7 @@ W pokoju strażnika (prolog i epilog) zamiast kubka kawy z parą stoi wysoka pus
 
 `dist/secret.js` (`window.MuseumSecret`) trzyma pakiety zaszyfrowane AES-GCM 256; klucz pochodzi z kodu dostępu (PBKDF2, 120 000 iteracji, SHA-256), a kod jest porównywany przez SHA-256. W źródle jest wyłącznie szyfrogram: bez kodu nie ma nazw, statystyk ani grafik, przedmioty nie istnieją w katalogu, nie wypadają ze skrzyń, nie ma ich w kolekcji ani w wyszukiwarce. Kod wpisuje się w oknie Konto (pole KOD DOSTĘPU, działa też jako gość); wielkość liter i spacje nie mają znaczenia. Poprawny kod odszyfrowuje pakiet i rejestruje jego zawartość w locie: `MuseumWeapons.register`, `MuseumLoot.register` (waga 0, prezent: nie do sprzedania, skin od razu w szafie), `MuseumPerks.register`, `MuseumPixel.registerArt` (ikona, sprite w ręce, paleta rycerza). Kody zapisują się w profilu (`profile.secrets`, lokalnie i w chmurze), więc pakiet odblokowuje się ponownie przy każdym wejściu i na innym urządzeniu po zalogowaniu.
 
-Pakiet **X-1**: Karabin Laserowy X-1 (mityczny, 12 impulsów, chłodzenie 0,9 s, 38 obrażeń w słabą gardę, zasięg 1000, `pierce`: wiązka przechodzi przez gardę i zamach wroga za 60% obrażeń, etykieta PRZEPALONA GARDA), Ostrze Plazmowe X-1 (mityczne ostrze, 30 obrażeń, +8 od drugiego ciosu, odbicie parady 40/55) i skin Prototyp X-1 (perk ZASILANIE X-1: 150 HP, +35% regeneracji). Bronie z pakietu mają własne palety (`weapon.palette`) i pulsującą poświatę (`glow`). Jawna zawartość pakietu i blob leżą poza repozytorium (`~/Documents/Codex/noc-eksponatow-secret/`); zmiana kodu = ponowne zaszyfrowanie przez `MuseumSecret._test.encrypt` na stronie testów i podmiana bloba. Testy używają własnego pakietu testowego, nigdy prawdziwego kodu.
+Zawartość pakietów (co odblokowuje który kod) nie jest opisana w repozytorium: jawne pliki pakietów, bloby i kody leżą poza nim (`~/Documents/Codex/noc-eksponatow-secret/`). Zmiana kodu lub zawartości = ponowne zaszyfrowanie przez `MuseumSecret._test.encrypt(kod, pack)` na stronie testów i podmiana bloba w `secret.js`. Testy używają własnego pakietu testowego, nigdy prawdziwych kodów. Rysowanie postaci specjalnych (np. `drawPope` w `pixel.js`) może zostać w kodzie: sama grafika bez nazwy i statystyk nic nie zdradza.
 
 ## Ikony broni palnej (faza75)
 

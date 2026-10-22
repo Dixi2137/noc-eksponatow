@@ -21,8 +21,7 @@
     assert.deepEqual(p.upgrades, { 'skin:frost': 3, 'weapon:axe': 5 }); assert.equal(p.login.streak, 4);
   });
   test('Karty: 33 bohaterów i 20 kart broni, każda z działającym modyfikatorem, karty broni wskazują istniejącą broń', () => {
-    const all = cards.all(); assert.equal(cards.heroes().length, 33); assert.equal(cards.weaponCards().length, 21);
-    const fer = weapons.get('ferula'); assert.equal(fer.type, 'polearm'); assert.equal(fer.rarity, 'legendary'); assert.equal(fer.sprite, 'ferula'); assert.equal(fer.stats.parryReflect.light, 30, 'ferula: mocne odbicie parady'); assert.ok(loot.getItem('ferula') && loot.getItem('ferula').weight > 0, 'ferula wypada ze skrzyń');
+    const all = cards.all(); assert.equal(cards.heroes().length, 33); assert.equal(cards.weaponCards().length, 20);
     const keys = ['staminaRegenMultiplier', 'maxStamina', 'maxHP', 'defenseCostMultiplier', 'perfectParryWindow', 'weakGuardDamageMultiplier', 'perfectParryHeal', 'incomingDamageMultiplier', 'ammo', 'weaponDamageMultiplier'];
     for (const c of all) { const ks = Object.keys(c.modifiers); assert.ok(ks.length >= 1 && ks.every(k => keys.includes(k)), `${c.id}: ${ks}`); assert.ok(c.initials && c.summary && c.description && c.color, c.id); if (c.type === 'weapon') assert.ok(weapons.has(c.weapon), c.id); }
     assert.equal(new Set(all.map(c => c.id)).size, all.length);
@@ -34,8 +33,7 @@
     for (const item of loot.items) { assert.ok(!ids.has(item.id), `duplikat ${item.id}`); ids.add(item.id); assert.ok(loot.rarities[item.rarity], item.id); assert.ok(loot.value(item) >= 0); }
     assert.equal(loot.items.filter(i => i.kind === 'weapon').length, weapons.all().length);
     assert.equal(loot.items.filter(i => i.kind === 'card').length, cards.all().length);
-    assert.equal(loot.value('brass'), 0, 'podstawowy strój nic nie jest wart'); assert.equal(loot.value('stachu-jones'), 0, 'prezent nie jest na sprzedaż'); assert.equal(loot.value('jan-pawel-ii'), 0, 'Jan Paweł II też jest prezentem');
-    const jp2 = loot.migrate({}); assert.ok(jp2.owned.includes('jan-pawel-ii'), 'Jan Paweł II od razu w szafie'); assert.equal(window.MuseumPerks.get('jan-pawel-ii').stats.perfectParryHeal, 3, 'perk NIE LĘKAJCIE SIĘ');
+    assert.equal(loot.value('brass'), 0, 'podstawowy strój nic nie jest wart'); assert.equal(loot.value('stachu-jones'), 0, 'prezent nie jest na sprzedaż');
     assert.equal(loot.value('revolver'), 4500); assert.equal(loot.sellPrice('revolver'), 1800);
   });
   test('Skrzynia broni losuje tylko bronie, skrzynia kart tylko karty, galeria tylko stroje', () => {
