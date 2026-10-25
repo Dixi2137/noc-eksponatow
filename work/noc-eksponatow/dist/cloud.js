@@ -16,6 +16,9 @@
   function messageFor(error) {
     const text = String(error?.msg || error?.message || error?.error_description || error?.error || error || 'Nieznany błąd');
     if (/invalid login credentials/i.test(text)) return 'Zły e-mail albo hasło.';
+    if (/security purposes|rate limit|too many requests/i.test(text)) return 'Za dużo prób. Odczekaj minutę i spróbuj ponownie.';
+    if (/otp_expired|expired|invalid.*token/i.test(text)) return 'Link wygasł albo został już użyty. Poproś o nowy.';
+    if (/same.*password|different from the old/i.test(text)) return 'Nowe hasło musi różnić się od starego.';
     if (/email not confirmed/i.test(text)) return 'Potwierdź e-mail linkiem z wiadomości, potem zaloguj się.';
     if (/already registered|already been registered/i.test(text)) return 'Ten e-mail ma już konto. Zaloguj się.';
     if (/password/i.test(text) && /6|short|weak/i.test(text)) return 'Hasło musi mieć co najmniej 6 znaków.';
@@ -60,6 +63,30 @@
     return result.ok ? { ok: false, error: 'Brak sesji w odpowiedzi.' } : result;
   }
   async function signOut() { if (session?.access_token) await request('/auth/v1/logout', { method: 'POST' }); store(null); return { ok: true }; }
+  // Password recovery: Supabase e-mails a link that returns to this page with tokens in the URL hash (type=recovery).
+  const returnUrl = () => (typeof location !== 'undefined' ? location.origin + location.pathname : '');
+  async function recover(email) {
+    const r = await request(`/auth/v1/recover?redirect_to=${encodeURIComponent(returnUrl())}`, { method: 'POST', body: { email }, auth: false });
+    return r.ok ? { ok: true } : r;
+  }
+  async function updatePassword(password) {
+    if (!session?.access_token) return { ok: false, error: 'Brak sesji odzyskiwania. Kliknij link z e-maila jeszcze raz.' };
+    const r = await request('/auth/v1/user', { method: 'PUT', body: { password } });
+    if (r.ok && r.data?.id) { store({ ...session, user: r.data }); return { ok: true, data: user() }; }
+    return r;
+  }
+  // Tokens arriving in the URL hash (recovery, e-mail confirmation, magic link) become the session; the hash is wiped afterwards.
+  async function consumeAuthHash(hash = typeof location !== 'undefined' ? location.hash : '') {
+    const params = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+    const clear = () => { try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {} };
+    if (params.get('error') || params.get('error_description')) { clear(); return { ok: false, error: messageFor(params.get('error_description') || params.get('error')), type: params.get('type') || null }; }
+    const access = params.get('access_token'); if (!access) return null;
+    const type = params.get('type') || 'session';
+    store({ access_token: access, refresh_token: params.get('refresh_token') || null, expires_at: Math.floor(Date.now() / 1000) + (Number(params.get('expires_in')) || 3600), user: null });
+    const me = await request('/auth/v1/user');
+    if (me.ok && me.data?.id) store({ ...session, user: me.data }); else { store(null); clear(); return { ok: false, error: me.error || 'Link wygasł. Poproś o nowy.', type }; }
+    clear(); return { ok: true, type, data: user() };
+  }
   async function restore() { if (!enabled() || !session) return null; if (expired()) await refresh(); return user(); }
   async function nicknameTaken(nickname) { const r = await request('/rest/v1/rpc/nickname_taken', { method: 'POST', body: { name: nickname }, auth: false }); return r.ok ? !!r.data : null; }
   async function fetchProfile() {
@@ -130,7 +157,7 @@
     patron: { name: 'MECENAS', color: '#9ad28b', note: 'Wsparł muzeum.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();

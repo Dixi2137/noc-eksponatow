@@ -18,6 +18,19 @@
     const p = loot.migrate({ records: { fastestNight: 123.4, nightCoins: 900 } }); assert.equal(p.records.fastestNight, 123.4); assert.equal(p.records.nightCoins, 900);
     assert.equal(loot.migrate(null).records.fastestNight, null);
   });
+  test('Odzyskiwanie hasła: prośba o link z redirect_to, tokeny z hasha stają się sesją, PUT /auth/v1/user ustawia nowe hasło', () => withConfig(async () => {
+    cloud._test.store(null);
+    const calls = fakeFetch((url, init) => url.includes('/auth/v1/user') && init.method === 'GET' ? { status: 200, body: { id: 'u9', email: 'zapominalski@b.pl', user_metadata: { nickname: 'Zapominalski' } } }
+      : url.includes('/auth/v1/user') && init.method === 'PUT' ? { status: 200, body: { id: 'u9', email: 'zapominalski@b.pl', user_metadata: { nickname: 'Zapominalski' } } } : { status: 200, body: {} });
+    const r = await cloud.recover('zapominalski@b.pl'); assert.ok(r.ok);
+    const rec = calls.at(-1); assert.ok(rec.url.includes('/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname)), rec.url); assert.deepEqual(JSON.parse(rec.init.body), { email: 'zapominalski@b.pl' }); assert.equal(rec.init.headers.Authorization, undefined, 'bez tokena użytkownika');
+    assert.equal(await cloud.consumeAuthHash(''), null, 'bez hasha nic się nie dzieje');
+    const bad = await cloud.consumeAuthHash('#error=access_denied&error_description=Email+link+is+invalid+or+has+expired'); assert.equal(bad.ok, false); assert.ok(/wygasł/i.test(bad.error), bad.error);
+    const landed = await cloud.consumeAuthHash('#access_token=rtok&refresh_token=rref&expires_in=3600&type=recovery'); assert.ok(landed.ok); assert.equal(landed.type, 'recovery'); assert.equal(cloud.user()?.email, 'zapominalski@b.pl');
+    const me = calls.at(-1); assert.ok(me.url.endsWith('/auth/v1/user')); assert.equal(me.init.headers.Authorization, 'Bearer rtok');
+    const up = await cloud.updatePassword('nowehaslo123'); assert.ok(up.ok); const put = calls.at(-1); assert.equal(put.init.method, 'PUT'); assert.deepEqual(JSON.parse(put.init.body), { password: 'nowehaslo123' }); assert.equal(put.init.headers.Authorization, 'Bearer rtok');
+    cloud._test.store(null); assert.equal((await cloud.updatePassword('x')).ok, false, 'bez sesji nie da się zmienić hasła');
+  }));
   test('Logowanie zapisuje sesję, żądania niosą apikey i token, wylogowanie czyści sesję', () => withConfig(async () => {
     const calls = fakeFetch((url) => url.includes('grant_type=password') ? { status: 200, body: { access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl', user_metadata: { nickname: 'Jakub' } } } } : url.includes('/rest/v1/profiles') ? { status: 200, body: [{ id: 'u1', nickname: 'Jakub', save: {} }] } : { status: 200, body: {} });
     try {

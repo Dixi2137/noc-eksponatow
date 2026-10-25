@@ -375,3 +375,8 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 .secret-form input{width:100%;background:#0c130b;border:1px solid #34382c;color:var(--cream);padding:10px 12px;font-size:12px;letter-spacing:2px;text-transform:uppercase}
 .secret-form .secondary-btn{min-height:40px;font-size:8px}
 .account-msg.error{color:#ff9d8e}
+
+/* Odzyskiwanie hasła w oknie konta. */
+.account-forgot{background:transparent;border:0;color:#9faf8d;font-size:8px;letter-spacing:1.2px;font-weight:800;padding:8px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.account-forgot:hover{color:var(--lime)}
+.account-reset{margin-bottom:10px}
