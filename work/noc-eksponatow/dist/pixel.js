@@ -249,6 +249,13 @@
     cape: ["CCCCCC", "CCCCCCC", "cCCCCCCC", "cCCCCCCC", "ccCCCCCC", "ccCCCCCC", "cccCCCCC", "cccCCCCC", "ccccCCCC", "ccccCCCC", "cccccCCC", "cccccCCC", "ccccccCC", "ccccccCC", "cccccccC", "cccccccC", "ccccccc.", "cccccc..", "ccccc...", "cccc...."]
   };
   const extraPalettes = {};   // knight palettes added by hidden packs: [base, dark, light, glint, cloth, clothDark]
+  const extraFigures = {};    // whole human rigs used as player skins (hidden packs): figure definition like an exhibit's
+  // A figure skin: the human rig with the player's equipped weapon mapped onto it (by weapon type, or the weapon's own sprite).
+  function drawFigureSkin(c, x, y, o = {}) {
+    const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type;
+    const key = wdef?.sprite && human.weapons[wdef.sprite] ? wdef.sprite : ({ blade: 'sabre', heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype] || 'sabre';
+    drawFigure(c, x, y, { ...o, figure: { ...extraFigures[o.skin], weapon: key } });
+  }
   function knightPalette(skin) {
     let base = '#687b7e', dark = '#172b36', light = '#bad2c8', glint = '#e5dfab', cloth = ['#581e32', '#26182b'];
     const special = { brass: ['#947247', '#302b29', '#d9b773', '#ffe1a0', '#581e32', '#26182b'], frost: ['#6c9ca5', '#193747', '#c5f6ed', '#e5ffff', '#35708a', '#16293e'], obsidian: ['#353d55', '#111a29', '#9c8bc1', '#d7b4ff', '#4d2f62', '#1b162a'],
@@ -329,6 +336,7 @@
   }
   function drawKnight(c, x, y, o = {}) {
     if (o.skin === 'cassock') { drawPope(c, x, y, o); return; }
+    if (extraFigures[o.skin]) { drawFigureSkin(c, x, y, o); return; }
     const pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0, pal = knightPalette(o.skin);
     pal.E = pose === 'attack' ? '#eff8df' : pal.E;
     const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
@@ -432,6 +440,8 @@
       "..OOOOOOOO..",
     ],
     neck: ["OSSO"],
+    hairLong: ["..OOOOOOOO..", ".OHHHHHHHHO.", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHOOOOHHHO", "OHHO....OHHO", "OHHO....OHHO", ".OO......OO."],
+    hairFront: ["OH........HO", "OH........HO", "OH........HO", "OHO......OHO"],
     torso: [
       "..OOOOOOOOOO..",
       ".OCCCCCCCCCCO.",
@@ -533,6 +543,7 @@
     const B = (rows, dx, dy, pl = pal) => rows && blit(c, rows, dx, oy + dy, pl);
     if (F.cloak) B(human.cloak, -11, 9);
     const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
+    const wdef = o.weapon ? window.MuseumWeapons?.get(o.weapon) : null; if (wdef?.palette) Object.assign(pal, wdef.palette); if (wdef?.glow) pal.L = mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4);
     B(bare ? human.armBare : human.armBack, 4, 12);
     if (attacking) c.translate(lunge(p), 0);
     if (bare) { B(human.legBare, -6, 22); B(human.legBare, 0, 22); B(human.sandal, -6, 30); B(human.sandal, 0, 30); }
@@ -543,8 +554,10 @@
     if (F.sash) B(human.sash, -6, 12);
     if (F.epaulettes) { B(human.epaulette, -7, 11); B(human.epaulette, 3, 11); }
     if (F.armband) B(human.armband, 4, 15);
+    if (F.hairstyle === 'long') B(human.hairLong, -6, 0);
     B(human.neck, -2, 10);
     B(human.head, -6, 0);
+    if (F.hairstyle === 'long') B(human.hairFront, -6, 3);
     if (F.beard) B(human.hair[F.beard], -3, 7); if (F.mustache) B(human.hair[F.mustache], -3, 7);
     if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
     if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
@@ -728,6 +741,6 @@
     c.restore();
   }
   // Hidden packs register their art at runtime: a 24-wide icon, an in-hand sprite (hold/fwd rows) and a knight palette.
-  const registerArt = ({ icons = {}, held = {}, palettes = {} } = {}) => { for (const [k, rows] of Object.entries(icons)) I[k] = rows; for (const [k, v] of Object.entries(held)) human.weapons[k] = v; for (const [k, v] of Object.entries(palettes)) extraPalettes[k] = v; };
+  const registerArt = ({ icons = {}, held = {}, palettes = {}, figures = {} } = {}) => { for (const [k, rows] of Object.entries(icons)) I[k] = rows; for (const [k, v] of Object.entries(held)) human.weapons[k] = v; for (const [k, v] of Object.entries(palettes)) extraPalettes[k] = v; for (const [k, v] of Object.entries(figures)) extraFigures[k] = v; };
   window.MuseumPixel = Object.freeze({ PX, W, H, FLOOR, drawTexts, drawGuardRoom, drawTrophy, ready: () => sheet.complete && sheet.naturalWidth > 0, drawArena, drawKnight, drawRex, drawFigure, drawWeaponIcon, registerArt, drawCrate, drawCardArt, drawHall, icons: I, blit, themes, knightPalette, figurePalette });
 })();
