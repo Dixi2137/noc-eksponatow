@@ -440,6 +440,9 @@
       "..OOOOOOOO..",
     ],
     neck: ["OSSO"],
+    // stocky build: wider torso and a rounder head (figure.build === 'stocky')
+    torsoWide: ["...OOOOOOOOOOOO...", "..OCCCCCCCCCCCCO..", ".OCCCCCCCCCCCCCCO.", "OCCCCCCcCCCCCCCCCO", "OCCCCCCcCCCCCCCCCO", "OcCCCCCcCCCCCCCcCO", "OcCCCCCcCCCCCCCcCO", ".OccCCCcCCCCCCccO.", ".OcccccccccccccO..", ".OGGGGGGGGGGGGGGO.", ".OccccccccccccccO.", "..OOOOOOOOOOOOOO.."],
+    headWide: ["....OOOOOO....", "..OOHHHHHHOO..", ".OHHHHHHHHHHO.", ".OSSSSSSSSSSO.", "OSSSSSSSSSSSSO", "OSSSKSSSSSKSSO", "OSSSSSSSSSSSSO", "OSSSSSSNSSSSSO", "OSSSSSSSSSSSSO", ".OSSSSSSSSSSO.", "..OOOOOOOOOO.."],
     hairLong: ["..OOOOOOOO..", ".OHHHHHHHHO.", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHHHHHHHHO", "OHHHOOOOHHHO", "OHHO....OHHO", "OHHO....OHHO", ".OO......OO."],
     hairFront: ["OH........HO", "OH........HO", "OH........HO", "OHO......OHO"],
     torso: [
@@ -534,7 +537,7 @@
     const F = o.figure || {}, pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0;
     const pal = figurePalette(F); const flip = o.facing === -1;
     const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
-    const bare = F.legs === 'bare';
+    const bare = F.legs === 'bare', stocky = F.build === 'stocky';
     c.save(); c.translate(Math.round(x), Math.round(y)); if (flip) c.scale(-1, 1);
     c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(-9, -1, 18, 2);
     if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
@@ -546,20 +549,21 @@
     // Weapon colours live in their own palette so a weapon's letters (A/B/C…) never recolour the figure's coat or skin.
     const wdef = o.weapon ? window.MuseumWeapons?.get(o.weapon) : null;
     const wpal = { ...pal, ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}) };
-    B(bare ? human.armBare : human.armBack, 4, 12);
+    B(bare ? human.armBare : human.armBack, stocky ? 6 : 4, 12);
     if (attacking) c.translate(lunge(p), 0);
-    if (bare) { B(human.legBare, -6, 22); B(human.legBare, 0, 22); B(human.sandal, -6, 30); B(human.sandal, 0, 30); }
-    else { B(walk > 0 ? human.legB : human.legA, -6, 22); B(walk < 0 ? human.legB : human.legA, 0, 22); B(human.boot, -6, 30); B(human.boot, 0, 30); }
-    B(human.torso, -7, 11);
+    const lx = stocky ? -8 : -6, rx = stocky ? 2 : 0;
+    if (bare) { B(human.legBare, lx, 22); B(human.legBare, rx, 22); B(human.sandal, lx, 30); B(human.sandal, rx, 30); }
+    else { B(walk > 0 ? human.legB : human.legA, lx, 22); B(walk < 0 ? human.legB : human.legA, rx, 22); B(human.boot, lx, 30); B(human.boot, rx, 30); }
+    if (stocky) B(human.torsoWide, -9, 11); else B(human.torso, -7, 11);
     if (F.armor) B(human.armor, -6, 12);
     if (F.lapel) B(human.lapel, -4, 12);
     if (F.sash) B(human.sash, -6, 12);
     if (F.epaulettes) { B(human.epaulette, -7, 11); B(human.epaulette, 3, 11); }
     if (F.armband) B(human.armband, 4, 15);
-    if (F.hairstyle === 'long') B(human.hairLong, -6, 0);
-    B(human.neck, -2, 10);
-    B(human.head, -6, 0);
-    if (F.hairstyle === 'long') B(human.hairFront, -6, 3);
+    if (F.hairstyle === 'long') B(human.hairLong, stocky ? -7 : -6, 0);
+    B(human.neck, stocky ? -3 : -2, 10); if (stocky) B(human.neck, 0, 10);
+    if (stocky) B(human.headWide, -7, 0); else B(human.head, -6, 0);
+    if (F.hairstyle === 'long') B(human.hairFront, stocky ? -7 : -6, 3);
     if (F.beard) B(human.hair[F.beard], -3, 7); if (F.mustache) B(human.hair[F.mustache], -3, 7);
     if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
     if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
