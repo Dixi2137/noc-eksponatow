@@ -128,7 +128,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   $('hallTrophyCount').textContent=`${sum.trophies} / ${sum.trophiesTotal}`;
   $('hallTrophies').replaceChildren(...hallApi.trophies.map(trophy=>{
    const owned=hallApi.hasTrophy(profile,trophy.id),card=document.createElement('div');card.className=`hall-trophy ${owned?'':'locked'}`;card.title=trophy.description;
-   const canvas=document.createElement('canvas');canvas.width=180;canvas.height=180;const ctx=canvas.getContext('2d');if(ctx&&window.MuseumPixel?.drawTrophy){ctx.imageSmoothingEnabled=false;window.MuseumPixel.drawTrophy(ctx,trophy,90,160,6,{locked:!owned});}
+   const canvas=document.createElement('canvas');canvas.width=180;canvas.height=180;const ctx=canvas.getContext('2d');if(ctx&&window.MuseumPixel?.drawTrophy){ctx.imageSmoothingEnabled=false;window.MuseumPixel.drawTrophy(ctx,trophy,90,160,5,{locked:!owned});}
    const name=document.createElement('strong');name.textContent=owned?trophy.name:'???';const era=document.createElement('small');era.textContent=owned?trophy.era:`ZA SALĘ: ${levels.get(trophy.level).title}`;
    card.append(canvas,name,era);return card;
   }));

@@ -634,7 +634,7 @@
     'leonidas': ["................", "....OOOOOOO.....", "...OCRRRRRCO....", "..OCRRRRRRRCO...", "..ORRRRRRRRRO...", "..OBRRRRRRRBO...", "..OOOBRRRBOOO...", ".OGGGGBRBGGGGO..", ".OGGGGGOGGGGGO..", ".OGGGGGGGGGGGO..", ".OGGGOOOOOGGGO..", ".OGGO.....OGGO..", ".OGGO.....OGGO..", ".OOOO.....OOOO..", "................", "................"],
     'hitler': ["................", "....OOOO........", "...OAAAAO.......", "..OAOOOOAO......", "..OAO..OAO......", "..OAOOOOAO......", "...OAAAAO.......", "....OAAO........", "....OAAO........", "....OAAO........", "....OAAO........", "....OAAOOO......", "....OAAAAO......", "....OAAOOO......", "....OOO.........", "................"],
     'stalin': ["................", ".........CC.....", "........C..C....", ".........CC.....", "................", "..OOOOOOOOOO....", ".OBBBBBBBBBBO...", ".OOOOOOOOOBBO...", ".........OBBO...", "........OBBBBO..", ".......OBBBBBBO.", ".......OBKKKBBO.", ".......OBBKKBBO.", "........OBBBBO..", ".........OOOO...", "................"],
-    'beelzebub': ["................", "................", "................", "................", ".....OOOOOOO....", "....OACCCCCAO...", "...OAAACCCAAAO..", "..OAAAAAAAAAAAO.", "OOAAAAAAAAAAAAAO", "OGAAWWAAAAAAAARO", "OAAAWWAAAAAAAAAO", "OOOOOOOOOOOOOOOO", ".OKKOOOOOOOOKKO.", ".OKMKO.....OKMKO", "..OOO.......OOO.", "................"],
+    'beelzebub': ["...........OOOOOOOOOO....OOOOOOO", "..........OAAAAAAAAAAO...OAAAAAO", ".........OACCCCOCCCCCAO....O..O.", ".......OOAACCCCOCCCCCAAOO..O..O.", "..OOOOOAAAAAAAAAAAAAAAAAAOOOOOO.", ".OAAAAAAAAAAAAAAAAAAAAAAAAAAAAO.", "OGAAAAAAWWWWWWWWWWWWWWWWWWWWAARO", "OGAAAAAAAAAAAAAAAAAAAAAAAAAAAARO", "OBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBO", "OBBBBOOOOBBBBBBBBBBBBBBBOOOOBBBO", "OOOOOKKKKOOOOOOOOOOOOOOKKKKOOOOO", "....OKBBBKO..........OKBBBKO....", "....OKBRBKO..........OKBRBKO....", "....OKBBBKO..........OKBBBKO....", ".....OKKKO............OKKKO.....", "......OOO..............OOO......"],   // 32 x 16: Hennessey Exorcist Camaro in profile (trophies may be wider than 16)
     'xerxes': ["................", ".......OO.......", "......OCCO......", "...OO.OGGO.OO...", "..OCCOOGGOOCCO..", "..OGGGOGGOGGGO..", "..OGGGGGGGGGGO..", "..OGRGGGWGGRGO..", "..OGGGGGGGGGGO..", "..OGGGGGGGGGGO..", "..OBGGGGGGGGBO..", "...OBBBBBBBBO...", "....OOOOOOOO....", "................", "................", "................"],
     'qin': ["................", ".....OOOOOO.....", "....OAAAAAAO....", "....OACCCCAO....", "....OACBCBAO....", "....OACCCCAO....", ".....OCBBCO.....", "......OCCO......", "....OOOAAOOO....", "...OAAAAAAAAO...", "...OABAAAABAO...", "...OABAAAABAO...", "...OABAAAABAO...", "...OBBBBBBBBO...", "....OOOOOOOO....", "................"],
     'herod': ["................", ".....OOOOOO.....", "....OGGGGGGO....", "...OGGGGGGGGO...", "..OGGGGWGGGGGO..", "..OGGGWWWGGGGO..", "..OGWWWWWWWGGO..", "..OGGGWWWGGGGO..", "..OGGWWGWWGGGO..", "..OGGGGWGGGGGO..", "...OGGGGGGGGO...", "....OBBBBBBO....", ".....OOOOOO.....", "................", "................", "................"],
@@ -674,14 +674,17 @@
     return { O: '#141216', A: col, B: mix(col, '#000000', .45), C: mix(col, '#ffffff', .45), G: '#d4af37', W: '#f4f1e8', K: '#23232a', R: '#b3202a', M: '#c9d6dc', S: '#8a6a42', D: '#5a3a22', P: '#3b2a3a', p: '#6a4a6a' };
   }
   // Draws the trophy sprite centred over a pedestal; x is the centre, y the pedestal's bottom edge. locked: a grey question mark.
+  const trophySize = trophy => { const rows = trophySprites[String(trophy?.id || '').replace(/^trophy-/, '')] || trophyUnknown; return { w: rows[0].length, h: rows.length }; };
+  const pedestalRows = width => { const w = Math.max(20, width + 4), line = (l, r, fill) => l + fill.repeat(w - l.length - r.length) + r; return [line('....', '....', 'O'), line('...O', 'O...', 'P'), line('..OPp', 'pPO..', 'P'), line('.O', 'O.', 'p'), 'O'.repeat(w)]; };
   function drawTrophy(c, trophy, x, y, scale = 1, o = {}) {
     const key = String(trophy?.id || '').replace(/^trophy-/, ''), rows = o.locked ? trophyUnknown : trophySprites[key] || trophyUnknown;
+    const w = rows[0].length, h = rows.length, ped = pedestalRows(w), pw = ped[0].length;
     const pal = o.locked ? { O: '#141216', B: '#555555', P: '#2a2228', p: '#3a3038' } : trophyPalette(trophy);
     c.save(); c.translate(x, y); c.scale(scale, scale);
-    blit(c, trophyPedestal, -10, -5, pal);
+    blit(c, ped, -Math.floor(pw / 2), -5, pal);
     // soft glow behind the sprite in the trophy colour
-    if (!o.locked) { c.fillStyle = mix(trophy?.color || '#c9b37a', '#000000', .7); c.globalAlpha = .35; c.fillRect(-7, -21, 14, 16); c.globalAlpha = 1; }
-    blit(c, rows, -8, -22, pal);
+    if (!o.locked) { c.fillStyle = mix(trophy?.color || '#c9b37a', '#000000', .7); c.globalAlpha = .35; c.fillRect(-Math.floor(w / 2) + 1, -6 - h + 1, w - 2, h - 2); c.globalAlpha = 1; }
+    blit(c, rows, -Math.floor(w / 2), -6 - h, pal);
     c.restore();
   }
   // ── Crates, cards and the private hall in pixels ─────────────────────────
@@ -732,7 +735,7 @@
     [['armor-1', 56], ['armor-2', 232]].forEach(([id, x], i) => { const item = at(id); px(c, x - 14, 124, '#4a3b2a', 28, 4); px(c, x - 16, 128, '#241c13', 32, 3); if (item) drawKnight(c, x, 124, { pose: 'idle', facing: i ? -1 : 1, time: t, skin: item.id }); label(x, 118 - (item ? 46 : 0), item ? item.name : 'POSTUMENT'); });
     [['weapon-1', 24], ['weapon-2', 264]].forEach(([id, x]) => { const item = at(id); px(c, x - 13, 40, '#1d1710', 26, 44); if (item) drawWeaponIcon(c, window.MuseumWeapons?.get(item.id), x - 8, 54, 1); label(x, 86, item ? item.name : 'BROŃ'); });
     [['card-1', 84], ['card-2', 182]].forEach(([id, x]) => { const item = at(id); if (item) { c.save(); c.translate(x, 30); drawCardArt(c, window.MuseumCards?.get(item.id), 22, 60, { texts: T, ox: x, oy: 30 }); c.restore(); } else label(x + 11, 56, 'KARTA'); });
-    [['trophy-1', 132], ['trophy-2', 156]].forEach(([id, x]) => { const item = at(id); px(c, x - 9, 76, '#2a2219', 18, 30); px(c, x - 8, 78, 'rgba(154,208,232,.18)', 16, 24); if (item) drawTrophy(c, item, x, 104, 1); else label(x, 86, 'GABLOTA'); });
+    [['trophy-1', 128], ['trophy-2', 162]].forEach(([id, x]) => { const item = at(id); const cw = item ? Math.max(18, trophySize(item).w + 6) : 18; px(c, x - Math.floor(cw / 2), 76, '#2a2219', cw, 30); px(c, x - Math.floor(cw / 2) + 1, 78, 'rgba(154,208,232,.18)', cw - 2, 24); if (item) drawTrophy(c, item, x, 104, 1); else label(x, 86, 'GABLOTA'); });
   }
   // Draws texts collected in low-res coordinates on a full-resolution context (scale PX), crisp, in the pixel UI font.
   function drawTexts(c, texts, scale = PX) {
