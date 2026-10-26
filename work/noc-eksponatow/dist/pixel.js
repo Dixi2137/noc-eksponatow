@@ -543,7 +543,9 @@
     const B = (rows, dx, dy, pl = pal) => rows && blit(c, rows, dx, oy + dy, pl);
     if (F.cloak) B(human.cloak, -11, 9);
     const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
-    const wdef = o.weapon ? window.MuseumWeapons?.get(o.weapon) : null; if (wdef?.palette) Object.assign(pal, wdef.palette); if (wdef?.glow) pal.L = mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4);
+    // Weapon colours live in their own palette so a weapon's letters (A/B/C…) never recolour the figure's coat or skin.
+    const wdef = o.weapon ? window.MuseumWeapons?.get(o.weapon) : null;
+    const wpal = { ...pal, ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}) };
     B(bare ? human.armBare : human.armBack, 4, 12);
     if (attacking) c.translate(lunge(p), 0);
     if (bare) { B(human.legBare, -6, 22); B(human.legBare, 0, 22); B(human.sandal, -6, 30); B(human.sandal, 0, 30); }
@@ -561,8 +563,8 @@
     if (F.beard) B(human.hair[F.beard], -3, 7); if (F.mustache) B(human.hair[F.mustache], -3, 7);
     if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
     if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
-    if (attacking) swing(B, p, { raised: bare ? human.armRaisedBare : human.armRaised, fwd: bare ? human.armFwdBare : human.armFwd }, wp.hold, wp.fwd, pal);
-    else holdIdle(B, bare ? human.armBare : human.armFront, wp.hold, pal);
+    if (attacking) swing(B, p, { raised: bare ? human.armRaisedBare : human.armRaised, fwd: bare ? human.armFwdBare : human.armFwd }, wp.hold, wp.fwd, wpal);
+    else holdIdle(B, bare ? human.armBare : human.armFront, wp.hold, wpal);
     c.restore();
   }
   // ── Weapon icons: 16 x 16 pixel glyphs per icon key, tinted by rarity ─────
