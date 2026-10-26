@@ -16,6 +16,7 @@
   function messageFor(error) {
     const text = String(error?.msg || error?.message || error?.error_description || error?.error || error || 'Nieznany błąd');
     if (/invalid login credentials/i.test(text)) return 'Zły e-mail albo hasło.';
+    if (/email rate limit|over_email_send_rate_limit/i.test(text)) return 'Serwer wysłał już limit maili (Supabase bez własnego SMTP: kilka na godzinę). Spróbuj za godzinę albo poproś kustosza o wyłączenie potwierdzania e-maila.';
     if (/security purposes|rate limit|too many requests/i.test(text)) return 'Za dużo prób. Odczekaj minutę i spróbuj ponownie.';
     if (/otp_expired|expired|invalid.*token/i.test(text)) return 'Link wygasł albo został już użyty. Poproś o nowy.';
     if (/same.*password|different from the old/i.test(text)) return 'Nowe hasło musi różnić się od starego.';

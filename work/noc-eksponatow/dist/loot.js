@@ -31,7 +31,7 @@
  });
  const originalCategories=Object.freeze({brass:'forge',frost:'elements',obsidian:'shadow',verdigris:'nature',ember:'elements',royal:'royal',solar:'royal','stachu-jones':'special'});
  function skinCategory(id) {
-  if(Object.hasOwn(originalCategories,id))return originalCategories[id];
+  if(Object.prototype.hasOwnProperty.call(originalCategories,id))return originalCategories[id];
   const number=Number(id.replace(/^knight-/,''));
   return Object.keys(categoryNumbers).find(category=>categoryNumbers[category].includes(number));
  }
@@ -276,7 +276,7 @@
    if(roll<tier.weight) return tier.skins[Math.min(tier.skins.length-1,Math.floor(roll/tier.weight*tier.skins.length))];
    roll-=tier.weight;
   }
-  return pool.at(-1);
+  return pool[pool.length-1];
  }
  function reserve(profile, random=randomValue,crateId='gallery') {
   const crate=getCrate(crateId);
