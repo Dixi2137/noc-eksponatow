@@ -93,9 +93,9 @@
       for (let k = 0; k < 9; k++) px(c, 8 + k * 32 + ((k * 7) % 5), 140 + (k % 3) * 6, '#ff7a2a', 10 + (k % 4) * 3, 1);
       for (let k = 0; k < 6; k++) px(c, 30 + k * 44, 150 + (k % 2) * 5, '#ffb24a', 6, 1);
     }
-    if (th.fire) blit(c, arenaProps.carBig.rows, 116, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
+    if (th.fire) blit(c, arenaProps.carBig.rows, 148, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
     // Vignette.
     const g = c.createRadialGradient(144, 80, 60, 144, 80, 190); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,4,10,.6)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
   }
