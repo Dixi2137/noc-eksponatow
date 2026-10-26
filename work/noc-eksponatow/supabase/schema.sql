@@ -212,7 +212,7 @@ grant execute on function public.mod_set_role(uuid, text) to authenticated;
 -- Tytuł nadawany ręcznie przez moderatora, widoczny w rankingu i w koncie. „First to arrive” może mieć tylko jedna osoba.
 alter table public.profiles add column if not exists title text;
 alter table public.profiles drop constraint if exists profiles_title_check;
-alter table public.profiles add constraint profiles_title_check check (title is null or title in ('owner', 'first-to-arrive', 'founder', 'veteran', 'patron'));
+alter table public.profiles add constraint profiles_title_check check (title is null or title in ('owner', 'first-to-arrive', 'founder', 'veteran', 'patron', 'demon-slayer'));
 create unique index if not exists profiles_first_to_arrive on public.profiles (title) where title = 'first-to-arrive';
 
 create or replace function public.protect_mod_fields() returns trigger

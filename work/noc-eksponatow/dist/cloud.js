@@ -157,7 +157,8 @@
     'first-to-arrive': { name: 'FIRST TO ARRIVE', color: '#f0ca72', note: 'Pierwsza osoba, która zalogowała się po założycielu.' },
     founder: { name: 'ZAŁOŻYCIEL', color: '#7ff0e0', note: 'Twórca muzeum.' },
     veteran: { name: 'WETERAN', color: '#c4a1f0', note: 'Przeszedł całą noc.' },
-    patron: { name: 'MECENAS', color: '#9ad28b', note: 'Wsparł muzeum.' }
+    patron: { name: 'MECENAS', color: '#9ad28b', note: 'Wsparł muzeum.' },
+    'demon-slayer': { name: 'DEMON SLAYER', color: '#ff4a3a', note: 'Pokonał Belzebuba w piekle.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
   window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
