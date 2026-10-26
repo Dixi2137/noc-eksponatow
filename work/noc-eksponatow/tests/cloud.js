@@ -132,7 +132,7 @@
     window.fetch = async (url, init) => { calls.push(url); const missing = url.includes('title'); return { ok: !missing, status: missing ? 400 : 200, text: async () => missing ? JSON.stringify({ message: 'column profiles.title does not exist' }) : JSON.stringify([{ id: 'u1', nickname: 'Mr. Dixi', role: 'admin' }]) }; };
     try {
       cloud._test.store({ access_token: 'tok', refresh_token: 'ref', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'u1', email: 'a@b.pl' } });
-      const r = await cloud.fetchProfile(); assert.equal(r.ok, true); assert.equal(r.data.role, 'admin'); assert.equal(calls.length, 2); assert.ok(!calls[1].includes('title'));
+      const r = await cloud.fetchProfile(); assert.equal(r.ok, true); assert.equal(r.data.role, 'admin'); assert.equal(calls.length, 3, 'select z titles, potem z title, potem bez obu'); assert.ok(calls[0].includes('titles') && calls[1].includes('title') && !calls[1].includes('titles') && !calls[2].includes('title'));
       await cloud.signOut();
     } finally { window.fetch = realFetch; window.MuseumConfig = old; }
   });
