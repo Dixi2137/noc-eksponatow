@@ -687,6 +687,8 @@ window.MuseumConfig = Object.freeze({
     return request('/rest/v1/profiles', { method: 'POST', body: { id: me.id, nickname: me.nickname || `gracz-${me.id.slice(0, 8)}`, ...body }, prefer: 'return=representation' });
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
+  // Moderator adjustments wait on the server until the player's game picks them up (the local save is authoritative for the client).
+  async function claimAdjustments() { const r = await request('/rest/v1/rpc/claim_adjustments', { method: 'POST', body: {} }); return r.ok ? { ok: true, coins: Number(r.data?.coins) || 0, balance: Number(r.data?.balance) || 0 } : r; }
   // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.
   function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/title_taken|profiles_first_to_arrive/i.test(t)) return { ...r, error: 'Rangę FIRST TO ARRIVE ma już ktoś inny. Najpierw ją zdejmij.' }; if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
   const rpc = async (name, body) => modMessage(await request(`/rest/v1/rpc/${name}`, { method: 'POST', body }));
@@ -736,7 +738,7 @@ window.MuseumConfig = Object.freeze({
     patron: { name: 'MECENAS', color: '#9ad28b', note: 'Wsparł muzeum.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();
@@ -4620,6 +4622,12 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me&&!recoveryPending);show('accountUser',!!me&&!recoveryPending);show('accountReset',recoveryPending);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me){cloudRole='player';cloudTitle=null;}const tt=cloud.titles?.[cloudTitle];show('accountTitle',!!me&&!!tt);if(me&&tt){$('accountTitle').textContent=`${tt.name} · ${tt.note}`;$('accountTitle').style.color=tt.color;}
   $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
  function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
+ // Coins / PLN granted by a moderator: pulled from the server and added to the local save (the local save otherwise wins every push).
+ let claimingAdjustments=false;
+ async function syncAdjustments(){if(!cloud.user()||claimingAdjustments||typeof cloud.claimAdjustments!=='function')return;claimingAdjustments=true;try{const r=await cloud.claimAdjustments();if(!r.ok||(!r.coins&&!r.balance))return;
+  profile=loot.migrate({...profile,coins:Math.max(0,profile.coins+r.coins),balance:Math.max(0,(profile.balance||0)+r.balance)});persist();refreshStores();
+  const parts=[];if(r.coins)parts.push(`${r.coins>0?'+':''}${number(r.coins)} ✦`);if(r.balance)parts.push(`${r.balance>0?'+':''}${pln(r.balance)}`);toast(`Kustosz zmienił twoje konto: ${parts.join(', ')}.`);}finally{claimingAdjustments=false;}}
+ setInterval(syncAdjustments,45000);
  function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();applySecrets();}
  // Hidden packs: codes stored in the profile unlock their content again on every load; a newly entered code adds it.
  async function applySecrets(){const secret=window.MuseumSecret;if(!secret||!profile.secrets?.length)return;const results=await secret.restore(profile.secrets);if(results.length){profile=loot.migrate({...profile,weapons:[...profile.weapons,...results.flatMap(r=>r.items.filter(i=>i.kind==='weapon').map(i=>i.id))]});persist();refreshStores();}}
@@ -4674,7 +4682,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
    row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');if(cloud.titles?.[p.title]){const badge=document.createElement('small');badge.className='rank-title';badge.textContent=cloud.titles[p.title].name;badge.style.color=cloud.titles[p.title].color;row.querySelector('strong').append(badge);}row.querySelector('div>small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
    row.querySelector('.mod-ok,.mod-banned').textContent=banned?`BAN ${perm?'∞':'do '+new Date(p.banned_until).toLocaleDateString('pl-PL')}${p.ban_reason?' · '+p.ban_reason:''}`:'AKTYWNY';
    const actions=document.createElement('div');actions.className='mod-actions';const self=p.id===me?.id;
-   const act=(label,fn,danger=false,disabled=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;if(danger)b.className='danger';b.disabled=disabled;b.addEventListener('click',async()=>{const r=await fn();if(r===undefined)return;modMessage(r.ok?`${p.nickname}: zrobione.`:r.error||'Nie udało się.',!r.ok);if(r.ok)renderModeration();});actions.append(b);};
+   const act=(label,fn,danger=false,disabled=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;if(danger)b.className='danger';b.disabled=disabled;b.addEventListener('click',async()=>{const r=await fn();if(r===undefined)return;modMessage(r.ok?`${p.nickname}: zrobione.${r.data?.pending||r.data?.coins!==undefined?' Gracz dostanie korektę przy najbliższym wejściu do gry (lub w ciągu minuty, jeśli gra).':''}`:r.error||'Nie udało się.',!r.ok);if(r.ok)renderModeration();});actions.append(b);};
    act('ŻETONY ±',()=>{const v=window.prompt(`Zmiana żetonów dla ${p.nickname} (np. 500 albo -500):`,'500');if(v===null||!Number.isFinite(Number(v)))return;return cloud.mod.adjust(p.id,Math.trunc(Number(v)),0);});
    act('SALDO ±',()=>{const v=window.prompt(`Zmiana salda w zł dla ${p.nickname} (np. 50 albo -50):`,'50');if(v===null||!Number.isFinite(Number(v)))return;return cloud.mod.adjust(p.id,0,Math.round(Number(v)*100));});
    act('NOTATKA',()=>{const v=window.prompt(`Notatka moderatora o ${p.nickname}:`,p.mod_note||'');if(v===null)return;return cloud.mod.note(p.id,v);});
@@ -4692,7 +4700,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  const isMod=()=>cloudRole==='moderator'||cloudRole==='admin';
  async function afterLogin(){
   const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
-  const remote=r.data;cloudRole=remote?.role||'player';cloudTitle=remote?.title||null;renderAccount();document.body.classList.remove('maintenance-login');applyMaintenance();
+  const remote=r.data;cloudRole=remote?.role||'player';cloudTitle=remote?.title||null;renderAccount();document.body.classList.remove('maintenance-login');applyMaintenance();syncAdjustments();
   if(remote?.banned_until&&new Date(remote.banned_until)>new Date()){const until=new Date(remote.banned_until);const perm=until.getFullYear()-new Date().getFullYear()>50;await cloud.signOut();cloudRole='player';renderAccount();setAccountStatus(`Konto zablokowane ${perm?'bezterminowo':'do '+until.toLocaleString('pl-PL')}${remote.ban_reason?`. Powód: ${remote.ban_reason}`:''}.`,true);return;}
   if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
   else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
@@ -4729,7 +4737,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  function closeModal(){if(crateBusy){toast('Skrzynia się otwiera. Za chwilę poznasz swój nowy wygląd.');return;}if(!$('loot').classList.contains('hidden')){claimReward(false);return;}for(const id of ['help','collection','shop','hall','account','ranking','moderation'])show(id,false);document.body.style.overflow='';document.body.classList.remove('maintenance-login');if(maintenance.enabled)applyMaintenance();if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});if(helpWasPlaying){helpWasPlaying=false;resume();}}
  function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
  function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
- function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');}
+ function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');syncAdjustments();}
  function chooseShopCrate(id){if(!canOpenShop()||!loot.getCrate(id))return;selectedCrateId=id;openCrate();}
  function drawItem(canvas,item){
   const ctx0=canvas.getContext('2d'),d=canvas.width/360;let cardTexts=null;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
@@ -4907,7 +4915,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  $('bootLoginBtn').addEventListener('click',()=>{bootEnd();accountMode='login';setTimeout(()=>account(),250);});
  $('bootRegisterBtn').addEventListener('click',()=>{bootEnd();accountMode='register';setTimeout(()=>account(),250);});
  bootStart();
- renderAccount();landFromEmailLink().then(()=>cloud.restore()).then(async me=>{renderAccount();boot.restored=me;if(me&&!boot.done&&!$('bootLogin').classList.contains('hidden'))bootChoice();if(me){const r=await cloud.fetchProfile();if(r.ok&&r.data){cloudRole=r.data.role||'player';cloudTitle=r.data.title||null;renderAccount();applyMaintenance();}await claimServerDaily();}});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
+ renderAccount();landFromEmailLink().then(()=>cloud.restore()).then(async me=>{renderAccount();boot.restored=me;if(me&&!boot.done&&!$('bootLogin').classList.contains('hidden'))bootChoice();if(me){const r=await cloud.fetchProfile();if(r.ok&&r.data){cloudRole=r.data.role||'player';cloudTitle=r.data.title||null;renderAccount();applyMaintenance();}await claimServerDaily();await syncAdjustments();}});if(profile.pendingReward){renderSkins();openModal('collection');showLoot();revealReward(true);}requestAnimationFrame(loop);
 })();
 </script>
 </body></html>

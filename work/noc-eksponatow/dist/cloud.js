@@ -108,6 +108,8 @@
     return request('/rest/v1/profiles', { method: 'POST', body: { id: me.id, nickname: me.nickname || `gracz-${me.id.slice(0, 8)}`, ...body }, prefer: 'return=representation' });
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
+  // Moderator adjustments wait on the server until the player's game picks them up (the local save is authoritative for the client).
+  async function claimAdjustments() { const r = await request('/rest/v1/rpc/claim_adjustments', { method: 'POST', body: {} }); return r.ok ? { ok: true, coins: Number(r.data?.coins) || 0, balance: Number(r.data?.balance) || 0 } : r; }
   // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.
   function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/title_taken|profiles_first_to_arrive/i.test(t)) return { ...r, error: 'Rangę FIRST TO ARRIVE ma już ktoś inny. Najpierw ją zdejmij.' }; if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
   const rpc = async (name, body) => modMessage(await request(`/rest/v1/rpc/${name}`, { method: 'POST', body }));
@@ -157,7 +159,7 @@
     patron: { name: 'MECENAS', color: '#9ad28b', note: 'Wsparł muzeum.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();
