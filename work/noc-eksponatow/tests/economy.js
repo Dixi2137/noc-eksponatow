@@ -35,6 +35,7 @@
     assert.ok(p.weapons.includes('ghost-ray') && p.weapons.includes('nie') && p.weapons.includes('axe'), 'nieznane bronie zostają'); assert.ok(p.owned.includes('ghost-suit') && p.owned.includes('frost'));
     assert.deepEqual(p.finishes, ['ghost-coat']); assert.equal(p.weapon, 'ghost-ray', 'założona nieznana broń zostaje'); assert.equal(p.skin, 'ghost-suit'); assert.equal(p.savedAt, '2026-10-26T10:00:00.000Z');
     const again = loot.migrate(p); assert.equal(again.upgrades['weapon:ghost-ray'], 3, 'druga migracja też nie gubi');
+    assert.equal(window.MuseumPerks.get(p.skin).id, 'brass', 'nieznany skin: perk podstawowy'); g.reset(); const s0 = g.start({ sound: false, skin: p.skin, weapon: p.weapon }); assert.equal(s0.weapon.id, 'sword', 'nieznana broń: miecz'); assert.ok(s0.player.maxHP > 0, 'walka startuje mimo nieznanego skina');
     const big = loot.migrate({ weapons: Array.from({ length: 200 }, (_, i) => 'x' + i) }); assert.ok(big.weapons.length <= 51, 'limit nieznanych id');
   });
   test('Katalog przedmiotów: każdy skin, broń i karta ma unikalne id, rzadkość i wartość', () => {
