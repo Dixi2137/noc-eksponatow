@@ -32,9 +32,12 @@
  function updateActivePerk(perk){const target=$('activePerk');if(target.dataset.perk===perk.id)return;const title=document.createElement('strong'),summary=document.createElement('span');title.textContent=perk.title;summary.textContent=perk.summary;target.replaceChildren(title,summary);target.dataset.perk=perk.id;target.setAttribute('aria-label',perkText(perk));}
  let pushTimer=null,pushing=false;
  function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
- async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),2500);return null;}if(pushing)return null;pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
+ let pushAgain=false;
+ // Leaving the page: push the current save right away (keepalive lets the request finish after the tab closes).
+ window.addEventListener('pagehide',()=>{if(!cloud.user())return;clearTimeout(pushTimer);cloud.upsertProfile({save:profile,...cloudStats()},{keepalive:true});});
+ async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),1200);return null;}if(pushing){pushAgain=true;return null;}pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;if(pushAgain){pushAgain=false;pushCloud();}setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
- function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);updateLoadout();pushCloud();}
+ function persist(){profile.savedAt=new Date().toISOString();try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);updateLoadout();pushCloud();}
  function refreshStores(){if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();}
  function buyFinish(id){const result=loot.buyFinish(profile,id);if(!result){toast('Za mało na saldzie. Wpłać najpierw złotówki.');return;}profile=result.profile;persist();refreshStores();toast(`Kupiono ${result.item.name} za ${pln(result.price)}. Nałóż je w kolekcji, zakładka WYKOŃCZENIA.`);}
 // Pixel art is the only look: the vector renderer stays in art.js as a fallback, but nothing in the UI switches to it.
@@ -225,7 +228,11 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
   const remote=r.data;cloudRole=remote?.role||'player';cloudTitle=remote?.title||null;renderAccount();document.body.classList.remove('maintenance-login');applyMaintenance();syncAdjustments();
   if(remote?.banned_until&&new Date(remote.banned_until)>new Date()){const until=new Date(remote.banned_until);const perm=until.getFullYear()-new Date().getFullYear()>50;await cloud.signOut();cloudRole='player';renderAccount();setAccountStatus(`Konto zablokowane ${perm?'bezterminowo':'do '+until.toLocaleString('pl-PL')}${remote.ban_reason?`. Powód: ${remote.ban_reason}`:''}.`,true);return;}
-  if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+  // Which save wins: an empty local save takes the cloud; otherwise the newer one (by its own stamp), asking only when the cloud is newer.
+  if(remote&&!saveLooksEmpty(remote.save)){const cloudAt=remote.save?.savedAt||remote.updated_at||null,localAt=profile.savedAt||null;const cloudNewer=!!cloudAt&&(!localAt||new Date(cloudAt)>new Date(localAt));
+   if(localLooksEmpty()){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+   else if(cloudNewer&&window.confirm(`W chmurze jest nowszy zapis (${new Date(cloudAt).toLocaleString('pl-PL')}) niż w tej przeglądarce${localAt?` (${new Date(localAt).toLocaleString('pl-PL')})`:''}. Wczytać go? Lokalny postęp zostanie nadpisany.`)){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+   else{pushCloud(true);setAccountStatus('Zapis z tej przeglądarki jest nowszy: wysłano go do chmury.');}}
   else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
   await claimServerDaily();renderAccount();
  }

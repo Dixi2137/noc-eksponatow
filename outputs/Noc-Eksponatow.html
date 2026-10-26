@@ -608,7 +608,7 @@ window.MuseumConfig = Object.freeze({
     if (/failed to fetch|networkerror|load failed/i.test(text)) return 'Brak połączenia z chmurą.';
     return text;
   }
-  async function request(path, { method = 'GET', body, auth = true, headers = {}, prefer } = {}) {
+  async function request(path, { method = 'GET', body, auth = true, headers = {}, prefer, keepalive = false } = {}) {
     if (!enabled()) return { ok: false, error: 'Chmura jest wyłączona: brak konfiguracji.', offline: true };
     const base = config().supabaseUrl.replace(/\/$/, '');
     const h = { apikey: config().supabaseAnonKey, 'Content-Type': 'application/json', ...headers };
@@ -617,7 +617,7 @@ window.MuseumConfig = Object.freeze({
     if (!h.Authorization && /^eyJ/.test(config().supabaseAnonKey)) h.Authorization = `Bearer ${config().supabaseAnonKey}`;
     if (prefer) h.Prefer = prefer;
     try {
-      const response = await fetch(`${base}${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) });
+      const response = await fetch(`${base}${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body), ...(keepalive ? { keepalive: true } : {}) });
       const text = await response.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
       if (!response.ok) return { ok: false, error: messageFor(data), status: response.status, raw: data };
       return { ok: true, data };
@@ -679,10 +679,10 @@ window.MuseumConfig = Object.freeze({
   }
   // The profile row is created by a database trigger at sign-up, so saving is an UPDATE. (An upsert without the nickname
   // fails on the NOT NULL check before the conflict is even resolved.) If the row is somehow missing, insert it with a nickname.
-  async function upsertProfile(fields) {
+  async function upsertProfile(fields, { keepalive = false } = {}) {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
     const body = { ...fields, updated_at: new Date().toISOString() };
-    const r = await request(`/rest/v1/profiles?id=eq.${me.id}`, { method: 'PATCH', body, prefer: 'return=representation' });
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}`, { method: 'PATCH', body, prefer: 'return=representation', keepalive });
     if (!r.ok || (Array.isArray(r.data) && r.data.length)) return r;
     return request('/rest/v1/profiles', { method: 'POST', body: { id: me.id, nickname: me.nickname || `gracz-${me.id.slice(0, 8)}`, ...body }, prefer: 'return=representation' });
   }
@@ -4025,13 +4025,18 @@ window.MuseumConfig = Object.freeze({
  function migrate(saved) {
   const source = saved && typeof saved === 'object' ? saved : {};
   const inventory = Array.isArray(source.owned) ? source.owned : [];
-  const owned = skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id);
-  const weapons=['sword',...(Array.isArray(source.weapons)?source.weapons:[]).filter(id=>id!=='sword'&&weaponsApi.has(id))];
+  // Ids the catalogue does not know yet (hidden packs register their items only after the profile loads) are kept, capped, never dropped.
+  const unknown = id => typeof id === 'string' && id.length <= 40 && !itemsById.has(id);
+  const keepUnknown = list => [...new Set(list.filter(unknown))].slice(0, 50);
+  const owned = [...skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id), ...keepUnknown(inventory)];
+  const weaponsIn=Array.isArray(source.weapons)?source.weapons:[];
+  const weapons=['sword',...weaponsIn.filter(id=>id!=='sword'&&weaponsApi.has(id)),...keepUnknown(weaponsIn)];
   const cards=(Array.isArray(source.cards)?source.cards:[]).filter(id=>cardsApi.get(id));
-  const finishes=(Array.isArray(source.finishes)?source.finishes:[]).filter(id=>finishesApi?.has(id));
+  const finishesIn=Array.isArray(source.finishes)?source.finishes:[];
+  const finishes=[...finishesIn.filter(id=>finishesApi?.has(id)),...keepUnknown(finishesIn)];
   const pendingItem=getItem(source.pendingReward);
   const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:pendingItem.kind==='finish'?finishes:cards).includes(pendingItem.id) ? pendingItem.id : null;
-  const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(item&&item.kind===kind&&(kind==='skin'||kind==='weapon'))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}
+  const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(!(kind==='skin'||kind==='weapon'))continue;if(item?item.kind===kind:unknown(id))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}   // unknown id = hidden item not registered yet: keep its level
   return {
    coins:integer(source.coins),owned,
    skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,pixel:true,   // pixel art is the only look
@@ -4048,6 +4053,7 @@ window.MuseumConfig = Object.freeze({
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
+   savedAt:typeof source.savedAt==='string' ? source.savedAt : null,   // when this save was last written (cloud vs local comparison)
    secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
@@ -4524,9 +4530,12 @@ window.MuseumConfig = Object.freeze({
  function updateActivePerk(perk){const target=$('activePerk');if(target.dataset.perk===perk.id)return;const title=document.createElement('strong'),summary=document.createElement('span');title.textContent=perk.title;summary.textContent=perk.summary;target.replaceChildren(title,summary);target.dataset.perk=perk.id;target.setAttribute('aria-label',perkText(perk));}
  let pushTimer=null,pushing=false;
  function cloudStats(){const sum=hallApi.summary(profile);return {halls_cleared:profile.cleared.length,prestige:sum.prestige,fastest_night:profile.records?.fastestNight??null,night_coins:profile.records?.nightCoins||0};}
- async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),2500);return null;}if(pushing)return null;pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
+ let pushAgain=false;
+ // Leaving the page: push the current save right away (keepalive lets the request finish after the tab closes).
+ window.addEventListener('pagehide',()=>{if(!cloud.user())return;clearTimeout(pushTimer);cloud.upsertProfile({save:profile,...cloudStats()},{keepalive:true});});
+ async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),1200);return null;}if(pushing){pushAgain=true;return null;}pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;if(pushAgain){pushAgain=false;pushCloud();}setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
- function persist(){try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);updateLoadout();pushCloud();}
+ function persist(){profile.savedAt=new Date().toISOString();try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);updateLoadout();pushCloud();}
  function refreshStores(){if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();}
  function buyFinish(id){const result=loot.buyFinish(profile,id);if(!result){toast('Za mało na saldzie. Wpłać najpierw złotówki.');return;}profile=result.profile;persist();refreshStores();toast(`Kupiono ${result.item.name} za ${pln(result.price)}. Nałóż je w kolekcji, zakładka WYKOŃCZENIA.`);}
 // Pixel art is the only look: the vector renderer stays in art.js as a fallback, but nothing in the UI switches to it.
@@ -4717,7 +4726,11 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
   const remote=r.data;cloudRole=remote?.role||'player';cloudTitle=remote?.title||null;renderAccount();document.body.classList.remove('maintenance-login');applyMaintenance();syncAdjustments();
   if(remote?.banned_until&&new Date(remote.banned_until)>new Date()){const until=new Date(remote.banned_until);const perm=until.getFullYear()-new Date().getFullYear()>50;await cloud.signOut();cloudRole='player';renderAccount();setAccountStatus(`Konto zablokowane ${perm?'bezterminowo':'do '+until.toLocaleString('pl-PL')}${remote.ban_reason?`. Powód: ${remote.ban_reason}`:''}.`,true);return;}
-  if(remote&&!saveLooksEmpty(remote.save)&&(localLooksEmpty()||window.confirm('W chmurze jest zapis gry. Wczytać go? Lokalny postęp w tej przeglądarce zostanie nadpisany.'))){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+  // Which save wins: an empty local save takes the cloud; otherwise the newer one (by its own stamp), asking only when the cloud is newer.
+  if(remote&&!saveLooksEmpty(remote.save)){const cloudAt=remote.save?.savedAt||remote.updated_at||null,localAt=profile.savedAt||null;const cloudNewer=!!cloudAt&&(!localAt||new Date(cloudAt)>new Date(localAt));
+   if(localLooksEmpty()){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+   else if(cloudNewer&&window.confirm(`W chmurze jest nowszy zapis (${new Date(cloudAt).toLocaleString('pl-PL')}) niż w tej przeglądarce${localAt?` (${new Date(localAt).toLocaleString('pl-PL')})`:''}. Wczytać go? Lokalny postęp zostanie nadpisany.`)){adoptCloudSave(remote.save);setAccountStatus('Wczytano zapis z chmury.');}
+   else{pushCloud(true);setAccountStatus('Zapis z tej przeglądarki jest nowszy: wysłano go do chmury.');}}
   else{const push=await pushCloud(true);setAccountStatus(push?.ok?'Lokalny postęp zapisany w chmurze.':`Nie udało się zapisać w chmurze: ${push?.error||''}`,!push?.ok);}
   await claimServerDaily();renderAccount();
  }

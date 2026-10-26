@@ -29,7 +29,7 @@
     if (/failed to fetch|networkerror|load failed/i.test(text)) return 'Brak połączenia z chmurą.';
     return text;
   }
-  async function request(path, { method = 'GET', body, auth = true, headers = {}, prefer } = {}) {
+  async function request(path, { method = 'GET', body, auth = true, headers = {}, prefer, keepalive = false } = {}) {
     if (!enabled()) return { ok: false, error: 'Chmura jest wyłączona: brak konfiguracji.', offline: true };
     const base = config().supabaseUrl.replace(/\/$/, '');
     const h = { apikey: config().supabaseAnonKey, 'Content-Type': 'application/json', ...headers };
@@ -38,7 +38,7 @@
     if (!h.Authorization && /^eyJ/.test(config().supabaseAnonKey)) h.Authorization = `Bearer ${config().supabaseAnonKey}`;
     if (prefer) h.Prefer = prefer;
     try {
-      const response = await fetch(`${base}${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) });
+      const response = await fetch(`${base}${path}`, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body), ...(keepalive ? { keepalive: true } : {}) });
       const text = await response.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
       if (!response.ok) return { ok: false, error: messageFor(data), status: response.status, raw: data };
       return { ok: true, data };
@@ -100,10 +100,10 @@
   }
   // The profile row is created by a database trigger at sign-up, so saving is an UPDATE. (An upsert without the nickname
   // fails on the NOT NULL check before the conflict is even resolved.) If the row is somehow missing, insert it with a nickname.
-  async function upsertProfile(fields) {
+  async function upsertProfile(fields, { keepalive = false } = {}) {
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
     const body = { ...fields, updated_at: new Date().toISOString() };
-    const r = await request(`/rest/v1/profiles?id=eq.${me.id}`, { method: 'PATCH', body, prefer: 'return=representation' });
+    const r = await request(`/rest/v1/profiles?id=eq.${me.id}`, { method: 'PATCH', body, prefer: 'return=representation', keepalive });
     if (!r.ok || (Array.isArray(r.data) && r.data.length)) return r;
     return request('/rest/v1/profiles', { method: 'POST', body: { id: me.id, nickname: me.nickname || `gracz-${me.id.slice(0, 8)}`, ...body }, prefer: 'return=representation' });
   }

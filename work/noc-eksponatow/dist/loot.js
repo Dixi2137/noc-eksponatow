@@ -207,13 +207,18 @@
  function migrate(saved) {
   const source = saved && typeof saved === 'object' ? saved : {};
   const inventory = Array.isArray(source.owned) ? source.owned : [];
-  const owned = skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id);
-  const weapons=['sword',...(Array.isArray(source.weapons)?source.weapons:[]).filter(id=>id!=='sword'&&weaponsApi.has(id))];
+  // Ids the catalogue does not know yet (hidden packs register their items only after the profile loads) are kept, capped, never dropped.
+  const unknown = id => typeof id === 'string' && id.length <= 40 && !itemsById.has(id);
+  const keepUnknown = list => [...new Set(list.filter(unknown))].slice(0, 50);
+  const owned = [...skins.filter(s => s.id === 'brass' || s.gift || inventory.includes(s.id)).map(s => s.id), ...keepUnknown(inventory)];
+  const weaponsIn=Array.isArray(source.weapons)?source.weapons:[];
+  const weapons=['sword',...weaponsIn.filter(id=>id!=='sword'&&weaponsApi.has(id)),...keepUnknown(weaponsIn)];
   const cards=(Array.isArray(source.cards)?source.cards:[]).filter(id=>cardsApi.get(id));
-  const finishes=(Array.isArray(source.finishes)?source.finishes:[]).filter(id=>finishesApi?.has(id));
+  const finishesIn=Array.isArray(source.finishes)?source.finishes:[];
+  const finishes=[...finishesIn.filter(id=>finishesApi?.has(id)),...keepUnknown(finishesIn)];
   const pendingItem=getItem(source.pendingReward);
   const pendingReward=pendingItem&&pendingItem.id!=='brass'&&(pendingItem.kind==='skin'?owned:pendingItem.kind==='weapon'?weapons:pendingItem.kind==='finish'?finishes:cards).includes(pendingItem.id) ? pendingItem.id : null;
-  const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(item&&item.kind===kind&&(kind==='skin'||kind==='weapon'))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}
+  const upgrades={};for(const [key,level] of Object.entries(source.upgrades&&typeof source.upgrades==='object'?source.upgrades:{})){const [kind,id]=String(key).split(':');const item=getItem(id);if(!(kind==='skin'||kind==='weapon'))continue;if(item?item.kind===kind:unknown(id))upgrades[key]=Math.min(UPGRADE_MAX,integer(level));}   // unknown id = hidden item not registered yet: keep its level
   return {
    coins:integer(source.coins),owned,
    skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,pixel:true,   // pixel art is the only look
@@ -230,6 +235,7 @@
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
+   savedAt:typeof source.savedAt==='string' ? source.savedAt : null,   // when this save was last written (cloud vs local comparison)
    secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };

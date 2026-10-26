@@ -13,12 +13,12 @@
     assert.deepEqual(p.weapons, ['sword']); assert.equal(p.weapon, 'sword'); assert.deepEqual(p.cards, []); assert.equal(p.card, null);
     assert.deepEqual(p.upgrades, {}); assert.equal(p.login.last, null); assert.equal(p.login.streak, 0);
   });
-  test('Migracja starego zapisu zachowuje skiny i monety, a nieznane bronie i karty odrzuca', () => {
+  test('Migracja starego zapisu zachowuje skiny i monety, nieznane bronie zostawia na później (ukryte pakiety), nieznane karty odrzuca', () => {
     const p = loot.migrate({ coins: 777, owned: ['brass', 'frost'], skin: 'frost', weapons: ['sword', 'axe', 'nie-ma'], weapon: 'nie-ma', cards: ['card-zawisza', 'x'], card: 'card-sword', upgrades: { 'skin:frost': 3, 'weapon:axe': 9, 'card:card-zawisza': 2, 'skin:zzz': 1 }, login: { last: '2026-10-18', streak: 4 } });
     assert.equal(p.coins, 777); assert.ok(p.owned.includes('frost')); assert.equal(p.skin, 'frost');
-    assert.deepEqual(p.weapons, ['sword', 'axe']); assert.equal(p.weapon, 'sword', 'nieznana broń wraca do miecza');
+    assert.deepEqual(p.weapons, ['sword', 'axe', 'nie-ma']); assert.equal(p.weapon, 'nie-ma', 'nieznana założona broń zostaje do czasu rejestracji (weapons.get i tak cofa do miecza)'); assert.equal(weapons.get(p.weapon).id, 'sword');
     assert.deepEqual(p.cards, ['card-zawisza']); assert.equal(p.card, null, 'karta broni nie może być aktywną kartą bohatera');
-    assert.deepEqual(p.upgrades, { 'skin:frost': 3, 'weapon:axe': 5 }); assert.equal(p.login.streak, 4);
+    assert.deepEqual(p.upgrades, { 'skin:frost': 3, 'weapon:axe': 5, 'skin:zzz': 1 }, 'nieznany skin zachowuje poziom, karta odpada, poziom obcięty do 5'); assert.equal(p.login.streak, 4);
   });
   test('Karty: 33 bohaterów i 20 kart broni, każda z działającym modyfikatorem, karty broni wskazują istniejącą broń', () => {
     const all = cards.all(); assert.equal(cards.heroes().length, 33); assert.equal(cards.weaponCards().length, 20);
@@ -27,6 +27,15 @@
     assert.equal(new Set(all.map(c => c.id)).size, all.length);
     g.reset(); let s = g.start({ sound: false, skin: 'verdigris', weapon: 'ak47', modifiers: cards.get('card-ak47').modifiers }); assert.equal(s.weapon.maxAmmo, weapons.get('ak47').stats.ammo + 5, 'karta AK: +5 naboi');
     g.reset(); s = g.start({ sound: false, skin: 'verdigris', modifiers: cards.get('card-pilsudski').modifiers }); assert.equal(s.player.maxHP, 140, 'Piłsudski: +20 HP');
+  });
+  test('Migracja nie gubi ulepszeń ani przedmiotów o nieznanych id (ukryte pakiety rejestrują się dopiero po wczytaniu profilu)', () => {
+    const p = loot.migrate({ upgrades: { 'weapon:ghost-ray': 3, 'skin:ghost-suit': 2, 'weapon:sword': 1, 'card:card-zawisza': 5, 'weapon:brass': 2 }, weapons: ['ghost-ray', 'nie', 'axe'], owned: ['ghost-suit', 'frost'], finishes: ['ghost-coat'], weapon: 'ghost-ray', skin: 'ghost-suit', savedAt: '2026-10-26T10:00:00.000Z' });
+    assert.equal(p.upgrades['weapon:ghost-ray'], 3, 'ulepszenie nieznanej broni zostaje'); assert.equal(p.upgrades['skin:ghost-suit'], 2); assert.equal(p.upgrades['weapon:sword'], 1);
+    assert.equal(p.upgrades['card:card-zawisza'], undefined, 'karty nie mają ulepszeń'); assert.equal(p.upgrades['weapon:brass'], undefined, 'znany id złego rodzaju odpada');
+    assert.ok(p.weapons.includes('ghost-ray') && p.weapons.includes('nie') && p.weapons.includes('axe'), 'nieznane bronie zostają'); assert.ok(p.owned.includes('ghost-suit') && p.owned.includes('frost'));
+    assert.deepEqual(p.finishes, ['ghost-coat']); assert.equal(p.weapon, 'ghost-ray', 'założona nieznana broń zostaje'); assert.equal(p.skin, 'ghost-suit'); assert.equal(p.savedAt, '2026-10-26T10:00:00.000Z');
+    const again = loot.migrate(p); assert.equal(again.upgrades['weapon:ghost-ray'], 3, 'druga migracja też nie gubi');
+    const big = loot.migrate({ weapons: Array.from({ length: 200 }, (_, i) => 'x' + i) }); assert.ok(big.weapons.length <= 51, 'limit nieznanych id');
   });
   test('Katalog przedmiotów: każdy skin, broń i karta ma unikalne id, rzadkość i wartość', () => {
     const ids = new Set();
@@ -170,7 +179,7 @@
     assert.equal(p.finish, r.reward.id); assert.ok(loot.has(p, r.reward.id)); assert.ok(loot.equipped(p, r.reward.id));
     p = loot.equip(p, r.reward.id); assert.equal(p.finish, null, 'drugie kliknięcie zdejmuje'); assert.equal(loot.value(r.reward), 15000); assert.equal(loot.sellPrice(r.reward), 6000);
     assert.ok(loot.canSell(p, r.reward.id)); const sold = loot.sell(p, r.reward.id); assert.equal(sold.price, 6000); assert.equal(sold.profile.finishes.length, 0);
-    const m = loot.migrate({ finishes: ['titanium', 'nie-ma'], finish: 'titanium', weapons: ['sword'] }); assert.deepEqual(m.finishes, ['titanium']); assert.equal(m.finish, 'titanium');
+    const m = loot.migrate({ finishes: ['titanium', 'nie-ma'], finish: 'titanium', weapons: ['sword'] }); assert.deepEqual(m.finishes, ['titanium', 'nie-ma'], 'nieznane wykończenie czeka na rejestrację'); assert.equal(m.finish, 'titanium');
     assert.equal(loot.migrate({ finishes: [], finish: 'titanium' }).finish, null);
   });
   test('Każdą skrzynię da się narysować', () => {
