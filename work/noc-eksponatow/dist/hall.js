@@ -49,7 +49,17 @@
     { id: 'trophy-saddam', level: 'baghdad', name: 'BERET SADDAMA', era: 'TROFEUM · 1991', glyph: '◖', color: '#222222', description: 'Czarny beret z pałacu w Bagdadzie.' },
     { id: 'trophy-escobar', level: 'medellin', name: 'DACHÓWKA Z MEDELLÍN', era: 'TROFEUM · 1993', glyph: '▰', color: '#c9643a', description: 'Dachówka z dachu, na którym wszystko się skończyło.' },
     { id: 'trophy-binladen', level: 'tora-bora', name: 'KAMIEŃ Z JASKINI', era: 'TROFEUM · 2001', glyph: '●', color: '#8a7a5a', description: 'Kamień z Tora Bora. Echo ucichło.' },
-    { id: 'trophy-gaddafi', level: 'sirte', name: 'ZŁOTY PISTOLET', era: 'TROFEUM · 2011', glyph: '✦', color: '#d4af37', description: 'Złoty pistolet z Syrty. Ostatnie trofeum nocy. Muzeum ocalone.' }
+    { id: 'trophy-gaddafi', level: 'sirte', name: 'ZŁOTY PISTOLET', era: 'TROFEUM · 2011', glyph: '✦', color: '#d4af37', description: 'Złoty pistolet z Syrty. Ostatnie trofeum nocy. Muzeum ocalone.' },
+    { id: 'trophy-nebuchadnezzar', level: 'babylon', name: 'LEW Z BRAMY ISZTAR', era: 'TROFEUM · 587 P.N.E.', glyph: '◈', color: '#1f4f9a', description: 'Glazurowana cegła z lwem. Brama została w Berlinie, lew u ciebie.' },
+    { id: 'trophy-sulla', level: 'rome-sulla', name: 'LISTA PROSKRYPCYJNA', era: 'TROFEUM · 82 P.N.E.', glyph: 'X', color: '#c9b37a', description: 'Tablica z Forum. Twoje imię skreślone.' },
+    { id: 'trophy-diocletian', level: 'nicomedia', name: 'PURPURA DIOKLECJANA', era: 'TROFEUM · 303', glyph: '♦', color: '#5a1f7a', description: 'Płaszcz cesarza, który sam abdykował. Tym razem nie miał wyboru.' },
+    { id: 'trophy-john', level: 'runnymede', name: 'MAGNA CARTA', era: 'TROFEUM · 1215', glyph: '§', color: '#e8dcb8', description: 'Pergamin z pieczęcią. Król podpisał, ty wyegzekwowałeś.' },
+    { id: 'trophy-hulagu', level: 'baghdad-1258', name: 'KSIĘGA Z BAGDADU', era: 'TROFEUM · 1258', glyph: '✎', color: '#3a5a8a', description: 'Ocalała z Domu Mądrości. Jeszcze kapie z niej atrament.' },
+    { id: 'trophy-henry', level: 'tower-1536', name: 'TOPÓR Z TOWER', era: 'TROFEUM · 1536', glyph: '⚒', color: '#8a8a90', description: 'Topór kata. Tym razem nie poszedł w ruch.' },
+    { id: 'trophy-cromwell', level: 'drogheda', name: 'NAPIERŚNIK IRONSIDE', era: 'TROFEUM · 1649', glyph: '⛨', color: '#6a6a72', description: 'Żelazny napierśnik Lorda Protektora. Z wgnieceniem na pamiątkę.' },
+    { id: 'trophy-franco', level: 'madrid', name: 'JARZMO I STRZAŁY', era: 'TROFEUM · 1939', glyph: '⚑', color: '#b3202a', description: 'Emblemat Falangi zdjęty z munduru caudillo.' },
+    { id: 'trophy-pinochet', level: 'santiago', name: 'CIEMNE OKULARY', era: 'TROFEUM · 1973', glyph: '◖', color: '#1a1a1e', description: 'Okulary generała. Bez nich wyglądał jak zwykły emeryt.' },
+    { id: 'trophy-bokassa', level: 'bangui', name: 'ORLI TRON', era: 'TROFEUM · 1977', glyph: '✦', color: '#b3202a', description: 'Złoty orzeł z tronu koronacyjnego. Budżet państwa w jednym meblu.' }
   ].map(trophy => Object.freeze({ ...trophy, kind: 'trophy', rarity: 'legendary', limited: true })));
   const trophyById = new Map(trophies.map(t => [t.id, t]));
   const prestigePoints = Object.freeze({ basic: 1, common: 2, rare: 4, epic: 8, legendary: 16, trophy: 12 });

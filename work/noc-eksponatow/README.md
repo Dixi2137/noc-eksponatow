@@ -366,3 +366,20 @@ Gra działa wyłącznie w pixel arcie (`profile.pixel` jest zawsze `true`, przyc
 - Napisy walki, pierścień zamachu z wykrzyknikiem, PRZEŁADOWANIE i PAUZA są w trybie ▦ rysowane osobnym przejściem (`drawOverlay` w `game.js`) w pełnej rozdzielczości nad powiększoną sceną, więc pozostają czytelne.
 - Po każdej wygranej sali pojawia się panel wyboru (`#choice`): KOLEJNA SALA (Enter) rusza przeskok w czasie, MENU GŁÓWNE (Esc) kończy noc, zapisując rekord żetonów; postęp i żetony są już wtedy zapisane.
 - Czcionki trybu ▦: duże nagłówki, HUD, napisy w walce i tabliczki w sali używają **Jersey 10** (Google Fonts, Latin Extended, wyraźne H/C/W), Pixelify Sans został tylko jako zapas; drobne etykiety i ticker ogłoszeń są w Manrope, bo pikselowe kroje poniżej 16 px zlewają litery.
+
+## Faza 9 — 10 nowych sal (2026-10-26)
+
+Obchód ma teraz 46 sal plus finał w piekle. Nowe sale wskakują w środek historii (lista sortuje się po roku), każda z własnym bossem, kostiumem, stylem walki i trofeum w `hall.js` + `pixel.js`. Trzy nowe scenerie: `babylon`, `england`, `junta` (w `pixel.js` i `art.js`).
+
+| Rok | Boss | Styl | Sceneria |
+|---|---|---|---|
+| 587 p.n.e. | Nabuchodonozor II | tyrant 1 | babylon |
+| 82 p.n.e. | Sulla | duelist 1 | rome |
+| 303 | Dioklecjan | tyrant 2 | rome |
+| 1215 | Jan bez Ziemi | trickster 2 | england |
+| 1258 | Hulagu-chan | brute 3 | steppe |
+| 1536 | Henryk VIII | brute 3 | england |
+| 1649 | Oliver Cromwell | tyrant 4 | church |
+| 1939 | Francisco Franco | gunman 5 | fascist |
+| 1973 | Augusto Pinochet | gunman 6 | junta |
+| 1977 | Jean-Bédel Bokassa | brute 5 | jungle |

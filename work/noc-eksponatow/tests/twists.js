@@ -10,7 +10,7 @@
     const twisted = all.filter(l => l.twist); assert.ok(twisted.length >= 20, `sal z warunkiem: ${twisted.length}`);
     for (const level of twisted) { assert.ok(twists.get(level.twist), `${level.id}: ${level.twist}`); assert.equal(level.reward, Math.round((120 + (level.number - 1) * 15) * 1.2)); }
     assert.ok(all.some(l => l.number > 3 && !l.twist), 'są też ciche sale po trzeciej');
-    const last = all[all.length - 1]; assert.equal(last.id, 'hell'); assert.equal(last.twist, 'second-wind', 'finał ma własny warunek'); assert.equal(last.exhibit, 'beelzebub'); assert.equal(levels.count, 37);
+    const last = all[all.length - 1]; assert.equal(last.id, 'hell'); assert.equal(last.twist, 'second-wind', 'finał ma własny warunek'); assert.equal(last.exhibit, 'beelzebub'); assert.equal(levels.count, 47);
     for (let i = 1; i < all.length; i++) if (all[i].twist) assert.ok(all[i].twist !== all[i - 1].twist, 'dwie sale z rzędu nie mają tego samego warunku');
   });
   test('Szał skraca zamach i odpoczynek, Maraton dodaje HP, warunek jest w zrzucie stanu', () => {
