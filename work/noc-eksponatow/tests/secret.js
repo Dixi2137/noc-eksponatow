@@ -14,6 +14,7 @@
     assert.ok(blob.data.length > 100 && !blob.data.includes('PROMIE') && !JSON.stringify(blob).includes('test-ray'), 'blob nie zdradza zawartości');
     const bad = await secret.unlock('inne haslo', [blob]); assert.equal(bad.ok, false); assert.equal(bad.reason, 'unknown');
     const empty = await secret.unlock('   ', [blob]); assert.equal(empty.reason, 'empty');
+    assert.equal(secret.norm('środa Łódź'), 'SRODALODZ', 'kody bez ogonków i spacji');
     const good = await secret.unlock('  Tajne Haslo 123 ', [blob]); assert.ok(good.ok, 'kod normalizowany: spacje i wielkość liter nieistotne'); assert.equal(good.already, false);
     assert.deepEqual(good.items.map(i => i.id), ['test-ray', 'test-suit']);
     assert.ok(weapons.has('test-ray')); const w = weapons.get('test-ray'); assert.equal(w.stats.pierce, true); assert.equal(w.hidden, true); assert.equal(w.sprite, 'test-ray'); assert.ok(w.stats.weakGuardDamage >= 24, 'mityczny bonus +4');
