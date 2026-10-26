@@ -237,11 +237,15 @@ Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej bro
 
 Zapis gry jest po stronie klienta: `profile` w localStorage jest źródłem prawdy i przy każdej zmianie nadpisuje `profiles.save` w chmurze. Dlatego samo `mod_adjust` edytujące `save` nigdy nie docierało do gracza. Migracja `supabase/2026-10-26-korekty.sql` dodaje kolumny `pending_coins` / `pending_balance`: `mod_adjust` dalej poprawia `save` (żeby lista w panelu od razu pokazała nowe liczby) i dopisuje korektę do kolumn oczekujących; nowa funkcja `claim_adjustments()` zwraca sumy dla `auth.uid()` i zeruje je w jednej transakcji; trigger `profiles_guard_pending` nie pozwala graczowi zmienić tych kolumn zwykłym UPDATE. Klient (`cloud.claimAdjustments`, `syncAdjustments` w ui.js) odbiera korekty po zalogowaniu, przy starcie gry, co 45 s i przy wejściu do sklepu, dolicza je do lokalnego profilu, zapisuje i pokazuje toast „Kustosz zmienił twoje konto”.
 
+## Własna domena kustosz.xyz (2026-10-26)
+
+Domena kupiona w Porkbun. Po stronie GitHub: plik `dist/CNAME` z `kustosz.xyz` (trafia do artefaktu Pages) i `cname` ustawione przez API repo (`gh api -X PUT repos/Dixi2137/noc-eksponatow/pages -f cname=kustosz.xyz`). Po stronie DNS (Porkbun → DNS Records): cztery rekordy A dla `@` na 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153 oraz CNAME `www` → `dixi2137.github.io`. Gdy DNS się rozejdzie, GitHub sam wystawia certyfikat; wtedy włączyć wymuszanie HTTPS (`gh api -X PUT repos/Dixi2137/noc-eksponatow/pages -F https_enforced=true`). Stary adres `dixi2137.github.io/noc-eksponatow` przekierowuje na domenę. W Supabase (Authentication → URL Configuration) Site URL = `https://kustosz.xyz/`, a w Redirect URLs oba adresy: `https://kustosz.xyz/*` i `https://dixi2137.github.io/noc-eksponatow/*`.
+
 ## Odzyskiwanie hasła (faza87)
 
 W oknie Konto pod formularzem logowania jest przycisk **NIE PAMIĘTAM HASŁA**: bierze e-mail z pola wyżej i woła `cloud.recover(email)` (`POST /auth/v1/recover?redirect_to=<adres gry>`); Supabase wysyła wiadomość z linkiem (odpowiedź jest taka sama dla nieznanego adresu, więc nie da się sprawdzać, kto ma konto). Link wraca na stronę gry z tokenami w hashu URL; `cloud.consumeAuthHash()` przy starcie zamienia je w sesję (dla `type=recovery`, ale też dla linku potwierdzającego e-mail i magic linku, które od razu logują), czyści hash i dla odzyskiwania otwiera w Koncie formularz **NOWE HASŁO** (`cloud.updatePassword` → `PUT /auth/v1/user`). Po zapisaniu gracz jest zalogowany. Wygasły link pokazuje komunikat i prośbę o nowy.
 
-Wymaganie po stronie Supabase (Authentication → URL Configuration): **Site URL** = `https://dixi2137.github.io/noc-eksponatow/` i ten sam adres w **Redirect URLs** (plus adres własnej domeny, gdy się pojawi). Bez tego link z maila prowadzi na domyślny `localhost:3000` i nic nie otworzy. Limit Supabase: jedna prośba o link na 60 s z tego samego adresu.
+Wymaganie po stronie Supabase (Authentication → URL Configuration): **Site URL** = `https://kustosz.xyz/` i w **Redirect URLs** zarówno `https://kustosz.xyz/*`, jak i `https://dixi2137.github.io/noc-eksponatow/*`. Bez tego link z maila prowadzi na domyślny `localhost:3000` i nic nie otworzy. Limit Supabase: jedna prośba o link na 60 s z tego samego adresu.
 
 ## Puszka Kustosza na biurku strażnika (faza82)
 
