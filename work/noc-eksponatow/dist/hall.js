@@ -18,7 +18,7 @@
     { id: 'trophy-leonidas', level: 'thermopylae', name: 'PIÓROPUSZ LEONIDASA', era: 'TROFEUM · 480 P.N.E.', glyph: 'Λ', color: '#b3202a', description: 'Czerwony grzebień z korynckiego hełmu. Trzystu go nie oddało, król też nie.' },
     { id: 'trophy-hitler', level: 'berlin', name: 'KLUCZ DO BUNKRA', era: 'TROFEUM · 1945', glyph: '⚿', color: '#6b6349', description: 'Ostatni klucz z Kancelarii Rzeszy. Drzwi już nikogo nie chronią.' },
     { id: 'trophy-stalin', level: 'moscow', name: 'FAJKA Z KREMLA', era: 'TROFEUM · 1953', glyph: '★', color: '#b3202a', description: 'Zgaszona na dobre.' },
-    { id: 'trophy-beelzebub', level: 'hell', name: 'RÓG BELZEBUBA', era: 'TROFEUM · POZA CZASEM', glyph: '♆', color: '#ff4a3a', description: 'Odłamany w finale. Jeszcze ciepły.' },
+    { id: 'trophy-beelzebub', level: 'hell', name: 'CAMARO EXORCIST', era: 'TROFEUM · POZA CZASEM', glyph: '⛟', color: '#3a3a46', description: 'Hennessey Exorcist: Camaro z tysiącem koni, stworzone, żeby wypędzać demony. Belzebub nie zdążył zejść z drogi.' },
     { id: 'trophy-xerxes', level: 'plataea', name: 'TIARA KSERKSESA', era: 'TROFEUM · 479 P.N.E.', glyph: '♛', color: '#d4af37', description: 'Złota tiara króla królów. Morze jej nie chciało.' },
     { id: 'trophy-qin', level: 'xianyang', name: 'TERAKOTOWY ŻOŁNIERZ', era: 'TROFEUM · 210 P.N.E.', glyph: '卒', color: '#b08a5a', description: 'Jeden z ośmiu tysięcy. Ten jeden jest twój.' },
     { id: 'trophy-herod', level: 'jerusalem', name: 'PIECZĘĆ HERODA', era: 'TROFEUM · 4 P.N.E.', glyph: '✡', color: '#c9a040', description: 'Pieczęć króla, który nie ufał nikomu.' },
