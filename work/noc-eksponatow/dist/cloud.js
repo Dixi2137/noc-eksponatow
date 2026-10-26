@@ -94,7 +94,8 @@
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
     // Newer columns (moderation, titles) may be missing until the matching migration is applied; fall back to the base set.
     const base = 'id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at';
-    let r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title`);
+    let r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title,titles`);
+    if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title`);
     if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason`);
     if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base}`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
@@ -124,6 +125,7 @@
     reset: target => rpc('mod_reset', { target }),
     setRole: (target, role) => rpc('mod_set_role', { target, new_role: role }),
     setTitle: (target, title) => rpc('mod_set_title', { target, new_title: title || '' }),
+    setTitles: (target, list) => rpc('mod_set_titles', { target, new_titles: (list || []).filter(Boolean) }),
     announce: (body, kind = 'info', seconds = 60) => rpc('mod_announce', { body, kind, seconds }),
     setMaintenance: (enabled, message = '') => rpc('mod_set_maintenance', { enabled: !!enabled, message }),
     unannounce: id => rpc('mod_unannounce', { target: id })
@@ -151,7 +153,8 @@
     function onMaintenance(fn) { settingHandlers.add(fn); if (!poll) subscribe(() => {}); return () => settingHandlers.delete(fn); }
     return Object.freeze({ list, subscribe, onMaintenance, maintenance: () => settingsGet('maintenance'), markSeen: id => seen.add(id), _test: { deliver, seen, emitSetting } });
   })();
-  // Honorary titles a moderator can grant; 'first-to-arrive' is unique on the server.
+  // Honorary titles a moderator can grant (a profile may hold several); 'first-to-arrive' is unique on the server.
+  const titlesOf = row => Array.isArray(row?.titles) && row.titles.length ? row.titles : row?.title ? [row.title] : [];
   const titles = Object.freeze({
     owner: { name: 'OWNER', color: '#ff8c9a', note: 'Właściciel muzeum.' },
     'first-to-arrive': { name: 'FIRST TO ARRIVE', color: '#f0ca72', note: 'Pierwsza osoba, która zalogowała się po założycielu.' },
@@ -161,7 +164,7 @@
     'demon-slayer': { name: 'DEMON SLAYER', color: '#ff4a3a', note: 'Pokonał Belzebuba w piekle.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, titlesOf, announcements,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();

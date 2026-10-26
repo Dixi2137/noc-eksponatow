@@ -384,3 +384,7 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 /* Komunikat o błędzie startu na ekranie ładowania. */
 .boot-error{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);max-width:min(560px,90vw);padding:16px 20px;background:#2a0f12;border:1px solid #ff8c9a;color:#ffd7dc;font-size:12px;line-height:1.6;text-align:center;z-index:5}
 .boot-error strong{color:#ff9d8e;font-size:13px}
+
+/* Kilka rang: odznaki obok siebie, w koncie każda w osobnej linii. */
+.rank-title+.rank-title{margin-left:6px}
+.account-title-line{display:block}

@@ -389,6 +389,10 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 /* Komunikat o błędzie startu na ekranie ładowania. */
 .boot-error{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);max-width:min(560px,90vw);padding:16px 20px;background:#2a0f12;border:1px solid #ff8c9a;color:#ffd7dc;font-size:12px;line-height:1.6;text-align:center;z-index:5}
 .boot-error strong{color:#ff9d8e;font-size:13px}
+
+/* Kilka rang: odznaki obok siebie, w koncie każda w osobnej linii. */
+.rank-title+.rank-title{margin-left:6px}
+.account-title-line{display:block}
 </style>
 </head>
 <body>
@@ -678,7 +682,8 @@ window.MuseumConfig = Object.freeze({
     const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' };
     // Newer columns (moderation, titles) may be missing until the matching migration is applied; fall back to the base set.
     const base = 'id,nickname,save,halls_cleared,prestige,fastest_night,night_coins,daily_last,daily_streak,updated_at';
-    let r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title`);
+    let r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title,titles`);
+    if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason,title`);
     if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base},role,banned_until,ban_reason`);
     if (!r.ok && /does not exist/i.test(String(r.raw?.message || r.error))) r = await request(`/rest/v1/profiles?id=eq.${me.id}&select=${base}`);
     return r.ok ? { ok: true, data: Array.isArray(r.data) ? r.data[0] || null : null } : r;
@@ -708,6 +713,7 @@ window.MuseumConfig = Object.freeze({
     reset: target => rpc('mod_reset', { target }),
     setRole: (target, role) => rpc('mod_set_role', { target, new_role: role }),
     setTitle: (target, title) => rpc('mod_set_title', { target, new_title: title || '' }),
+    setTitles: (target, list) => rpc('mod_set_titles', { target, new_titles: (list || []).filter(Boolean) }),
     announce: (body, kind = 'info', seconds = 60) => rpc('mod_announce', { body, kind, seconds }),
     setMaintenance: (enabled, message = '') => rpc('mod_set_maintenance', { enabled: !!enabled, message }),
     unannounce: id => rpc('mod_unannounce', { target: id })
@@ -735,7 +741,8 @@ window.MuseumConfig = Object.freeze({
     function onMaintenance(fn) { settingHandlers.add(fn); if (!poll) subscribe(() => {}); return () => settingHandlers.delete(fn); }
     return Object.freeze({ list, subscribe, onMaintenance, maintenance: () => settingsGet('maintenance'), markSeen: id => seen.add(id), _test: { deliver, seen, emitSetting } });
   })();
-  // Honorary titles a moderator can grant; 'first-to-arrive' is unique on the server.
+  // Honorary titles a moderator can grant (a profile may hold several); 'first-to-arrive' is unique on the server.
+  const titlesOf = row => Array.isArray(row?.titles) && row.titles.length ? row.titles : row?.title ? [row.title] : [];
   const titles = Object.freeze({
     owner: { name: 'OWNER', color: '#ff8c9a', note: 'Właściciel muzeum.' },
     'first-to-arrive': { name: 'FIRST TO ARRIVE', color: '#f0ca72', note: 'Pierwsza osoba, która zalogowała się po założycielu.' },
@@ -745,7 +752,7 @@ window.MuseumConfig = Object.freeze({
     'demon-slayer': { name: 'DEMON SLAYER', color: '#ff4a3a', note: 'Pokonał Belzebuba w piekle.' }
   });
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, announcements,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, titlesOf, announcements,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();
@@ -4651,7 +4658,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   if(!r.ok){renderAccount();bootEnd();openModal('account');setAccountStatus(r.error,true);return true;}
   if(r.type==='recovery'){recoveryPending=true;renderAccount();$('accountResetWho').textContent=r.data?.email||'';bootEnd();openModal('account');setAccountStatus('Ustaw nowe hasło.');$('accountNewPassword')?.focus();return true;}
   renderAccount();bootEnd();await afterLogin();toast('E-mail potwierdzony, jesteś zalogowany.');return true;}
- function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me&&!recoveryPending);show('accountUser',!!me&&!recoveryPending);show('accountReset',recoveryPending);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me){cloudRole='player';cloudTitle=null;}const tt=cloud.titles?.[cloudTitle];show('accountTitle',!!me&&!!tt);if(me&&tt){$('accountTitle').textContent=`${tt.name} · ${tt.note}`;$('accountTitle').style.color=tt.color;}
+ function renderAccount(){const me=cloud.user();$('accountBtn').classList.toggle('online',!!me);$('accountLabel').textContent=me?(me.nickname||me.email).toLocaleUpperCase('pl-PL'):'GOŚĆ';show('accountGuest',!me&&!recoveryPending);show('accountUser',!!me&&!recoveryPending);show('accountReset',recoveryPending);show('accountOffline',!cloud.enabled());if(me)$('accountWho').textContent=me.nickname?`${me.nickname} (${me.email})`:me.email;show('accountModBtn',!!me&&isMod());show('accountRole',!!me&&isMod());if(me&&isMod())$('accountRole').textContent=`Twoja rola: ${cloudRole==='admin'?'ADMINISTRATOR':'MODERATOR'}. Panel pokazuje graczy, ich postęp i salda; akcje są sprawdzane po stronie serwera.`;if(!me){cloudRole='player';cloudTitle=null;}const tts=(me?cloudTitles:[]).map(k=>cloud.titles?.[k]).filter(Boolean);show('accountTitle',!!me&&tts.length>0);if(me&&tts.length){$('accountTitle').replaceChildren(...tts.map(tt=>{const line=document.createElement('span');line.className='account-title-line';line.textContent=`${tt.name} · ${tt.note}`;line.style.color=tt.color;return line;}));}
   $('accountModeLogin').setAttribute('aria-pressed',String(accountMode==='login'));$('accountModeRegister').setAttribute('aria-pressed',String(accountMode==='register'));show('accountNicknameLabel',accountMode==='register');$('accountPassword').autocomplete=accountMode==='register'?'new-password':'current-password';$('accountSubmit').innerHTML=accountMode==='register'?'ZAŁÓŻ KONTO <span>↗</span>':'ZALOGUJ <span>↗</span>';$('accountSubmit').disabled=!cloud.enabled();}
  function account(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Konto obsłużysz przed następnym pojedynkiem.');return;}closeModal();renderAccount();setAccountStatus('');openModal('account');}
  // Coins / PLN granted by a moderator: pulled from the server and added to the local save (the local save otherwise wins every push).
@@ -4711,7 +4718,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
    const row=document.createElement('div');row.className='mod-row';row.dataset.id=p.id;
    const banned=p.banned_until&&new Date(p.banned_until)>new Date(),perm=banned&&new Date(p.banned_until).getFullYear()-new Date().getFullYear()>50;
    row.innerHTML=`<div><strong></strong><small></small></div><span class="mod-role ${p.role}">${p.role}</span><span>${p.halls_cleared} / ${levels.count}</span><span>${number(p.coins)} ✦</span><span>${plnText(p.balance)}</span><span class="${banned?'mod-banned':'mod-ok'}"></span>`;
-   row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');if(cloud.titles?.[p.title]){const badge=document.createElement('small');badge.className='rank-title';badge.textContent=cloud.titles[p.title].name;badge.style.color=cloud.titles[p.title].color;row.querySelector('strong').append(badge);}row.querySelector('div>small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
+   row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');for(const key of cloud.titlesOf(p)){const tt=cloud.titles?.[key];if(!tt)continue;const badge=document.createElement('small');badge.className='rank-title';badge.textContent=tt.name;badge.style.color=tt.color;badge.title=tt.note;row.querySelector('strong').append(badge);}row.querySelector('div>small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
    row.querySelector('.mod-ok,.mod-banned').textContent=banned?`BAN ${perm?'∞':'do '+new Date(p.banned_until).toLocaleDateString('pl-PL')}${p.ban_reason?' · '+p.ban_reason:''}`:'AKTYWNY';
    const actions=document.createElement('div');actions.className='mod-actions';const self=p.id===me?.id;
    const act=(label,fn,danger=false,disabled=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;if(danger)b.className='danger';b.disabled=disabled;b.addEventListener('click',async()=>{const r=await fn();if(r===undefined)return;modMessage(r.ok?`${p.nickname}: zrobione.${r.data?.pending||r.data?.coins!==undefined?' Gracz dostanie korektę przy najbliższym wejściu do gry (lub w ciągu minuty, jeśli gra).':''}`:r.error||'Nie udało się.',!r.ok);if(r.ok)renderModeration();});actions.append(b);};
@@ -4720,7 +4727,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
    act('NOTATKA',()=>{const v=window.prompt(`Notatka moderatora o ${p.nickname}:`,p.mod_note||'');if(v===null)return;return cloud.mod.note(p.id,v);});
    if(banned)act('ODBANUJ',()=>cloud.mod.unban(p.id),false,self);
    else act('BAN',()=>{const h=window.prompt(`Ban dla ${p.nickname}: na ile godzin? (0 = bezterminowo)`,'24');if(h===null||!Number.isFinite(Number(h)))return;const reason=window.prompt('Powód (widoczny dla gracza):','')||'';return cloud.mod.ban(p.id,Math.trunc(Number(h)),reason);},true,self);
-   act('RANGA',()=>{const keys=Object.keys(cloud.titles||{});const v=window.prompt(`Ranga dla ${p.nickname}: ${keys.join(', ')} albo puste, żeby zdjąć.`,p.title||(p.id===me?.id?'owner':'first-to-arrive'));if(v===null)return;const t=v.trim();if(t&&!keys.includes(t)){modMessage(`Nieznana ranga. Dostępne: ${keys.join(', ')}.`,true);return;}return cloud.mod.setTitle(p.id,t);});
+   act('RANGI',()=>{const keys=Object.keys(cloud.titles||{});const current=cloud.titlesOf(p);const v=window.prompt(`Rangi dla ${p.nickname}, po przecinku (dostępne: ${keys.join(', ')}); puste zdejmuje wszystkie.`,current.length?current.join(', '):(p.id===me?.id?'owner':'first-to-arrive'));if(v===null)return;const list=v.split(',').map(s=>s.trim()).filter(Boolean);const bad=list.filter(t=>!keys.includes(t));if(bad.length){modMessage(`Nieznana ranga: ${bad.join(', ')}. Dostępne: ${keys.join(', ')}.`,true);return;}return cloud.mod.setTitles(p.id,list);});
    act('RESET ZAPISU',()=>{if(!window.confirm(`Wyzerować zapis gry ${p.nickname}? Konto i pseudonim zostają.`))return;return cloud.mod.reset(p.id);},true);
    if(cloudRole==='admin')act('ROLA',()=>{const v=window.prompt(`Nowa rola dla ${p.nickname}: player, moderator albo admin`,p.role);if(v===null)return;if(!['player','moderator','admin'].includes(v.trim())){modMessage('Rola musi być: player, moderator albo admin.',true);return;}return cloud.mod.setRole(p.id,v.trim());},false,self);
    row.append(actions);return row;}));
@@ -4728,11 +4735,11 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  }
  function saveLooksEmpty(save){return !save||typeof save!=='object'||!Object.keys(save).length||(!(save.cleared||[]).length&&(Number(save.coins)||0)<100&&(save.owned||[]).length<=2);}
  function localLooksEmpty(){return !profile.cleared.length&&profile.coins<100&&profile.owned.length<=2;}
- let cloudRole='player',cloudTitle=null;
+ let cloudRole='player',cloudTitle=null,cloudTitles=[];
  const isMod=()=>cloudRole==='moderator'||cloudRole==='admin';
  async function afterLogin(){
   const r=await cloud.fetchProfile();if(!r.ok){setAccountStatus(`Zalogowano, ale nie udało się pobrać profilu: ${r.error}`,true);return;}
-  const remote=r.data;cloudRole=remote?.role||'player';cloudTitle=remote?.title||null;renderAccount();document.body.classList.remove('maintenance-login');applyMaintenance();syncAdjustments();
+  const remote=r.data;cloudRole=remote?.role||'player';cloudTitles=cloud.titlesOf(remote);cloudTitle=cloudTitles[0]||null;renderAccount();document.body.classList.remove('maintenance-login');applyMaintenance();syncAdjustments();
   if(remote?.banned_until&&new Date(remote.banned_until)>new Date()){const until=new Date(remote.banned_until);const perm=until.getFullYear()-new Date().getFullYear()>50;await cloud.signOut();cloudRole='player';renderAccount();setAccountStatus(`Konto zablokowane ${perm?'bezterminowo':'do '+until.toLocaleString('pl-PL')}${remote.ban_reason?`. Powód: ${remote.ban_reason}`:''}.`,true);return;}
   // Which save wins: an empty local save takes the cloud; otherwise the newer one (by its own stamp), asking only when the cloud is newer.
   if(remote&&!saveLooksEmpty(remote.save)){const cloudAt=remote.save?.savedAt||remote.updated_at||null,localAt=profile.savedAt||null;const cloudNewer=!!cloudAt&&(!localAt||new Date(cloudAt)>new Date(localAt));
@@ -4766,7 +4773,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   $('rankMsg').textContent=cloud.enabled()?'Pobieram…':'Chmura nie jest skonfigurowana. Ranking pojawi się po podaniu kluczy w dist/config.js.';$('rankList').replaceChildren();if(!cloud.enabled())return;
   const r=await cloud.leaderboard(50);if(!r.ok){$('rankMsg').textContent=`Nie udało się pobrać rankingu: ${r.error}`;return;}
   const rows=Array.isArray(r.data)?r.data:[],me=cloud.user();$('rankMsg').textContent=rows.length?'':'Ranking jest jeszcze pusty. Zaloguj się i przejdź pierwszą salę.';
-  $('rankList').replaceChildren(...rows.map((row,i)=>{const li=document.createElement('li');li.className=`rank-row ${me&&row.nickname===me.nickname?'me':''}`;const no=document.createElement('span');no.className='rank-no';no.textContent=String(i+1).padStart(2,'0');const name=document.createElement('strong');name.textContent=row.nickname;const tt=cloud.titles?.[row.title];if(tt){const badge=document.createElement('small');badge.className='rank-title';badge.textContent=tt.name;badge.style.color=tt.color;badge.title=tt.note;name.append(badge);}const halls=document.createElement('span');halls.textContent=`${row.halls_cleared} / ${levels.count}`;const prestige=document.createElement('span');prestige.textContent=String(row.prestige);const time=document.createElement('span');time.textContent=formatNight(row.fastest_night);li.append(no,name,halls,prestige,time);return li;}));
+  $('rankList').replaceChildren(...rows.map((row,i)=>{const li=document.createElement('li');li.className=`rank-row ${me&&row.nickname===me.nickname?'me':''}`;const no=document.createElement('span');no.className='rank-no';no.textContent=String(i+1).padStart(2,'0');const name=document.createElement('strong');name.textContent=row.nickname;for(const key of cloud.titlesOf(row)){const tt=cloud.titles?.[key];if(!tt)continue;const badge=document.createElement('small');badge.className='rank-title';badge.textContent=tt.name;badge.style.color=tt.color;badge.title=tt.note;name.append(badge);}const halls=document.createElement('span');halls.textContent=`${row.halls_cleared} / ${levels.count}`;const prestige=document.createElement('span');prestige.textContent=String(row.prestige);const time=document.createElement('span');time.textContent=formatNight(row.fastest_night);li.append(no,name,halls,prestige,time);return li;}));
  }
  function ranking(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Ranking sprawdzisz przed następnym pojedynkiem.');return;}closeModal();openModal('ranking');renderRanking();}
  function openModal(id){lastFocus=document.activeElement;show(id);$(id).querySelector('button:not(:disabled)')?.focus();document.body.style.overflow='hidden';}

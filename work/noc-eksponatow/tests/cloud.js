@@ -81,6 +81,8 @@
       const claimed = await cloud.claimAdjustments(); assert.ok(calls.at(-1).url.endsWith('/rest/v1/rpc/claim_adjustments')); assert.equal(calls.at(-1).init.method, 'POST'); assert.ok(claimed.ok); assert.equal(typeof claimed.coins, 'number'); assert.equal(typeof claimed.balance, 'number');
       await cloud.mod.stats(); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_stats'));
       assert.equal(cloud.titles['demon-slayer'].name, 'DEMON SLAYER'); assert.ok(cloud.titles['demon-slayer'].color && cloud.titles['demon-slayer'].note);
+      await cloud.mod.setTitles('u2', ['veteran', '', 'demon-slayer']); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_set_titles')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', new_titles: ['veteran', 'demon-slayer'] });
+      assert.deepEqual(cloud.titlesOf({ titles: ['owner', 'veteran'], title: 'owner' }), ['owner', 'veteran']); assert.deepEqual(cloud.titlesOf({ title: 'patron' }), ['patron'], 'stary wiersz z jedną rangą'); assert.deepEqual(cloud.titlesOf({ titles: [], title: null }), []);
       await cloud.mod.setTitle('u2', 'first-to-arrive'); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', new_title: 'first-to-arrive' }); assert.equal(cloud.titles['first-to-arrive'].name, 'FIRST TO ARRIVE'); assert.equal(cloud.titles.owner.name, 'OWNER');
       const role = await cloud.mod.setRole('u2', 'moderator'); assert.equal(role.ok, false); assert.equal(role.error, 'Brak uprawnień moderatora.');
       const profileCall = cloud.fetchProfile(); await profileCall; assert.ok(calls.at(-1).url.includes('role,banned_until,ban_reason'), 'profil niesie rolę i ban');

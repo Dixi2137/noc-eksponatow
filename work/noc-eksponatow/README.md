@@ -233,6 +233,10 @@ Uwaga: w walce rycerz nadal trzyma w ręce miecz niezależnie od założonej bro
 
 `cards.js` ma 33 karty bohaterów i 20 kart broni (53 łącznie, 13 pierwotnych + 40 nowych). Nowi bohaterowie: Leonidas, Aleksander Wielki, Cezar, Boudika, Saladyn, Ryszard Lwie Serce, El Cid, Roland, Wilhelm Tell, Jagiełło, Žižka, Musashi, Tomoe Gozen, Chodkiewicz, Czarniecki, Washington, Dąbrowski, Plater, Bolívar, Kopernik, Skłodowska-Curie, Piłsudski, Sendlerowa, Pilecki, Mieszko I; bonusy to HP, energia, regeneracja, koszt obrony, okno parady, obrażenia w słabą gardę, leczenie za paradę, redukcja obrażeń, +1 strzał. Nowe karty broni: katana, halabarda, młot bojowy, szabla husarska, Szczerbiec, Zulfikar, kukri, sztylet, maczuga (+10–20% obrażeń) oraz łuk długi, kusza, muszkiet, Glock, AK-47, Barrett (+1 do +5 amunicji); każda karta broni może mieć własne `modifiers`, domyślnie +10% obrażeń. Przy starcie moduł sprawdza unikalność id i czy broń z karty istnieje.
 
+## Wiele rang na profilu (faza95)
+
+Profil może mieć kilka rang naraz: kolumna `profiles.titles text[]` (constraint `profiles_titles_check` na dozwolone wartości), `title` zostaje jako pierwsza ranga dla zgodności. Migracja `supabase/2026-10-26-wiele-rang.sql`: kolumna z backfillem, strażnik kolumn moderacyjnych rozszerzony o `titles`, RPC `mod_set_titles(target, text[])` ustawia całą listę (deduplikacja, FIRST TO ARRIVE wciąż tylko u jednej osoby), stare `mod_set_title` deleguje do niej, widok `leaderboard` i `mod_list` zwracają `titles`. Klient: `cloud.titlesOf(row)` (lista z `titles`, a gdy brak, z `title`), `mod.setTitles`, w panelu akcja RANGI przyjmuje listę po przecinku, ranking i konto pokazują wszystkie odznaki.
+
 ## Ranga DEMON SLAYER (faza94)
 
 Nowa ranga honorowa `demon-slayer` (DEMON SLAYER, czerwona, „Pokonał Belzebuba w piekle”), nadawana ręcznie z panelu moderatora jak pozostałe. Migracja `supabase/2026-10-26-ranga-demon-slayer.sql` rozszerza constraint `profiles_title_check`.
