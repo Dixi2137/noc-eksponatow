@@ -50,88 +50,86 @@
   // Door signs per era, so the same hall does not read MUSEUM in Sparta, Rome and the bunker alike.
   const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG', senate: 'SENAT', baghdad: 'BAGDAD', tudor: 'TOWER', madrid: 'MADRYT', caribbean: 'SANTO DOMINGO', coronation: 'BANGUI', vatican: 'WATYKAN', paddy: 'PHNOM PENH', blaze: 'ROMA · 64', colosseum: 'KOLOSEUM' };
 
-  // ── Scene layouts: a few halls leave the brick room behind. Pixel rules: flat colour bands, 2 px checker dithering between them,
-  //    one-pixel dark outlines on every prop, floors from the tileset. Each draws the whole 288 x 162 backdrop incl. the ground band. ──
+  // ── Scene layouts: a few halls leave the brick room behind. Each draws the whole 288 x 162 backdrop incl. the ground band. ──
+  const skyBand = (c, top, bottom, h = 126) => { for (let y = 0; y < h; y += 2) px(c, 0, y, mix(top, bottom, y / h), W, 2); };
+  const stars = (c, n, h = 80, seed = 0) => { for (let k = 0; k < n; k++) px(c, (k * 53 + 7 + seed) % W, (k * 29 + 3) % h, k % 5 ? '#9fb3c8' : '#ffffff'); };
+  const moon = (c, x, y) => { px(c, x, y, '#e8e6d0', 10, 10); px(c, x - 3, y - 2, '#0f1838', 8, 8); };
+  const ground = (c, col, line, dark) => { px(c, 0, 128, col, W, 34); px(c, 0, 127, line, W, 1); if (dark) px(c, 0, 150, dark, W, 12); };
   const O = '#141216';
   const bands = (c, list) => list.forEach(([y, h, col]) => px(c, 0, y, col, W, h));
   const dither = (c, y, colA, colB, h = 4) => { px(c, 0, y, colA, W, h); for (let r = 0; r < h; r += 2) for (let x = (r / 2) % 2 * 2; x < W; x += 4) px(c, x, y + r, colB, 2, 2); };
   const box = (c, x, y, w, h, fill, line = O) => { px(c, x - 1, y - 1, line, w + 2, h + 2); px(c, x, y, fill, w, h); };
-  const stars = (c, n, h = 80, seed = 0) => { for (let k = 0; k < n; k++) px(c, ((k * 53 + 7 + seed) % (W / 2)) * 2, ((k * 29 + 3) % (h / 2)) * 2, k % 5 ? '#9fb3c8' : '#ffffff', k % 7 ? 1 : 2, k % 7 ? 1 : 2); };
-  const moon = (c, x, y) => { box(c, x, y, 10, 10, '#e8e6d0'); px(c, x - 2, y - 2, '#0f1838', 8, 8); px(c, x - 3, y - 3, O, 1, 9); };
-  const sun = (c, x, y, col = '#ffd98a') => { box(c, x, y, 12, 12, col); px(c, x - 4, y + 4, col, 20, 4); px(c, x + 4, y - 4, col, 4, 20); };
   const tiledGround = (c, tint, line) => { for (let col = 0; col < 18; col++) { tile(c, 2, 3, col * T, 128); tile(c, 1, 3, col * T, 144); } c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(0, 128, W, 34); if (tint) { c.fillStyle = tint; c.fillRect(0, 128, W, 34); } px(c, 0, 127, line, W, 1); px(c, 0, 128, O, W, 1); };
-  const flatGround = (c, col, dark, line) => { px(c, 0, 128, col, W, 34); dither(c, 146, col, dark); px(c, 0, 150, dark, W, 12); px(c, 0, 127, line, W, 1); px(c, 0, 128, O, W, 1); };
   const layouts = {
     rooftop(c, t) {
-      bands(c, [[0, 40, '#0a1030'], [40, 44, '#101a40'], [84, 42, '#1a2a50']]); dither(c, 38, '#0a1030', '#101a40'); dither(c, 82, '#101a40', '#1a2a50'); stars(c, 40, 70); moon(c, 236, 14);
+      skyBand(c, '#0a1030', '#1a2a50'); stars(c, 40, 70); moon(c, 236, 14);
       [[0,70,22],[22,62,18],[40,78,30],[70,58,14],[84,74,26],[110,66,20],[130,80,34],[164,60,18],[182,72,24],[206,56,16],[222,76,28],[250,64,20],[270,70,18]]
-        .forEach(([x, y, w]) => { box(c, x, y, w, 126 - y, '#141c3a'); for (let r = y + 4; r < 118; r += 8) for (let q = x + 2; q < x + w - 2; q += 6) if ((q * 7 + r) % 3) px(c, q, r, '#f3d27a', 2, 2); });
+        .forEach(([x, y, w]) => { px(c, x, y, '#141c3a', w, 126 - y); for (let r = y + 4; r < 120; r += 7) for (let q = x + 2; q < x + w - 2; q += 5) if ((q * 7 + r) % 3) px(c, q, r, '#f3d27a', 2, 2); });
       [[-4,96,40],[44,104,30],[80,92,36],[124,100,28],[160,88,44],[212,98,34],[254,90,40]]
-        .forEach(([x, y, w]) => { box(c, x, y, w, 126 - y, '#0b1024'); for (let r = y + 6; r < 120; r += 8) for (let q = x + 4; q < x + w - 4; q += 6) if ((q * 5 + r) % 4) px(c, q, r, '#ffe08a', 2, 2); });
-      box(c, 20, 74, 28, 22, '#4a3a30'); px(c, 20, 74, '#6a5a50', 28, 4); px(c, 24, 80, '#5a4a40', 20, 2); box(c, 18, 70, 32, 4, '#5a4a40'); box(c, 22, 96, 4, 14, '#2a2220'); box(c, 42, 96, 4, 14, '#2a2220');   // water tank
-      box(c, 250, 56, 2, 54, '#3a3a40'); box(c, 240, 62, 22, 2, '#3a3a40'); box(c, 244, 70, 14, 2, '#3a3a40'); if (Math.floor(t * 2) % 2) px(c, 249, 52, '#ff3a3a', 4, 4);   // antenna
-      for (let col = 0; col < 18; col++) tile(c, 3, 3, col * T, 110); c.fillStyle = 'rgba(120,60,40,.45)'; c.fillRect(0, 110, W, 18); px(c, 0, 108, '#8a7a70', W, 2); px(c, 0, 110, O, W, 1);   // brick parapet from the tileset
-      tiledGround(c, 'rgba(60,60,70,.55)', '#7a7a80');
-      box(c, 96, 138, 40, 12, '#2a2a30'); px(c, 100, 140, '#8fb0d0', 32, 8); px(c, 100, 140, '#c8e0f0', 32, 2); px(c, 114, 140, '#2a2a30', 2, 8);   // skylight
+        .forEach(([x, y, w]) => { px(c, x, y, '#0b1024', w, 126 - y); for (let r = y + 5; r < 122; r += 8) for (let q = x + 3; q < x + w - 3; q += 6) if ((q * 5 + r) % 4) px(c, q, r, '#ffe08a', 2, 3); });
+      px(c, 20, 74, '#4a3a30', 28, 24); px(c, 18, 72, '#5a4a40', 32, 4); px(c, 22, 98, '#2a2220', 3, 14); px(c, 43, 98, '#2a2220', 3, 14); px(c, 30, 80, '#6a5a50', 8, 10);   // water tank
+      px(c, 250, 56, '#3a3a40', 2, 56); px(c, 240, 62, '#3a3a40', 22, 2); px(c, 244, 70, '#3a3a40', 14, 2); if (Math.floor(t * 2) % 2) px(c, 250, 54, '#ff3a3a', 2, 2);   // antenna
+      for (let x = 0; x < W; x += 16) { px(c, x, 112, '#5a3a30', 16, 16); px(c, x + 1, 113, '#7a4a3a', 14, 6); px(c, x + 1, 121, '#6a4236', 14, 6); }   // parapet
+      px(c, 0, 110, '#8a7a70', W, 3);
+      ground(c, '#4a4a4e', '#6a6a70'); for (let x = 0; x < W; x += 24) px(c, x, 128, '#3a3a3e', 1, 34);
+      px(c, 96, 138, '#2a2a30', 40, 14); px(c, 100, 140, '#8fb0d0', 32, 10);   // skylight
     },
     colosseum(c, t) {
-      bands(c, [[0, 12, '#f0b060'], [12, 28, '#f7d9a0'], [40, 20, '#c9a070']]); dither(c, 10, '#f0b060', '#f7d9a0'); dither(c, 38, '#f7d9a0', '#c9a070');
-      for (let x = 0; x < W; x += 24) px(c, x, 0, (x / 24) % 2 ? '#c84a3a' : '#f4e6c8', 24, 8); px(c, 0, 8, O, W, 1);    // velarium
-      for (let tier = 0; tier < 4; tier++) { const y = 46 + tier * 14; px(c, 0, y, tier % 2 ? '#b89a78' : '#a88a68', W, 14); px(c, 0, y, O, W, 1); for (let x = 2; x < W; x += 6) { const col = ['#5a3a2a', '#e8c8a0', '#8a2a2a', '#3a3a5a'][(x / 6 + tier) % 4]; px(c, x + (tier % 2) * 3, y + 4, col, 4, 4); px(c, x + 1 + (tier % 2) * 3, y + 2, '#e8c8a0', 2, 2); } }   // crowd
-      px(c, 0, 102, '#c9b088', W, 24); px(c, 0, 102, O, W, 1); for (let x = 8; x < W; x += 32) { box(c, x, 106, 16, 20, '#2a1a10'); px(c, x + 2, 108, '#4a2a1a', 12, 18); px(c, x + 2, 108, '#5a3a2a', 12, 2); }   // arcade
-      box(c, 120, 90, 48, 14, '#8a1a1a'); px(c, 124, 92, '#d4af37', 40, 2); box(c, 136, 98, 16, 6, '#f4e6c8'); px(c, 118, 88, '#d4af37', 52, 2);   // imperial box
-      flatGround(c, '#d8b878', '#c0a060', '#e8c888'); for (let k = 0; k < 30; k++) px(c, ((k * 37) % W) & ~1, 130 + ((k * 11) % 30 & ~1), '#c4a060', 4, 2);
-      px(c, 40, 138, '#8a2a2a', 14, 2); px(c, 230, 150, '#8a2a2a', 10, 2);
+      skyBand(c, '#f0b060', '#f7d9a0', 40); px(c, 0, 40, '#c9a070', W, 20);
+      for (let x = 0; x < W; x += 24) px(c, x, 0, (x / 24) % 2 ? '#c84a3a' : '#f4e6c8', 24, 10);    // velarium stripes
+      for (let tier = 0; tier < 4; tier++) { const y = 46 + tier * 14; px(c, 0, y, tier % 2 ? '#b89a78' : '#a88a68', W, 14); for (let x = 2; x < W; x += 5) px(c, x + (tier % 2) * 2, y + 3 + ((x * 7 + tier) % 3), ['#5a3a2a', '#e8c8a0', '#8a2a2a', '#3a3a5a'][(x / 5 + tier) % 4], 3, 4); }   // crowd
+      px(c, 0, 102, '#c9b088', W, 24); for (let x = 8; x < W; x += 32) { px(c, x, 104, '#2a1a10', 16, 22); px(c, x + 2, 106, '#4a2a1a', 12, 20); }   // arcade of arches
+      px(c, 120, 92, '#8a1a1a', 48, 12); px(c, 124, 94, '#d4af37', 40, 2); px(c, 136, 98, '#f4e6c8', 16, 6);   // imperial box
+      ground(c, '#d8b878', '#b89858'); for (let k = 0; k < 30; k++) px(c, (k * 37) % W, 130 + (k * 11) % 30, '#c4a060', 3, 1);
+      px(c, 40, 138, '#8a2a2a', 14, 2); px(c, 230, 150, '#8a2a2a', 10, 2);   // old stains in the sand
     },
     steppe(c, t) {
-      bands(c, [[0, 30, '#2a2a58'], [30, 30, '#6a3a5a'], [60, 36, '#e07a3a'], [96, 30, '#f0b060']]); dither(c, 28, '#2a2a58', '#6a3a5a'); dither(c, 58, '#6a3a5a', '#e07a3a'); dither(c, 94, '#e07a3a', '#f0b060');
+      skyBand(c, '#2a2a58', '#e07a3a'); px(c, 0, 96, '#f0b060', W, 30);
       moon(c, 40, 18);
-      px(c, 0, 100, '#5a6a3a', W, 26); for (let x = 0; x < W; x += 8) px(c, x, 98 + ((x * 3) % 4 & ~1), '#5a6a3a', 8, 4); px(c, 0, 100, O, W, 1); for (let x = 0; x < W; x += 8) px(c, x, 98 + ((x * 3) % 4 & ~1), O, 8, 1);   // grass horizon
-      [[60, 104, 26], [200, 108, 30], [250, 102, 20]].forEach(([x, y, w]) => { box(c, x, y, w, 10, '#e8e4d8'); box(c, x + 3, y - 4, w - 6, 5, '#f4f1e8'); box(c, x + w / 2 - 2, y - 8, 4, 4, '#5a3a1e'); box(c, x + w / 2 - 3, y + 2, 6, 8, '#3a2a1a'); });   // yurts
-      [[120, 70], [170, 66]].forEach(([x, y]) => { box(c, x, y, 2, 56, '#2a2a3a'); box(c, x + 2, y, 14, 10, '#8b1a1a'); px(c, x + 2, y + 10, '#d4af37', 10, 3); for (let k = 0; k < 6; k++) px(c, x - 2 + (k % 2) * 2, y + 14 + k * 3, '#2a2a3a', 2, 2); });   // banners with horsetails
-      tiledGround(c, 'rgba(90,110,40,.5)', '#8a9a4a'); for (let k = 0; k < 40; k++) px(c, ((k * 29 + 5) % W) & ~1, 130 + ((k * 13) % 30 & ~1), '#8a9a4a', 2, 4);
+      px(c, 0, 100, '#5a6a3a', W, 26); for (let x = 0; x < W; x += 6) px(c, x, 98 + ((x * 3) % 4), '#4a5a30', 6, 4);   // rolling grass horizon
+      [[60, 104, 26], [200, 108, 30], [250, 102, 20]].forEach(([x, y, w]) => { px(c, x, y, '#e8e4d8', w, 10); px(c, x + 3, y - 4, '#f4f1e8', w - 6, 5); px(c, x + w / 2 - 2, y - 7, '#5a3a1e', 4, 4); px(c, x + w / 2 - 3, y + 2, '#3a2a1a', 6, 8); });   // yurts
+      [[120, 70], [170, 66]].forEach(([x, y]) => { px(c, x, y, '#2a2a3a', 2, 56); px(c, x + 2, y, '#8b1a1a', 14, 10); px(c, x + 2, y + 10, '#d4af37', 10, 3); for (let k = 0; k < 6; k++) px(c, x - 1 + (k % 2), y + 14 + k * 3, '#2a2a3a', 2, 1); });   // banners with horsetails
+      ground(c, '#6a7a3a', '#8a9a4a', '#5a6a30'); for (let k = 0; k < 40; k++) px(c, (k * 29 + 5) % W, 130 + (k * 13) % 30, '#8a9a4a', 1, 3);
     },
     desert(c, t) {
-      bands(c, [[0, 30, '#1a1030'], [30, 30, '#6a2a3a'], [60, 30, '#e0703a'], [90, 20, '#f0a050']]); dither(c, 28, '#1a1030', '#6a2a3a'); dither(c, 58, '#6a2a3a', '#e0703a'); dither(c, 88, '#e0703a', '#f0a050');
-      sun(c, 200, 70, '#ffd98a');
-      for (let x = 0; x < W; x += 8) { const y = 90 + Math.round(Math.sin(x / 18) * 4) & ~1; px(c, x, y, '#d8a060', 8, 36); px(c, x, y, O, 8, 1); }        // far dunes
-      for (let x = 0; x < W; x += 8) { const y = 104 + Math.round(Math.sin(x / 11 + 2) * 5) & ~1; px(c, x, y, '#b87838', 8, 24); px(c, x, y, O, 8, 1); }   // near dunes
-      [[40, 84], [52, 88]].forEach(([x, y]) => { box(c, x, y, 6, 22, '#7a5a3a'); box(c, x - 2, y - 2, 10, 3, '#9a7a4a'); px(c, x + 1, y + 2, '#5a3a2a', 1, 18); });   // ruined columns
-      box(c, 240, 70, 4, 40, '#3a2a1a'); [[-12, 0], [8, -2], [-14, -8], [10, -9], [-4, -14]].forEach(([dx, dy]) => box(c, 240 + dx, 70 + dy, 14, 4, '#2a5a2a'));   // palm
-      flatGround(c, '#d8b070', '#c09858', '#e8c080'); for (let k = 0; k < 30; k++) px(c, ((k * 41 + 3) % W) & ~1, 132 + ((k * 17) % 28 & ~1), '#c8a060', 4, 2);
+      skyBand(c, '#1a1030', '#e0703a'); px(c, 0, 90, '#f0a050', W, 20); px(c, 200, 70, '#ffd98a', 16, 16); px(c, 196, 74, '#ffd98a', 24, 8);   // sun
+      px(c, 0, 92, '#c89050', W, 34); for (let x = 0; x < W; x += 4) px(c, x, 90 + Math.round(Math.sin(x / 18) * 4), '#d8a060', 4, 8);        // far dunes
+      for (let x = 0; x < W; x += 4) px(c, x, 104 + Math.round(Math.sin(x / 11 + 2) * 5), '#b87838', 4, 24);                                 // near dunes
+      [[40, 84], [52, 88]].forEach(([x, y]) => { px(c, x, y, '#7a5a3a', 6, 22); px(c, x - 2, y - 2, '#9a7a4a', 10, 3); });   // ruined columns
+      px(c, 240, 70, '#3a2a1a', 3, 40); [[-10, 0], [8, -2], [-12, -8], [10, -9], [-2, -12]].forEach(([dx, dy]) => px(c, 240 + dx, 70 + dy, '#2a5a2a', 12, 3));   // palm
+      ground(c, '#d8b070', '#e8c080', '#c09858'); for (let k = 0; k < 30; k++) px(c, (k * 41 + 3) % W, 132 + (k * 17) % 28, '#c8a060', 4, 1);
     },
     deck(c, t) {
-      bands(c, [[0, 40, '#0a1430'], [40, 40, '#162a50'], [80, 46, '#1a3a5a']]); dither(c, 38, '#0a1430', '#162a50'); stars(c, 30, 60, 11); moon(c, 60, 12);
-      px(c, 0, 80, O, W, 1); for (let x = 0; x < W; x += 8) px(c, x, 84 + ((x * 5 + Math.floor(t * 3)) % 3 & ~1), '#4a7a9a', 4, 2);   // waves
-      box(c, 150, 0, 6, 126, '#5a3a1e'); box(c, 110, 20, 86, 3, '#5a3a1e'); box(c, 112, 24, 82, 40, '#e8e4d8'); px(c, 112, 24, '#c9c4b0', 82, 4); px(c, 112, 44, '#d8d4c0', 82, 2);   // mast and sail
-      for (let k = 0; k < 8; k++) { px(c, 60 + k * 11, 24 + k * 10, O, 2, 2); px(c, 234 - k * 11, 24 + k * 10, O, 2, 2); }   // rigging
-      box(c, 156, 2, 14, 8, '#111111'); px(c, 160, 4, '#f4f1e8', 4, 4);   // black flag
-      box(c, 0, 108, W, 4, '#4a2e1a'); for (let x = 4; x < W; x += 16) box(c, x, 98, 3, 10, '#4a2e1a'); box(c, 0, 96, W, 2, '#6a4a2a');   // railing
-      flatGround(c, '#8a6a3a', '#6a4a26', '#a07a44'); for (let y = 128; y < 162; y += 6) { px(c, 0, y, '#5a3a1e', W, 1); for (let x = (y % 12) * 2; x < W; x += 48) px(c, x, y + 1, '#5a3a1e', 2, 5); }
-      box(c, 20, 118, 26, 8, '#2a2a30'); box(c, 44, 120, 8, 4, '#2a2a30'); box(c, 22, 126, 22, 2, '#5a3a1e'); px(c, 24, 120, '#4a4a50', 20, 2);   // cannon
+      skyBand(c, '#0a1430', '#2a4a70'); stars(c, 30, 60, 11); moon(c, 60, 12);
+      px(c, 0, 80, '#1a3a5a', W, 46); for (let x = 0; x < W; x += 8) px(c, x, 84 + ((x * 5 + Math.floor(t * 3)) % 3), '#4a7a9a', 4, 1);   // sea
+      px(c, 150, 0, '#5a3a1e', 6, 126); px(c, 110, 20, '#5a3a1e', 86, 3); px(c, 112, 23, '#e8e4d8', 82, 40); px(c, 112, 23, '#c9c4b0', 82, 4);   // mast and sail
+      for (let k = 0; k < 8; k++) { px(c, 60 + k * 11, 24 + k * 10, '#3a2a1a', 1, 1); px(c, 236 - k * 11, 24 + k * 10, '#3a2a1a', 1, 1); }           // rigging
+      px(c, 150, 2, '#111111', 14, 8); px(c, 154, 4, '#f4f1e8', 4, 4);   // black flag
+      px(c, 0, 108, '#4a2e1a', W, 4); for (let x = 4; x < W; x += 16) px(c, x, 100, '#4a2e1a', 3, 10); px(c, 0, 98, '#6a4a2a', W, 2);   // railing
+      ground(c, '#8a6a3a', '#a07a44', '#6a4a26'); for (let y = 128; y < 162; y += 6) { px(c, 0, y, '#5a3a1e', W, 1); for (let x = (y % 12) * 2; x < W; x += 48) px(c, x, y + 1, '#5a3a1e', 1, 5); }
+      px(c, 20, 118, '#2a2a30', 26, 8); px(c, 44, 120, '#2a2a30', 8, 4); px(c, 22, 126, '#5a3a1e', 22, 3);   // cannon
     },
     snow(c, t) {
-      bands(c, [[0, 40, '#5a6a7e'], [40, 40, '#8a98a8'], [80, 46, '#b8c4d0']]); dither(c, 38, '#5a6a7e', '#8a98a8'); dither(c, 78, '#8a98a8', '#b8c4d0'); px(c, 0, 96, '#d8e0e8', W, 30); px(c, 0, 96, O, W, 1);
-      [[30, 60], [70, 68], [230, 58], [262, 70]].forEach(([x, y]) => { box(c, x, y, 3, 126 - y, '#3a3a40'); for (let k = 0; k < 4; k++) { box(c, x - 6 + k * 2, y + 6 + k * 8, 6, 2, '#3a3a40'); box(c, x + 3, y + 10 + k * 8, 6 - k, 2, '#3a3a40'); } });   // bare trees
-      box(c, 110, 96, 60, 14, '#6a6a60'); box(c, 108, 92, 64, 4, '#8a8a80'); box(c, 120, 100, 20, 6, '#2a2a30'); box(c, 140, 102, 4, 4, '#2a2a30');   // redoubt with a cannon
-      for (let k = 0; k < 36; k++) px(c, ((k * 31 + 2) % W) & ~1, ((k * 17 + Math.floor(t * 20)) % 126) & ~1, '#ffffff', 2, 2);   // falling snow
-      flatGround(c, '#e8eef4', '#c8d4dc', '#ffffff'); for (let k = 0; k < 20; k++) px(c, ((k * 43) % W) & ~1, 134 + ((k * 9) % 24 & ~1), '#c8d4dc', 6, 2);
-      box(c, 200, 118, 2, 12, '#3a3a40'); box(c, 202, 118, 10, 7, '#1f3a6b'); px(c, 202, 118, '#f4f1e8', 3, 7); px(c, 209, 118, '#b3202a', 3, 7);   // tricolour
+      skyBand(c, '#5a6a7e', '#b8c4d0'); px(c, 0, 96, '#d8e0e8', W, 30);
+      [[30, 60], [70, 68], [230, 58], [262, 70]].forEach(([x, y]) => { px(c, x, y, '#3a3a40', 3, 126 - y); for (let k = 0; k < 4; k++) { px(c, x - 6 + k * 2, y + 6 + k * 8, '#3a3a40', 6, 1); px(c, x + 3, y + 10 + k * 8, '#3a3a40', 6 - k, 1); } });   // bare trees
+      px(c, 110, 96, '#6a6a60', 60, 14); px(c, 108, 92, '#8a8a80', 64, 4); px(c, 120, 100, '#2a2a30', 20, 6); px(c, 140, 102, '#2a2a30', 3, 3);   // redoubt with a cannon
+      for (let k = 0; k < 36; k++) px(c, (k * 31 + 2) % W, (k * 17 + Math.floor(t * 20)) % 126, '#ffffff');   // falling snow
+      ground(c, '#e8eef4', '#ffffff', '#c8d4dc'); for (let k = 0; k < 20; k++) px(c, (k * 43) % W, 134 + (k * 9) % 24, '#c8d4dc', 6, 1);
+      px(c, 200, 120, '#3a3a40', 2, 12); px(c, 202, 118, '#1f3a6b', 10, 7); px(c, 202, 118, '#f4f1e8', 3, 7); px(c, 209, 118, '#b3202a', 3, 7);   // tricolour
     },
     jungle(c, t) {
-      bands(c, [[0, 60, '#0a1a10'], [60, 66, '#1a3a20']]); dither(c, 58, '#0a1a10', '#1a3a20');
-      for (let x = 0; x < W; x += 20) { const dy = (x % 40) / 4; box(c, x + 8, 20 + dy, 6, 106 - dy, '#0e2814'); for (let k = 0; k < 4; k++) box(c, x - 4 + k * 2, 24 + dy + k * 10, 24 - k * 2, 6, '#143a1a'); }   // trees
-      for (let k = 0; k < 14; k++) box(c, k * 21 + 3, -1, 2, 30 + (k * 13) % 40, '#1e5a26');   // vines
-      box(c, 190, 86, 44, 30, '#5a3a1e'); box(c, 184, 78, 56, 10, '#8a6a3a'); for (let x = 186; x < 240; x += 6) px(c, x, 80, '#a08a4a', 3, 6); box(c, 206, 100, 12, 16, '#2a1a10');   // hut
-      for (let k = 0; k < 8; k++) if ((Math.floor(t * 3) + k) % 3) px(c, ((k * 37 + 10) % W) & ~1, (60 + (k * 23) % 50) & ~1, '#d8ff8a', 2, 2);   // fireflies
-      tiledGround(c, 'rgba(50,70,30,.55)', '#5a6a30'); for (let k = 0; k < 40; k++) px(c, ((k * 29 + 5) % W) & ~1, 129 + ((k * 13) % 30 & ~1), '#5a7a30', 2, 4);
+      skyBand(c, '#0a1a10', '#1a3a20'); for (let x = 0; x < W; x += 20) { px(c, x + 8, 20 + (x % 40) / 4, '#0e2814', 6, 106); for (let k = 0; k < 4; k++) px(c, x - 4 + k * 2, 24 + (x % 40) / 4 + k * 10, '#143a1a', 24 - k * 2, 6); }   // trees
+      for (let k = 0; k < 14; k++) px(c, k * 21 + 3, 0, '#1e5a26', 2, 30 + (k * 13) % 40);   // vines
+      px(c, 190, 86, '#5a3a1e', 44, 30); px(c, 184, 78, '#8a6a3a', 56, 10); px(c, 206, 100, '#2a1a10', 12, 16);   // hut
+      for (let k = 0; k < 8; k++) if ((Math.floor(t * 3) + k) % 3) px(c, (k * 37 + 10) % W, 60 + (k * 23) % 50, '#d8ff8a');   // fireflies
+      ground(c, '#3a3a22', '#5a6a30', '#2a2a18'); for (let k = 0; k < 40; k++) px(c, (k * 29 + 5) % W, 129 + (k * 13) % 30, '#5a7a30', 1, 3);
     },
     stadium(c, t) {
-      bands(c, [[0, 30, '#06080f'], [30, 26, '#101828']]); dither(c, 28, '#06080f', '#101828'); stars(c, 20, 40, 5);
-      [[40, 10], [240, 10]].forEach(([x, y]) => { box(c, x, y, 4, 80, '#3a3a40'); box(c, x - 8, y, 20, 8, '#5a5a60'); for (let k = 0; k < 4; k++) px(c, x - 6 + k * 5, y + 2, '#ffffff', 3, 4); for (let r = 0; r < 12; r++) for (let q = 0; q < 42; q += 2) if ((q + r) % 4 === 0) px(c, x - 20 + q * 2, y + 10 + r * 9, '#2a2a3a', 2, 2); });   // floodlight towers with dithered glare
-      for (let tier = 0; tier < 5; tier++) { const y = 56 + tier * 11; px(c, 0, y, tier % 2 ? '#3a3a44' : '#30303a', W, 11); px(c, 0, y, O, W, 1); for (let x = 2; x < W; x += 6) box(c, x, y + 3, 4, 5, (x + tier) % 7 ? '#2a2a34' : '#8a2a2a', '#20202a'); }   // seats
-      box(c, 0, 111, W, 3, '#5a5a62'); for (let x = 0; x < W; x += 10) px(c, x, 114, '#6a6a72', 2, 12); px(c, 0, 114, '#6a6a72', W, 2); px(c, 0, 124, '#6a6a72', W, 2);   // fence
-      flatGround(c, '#3a5a2a', '#2a4a20', '#4a7a30'); px(c, 0, 144, '#e8e8e8', W, 2); px(c, 142, 128, '#e8e8e8', 2, 34);
+      skyBand(c, '#06080f', '#101828'); stars(c, 20, 40, 5);
+      [[40, 10], [240, 10]].forEach(([x, y]) => { px(c, x, y, '#3a3a40', 4, 80); px(c, x - 8, y, '#5a5a60', 20, 8); for (let k = 0; k < 4; k++) px(c, x - 6 + k * 5, y + 2, '#ffffff', 3, 3); c.fillStyle = 'rgba(255,255,220,.08)'; c.fillRect(x - 40, y + 8, 84, 110); });   // floodlights
+      for (let tier = 0; tier < 5; tier++) { const y = 56 + tier * 11; px(c, 0, y, tier % 2 ? '#3a3a44' : '#30303a', W, 11); for (let x = 2; x < W; x += 6) px(c, x, y + 3, (x + tier) % 7 ? '#2a2a34' : '#8a2a2a', 4, 5); }   // empty seats
+      px(c, 0, 111, '#5a5a62', W, 3); for (let x = 0; x < W; x += 10) px(c, x, 114, '#6a6a72', 1, 12); px(c, 0, 114, '#6a6a72', W, 1); px(c, 0, 125, '#6a6a72', W, 1);   // fence
+      ground(c, '#3a5a2a', '#4a7a30', '#2a4a20'); px(c, 0, 144, '#e8e8e8', W, 1); px(c, 142, 128, '#e8e8e8', 2, 34);
     },
     bunker(c, t) {
       // concrete walls with shuttering lines, darker toward the floor
