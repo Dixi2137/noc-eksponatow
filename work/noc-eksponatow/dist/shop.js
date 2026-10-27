@@ -1,4 +1,4 @@
-/* Store preview. PLN prices are a catalogue only; earned tokens open crates in the collection. */
+/* Store. Crates open for earned tokens or from the PLN balance (demo balance topped up by a moderator). */
 (() => {
  'use strict';
  const $=id=>document.getElementById(id);
@@ -7,7 +7,7 @@
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -97,7 +97,10 @@
   const tokenButton=$('shopTokenBtn');
   tokenButton.disabled=!available||!!current.pendingReward||!callbacks.canOpen();
   tokenButton.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':free?'WYBIERZ DARMOWĄ SKRZYNIĘ':coins<cost?`BRAKUJE ${number.format(cost-coins)} ✦`:`WYBIERZ ZA ${number.format(cost)} ✦`;
-  $('shopPaymentBtn').disabled=true;
+  const payBtn=$('shopPaymentBtn'),price=loot.cratePricePLN(selected),missingPLN=price-(Number(current.balance)||0);
+  payBtn.disabled=!available||!!current.pendingReward||!callbacks.canOpen()||missingPLN>0;
+  payBtn.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':missingPLN>0?`BRAKUJE ${pln(missingPLN)}`:`KUP ZA ${pln(price)}`;
+  $('shopPaymentHint').textContent=missingPLN>0?`Masz ${pln(current.balance)} na saldzie. Saldo zasila moderator w zakładce PORTFEL.`:'Zakup z salda w złotówkach. Skrzynia otworzy się od razu.';
   $('shopTokenHint').textContent=!available?'Masz już wszystko, co może wypaść z tej skrzyni.':current.pendingReward?'Odbierz zapisaną nagrodę w kolekcji, żeby otworzyć następną.':free?'Masz 1 darmową skrzynię Galerii na start. Otworzysz ją w kolekcji.':coins<cost?`Masz ${number.format(coins)} / ${number.format(cost)} ✦. Żetony zdobywasz w walkach.`:`Masz ${number.format(coins)} / ${number.format(cost)} ✦. Otwarcie potwierdzisz w kolekcji.`;
   renderFinishes(current);
  }
@@ -140,6 +143,11 @@
     const selected=validCrate(selectedId),current=profile();
     if(!selected||!callbacks.canOpen()||current.pendingReward||!loot.remaining(current,selected.id).length)return;
     callbacks.onOpenWithTokens(selected.id);
+   });
+   $('shopPaymentBtn')?.addEventListener('click',()=>{
+    const selected=validCrate(selectedId),current=profile();
+    if(!selected||!callbacks.canOpen()||current.pendingReward||!loot.remaining(current,selected.id).length||!loot.canPayPLN(current,selected.id))return;
+    callbacks.onOpenWithPLN(selected.id);
    });
    mounted=true;
   }

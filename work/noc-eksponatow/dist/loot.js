@@ -278,16 +278,19 @@
   }
   return pool[pool.length-1];
  }
- function reserve(profile, random=randomValue,crateId='gallery') {
+ function cratePricePLN(crate){const c=typeof crate==='string'?getCrate(crate):crate;return c?Math.round((c.pricePLN||0)*100):0;}
+ function canPayPLN(profile,crateId){const price=cratePricePLN(crateId);return price>0&&integer(profile.balance)>=price;}
+ function reserve(profile, random=randomValue,crateId='gallery',pay='coins') {
   const crate=getCrate(crateId);
   if(!crate||profile.pendingReward)return null;
-  const free=crate.id==='gallery'&&profile.freeCrates>0,cost=free?0:crate.cost;
-  if(profile.coins<cost)return null;
+  const pln=pay==='pln',price=pln?cratePricePLN(crate):0;
+  const free=!pln&&crate.id==='gallery'&&profile.freeCrates>0,cost=pln||free?0:crate.cost;
+  if(pln?!canPayPLN(profile,crate.id):profile.coins<cost)return null;
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
-  const next={...profile,coins:profile.coins-cost,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
+  const next={...profile,coins:profile.coins-cost,balance:integer(profile.balance)-price,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
   if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else if(reward.kind==='finish')next.finishes=[...(profile.finishes||[]),reward.id];else next.cards=[...profile.cards,reward.id];
-  return {reward,cost,free,crate,profile:next};
+  return {reward,cost,free,crate,profile:next,pln:price};
  }
  function claim(profile, {equip=false}={}) {
   const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null};
@@ -350,5 +353,5 @@
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();

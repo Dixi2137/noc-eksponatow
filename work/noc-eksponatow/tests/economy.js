@@ -239,4 +239,12 @@
     const sold = loot.sellFinish(p, 'gold-marble'); assert.ok(sold); assert.equal(sold.price, 112425); assert.equal(sold.profile.balance, 21470 + 112425); assert.deepEqual(sold.profile.finishes, []);
     assert.equal(loot.sellFinish(p, 'sword'), null, 'tylko wykończenia'); assert.equal(loot.migrate({ balance: '12.7' }).balance, 12); assert.equal(loot.migrate({ balance: -5 }).balance, 0);
   });
+  test('Skrzynia za złotówki: cena w groszach z cennika, schodzi z salda, żetony i darmowa skrzynia nietknięte', () => {
+    let p = { ...loot.migrate(null), coins: 0, freeCrates: 1 }; assert.equal(loot.cratePricePLN('gallery'), 2999); assert.equal(loot.canPayPLN(p, 'gallery'), false);
+    assert.equal(loot.reserve(p, () => .5, 'gallery', 'pln'), null, 'puste saldo');
+    p = loot.deposit(p, 5000); assert.ok(loot.canPayPLN(p, 'gallery')); const r = loot.reserve(p, () => .5, 'gallery', 'pln'); assert.ok(r);
+    assert.equal(r.pln, 2999); assert.equal(r.cost, 0); assert.equal(r.free, false); assert.equal(r.profile.balance, 2001); assert.equal(r.profile.coins, 0); assert.equal(r.profile.freeCrates, 1, 'darmowa skrzynia zostaje');
+    assert.ok(r.profile.pendingReward && loot.has(r.profile, loot.getItem(r.profile.pendingReward)), 'nagroda zapisana');
+    const coins = loot.reserve({ ...p, coins: 900, freeCrates: 0 }, () => .5, 'gallery'); assert.equal(coins.pln, 0); assert.equal(coins.profile.balance, 5000, 'za żetony saldo nietknięte');
+  });
 })();

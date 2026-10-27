@@ -491,7 +491,7 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
      <span class="eyebrow">WYBRANA SKRZYNIA</span><h3 id="shopSelectedName"></h3><span id="shopSelectedCategory" class="shop-family-label"></span><p id="shopSelectedGuarantee"></p>
      <div id="shopSelectedOdds" class="shop-odds" aria-label="Szanse na rzadkości"></div>
      <details id="shopContents" class="drop-contents"><summary id="shopContentsSummary">ZAWARTOŚĆ I SZANSE</summary><ul id="shopContentsList" class="drop-list"></ul></details>
-     <div class="shop-checkout"><button id="shopTokenBtn" type="button" class="primary-btn"></button><p id="shopTokenHint" class="shop-token-hint" aria-live="polite"></p><div class="shop-total"><span>PLANOWANA CENA</span><strong id="shopSelectedPrice"></strong></div><button id="shopPaymentBtn" type="button" class="secondary-btn" disabled aria-describedby="shopPaymentHint">PŁATNOŚCI WKRÓTCE</button><p id="shopPaymentHint" class="shop-payment-note">Zakup za złotówki ruszy po podpięciu płatności.</p></div>
+     <div class="shop-checkout"><button id="shopTokenBtn" type="button" class="primary-btn"></button><p id="shopTokenHint" class="shop-token-hint" aria-live="polite"></p><div class="shop-total"><span>PLANOWANA CENA</span><strong id="shopSelectedPrice"></strong></div><button id="shopPaymentBtn" type="button" class="secondary-btn" disabled aria-describedby="shopPaymentHint">KUP ZA ZŁOTÓWKI</button><p id="shopPaymentHint" class="shop-payment-note">Zakup z salda w złotówkach.</p></div>
     </aside>
    </section>
    <section id="shopViewFinishes" class="shop-view hidden" role="tabpanel">
@@ -4229,16 +4229,19 @@ window.MuseumConfig = Object.freeze({
   }
   return pool[pool.length-1];
  }
- function reserve(profile, random=randomValue,crateId='gallery') {
+ function cratePricePLN(crate){const c=typeof crate==='string'?getCrate(crate):crate;return c?Math.round((c.pricePLN||0)*100):0;}
+ function canPayPLN(profile,crateId){const price=cratePricePLN(crateId);return price>0&&integer(profile.balance)>=price;}
+ function reserve(profile, random=randomValue,crateId='gallery',pay='coins') {
   const crate=getCrate(crateId);
   if(!crate||profile.pendingReward)return null;
-  const free=crate.id==='gallery'&&profile.freeCrates>0,cost=free?0:crate.cost;
-  if(profile.coins<cost)return null;
+  const pln=pay==='pln',price=pln?cratePricePLN(crate):0;
+  const free=!pln&&crate.id==='gallery'&&profile.freeCrates>0,cost=pln||free?0:crate.cost;
+  if(pln?!canPayPLN(profile,crate.id):profile.coins<cost)return null;
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
-  const next={...profile,coins:profile.coins-cost,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
+  const next={...profile,coins:profile.coins-cost,balance:integer(profile.balance)-price,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
   if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else if(reward.kind==='finish')next.finishes=[...(profile.finishes||[]),reward.id];else next.cards=[...profile.cards,reward.id];
-  return {reward,cost,free,crate,profile:next};
+  return {reward,cost,free,crate,profile:next,pln:price};
  }
  function claim(profile, {equip=false}={}) {
   const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null};
@@ -4301,7 +4304,7 @@ window.MuseumConfig = Object.freeze({
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();
 </script><script>/* Hidden packs. Each pack is an AES-GCM blob whose key comes from an access code (PBKDF2). Without the code the source
    holds only ciphertext: no names, stats or art. A correct code decrypts the pack and registers its weapons, skins, art
@@ -4357,7 +4360,7 @@ window.MuseumConfig = Object.freeze({
   async function restore(codes) { const out = []; for (const code of codes || []) { const r = await unlock(code); if (r.ok) out.push(r); } return out; }
   window.MuseumSecret = Object.freeze({ unlock, restore, norm, count: () => PACKS.length, unlockedIds: () => [...unlocked.keys()], _test: { encrypt, digest, apply } });
 })();
-</script><script>/* Store preview. PLN prices are a catalogue only; earned tokens open crates in the collection. */
+</script><script>/* Store. Crates open for earned tokens or from the PLN balance (demo balance topped up by a moderator). */
 (() => {
  'use strict';
  const $=id=>document.getElementById(id);
@@ -4366,7 +4369,7 @@ window.MuseumConfig = Object.freeze({
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -4456,7 +4459,10 @@ window.MuseumConfig = Object.freeze({
   const tokenButton=$('shopTokenBtn');
   tokenButton.disabled=!available||!!current.pendingReward||!callbacks.canOpen();
   tokenButton.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':free?'WYBIERZ DARMOWĄ SKRZYNIĘ':coins<cost?`BRAKUJE ${number.format(cost-coins)} ✦`:`WYBIERZ ZA ${number.format(cost)} ✦`;
-  $('shopPaymentBtn').disabled=true;
+  const payBtn=$('shopPaymentBtn'),price=loot.cratePricePLN(selected),missingPLN=price-(Number(current.balance)||0);
+  payBtn.disabled=!available||!!current.pendingReward||!callbacks.canOpen()||missingPLN>0;
+  payBtn.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':missingPLN>0?`BRAKUJE ${pln(missingPLN)}`:`KUP ZA ${pln(price)}`;
+  $('shopPaymentHint').textContent=missingPLN>0?`Masz ${pln(current.balance)} na saldzie. Saldo zasila moderator w zakładce PORTFEL.`:'Zakup z salda w złotówkach. Skrzynia otworzy się od razu.';
   $('shopTokenHint').textContent=!available?'Masz już wszystko, co może wypaść z tej skrzyni.':current.pendingReward?'Odbierz zapisaną nagrodę w kolekcji, żeby otworzyć następną.':free?'Masz 1 darmową skrzynię Galerii na start. Otworzysz ją w kolekcji.':coins<cost?`Masz ${number.format(coins)} / ${number.format(cost)} ✦. Żetony zdobywasz w walkach.`:`Masz ${number.format(coins)} / ${number.format(cost)} ✦. Otwarcie potwierdzisz w kolekcji.`;
   renderFinishes(current);
  }
@@ -4499,6 +4505,11 @@ window.MuseumConfig = Object.freeze({
     const selected=validCrate(selectedId),current=profile();
     if(!selected||!callbacks.canOpen()||current.pendingReward||!loot.remaining(current,selected.id).length)return;
     callbacks.onOpenWithTokens(selected.id);
+   });
+   $('shopPaymentBtn')?.addEventListener('click',()=>{
+    const selected=validCrate(selectedId),current=profile();
+    if(!selected||!callbacks.canOpen()||current.pendingReward||!loot.remaining(current,selected.id).length||!loot.canPayPLN(current,selected.id))return;
+    callbacks.onOpenWithPLN(selected.id);
    });
    mounted=true;
   }
@@ -4901,7 +4912,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  function collection(){if(crateBusy||!$('loot').classList.contains('hidden'))return;if(!['menu','result'].includes(screen)){toast('Wygląd możesz zmienić przed następnym pojedynkiem.');return;}renderSkins();openModal('collection');}
  function canOpenShop(){return !crateBusy&&['menu','result'].includes(screen)&&$('loot').classList.contains('hidden');}
  function shop(){if(!canOpenShop()){toast('Sklep czeka na koniec pojedynku i odbiór nagrody.');return;}closeModal();window.MuseumShop.render(selectedCrateId);openModal('shop');syncAdjustments();}
- function chooseShopCrate(id){if(!canOpenShop()||!loot.getCrate(id))return;selectedCrateId=id;openCrate();}
+ function chooseShopCrate(id,pay='coins'){if(!canOpenShop()||!loot.getCrate(id))return;selectedCrateId=id;openCrate(pay);}
  function drawItem(canvas,item){
   const ctx0=canvas.getContext('2d'),d=canvas.width/360;let cardTexts=null;ctx0.setTransform(d,0,0,d,0,0);ctx0.clearRect(0,0,360,360);window.MuseumArt.pixelFrame(ctx0,360,360,ctx=>{
   const g=ctx.createRadialGradient(180,175,15,180,180,230);g.addColorStop(0,loot.rarities[item.rarity].color+'30');g.addColorStop(1,'#10180e');if(canvas.id!=='lootCanvas'){ctx.fillStyle=g;ctx.fillRect(0,0,360,360);}
@@ -4996,14 +5007,14 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   if(!loot.remaining(profile,crate.id).length){toast('Zebrano wszystko z tej skrzyni.');updateAgainBtn();renderSkins();return;}
   openCrate();lootReturnFocus=keepFocus;
  }
- function openCrate(){
+ function openCrate(pay='coins'){
   if(crateBusy||!['menu','result'].includes(screen))return;
   if(profile.pendingReward){showLoot();revealReward(true);return;}
-  const reservation=loot.reserve(profile,undefined,selectedCrateId);if(!reservation)return;
+  const reservation=loot.reserve(profile,undefined,selectedCrateId,pay);if(!reservation){if(pay==='pln')toast('Za mało na saldzie. Saldo zasila moderator.');return;}
   // Persist the exact reward and payment before any visual effects. Reloading cannot eat a crate.
   profile=reservation.profile;persist();setLootBusy(true);renderSkins();showLoot();
   const token=++rollToken,reel=$('lootReel');window.MuseumLootShow.cancel();reel.replaceChildren();$('lootPanel').classList.remove('is-revealed');$('lootPanel').classList.add('is-rolling');delete $('lootPanel').dataset.rarity;$('lootPanel').style.removeProperty('--rarity');
-  $('lootEyebrow').textContent=reservation.crate.name.toLocaleUpperCase('pl-PL')+' / LOSOWANIE';$('lootTitle').textContent='CO KRYJE SKRZYNIA?';$('lootSubtitle').textContent=reservation.free?'Darmowa skrzynia. Jeden nowy wygląd, zero duplikatów.':`Wymieniono ${reservation.cost.toLocaleString('pl-PL')} żetonów. ${reservation.crate.guarantee}.`;show('lootReward',false);show('lootActions',false);show('lootWindow');
+  $('lootEyebrow').textContent=reservation.crate.name.toLocaleUpperCase('pl-PL')+' / LOSOWANIE';$('lootTitle').textContent='CO KRYJE SKRZYNIA?';$('lootSubtitle').textContent=reservation.free?'Darmowa skrzynia. Jeden nowy wygląd, zero duplikatów.':reservation.pln?`Zapłacono ${pln(reservation.pln)} z salda. ${reservation.crate.guarantee}.`:`Wymieniono ${reservation.cost.toLocaleString('pl-PL')} żetonów. ${reservation.crate.guarantee}.`;show('lootReward',false);show('lootActions',false);show('lootWindow');
   show('lootSuspense');$('lootProgressFill').style.width='0%';
   const winner=48,cards=[];
   for(let i=0;i<54;i++){
@@ -5015,7 +5026,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  for(const [id,kind] of [['kindSkins','skin'],['kindWeapons','weapon'],['kindCards','card'],['kindFinishes','finish']])$(id).addEventListener('click',()=>{if(crateBusy||!['menu','result'].includes(screen))return;collectionKind=kind;collectionPage=0;collectionFilters.newOnly=false;renderSkins();});
  for(const category of [{id:'all',name:'Wszystkie kategorie'},...loot.categories]){const option=document.createElement('option');option.value=category.id;option.textContent=category.name;$('categoryFilter').append(option);}
  $('categoryFilter').value='all';
- window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,onBuyFinish:buyFinish,notify:toast});
+ window.MuseumShop.mount({getProfile:()=>profile,canOpen:canOpenShop,onOpenWithTokens:chooseShopCrate,onOpenWithPLN:id=>chooseShopCrate(id,'pln'),onBuyFinish:buyFinish,notify:toast});
  $('secretForm').addEventListener('submit',event=>{event.preventDefault();enterSecret($('secretCode').value);});
  $('accountForgot').addEventListener('click',forgotPassword);$('accountReset').addEventListener('submit',submitNewPassword);
  $('shopTab').addEventListener('click',shop);$('hallTab').addEventListener('click',hall);$('rankTab').addEventListener('click',ranking);$('rankRefresh').addEventListener('click',renderRanking);$('accountBtn').addEventListener('click',account);$('accountModBtn').addEventListener('click',moderation);$('modRefresh').addEventListener('click',renderModeration);$('modSearch').addEventListener('submit',e=>{e.preventDefault();renderModeration();});$('modMaintenanceOn').addEventListener('click',()=>{if(!window.confirm('Włączyć tryb serwisowy? Wszyscy gracze poza moderatorami zobaczą ekran serwisowy i nie zagrają.'))return;setMaintenance(true);});$('modMaintenanceOff').addEventListener('click',()=>setMaintenance(false));$('maintenanceLoginBtn').addEventListener('click',maintenanceLogin);$('modAnnounce').addEventListener('submit',async e=>{e.preventDefault();const body=$('modAnnounceText').value.trim();if(!body){modMessage('Wpisz treść ogłoszenia.',true);return;}const r=await cloud.mod.announce(body,$('modAnnounceKind').value,Number($('modAnnounceSeconds').value)||60);if(!r.ok){modMessage(r.error,true);return;}$('modAnnounceText').value='';modMessage('Ogłoszenie wysłane do wszystkich graczy.');renderAnnouncements();});$('accountForm').addEventListener('submit',submitAccount);$('accountModeLogin').addEventListener('click',()=>{accountMode='login';renderAccount();setAccountStatus('');});$('accountModeRegister').addEventListener('click',()=>{accountMode='register';renderAccount();setAccountStatus('');});$('accountLogout').addEventListener('click',async()=>{await pushCloud(true);await cloud.signOut();renderAccount();setAccountStatus('Wylogowano. Grasz dalej jako gość na lokalnym zapisie.');});$('accountPush').addEventListener('click',async()=>{const r=await pushCloud(true);setAccountStatus(r?.ok?'Zapisano w chmurze.':`Nie udało się: ${r?.error||''}`,!r?.ok);});$('accountPull').addEventListener('click',async()=>{const r=await cloud.fetchProfile();if(!r.ok||!r.data){setAccountStatus(r.error||'Brak zapisu w chmurze.',true);return;}if(saveLooksEmpty(r.data.save)){setAccountStatus('W chmurze nie ma jeszcze zapisu.',true);return;}if(!window.confirm('Nadpisać lokalny postęp zapisem z chmury?'))return;adoptCloudSave(r.data.save);setAccountStatus('Wczytano zapis z chmury.');});$('hallName').addEventListener('change',()=>{profile=hallApi.rename(profile,$('hallName').value);persist();renderHall();toast(`Sala nazywa się teraz: ${profile.hall.name}.`);});
