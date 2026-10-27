@@ -59,9 +59,9 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   $('introNote').innerHTML=levels.indexOf(level.id)===0?'<span>◷</span> Najpierw historia. 18 sekund. Bez pomijania.':`<span>◷</span> Noc zaczyna się od sali ${level.number}. Pokonane sale zostają zaliczone.`;
   renderLevelStrip();
  }
- function menu(){screen='menu';night=null;window.MuseumGame?.reset();window.MuseumGame?.setScene('external');['hud','combatHint','intro','card','timejump','choice','ending','pause','results'].forEach(id=>show(id,false));show('menu');show('exhibitTag');show('stageMeta');$('topStatus').innerHTML='ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI';renderMenuLevel();stageState();$('startBtn').focus({preventScroll:true});}
+ function menu(){leaveFullscreen();screen='menu';night=null;window.MuseumGame?.reset();window.MuseumGame?.setScene('external');['hud','combatHint','intro','card','timejump','choice','ending','pause','results'].forEach(id=>show(id,false));show('menu');show('exhibitTag');show('stageMeta');$('topStatus').innerHTML='ZAMKNIĘTE DLA ZWIEDZAJĄCYCH <span class="muted">/</span> OTWARTE NA POJEDYNKI';renderMenuLevel();stageState();$('startBtn').focus({preventScroll:true});}
  function beginNight(){
-  if(crateBusy||!$('loot').classList.contains('hidden')||!['menu','result'].includes(screen))return;closeModal();
+  if(crateBusy||!$('loot').classList.contains('hidden')||!['menu','result'].includes(screen))return;closeModal();enterFullscreen();
   const level=screen==='result'&&night?levels.get(night.levelId):currentLevel();
   night={levelId:level.id,coins:0,wins:0,parries:0,time:0};profile.level=level.id;persist();
   window.MuseumGame?.reset();window.MuseumGame?.setScene('external');['menu','exhibitTag','hud','combatHint','ending','pause','results','stageMeta','timejump','choice','card'].forEach(id=>show(id,false));stageState();$('startBtn').blur();
@@ -429,7 +429,15 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  persist();pixelUI();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');applySecrets();if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
  // Fit the stage to the window: the frame shrinks to the free height (top bar + section line + controls take --chrome),
  // and the in-frame UI zooms by the ratio of the frame to the full content width, so nothing is ever clipped.
- function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(1,frame.clientWidth/Math.max(1,parent.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}
+ function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement,app=document.querySelector('.app')||parent;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(fullscreenOn()?1.4:1,frame.clientWidth/Math.max(1,app.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}
+ // Fullscreen: the fight takes the whole screen (laptops are small), the menu gives the page back. Opt-out lives in localStorage; phones without the API simply stay inline.
+ const FS_KEY='museum-fullscreen';
+ function fullscreenWanted(){try{return localStorage.getItem(FS_KEY)!=='off';}catch{return true;}}
+ function fullscreenOn(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+ function enterFullscreen(){const host=$('stageHost');if(!host||!fullscreenWanted()||fullscreenOn())return;const req=host.requestFullscreen||host.webkitRequestFullscreen;if(!req)return;try{const r=req.call(host,{navigationUI:'hide'});if(r?.catch)r.catch(()=>{});}catch{}}
+ function leaveFullscreen(){if(!fullscreenOn())return;const exit=document.exitFullscreen||document.webkitExitFullscreen;try{const r=exit?.call(document);if(r?.catch)r.catch(()=>{});}catch{}}
+ for(const ev of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(ev,()=>{document.body.classList.toggle('is-fullscreen',fullscreenOn());fitStage();if(!fullscreenOn()&&screen==='fight')pause();});
+ (()=>{const b=$('fsToggle');if(!b)return;const sync=()=>b.setAttribute('aria-pressed',String(fullscreenWanted()));sync();b.addEventListener('click',()=>{const on=!fullscreenWanted();try{localStorage.setItem(FS_KEY,on?'on':'off');}catch{}sync();if(!on)leaveFullscreen();toast(on?'Walka odpali się na pełnym ekranie. Esc wraca do strony.':'Pełny ekran wyłączony. Gra zostaje w ramce.');});})();
  fitStage();window.addEventListener('resize',fitStage);window.addEventListener('orientationchange',fitStage);if(document.fonts?.ready)document.fonts.ready.then(fitStage);setTimeout(fitStage,300);
  // Boot sequence: studio card → title with the seal → login / guest. Click or Esc skips to the choice; a restored session skips the choice.
  const boot={timers:[],done:false,restored:null};
