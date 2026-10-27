@@ -1,4 +1,4 @@
-# Noc Eksponatów
+# Noc Eksponatów (publicznie: **Kustosz.xyz**, kustosz.xyz)
 
 Gra przeglądarkowa 2D bez zależności. Otwórz `dist/index.html` albo uruchom dowolny serwer HTTP dla folderu `dist`.
 
