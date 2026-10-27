@@ -369,7 +369,7 @@ Gra działa wyłącznie w pixel arcie (`profile.pixel` jest zawsze `true`, przyc
 
 ## Faza 9 — 10 nowych sal (2026-10-26)
 
-Obchód ma teraz 46 sal plus finał w piekle. Nowe sale wskakują w środek historii (lista sortuje się po roku), każda z własnym bossem, kostiumem, stylem walki i trofeum w `hall.js` + `pixel.js`. Trzy nowe scenerie: `babylon`, `england`, `junta` (w `pixel.js` i `art.js`).
+Obchód ma teraz 50 sal plus finał w piekle. Nowe sale wskakują w środek historii (lista sortuje się po roku), każda z własnym bossem, kostiumem, stylem walki i trofeum w `hall.js` + `pixel.js`. Trzy nowe scenerie: `babylon`, `england`, `junta` (w `pixel.js` i `art.js`).
 
 | Rok | Boss | Styl | Sceneria |
 |---|---|---|---|
@@ -383,3 +383,9 @@ Obchód ma teraz 46 sal plus finał w piekle. Nowe sale wskakują w środek hist
 | 1939 | Francisco Franco | gunman 5 | fascist |
 | 1973 | Augusto Pinochet | gunman 6 | junta |
 | 1977 | Jean-Bédel Bokassa | brute 5 | jungle |
+| 1440 | Gilles de Rais | trickster 3 | castle |
+| 1503 | Cesare Borgia | duelist 3 | church |
+| 1937 | Rafael Trujillo | trickster 5 | cartel |
+| 1950 | Kim Ir Sen | gunman 5 | pyongyang |
+
+Druga partia (2026-10-27) dociąga obchód do 50 sal plus piekło; nowa sceneria `pyongyang`.

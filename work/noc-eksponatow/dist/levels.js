@@ -100,6 +100,14 @@
       tagline: 'Pałac La Moneda płonie.<br>Generał zdejmuje okulary.', card: 'Estadio Nacional. Pinochet poprawia pelerynę i odbezpiecza pistolet.' },
     { id: 'bangui', year: 1977.9, yearLabel: '1977', title: 'BANGUI', hall: 'SALA KORONACJI', exhibit: 'bokassa', theme: 'jungle',
       tagline: 'Koronacja kosztowała trzecią część budżetu.<br>Cesarz chce reszty.', card: 'Sala koronacyjna w Bangui. Bokassa wstaje z orlego tronu z berłem.' },
+    { id: 'machecoul', year: 1440, yearLabel: '1440', title: 'MACHECOUL', hall: 'SALA SINOBRODEGO', exhibit: 'gilles', theme: 'castle',
+      tagline: 'Marszałek Francji, towarzysz Joanny d’Arc.<br>Zamek, z którego dzieci nie wracały.', card: 'Loch w Machecoul. Gilles de Rais zamyka drzwi i dobywa miecza.' },
+    { id: 'rome-borgia', year: 1503, yearLabel: '1503', title: 'RZYM', hall: 'SALA BORGIÓW', exhibit: 'cesare', theme: 'church',
+      tagline: 'Albo Cezar, albo nic.<br>Sztylet i kielich wina, którego nie tkniesz.', card: 'Komnaty Borgiów. Cesare odkłada kielich i wyciąga sztylet.' },
+    { id: 'ciudad-trujillo', year: 1937, yearLabel: '1937', title: 'CIUDAD TRUJILLO', hall: 'SALA GENERALISSIMUSA', exhibit: 'trujillo', theme: 'cartel',
+      tagline: 'Nazwał stolicę po sobie.<br>Na granicy pytał o pietruszkę.', card: 'Pałac w Ciudad Trujillo. Generalissimus poprawia dwuróg i odpina kaburę.' },
+    { id: 'pyongyang', year: 1950, yearLabel: '1950', title: 'PJONGJANG', hall: 'SALA DŻUCZE', exhibit: 'kimilsung', theme: 'pyongyang',
+      tagline: 'Wieczny prezydent.<br>Wojna, która nigdy się nie skończyła.', card: 'Plac w Pjongjangu. Kim Ir Sen zdejmuje karabin z ramienia.' },
     { id: 'hell', year: 9999, yearLabel: 'POZA CZASEM', title: 'WALKA Z BELZEBUBEM', hall: 'PIEKŁO', exhibit: 'beelzebub', theme: 'hell', twist: 'second-wind',
       tagline: 'Finał. Nie ma już sal.<br>Jest tylko ogień i Belzebub.', card: 'Podłoga muzeum pęka. Pod nią nie ma piwnicy. Jest piekło, a w nim czeka Belzebub.' }
   ];

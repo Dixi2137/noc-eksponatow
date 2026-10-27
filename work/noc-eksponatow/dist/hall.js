@@ -59,7 +59,11 @@
     { id: 'trophy-cromwell', level: 'drogheda', name: 'NAPIERŚNIK IRONSIDE', era: 'TROFEUM · 1649', glyph: '⛨', color: '#6a6a72', description: 'Żelazny napierśnik Lorda Protektora. Z wgnieceniem na pamiątkę.' },
     { id: 'trophy-franco', level: 'madrid', name: 'JARZMO I STRZAŁY', era: 'TROFEUM · 1939', glyph: '⚑', color: '#b3202a', description: 'Emblemat Falangi zdjęty z munduru caudillo.' },
     { id: 'trophy-pinochet', level: 'santiago', name: 'CIEMNE OKULARY', era: 'TROFEUM · 1973', glyph: '◖', color: '#1a1a1e', description: 'Okulary generała. Bez nich wyglądał jak zwykły emeryt.' },
-    { id: 'trophy-bokassa', level: 'bangui', name: 'ORLI TRON', era: 'TROFEUM · 1977', glyph: '✦', color: '#b3202a', description: 'Złoty orzeł z tronu koronacyjnego. Budżet państwa w jednym meblu.' }
+    { id: 'trophy-bokassa', level: 'bangui', name: 'ORLI TRON', era: 'TROFEUM · 1977', glyph: '✦', color: '#b3202a', description: 'Złoty orzeł z tronu koronacyjnego. Budżet państwa w jednym meblu.' },
+    { id: 'trophy-gilles', level: 'machecoul', name: 'KLUCZ SINOBRODEGO', era: 'TROFEUM · 1440', glyph: '⚿', color: '#8a8a90', description: 'Klucz do komnaty, której nie wolno było otwierać. Plama nie schodzi.' },
+    { id: 'trophy-cesare', level: 'rome-borgia', name: 'PIERŚCIEŃ Z TRUCIZNĄ', era: 'TROFEUM · 1503', glyph: '◌', color: '#d4af37', description: 'Pierścień Borgiów ze skrytką. Skrytka pusta, na szczęście.' },
+    { id: 'trophy-trujillo', level: 'ciudad-trujillo', name: 'MEDAL DOBROCZYŃCY', era: 'TROFEUM · 1937', glyph: '✵', color: '#1f3a6b', description: 'Order Dobroczyńcy Ojczyzny. Nadany sobie, odebrany przez ciebie.' },
+    { id: 'trophy-kimilsung', level: 'pyongyang', name: 'ZNACZEK Z PORTRETEM', era: 'TROFEUM · 1950', glyph: '✪', color: '#b3202a', description: 'Przypinka z wiecznym prezydentem. Noszona obowiązkowo, zdjęta dobrowolnie.' }
   ].map(trophy => Object.freeze({ ...trophy, kind: 'trophy', rarity: 'legendary', limited: true })));
   const trophyById = new Map(trophies.map(t => [t.id, t]));
   const prestigePoints = Object.freeze({ basic: 1, common: 2, rare: 4, epic: 8, legendary: 16, trophy: 12 });
