@@ -2,7 +2,7 @@
    Five rarities: from one-colour paint jobs to animated mythic coats. Mythics also sneak into every crate; the Lakiernia crates drop the whole catalogue. Colours: steel body, edge highlight, dark steel, fittings (gold), haft (wood). */
 (() => {
   'use strict';
-  const f = (id, name, era, flavour, colors, fx, rarity = 'mythic', pricePLN = PRICES[id]) => Object.freeze({ id, name, era, flavour, rarity, fx, colors: Object.freeze(colors), pricePLN });
+  const f = (id, name, era, flavour, colors, fx, rarity = 'mythic', pricePLN = PRICES[id], season = null) => Object.freeze({ id, name, era, flavour, rarity, fx, colors: Object.freeze(colors), pricePLN, ...(season ? { season } : {}) });
   // Planned direct-sale prices in PLN (payments are not live yet): a few hundred to a few thousand zł.
   const PRICES = Object.freeze({'diamond-emerald': 2499, 'gold-marble': 1499, 'titanium': 499, 'holo': 3499, 'obsidian-ruby': 1199, 'damascus': 699, 'rose-gold': 899, 'void': 1999});
   const handmade = [
@@ -63,7 +63,26 @@
     const s = fx === 'chrome' ? 8 : 85, l = fx === 'nebula' || name === 'CZARNA DZIURA' ? 18 : fx === 'chrome' ? 72 : 52;
     generated.push({ name, rarity: 'mythic', era: `${name} · WYKOŃCZENIE LIMITOWANE`, pricePLN: price, fx, flavour, colors: { steel: hsl2hex(h, s, l), edge: hsl2hex(h, Math.max(10, s - 20), Math.min(96, l + 32)), dark: hsl2hex(h, s, Math.max(6, l - 30)), gold: hsl2hex(h + 40, 80, 75), wood: hsl2hex(h, 30, 14), vein: hsl2hex(h + 60, 90, 80), hue: h } });
   }
-  const finishes = Object.freeze([...handmade, ...generated.map(x => { const id = slug(x.name); return f(id, x.name, x.era, x.flavour, x.colors, x.fx, x.rarity, x.pricePLN); })]);
+  // Seasonal coats: drop only from their seasonal crate while the season lasts; once owned they stay.
+  const seasonal = [
+    ['DYNIOWA LATARNIA', 'halloween', 30, 'Pomarańczowa skorupa z wyszczerbionym uśmiechem, który świeci w ciemności.', 'glow', 'legendary', 249],
+    ['CMENTARNA MGŁA', 'halloween', 120, 'Zimna zieleń mgły znad grobów. Pełznie po ostrzu.', 'aurora', 'epic', 79],
+    ['KREW NA KLINDZE', 'halloween', 355, 'Ciemna czerwień zasychająca na stali. Nie schodzi.', 'veins', 'epic', 69],
+    ['KOŚĆ', 'halloween', 45, 'Blada kość z pęknięciami. Jak z gabloty paleontologii, tylko ostrzejsza.', 'brushed', 'rare', 29],
+    ['PAJĘCZYNA', 'halloween', 0, 'Srebrne nitki pajęczyny na czarnej stali.', 'veins', 'rare', 24],
+    ['WIDMO', 'halloween', 270, 'Półprzezroczysty fiolet z duchem w środku. Widać go tylko w ruchu.', 'holo', 'legendary', 299],
+    ['ŚNIEŻNA KORA', 'christmas', 200, 'Biały szron na błękitnej stali. Zimny w dotyku nawet latem.', 'frost', 'epic', 79],
+    ['LASKA CUKROWA', 'christmas', 0, 'Czerwono-białe paski. Słodka, dopóki nie trafi.', 'stripes', 'rare', 24],
+    ['ŚWIĄTECZNA CHOINKA', 'christmas', 130, 'Ciemna zieleń z kolorowymi lampkami, które migają.', 'sparkle', 'legendary', 249],
+    ['ZŁOTA BOMBKA', 'christmas', 45, 'Lustrzane złoto bombki. Odbija całą salę.', 'chrome', 'epic', 89],
+    ['PIERNIK', 'christmas', 30, 'Brąz piernika z lukrowym brzegiem. Pachnie imbirem, bije jak młot.', 'dots', 'rare', 29],
+    ['ZORZA WIGILIJNA', 'christmas', 160, 'Zielono-czerwona zorza nad muzeum w wigilijną noc.', 'aurora', 'legendary', 299]
+  ];
+  for (const [name, season, h, flavour, fx, rarity, price] of seasonal) {
+    const s = fx === 'chrome' ? 8 : name === 'KOŚĆ' ? 20 : 75, l = name === 'PAJĘCZYNA' ? 16 : name === 'KOŚĆ' ? 82 : fx === 'chrome' ? 72 : 48;
+    generated.push({ name, rarity, era: `${name} · ${season === 'halloween' ? 'HALLOWEEN' : 'ŚWIĘTA'} · WYKOŃCZENIE SEZONOWE`, pricePLN: price, fx, flavour, season, colors: { steel: hsl2hex(h, s, l), edge: hsl2hex(h, Math.max(10, s - 20), Math.min(96, l + 30)), dark: hsl2hex(h, s, Math.max(6, l - 28)), gold: hsl2hex(h + 40, 80, 72), wood: hsl2hex(h, 30, 14), vein: hsl2hex(h + 60, 90, 80), hue: h } });
+  }
+  const finishes = Object.freeze([...handmade, ...generated.map(x => { const id = slug(x.name); return f(id, x.name, x.era, x.flavour, x.colors, x.fx, x.rarity, x.pricePLN, x.season || null); })]);
   const byId = new Map(finishes.map(x => [x.id, x]));
   if (byId.size !== finishes.length) throw new Error('Duplicate finish id');
   // Palette letters shared by icons and in-hand sprites: M steel, W edge, S dark steel, G fittings, D haft.

@@ -21,7 +21,7 @@
  function node(tag,className,text){const element=document.createElement(tag);if(className)element.className=className;if(text!==undefined)element.textContent=text;return element;}
  function profile(){return callbacks.getProfile();}
  function isFree(crate,current){return crate.id==='gallery'&&current.freeCrates>0;}
- function validCrate(id){return loot.crates.find(crate=>crate.id===id);}
+ function validCrate(id){return loot.activeCrates().find(crate=>crate.id===id);}
  function scrollToSummary(){let reduced=false;try{reduced=!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}catch(_){}$('shopSummary').scrollIntoView({behavior:reduced?'instant':'smooth',block:'nearest'});}
  let view='crates';
  const filters=[['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed'],['shopFilterFinishes','finishes']];
@@ -37,7 +37,7 @@
   return [pool.filter(item=>loot.has(current,item)).length,pool.length,crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':crate.pool==='skin'?'STROJÓW':'PRZEDMIOTÓW'];
  }
  function tile(crate,current){
-  const index=loot.crates.indexOf(crate),category=loot.getCategory(crate.categoryId),typeName=crate.weaponType?window.MuseumWeapons.types[crate.weaponType].name:null;
+  const index=loot.activeCrates().indexOf(crate),category=loot.getCategory(crate.categoryId),typeName=crate.weaponType?window.MuseumWeapons.types[crate.weaponType].name:null;
   const available=loot.remaining(current,crate.id).length>0,selected=crate.id===selectedId,[have,total,what]=poolLine(crate,current);
   const button=node('button',`shop-tile${selected?' is-selected':''}${available?'':' is-done'}${crate.id==='treasury'?' is-best':''}`);
   button.type='button';button.dataset.crateId=crate.id;button.style.setProperty('--crate-color',crate.color);
@@ -45,7 +45,7 @@
   button.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. ${number.format(crate.cost)} żetonów lub planowo ${currency.format(crate.pricePLN)}.`);
   const art=node('span','shop-tile-art');const canvas=document.createElement('canvas');canvas.width=142;canvas.height=120;art.append(canvas);drawCrateInto(canvas,crate,1.3);
   const body=node('span','shop-tile-body');
-  body.append(node('small','shop-tile-tag',`${String(index+1).padStart(2,'0')} · ${typeName||category?.name||crate.tag||'KOLEKCJA'}`),node('strong','shop-tile-name',crate.name),node('span','shop-tile-cost',`${number.format(crate.cost)} ✦`),node('span','shop-tile-pln',currency.format(crate.pricePLN)));
+  body.append(node('small','shop-tile-tag',`${String(index+1).padStart(2,'0')} · ${crate.season?`${crate.tag} · ${loot.seasonLabel(crate.season)}`:(typeName||category?.name||crate.tag||'KOLEKCJA')}`),node('strong','shop-tile-name',crate.name),node('span','shop-tile-cost',`${number.format(crate.cost)} ✦`),node('span','shop-tile-pln',currency.format(crate.pricePLN)));
   body.append(node('span','shop-tile-progress',!available?'ZEBRANA ✓':isFree(crate,current)?'PREZENT NA START':`${have} / ${total} ${what}`));
   if(crate.id==='treasury')button.append(node('span','shop-tile-badge','HIT'));
   button.append(art,body);
@@ -58,9 +58,9 @@
  function render(crateId){
   const requested=validCrate(crateId);
   if(requested){selectedId=requested.id;if(!matchesFamily(requested))familyFilter='all';}
-  const visible=loot.crates.filter(matchesFamily);
-  if(!visible.some(crate=>crate.id===selectedId))selectedId=visible[0]?.id||loot.crates[0]?.id;
-  const selected=validCrate(selectedId)||loot.crates[0];
+  const visible=loot.activeCrates().filter(matchesFamily);
+  if(!visible.some(crate=>crate.id===selectedId))selectedId=visible[0]?.id||loot.activeCrates()[0]?.id;
+  const selected=validCrate(selectedId)||loot.activeCrates()[0];
   if(!selected||!$('shopOffers'))return;
   selectedId=selected.id;
   const current=profile(),coins=Math.max(0,Number(current.coins)||0);
@@ -76,7 +76,7 @@
   $('shopOffers').replaceChildren(...blocks);
   if(focused)$('shopOffers').querySelector(`[data-crate-id="${focused}"]`)?.focus({preventScroll:true});
   for(const [id,filter] of filters)$(id).setAttribute('aria-pressed',String(familyFilter===filter));
-  $('shopOffersCount').textContent=String(loot.crates.length);
+  $('shopOffersCount').textContent=String(loot.activeCrates().length);
   $('shopBalance').textContent=`${number.format(coins)} ✦`;
   $('shopBalancePLN').textContent=pln(current.balance);
   // Selected crate panel.

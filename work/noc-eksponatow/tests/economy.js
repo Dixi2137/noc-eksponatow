@@ -153,7 +153,7 @@
     for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
     assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
     assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
-    assert.equal(loot.crates.length, 33); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+    assert.equal(loot.crates.length, 35); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
   });
   test('Lakiernia: ~390 wykończeń w pięciu rzadkościach, dwie skrzynie tylko z wykończeniami, ceny od groszy do tysięcy', () => {
     const F = window.MuseumFinishes, all = F.all(); assert.ok(all.length >= 380 && all.length <= 400, String(all.length));
@@ -162,7 +162,7 @@
     const cheapest = Math.min(...F.byRarity('common').map(x => x.pricePLN)), dearest = Math.max(...F.byRarity('mythic').map(x => x.pricePLN)); assert.ok(cheapest < 5 && dearest >= 3499, `${cheapest} – ${dearest}`);
     assert.ok(F.byRarity('rare').every(x => x.pricePLN > 9.99) && F.byRarity('epic').every(x => x.pricePLN > 39.99) && F.byRarity('legendary').every(x => x.pricePLN >= 199), 'ceny rosną z rzadkością');
     for (const x of all) { const pal = F.palette(x.id, 1.3); assert.ok(pal && pal.M && pal.W && pal.S, x.id); F.overlay(x.id, 'M', 3, 4, 1.3); F.overlay(x.id, 'W', 0, 0, 0); }
-    const p = { ...loot.migrate(null), coins: 50000 }; const pool = loot.remaining(p, 'lacquer'); assert.equal(pool.length, all.length, 'lakiernia ma cały katalog'); assert.ok(pool.every(i => i.kind === 'finish'), 'tylko wykończenia');
+    const p = { ...loot.migrate(null), coins: 50000 }; const pool = loot.remaining(p, 'lacquer'); assert.equal(pool.length, all.filter(x => !x.season).length, 'lakiernia ma cały katalog poza sezonowymi'); assert.ok(pool.every(i => i.kind === 'finish'), 'tylko wykończenia');
     const o = loot.odds(p, 'lacquer'); assert.ok(o.common > 50 && o.mythic < 1 && Math.abs(o.mythic - .5) < .01, JSON.stringify(o));
     const r = loot.reserve(p, () => .1, 'lacquer'); assert.ok(r && r.reward.kind === 'finish' && r.reward.rarity === 'common', 'dół losowania to bieda'); assert.equal(r.cost, 1200);
     const at = loot.remaining(p, 'atelier'); assert.ok(at.length && at.every(i => i.kind === 'finish' && ['epic', 'legendary', 'mythic'].includes(i.rarity)), 'atelier: minimum epickie'); assert.ok(Math.abs(loot.odds(p, 'atelier').mythic - 3) < .01);
@@ -247,6 +247,16 @@
     assert.ok(loot.remaining(p, 'elements').every(i => i.categoryId !== 'heroes'), 'skrzynie motywów bez bohaterów');
     assert.ok(loot.remaining(p, 'gallery').some(i => i.categoryId === 'heroes'), 'Skrzynia Galerii może dać bohatera');
     const r = loot.reserve({ ...p, coins: 5000 }, () => .5, 'heroes-gallery'); assert.ok(r && r.reward.categoryId === 'heroes');
+  });
+  test('Sezony: skrzynki halloweenowa i świąteczna tylko w swoich oknach, ich wykończenia nie wypadają nigdzie indziej', () => {
+    assert.ok(loot.seasonActive('halloween', new Date(2026, 9, 25)) && loot.seasonActive('halloween', new Date(2026, 10, 3)) && !loot.seasonActive('halloween', new Date(2026, 10, 4)) && !loot.seasonActive('halloween', new Date(2026, 9, 19)));
+    assert.ok(loot.seasonActive('christmas', new Date(2026, 11, 24)) && loot.seasonActive('christmas', new Date(2027, 0, 3)) && !loot.seasonActive('christmas', new Date(2027, 0, 7)) && !loot.seasonActive('christmas', new Date(2026, 5, 1)));
+    const ids = d => loot.activeCrates(d).map(c => c.id); assert.ok(!ids(new Date(2026, 5, 1)).includes('halloween') && !ids(new Date(2026, 5, 1)).includes('christmas')); assert.ok(ids(new Date(2026, 9, 31)).includes('halloween') && !ids(new Date(2026, 9, 31)).includes('christmas')); assert.ok(ids(new Date(2026, 11, 25)).includes('christmas'));
+    const F = window.MuseumFinishes; const hw = F.all().filter(x => x.season === 'halloween'), xm = F.all().filter(x => x.season === 'christmas'); assert.equal(hw.length, 6); assert.equal(xm.length, 6);
+    const p = { ...loot.migrate(null), coins: 50000 }; const pool = loot.remaining(p, 'halloween'); assert.equal(pool.length, 6); assert.ok(pool.every(i => i.kind === 'finish' && i.season === 'halloween'));
+    for (const id of ['lacquer', 'atelier', 'collector', 'gallery', 'armory', 'night']) assert.ok(loot.remaining(p, id).every(i => !i.season), `${id}: bez sezonowych`);
+    const live = loot.activeCrates().some(c => c.id === 'halloween'); const r = loot.reserve(p, () => .5, 'halloween'); assert.equal(!!r, live, 'rezerwacja tylko w sezonie'); if (r) assert.equal(r.reward.season, 'halloween');
+    assert.ok(loot.seasonLabel('halloween').includes('LISTOPADA'));
   });
   test('Skrzynia za złotówki: cena w groszach z cennika, schodzi z salda, żetony i darmowa skrzynia nietknięte', () => {
     let p = { ...loot.migrate(null), coins: 0, freeCrates: 1 }; assert.equal(loot.cratePricePLN('gallery'), 2999); assert.equal(loot.canPayPLN(p, 'gallery'), false);

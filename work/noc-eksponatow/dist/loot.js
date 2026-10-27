@@ -155,11 +155,24 @@
   {id:'atelier',name:'Atelier Płatnerza',title:'Atelier Płatnerza',tag:'EPICKIE+',cost:6000,pricePLN:129.99,pool:'finish',family:'finishes',group:'finishes',
    description:'Tylko klejnoty, żywioły i mityczne powłoki. Żadnej farby z puszki, ale mityczne wciąż tylko 3%.',
    guarantee:'1 nowe wykończenie · minimum epickie',color:'#c4a1f0',glyph:'◈',
-   rarityWeights:Object.freeze({common:0,rare:0,epic:72,legendary:25,mythic:3})}
+   rarityWeights:Object.freeze({common:0,rare:0,epic:72,legendary:25,mythic:3})},
+  {id:'halloween',season:'halloween',name:'Dynia Kustosza',title:'Dynia Kustosza',tag:'HALLOWEEN',cost:1500,pricePLN:39.99,pool:'finish',family:'finishes',group:'seasonal',
+   description:'Sześć wykończeń tylko na Halloween: dynia, kość, pajęczyna, krew, mgła i widmo. Po sezonie skrzynia znika ze sklepu, zdobyte powłoki zostają na zawsze.',
+   guarantee:'1 nowe wykończenie · tylko halloweenowe',color:'#e07a2a',glyph:'☾',
+   rarityWeights:Object.freeze({common:0,rare:45,epic:35,legendary:20,mythic:0})},
+  {id:'christmas',season:'christmas',name:'Gwiazdka Kustosza',title:'Gwiazdka Kustosza',tag:'ŚWIĘTA',cost:1500,pricePLN:39.99,pool:'finish',family:'finishes',group:'seasonal',
+   description:'Sześć wykończeń tylko na święta: szron, laska cukrowa, choinka, bombka, piernik i zorza wigilijna. Po Trzech Królach skrzynia znika ze sklepu, zdobyte powłoki zostają.',
+   guarantee:'1 nowe wykończenie · tylko świąteczne',color:'#b3202a',glyph:'✶',
+   rarityWeights:Object.freeze({common:0,rare:45,epic:35,legendary:20,mythic:0})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
   rarityWeights:Object.freeze({...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
  // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
- const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
+ const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'},{id:'seasonal',name:'Skrzynie sezonowe'}]);
+ // Seasons: month/day windows that repeat every year; the christmas one crosses New Year.
+ const SEASONS=Object.freeze({halloween:{from:[10,20],to:[11,3],label:'DO 3 LISTOPADA'},christmas:{from:[12,6],to:[1,6],label:'DO 6 STYCZNIA'}});
+ function seasonActive(id,date=new Date()){const s=SEASONS[id];if(!s)return false;const md=(date.getMonth()+1)*100+date.getDate(),a=s.from[0]*100+s.from[1],b=s.to[0]*100+s.to[1];return a<=b?(md>=a&&md<=b):(md>=a||md<=b);}
+ function seasonLabel(id){return SEASONS[id]?.label||'';}
+ function activeCrates(date=new Date()){return crates.filter(c=>!c.season||seasonActive(c.season,date));}
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -190,7 +203,7 @@
   ...skins.map(skin=>({kind:'skin',...skin})),
   ...weaponsApi.all().map(weaponItem),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
-  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
+  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN,...(x.season?{season:x.season}:{})}))
  ].map(Object.freeze);
  const itemsById=new Map(items.map(item=>[item.id,item]));
  // Hidden packs: a weapon or skin registered after the catalogue was built. Weight 0 keeps them out of every crate; gift keeps them unsellable and auto-owned once unlocked.
@@ -245,7 +258,7 @@
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  const fits=s=>s.kind==='finish'?(crate.pool==='finish'||(s.rarity==='mythic'&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
+  const fits=s=>s.kind==='finish'?(crate.pool==='finish'?(crate.season?s.season===crate.season:!s.season):(s.rarity==='mythic'&&!s.season&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
   return crate ? items.filter(s => fits(s) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
@@ -285,7 +298,7 @@
  function canPayPLN(profile,crateId){const price=cratePricePLN(crateId);return price>0&&integer(profile.balance)>=price;}
  function reserve(profile, random=randomValue,crateId='gallery',pay='coins') {
   const crate=getCrate(crateId);
-  if(!crate||profile.pendingReward)return null;
+  if(!crate||profile.pendingReward||(crate.season&&!seasonActive(crate.season)))return null;
   const pln=pay==='pln',price=pln?cratePricePLN(crate):0;
   const free=!pln&&crate.id==='gallery'&&profile.freeCrates>0,cost=pln||free?0:crate.cost;
   if(pln?!canPayPLN(profile,crate.id):profile.coins<cost)return null;
@@ -356,5 +369,5 @@
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,activeCrates,seasonActive,seasonLabel,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();

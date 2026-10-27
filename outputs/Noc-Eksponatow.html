@@ -405,6 +405,8 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
 .card-bio{font-family:Manrope,Arial,sans-serif;font-size:clamp(9px,.95vw,13px);line-height:1.6;color:#cfd6c4;margin:0 0 12px;max-width:62ch}.card-skip{display:block;font-size:6px;letter-spacing:2px;color:#7d8e6c;margin-top:7px}@media(max-width:650px){.card-bio{font-size:8px;line-height:1.5;-webkit-line-clamp:4;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}.card-skip{font-size:4px}}
 
 #cardView{z-index:60}.bigcard-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;position:relative}.bigcard{width:min(360px,84vw);aspect-ratio:5/7;perspective:1400px;cursor:pointer}.bigcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.2,.8,.2,1)}.bigcard.is-flipped .bigcard-inner{transform:rotateY(180deg)}.bigcard-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--rarity,#8b9b6a);background:#10180e;box-shadow:0 30px 80px #000c;display:flex;flex-direction:column;padding:14px;border-radius:6px;overflow:hidden}.bigcard-front canvas{width:100%;aspect-ratio:1/1;display:block;image-rendering:pixelated;background:#0c130b;border:1px solid #26301f}.bigcard-head{margin-top:auto;display:flex;flex-direction:column;gap:4px;padding-top:10px}.bigcard-head small{font-size:7px;letter-spacing:1.6px;color:#9bab83}.bigcard-head strong{font-family:var(--pixel-head);font-weight:400;font-size:26px;line-height:1;color:var(--cream)}.bigcard-head span{font-size:7px;letter-spacing:1.4px;color:var(--rarity)}.bigcard-back{transform:rotateY(180deg);background:radial-gradient(ellipse at 50% 15%,color-mix(in srgb,var(--rarity,#8b9b6a) 22%,transparent),#10180e 70%)}.bigcard-back>small{font-size:7px;letter-spacing:2px;color:var(--lime)}.bigcard-back p{font-family:Manrope,Arial,sans-serif;font-size:13px;line-height:1.7;color:#dfe5d2;margin:10px 0 14px;overflow:auto;min-height:0}.bigcard-perk{margin-top:auto;border-top:1px solid #61734a50;padding-top:10px}.bigcard-perk strong{display:block;font-size:9px;letter-spacing:1px;color:var(--rarity);margin-bottom:4px}.bigcard-perk span{font-size:10px;line-height:1.6;color:#aeba9c}.bigcard-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.bigcard-close{position:absolute;top:-8px;right:-8px;z-index:2;background:#171e15}.bigcard-hint{font-size:7px;letter-spacing:1.5px;color:#7d8e6c;text-align:center}@media(max-width:650px){.bigcard{width:min(300px,86vw)}.bigcard-back p{font-size:11px}.bigcard-head strong{font-size:21px}}
+
+.jump-trivia{font-family:Manrope,Arial,sans-serif;font-size:clamp(9px,.95vw,13px);line-height:1.6;color:#cfd6c4;margin:0 0 12px;max-width:64ch}.jump-trivia::before{content:'CIEKAWOSTKA · ';color:var(--lime);font-size:7px;letter-spacing:2px;vertical-align:middle}@media(max-width:650px){.jump-trivia{font-size:8px;line-height:1.5}}
 </style>
 </head>
 <body>
@@ -442,7 +444,7 @@ body.pixel .shop-tile-name,body.pixel .shop-tile-tag,body.pixel .shop-tabs butto
     <div id="combatHint" class="combat-hint hidden"><span class="hint-icon">!</span><span id="hintText">Wyczuj moment. Paruj tuż przed ciosem.</span></div>
     <div id="intro" class="cinematic hidden" aria-live="polite"><div class="cinema-top"><span>KUSTOSZ.XYZ</span><span id="introChapter">PROLOG / 01</span></div><div class="cinema-bottom"><span class="scene-label" id="sceneLabel">23:58 / OSTATNI OBCHÓD</span><p id="sceneText">W muzeum zapada cisza. Stróż kończy swoją zmianę.</p><div class="scene-progress"><div id="introProgress"></div></div><span class="cinema-note">SCENKA WSTĘPNA · <span id="introRemaining">18</span> S</span></div></div>
     <div id="card" class="cinematic level-card hidden" aria-live="polite"><div class="cinema-top"><span>KUSTOSZ.XYZ</span><span id="cardLevel">SALA 02 / 06</span></div><div class="cinema-bottom"><span class="scene-label" id="cardLabel">66 MLN LAT TEMU / GŁÓWNA GALERIA</span><p id="cardText">Główna galeria. Król kredy schodzi z postumentu.</p><div id="cardTwist" class="card-twist hidden"><span>WARUNKI SALI</span><strong></strong><em></em></div><div class="card-foe"><span>PRZECIWNIK</span><strong id="cardFoe">TYRANNOSAURUS REX</strong></div><p id="cardBio" class="card-bio hidden"></p><div class="scene-progress"><div id="cardProgress"></div></div><small class="card-skip">Enter / klik = do walki</small></div></div>
-    <div id="timejump" class="cinematic timejump hidden" aria-live="polite"><div class="cinema-top"><span>PRZESKOK W CZASIE</span><span id="jumpLevel">SALA 03 / 06</span></div><div class="jump-center"><span class="eyebrow" id="jumpFrom">66 MLN LAT TEMU</span><strong id="jumpYear">480 P.N.E.</strong><span class="eyebrow jump-to" id="jumpTo">→ 480 P.N.E.</span></div><div class="cinema-bottom"><span class="scene-label" id="jumpLabel">TERMOPILE / SALA ANTYKU</span><p id="jumpText">Wąwóz Termopil.</p><div id="jumpTwist" class="card-twist hidden"><span>WARUNKI SALI</span><strong></strong><em></em></div><div class="card-foe"><span>NASTĘPNY PRZECIWNIK</span><strong id="jumpFoe">LEONIDAS I</strong></div><div class="scene-progress"><div id="jumpProgress"></div></div></div></div>
+    <div id="timejump" class="cinematic timejump hidden" aria-live="polite"><div class="cinema-top"><span>PRZESKOK W CZASIE</span><span id="jumpLevel">SALA 03 / 06</span></div><div class="jump-center"><span class="eyebrow" id="jumpFrom">66 MLN LAT TEMU</span><strong id="jumpYear">480 P.N.E.</strong><span class="eyebrow jump-to" id="jumpTo">→ 480 P.N.E.</span></div><div class="cinema-bottom"><span class="scene-label" id="jumpLabel">TERMOPILE / SALA ANTYKU</span><p id="jumpText">Wąwóz Termopil.</p><div id="jumpTwist" class="card-twist hidden"><span>WARUNKI SALI</span><strong></strong><em></em></div><div class="card-foe"><span>NASTĘPNY PRZECIWNIK</span><strong id="jumpFoe">LEONIDAS I</strong></div><p id="jumpTrivia" class="jump-trivia hidden"></p><div class="scene-progress"><div id="jumpProgress"></div></div><small class="card-skip">Enter / klik = do walki</small></div></div>
     <div id="pause" class="overlay hidden"><div class="dialog pause-dialog"><span class="eyebrow">MUZEUM MOŻE POCZEKAĆ</span><h2>CHWILA<br>ODDECHU.</h2><p>Arena jest wstrzymana.</p><div id="pauseInfo" class="pause-info hidden"></div><button id="resumeBtn" class="primary-btn">WRÓĆ DO WALKI <span>↗</span></button><div class="key-hint">ESC — WZNÓW</div></div></div>
     <div id="choice" class="cinematic choice hidden" role="dialog" aria-labelledby="choiceTitle"><div class="cinema-top"><span id="choiceLevel">SALA 03 ZALICZONA</span><span>CO DALEJ?</span></div><div class="choice-box"><span class="eyebrow" id="choiceReward">+135 ✦</span><h2 id="choiceTitle">LEONIDAS POKONANY.</h2><p id="choiceText">Następna: Sala 04 / Napoleon Bonaparte, 1805.</p><div class="result-actions"><button id="nextBtn" class="primary-btn">KOLEJNA SALA <span>↗</span></button><button id="choiceMenuBtn" class="secondary-btn">MENU GŁÓWNE</button></div><small class="choice-hint">Enter = kolejna sala · Esc = menu</small></div></div>
     <div id="ending" class="cinematic hidden"><div class="cinema-top"><span id="outcomeLabel">KONIEC POJEDYNKU</span><span>EPILOG</span></div><div class="dream-caption"><span class="eyebrow">06:00 / POKÓJ STRÓŻA</span><h2 id="dreamTitle">TO BYŁ TYLKO SEN.</h2><p id="dreamText">„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.</p></div><div id="results" class="results hidden"><div class="result-stats"><span>SALE<strong id="resultLevel">0 / 6</strong></span><span>CZAS WALK<strong id="resultTime">00:00</strong></span><span>PARADY<strong id="resultParries">0</strong></span><span>ZDOBYTE ŻETONY<strong id="resultCoins">+0 ✦</strong></span></div><div class="result-actions"><button id="retryBtn" class="primary-btn">JESZCZE JEDEN SEN <span>↗</span></button><button id="menuBtn" class="secondary-btn">WRÓĆ DO MUZEUM</button></div></div></div>
@@ -1286,7 +1288,7 @@ window.MuseumConfig = Object.freeze({
    Five rarities: from one-colour paint jobs to animated mythic coats. Mythics also sneak into every crate; the Lakiernia crates drop the whole catalogue. Colours: steel body, edge highlight, dark steel, fittings (gold), haft (wood). */
 (() => {
   'use strict';
-  const f = (id, name, era, flavour, colors, fx, rarity = 'mythic', pricePLN = PRICES[id]) => Object.freeze({ id, name, era, flavour, rarity, fx, colors: Object.freeze(colors), pricePLN });
+  const f = (id, name, era, flavour, colors, fx, rarity = 'mythic', pricePLN = PRICES[id], season = null) => Object.freeze({ id, name, era, flavour, rarity, fx, colors: Object.freeze(colors), pricePLN, ...(season ? { season } : {}) });
   // Planned direct-sale prices in PLN (payments are not live yet): a few hundred to a few thousand zł.
   const PRICES = Object.freeze({'diamond-emerald': 2499, 'gold-marble': 1499, 'titanium': 499, 'holo': 3499, 'obsidian-ruby': 1199, 'damascus': 699, 'rose-gold': 899, 'void': 1999});
   const handmade = [
@@ -1347,7 +1349,26 @@ window.MuseumConfig = Object.freeze({
     const s = fx === 'chrome' ? 8 : 85, l = fx === 'nebula' || name === 'CZARNA DZIURA' ? 18 : fx === 'chrome' ? 72 : 52;
     generated.push({ name, rarity: 'mythic', era: `${name} · WYKOŃCZENIE LIMITOWANE`, pricePLN: price, fx, flavour, colors: { steel: hsl2hex(h, s, l), edge: hsl2hex(h, Math.max(10, s - 20), Math.min(96, l + 32)), dark: hsl2hex(h, s, Math.max(6, l - 30)), gold: hsl2hex(h + 40, 80, 75), wood: hsl2hex(h, 30, 14), vein: hsl2hex(h + 60, 90, 80), hue: h } });
   }
-  const finishes = Object.freeze([...handmade, ...generated.map(x => { const id = slug(x.name); return f(id, x.name, x.era, x.flavour, x.colors, x.fx, x.rarity, x.pricePLN); })]);
+  // Seasonal coats: drop only from their seasonal crate while the season lasts; once owned they stay.
+  const seasonal = [
+    ['DYNIOWA LATARNIA', 'halloween', 30, 'Pomarańczowa skorupa z wyszczerbionym uśmiechem, który świeci w ciemności.', 'glow', 'legendary', 249],
+    ['CMENTARNA MGŁA', 'halloween', 120, 'Zimna zieleń mgły znad grobów. Pełznie po ostrzu.', 'aurora', 'epic', 79],
+    ['KREW NA KLINDZE', 'halloween', 355, 'Ciemna czerwień zasychająca na stali. Nie schodzi.', 'veins', 'epic', 69],
+    ['KOŚĆ', 'halloween', 45, 'Blada kość z pęknięciami. Jak z gabloty paleontologii, tylko ostrzejsza.', 'brushed', 'rare', 29],
+    ['PAJĘCZYNA', 'halloween', 0, 'Srebrne nitki pajęczyny na czarnej stali.', 'veins', 'rare', 24],
+    ['WIDMO', 'halloween', 270, 'Półprzezroczysty fiolet z duchem w środku. Widać go tylko w ruchu.', 'holo', 'legendary', 299],
+    ['ŚNIEŻNA KORA', 'christmas', 200, 'Biały szron na błękitnej stali. Zimny w dotyku nawet latem.', 'frost', 'epic', 79],
+    ['LASKA CUKROWA', 'christmas', 0, 'Czerwono-białe paski. Słodka, dopóki nie trafi.', 'stripes', 'rare', 24],
+    ['ŚWIĄTECZNA CHOINKA', 'christmas', 130, 'Ciemna zieleń z kolorowymi lampkami, które migają.', 'sparkle', 'legendary', 249],
+    ['ZŁOTA BOMBKA', 'christmas', 45, 'Lustrzane złoto bombki. Odbija całą salę.', 'chrome', 'epic', 89],
+    ['PIERNIK', 'christmas', 30, 'Brąz piernika z lukrowym brzegiem. Pachnie imbirem, bije jak młot.', 'dots', 'rare', 29],
+    ['ZORZA WIGILIJNA', 'christmas', 160, 'Zielono-czerwona zorza nad muzeum w wigilijną noc.', 'aurora', 'legendary', 299]
+  ];
+  for (const [name, season, h, flavour, fx, rarity, price] of seasonal) {
+    const s = fx === 'chrome' ? 8 : name === 'KOŚĆ' ? 20 : 75, l = name === 'PAJĘCZYNA' ? 16 : name === 'KOŚĆ' ? 82 : fx === 'chrome' ? 72 : 48;
+    generated.push({ name, rarity, era: `${name} · ${season === 'halloween' ? 'HALLOWEEN' : 'ŚWIĘTA'} · WYKOŃCZENIE SEZONOWE`, pricePLN: price, fx, flavour, season, colors: { steel: hsl2hex(h, s, l), edge: hsl2hex(h, Math.max(10, s - 20), Math.min(96, l + 30)), dark: hsl2hex(h, s, Math.max(6, l - 28)), gold: hsl2hex(h + 40, 80, 72), wood: hsl2hex(h, 30, 14), vein: hsl2hex(h + 60, 90, 80), hue: h } });
+  }
+  const finishes = Object.freeze([...handmade, ...generated.map(x => { const id = slug(x.name); return f(id, x.name, x.era, x.flavour, x.colors, x.fx, x.rarity, x.pricePLN, x.season || null); })]);
   const byId = new Map(finishes.map(x => [x.id, x]));
   if (byId.size !== finishes.length) throw new Error('Duplicate finish id');
   // Palette letters shared by icons and in-hand sprites: M steel, W edge, S dark steel, G fittings, D haft.
@@ -1713,7 +1734,7 @@ window.MuseumConfig = Object.freeze({
       tagline: 'Król z nadania Rzymu.<br>Ufa tylko sztyletowi.', card: 'Pałac Heroda. Sztylet błyska w świetle lamp oliwnych.' },
     { id: 'rome-caligula', year: 40, yearLabel: '40 R.', title: 'RZYM', hall: 'SALA CESARSKA', exhibit: 'caligula', theme: 'rome',
       tagline: 'Mianował konia senatorem.<br>Ciebie mianuje celem.', card: 'Pałac na Palatynie. Kaligula odkłada kielich i chwyta sztylet.' },
-    { id: 'rome-nero', year: 64, yearLabel: '64 R.', title: 'POŻAR RZYMU', hall: 'SALA CESARSKA', exhibit: 'nero', theme: 'rome',
+    { id: 'rome-nero', year: 64, yearLabel: '64 R.', title: 'POŻAR RZYMU', hall: 'SALA CESARSKA', exhibit: 'nero', theme: 'blaze',
       tagline: 'Rzym płonie.<br>Neron skończył grać.', card: 'Łuna nad Rzymem. Neron odkłada lirę i bierze laskę.' },
     { id: 'colosseum', year: 192, yearLabel: '192 R.', title: 'KOLOSEUM', hall: 'ARENA', exhibit: 'commodus', theme: 'rome',
       tagline: 'Cesarz w zbroi gladiatora.<br>Tym razem przeciwnik ma prawdziwy miecz.', card: 'Piasek Koloseum. Kommodus unosi gladius ku pustym trybunom.' },
@@ -1759,7 +1780,7 @@ window.MuseumConfig = Object.freeze({
       tagline: 'Wielki Skok.<br>Mała czerwona książeczka i laska.', card: 'Plac Tiananmen. Mao odkłada książeczkę i bierze laskę.' },
     { id: 'kampala', year: 1976, yearLabel: '1976', title: 'KAMPALA', hall: 'SALA DYKTATORÓW', exhibit: 'amin', theme: 'jungle',
       tagline: 'Ordery nadane sobie samemu.<br>Pięść ciężka jak one wszystkie.', card: 'Pałac w Kampali. Idi Amin poprawia ordery i wyciąga pistolet.' },
-    { id: 'phnom-penh', year: 1977, yearLabel: '1977', title: 'PHNOM PENH', hall: 'SALA DYKTATORÓW', exhibit: 'polpot', theme: 'jungle',
+    { id: 'phnom-penh', year: 1977, yearLabel: '1977', title: 'PHNOM PENH', hall: 'SALA DYKTATORÓW', exhibit: 'polpot', theme: 'paddy',
       tagline: 'Rok zero.<br>Pola śmierci milczą.', card: 'Opuszczone Phnom Penh. Pol Pot wychodzi z dżungli z karabinem.' },
     { id: 'bucharest', year: 1989, yearLabel: '1989', title: 'BUKARESZT', hall: 'SALA DYKTATORÓW', exhibit: 'ceausescu', theme: 'palace',
       tagline: 'Ostatnie przemówienie z balkonu.<br>Tłum nie klaszcze.', card: 'Balkon KC w Bukareszcie. Ceaușescu przestaje mówić i sięga po pistolet.' },
@@ -1773,29 +1794,29 @@ window.MuseumConfig = Object.freeze({
       tagline: 'Ostatni z ludzi.<br>Złoty pistolet i ostatnie drzwi.', card: 'Rura pod Syrtą. Kaddafi wychodzi ze złotym pistoletem. Za nim podłoga muzeum zaczyna pękać.' },
     { id: 'babylon', year: -587, yearLabel: '587 P.N.E.', title: 'BABILON', hall: 'SALA BABILOŃSKA', exhibit: 'nebuchadnezzar', theme: 'babylon',
       tagline: 'Brama Isztar lśni błękitem.<br>Król, który zburzył Świątynię, czeka pod lwami.', card: 'Sala babilońska. Nabuchodonozor schodzi z zigguratu z włócznią w dłoni.' },
-    { id: 'rome-sulla', year: -82, yearLabel: '82 P.N.E.', title: 'FORUM ROMANUM', hall: 'SALA REPUBLIKI', exhibit: 'sulla', theme: 'rome',
+    { id: 'rome-sulla', year: -82, yearLabel: '82 P.N.E.', title: 'FORUM ROMANUM', hall: 'SALA REPUBLIKI', exhibit: 'sulla', theme: 'senate',
       tagline: 'Listy wiszą na Forum.<br>Twoje imię jest na górze.', card: 'Forum Romanum. Sulla odrywa wzrok od list proskrypcyjnych i dobywa gladiusa.' },
     { id: 'nicomedia', year: 303, yearLabel: '303 R.', title: 'NIKOMEDIA', hall: 'SALA TETRARCHII', exhibit: 'diocletian', theme: 'rome',
       tagline: 'Edykt podpisany.<br>Purpura nie zna litości.', card: 'Pałac w Nikomedii. Dioklecjan zrzuca purpurowy płaszcz i chwyta włócznię.' },
     { id: 'runnymede', year: 1215, yearLabel: '1215', title: 'RUNNYMEDE', hall: 'SALA PLANTAGENETÓW', exhibit: 'john', theme: 'england',
       tagline: 'Baronowie czekają na pieczęć.<br>Król woli miecz.', card: 'Łąka pod Runnymede. Jan bez Ziemi odrzuca pergamin i dobywa miecza.' },
-    { id: 'baghdad-1258', year: 1258, yearLabel: '1258', title: 'BAGDAD', hall: 'SALA ILCHANÓW', exhibit: 'hulagu', theme: 'steppe',
+    { id: 'baghdad-1258', year: 1258, yearLabel: '1258', title: 'BAGDAD', hall: 'SALA ILCHANÓW', exhibit: 'hulagu', theme: 'baghdad',
       tagline: 'Tygrys płynie czarny od atramentu.<br>Wnuk Czyngisa przyszedł po resztę.', card: 'Ruiny Domu Mądrości. Hulagu przechodzi po księgach i unosi szablę.' },
-    { id: 'tower-1536', year: 1536, yearLabel: '1536', title: 'TOWER', hall: 'SALA TUDORÓW', exhibit: 'henry', theme: 'england',
+    { id: 'tower-1536', year: 1536, yearLabel: '1536', title: 'TOWER', hall: 'SALA TUDORÓW', exhibit: 'henry', theme: 'tudor',
       tagline: 'Dwie żony już nie żyją.<br>Topór jeszcze nie wysechł.', card: 'Dziedziniec Tower. Henryk VIII odbiera katowi topór.' },
     { id: 'drogheda', year: 1649, yearLabel: '1649', title: 'DROGHEDA', hall: 'SALA PURYTAŃSKA', exhibit: 'cromwell', theme: 'church',
       tagline: 'Król ścięty. Miasto wyrżnięte.<br>Święta zakazane.', card: 'Mury Droghedy. Cromwell ociera pałasz i rusza w twoją stronę.' },
-    { id: 'madrid', year: 1939, yearLabel: '1939', title: 'MADRYT', hall: 'SALA FALANGI', exhibit: 'franco', theme: 'fascist',
+    { id: 'madrid', year: 1939, yearLabel: '1939', title: 'MADRYT', hall: 'SALA FALANGI', exhibit: 'franco', theme: 'madrid',
       tagline: 'Wojna domowa skończona.<br>Caudillo dopiero zaczyna.', card: 'Madryt, 1939. Franco odpina kaburę pod jarzmem i strzałami.' },
     { id: 'santiago', year: 1973, yearLabel: '1973', title: 'SANTIAGO', hall: 'SALA JUNTY', exhibit: 'pinochet', theme: 'junta',
       tagline: 'Pałac La Moneda płonie.<br>Generał zdejmuje okulary.', card: 'Estadio Nacional. Pinochet poprawia pelerynę i odbezpiecza pistolet.' },
-    { id: 'bangui', year: 1977.9, yearLabel: '1977', title: 'BANGUI', hall: 'SALA KORONACJI', exhibit: 'bokassa', theme: 'jungle',
+    { id: 'bangui', year: 1977.9, yearLabel: '1977', title: 'BANGUI', hall: 'SALA KORONACJI', exhibit: 'bokassa', theme: 'coronation',
       tagline: 'Koronacja kosztowała trzecią część budżetu.<br>Cesarz chce reszty.', card: 'Sala koronacyjna w Bangui. Bokassa wstaje z orlego tronu z berłem.' },
     { id: 'machecoul', year: 1440, yearLabel: '1440', title: 'MACHECOUL', hall: 'SALA SINOBRODEGO', exhibit: 'gilles', theme: 'castle',
       tagline: 'Marszałek Francji, towarzysz Joanny d’Arc.<br>Zamek, z którego dzieci nie wracały.', card: 'Loch w Machecoul. Gilles de Rais zamyka drzwi i dobywa miecza.' },
-    { id: 'rome-borgia', year: 1503, yearLabel: '1503', title: 'RZYM', hall: 'SALA BORGIÓW', exhibit: 'cesare', theme: 'church',
+    { id: 'rome-borgia', year: 1503, yearLabel: '1503', title: 'RZYM', hall: 'SALA BORGIÓW', exhibit: 'cesare', theme: 'vatican',
       tagline: 'Albo Cezar, albo nic.<br>Sztylet i kielich wina, którego nie tkniesz.', card: 'Komnaty Borgiów. Cesare odkłada kielich i wyciąga sztylet.' },
-    { id: 'ciudad-trujillo', year: 1937, yearLabel: '1937', title: 'CIUDAD TRUJILLO', hall: 'SALA GENERALISSIMUSA', exhibit: 'trujillo', theme: 'cartel',
+    { id: 'ciudad-trujillo', year: 1937, yearLabel: '1937', title: 'CIUDAD TRUJILLO', hall: 'SALA GENERALISSIMUSA', exhibit: 'trujillo', theme: 'caribbean',
       tagline: 'Nazwał stolicę po sobie.<br>Na granicy pytał o pietruszkę.', card: 'Pałac w Ciudad Trujillo. Generalissimus poprawia dwuróg i odpina kaburę.' },
     { id: 'pyongyang', year: 1950, yearLabel: '1950', title: 'PJONGJANG', hall: 'SALA DŻUCZE', exhibit: 'kimilsung', theme: 'pyongyang',
       tagline: 'Wieczny prezydent.<br>Wojna, która nigdy się nie skończyła.', card: 'Plac w Pjongjangu. Kim Ir Sen zdejmuje karabin z ramienia.' },
@@ -1818,6 +1839,60 @@ window.MuseumConfig = Object.freeze({
     first() { return levels[0]; },
     count: levels.length
   });
+})();
+</script><script>/* Trivia shown between halls: short facts about the exhibits, their eras and museums themselves. Picked at random, never the same twice in a row. */
+(() => {
+  'use strict';
+  const all = Object.freeze([
+    'tyranozaur żył bliżej naszych czasów niż stegozaura? Dzieli je 80 milionów lat, a nas od T-rexa tylko 66.',
+    'velociraptor miał pióra i był wielkości indyka? Filmowe raptory to w istocie deinonychy.',
+    'Spartanie pod Termopilami nie byli sami? Oprócz 300 Spartan walczyło tam kilka tysięcy innych Greków.',
+    'terakotowa armia Qin Shi Huanga liczy około 8 tysięcy żołnierzy i każdy ma inną twarz?',
+    'rzymscy legioniści maszerowali po 30 kilometrów dziennie z 30 kilogramami ekwipunku?',
+    'Kaligula naprawdę kochał swojego konia Incitatusa, ale historia o mianowaniu go konsulem to prawdopodobnie plotka?',
+    'Neron podczas pożaru Rzymu w 64 roku był w Ancjum, 50 kilometrów od miasta?',
+    'Attyla zmarł w noc poślubną z krwotoku z nosa, a jego grób do dziś nie został odnaleziony?',
+    'imperium Czyngis-chana obejmowało w szczycie 24 miliony kilometrów kwadratowych, więcej niż dzisiejsza Rosja?',
+    'wyprawy krzyżowe przyniosły Europie cukier, cytryny i liczby arabskie?',
+    'łucznicy z łukami długimi z cisu strzelali 10–12 razy na minutę, a kusznicy ledwie 2?',
+    'husaria wygrywała bitwy przy przewadze przeciwnika 5 do 1, a jej skrzydła prawdopodobnie służyły głównie do parady?',
+    'Zawisza Czarny dostał przydomek od koloru włosów i karnacji, nie zbroi?',
+    'Leonardo da Vinci pisał w lustrzanym odbiciu i był leworęczny?',
+    'Kopernik przez ponad 30 lat zwlekał z wydaniem swojego dzieła, a pierwszy egzemplarz zobaczył podobno na łożu śmierci?',
+    'muszkiet z XVII wieku trafiał w człowieka z 50 metrów mniej więcej co drugi raz, dlatego strzelano salwami?',
+    'Czarnobrody nigdy nie kazał nikomu przejść po desce? To wymysł pisarzy z XIX wieku.',
+    'Napoleon nie był niski? Miał około 168 cm, czyli tyle, ile przeciętny Francuz jego czasów.',
+    'gilotynę wprowadzono we Francji jako humanitarną metodę egzekucji, równą dla wszystkich stanów?',
+    'Kościuszko w testamencie przeznaczył swój amerykański majątek na wykup i edukację niewolników?',
+    'Maria Skłodowska-Curie nosiła w kieszeni probówki z radem, a jej notatki do dziś są promieniotwórcze?',
+    'pierwszy pistolet maszynowy Thompson był reklamowany jako broń dla farmerów do ochrony ranczo?',
+    'Al Capone trafił do więzienia nie za morderstwa, tylko za niepłacenie podatków?',
+    'Jurij Gagarin po wylądowaniu w kapsule musiał katapultować się na spadochronie, bo kapsuła lądowała za twardo?',
+    'słowo „muzeum” pochodzi od greckiego mouseion, czyli świątyni muz? Pierwsze było w Aleksandrii.',
+    'najstarsze muzeum świata, Ennigaldi-Nanna, powstało w Ur około 530 roku p.n.e. i miało opisy eksponatów na glinianych tabliczkach?',
+    'Luwr był fortecą, potem pałacem, a muzeum dopiero od rewolucji francuskiej w 1793 roku?',
+    'Mona Lisa stała się sławna dopiero po kradzieży z Luwru w 1911 roku? Złodziej trzymał ją dwa lata w walizce.',
+    'w muzeach światło jest przyciemnione nie dla nastroju, tylko dlatego, że światło niszczy pigmenty i tkaniny?',
+    'nocni strażnicy muzeów naprawdę raportują ruch eksponatów? Zwykle to czujniki reagujące na zmianę temperatury.',
+    'Szczerbiec, miecz koronacyjny królów Polski, nigdy nie był wyszczerbiony na bramie Kijowa? Szczerba w nim jest, ale to późniejsza legenda.',
+    'katana była składana w kuźni kilkanaście razy, co daje tysiące warstw, ale „składana tysiąc razy” to przesada?',
+    'topór był przez większość historii bronią biedniejszych wojowników, bo wymagał mniej stali niż miecz?',
+    'Hannibal stracił większość słoni w Alpach, a do bitwy pod Kannami nie dotarł prawdopodobnie ani jeden?',
+    'Kleopatra żyła bliżej lądowania na Księżycu niż budowy Wielkiej Piramidy?',
+    'Joanna d’Arc nie walczyła mieczem w bitwie? Nosiła sztandar, a sama twierdziła, że nikogo nie zabiła.',
+    'Saladyn po zdobyciu Jerozolimy zapłacił z własnej kieszeni okup za część ubogich jeńców, by mogli odejść wolno?',
+    'Wilhelm Tell prawdopodobnie nigdy nie istniał? Ta sama historia o strzale w jabłko pojawia się wcześniej w sagach duńskich.',
+    'William Wallace nie nosił kiltu i nie malował twarzy na niebiesko? Kilt pojawił się w Szkocji 300 lat później.',
+    'Czyngis-chan zakazał tortur i kradzieży bydła, a za zgubienie cudzego konia groziła śmierć?',
+    'Mozart napisał swoją pierwszą symfonię w wieku ośmiu lat?',
+    'Beethoven, już całkiem głuchy, dyrygował premierą IX symfonii i trzeba było go odwrócić, by zobaczył owacje?',
+    'Tesla twierdził, że jego najważniejsze wynalazki powstały w głowie w całości, zanim cokolwiek narysował?',
+    'Piłsudski trzymał w gabinecie rozkład jazdy pociągów i uważał, że kolej jest ważniejsza od kawalerii?',
+    'rotmistrz Pilecki pisał raporty z Auschwitz na bibułce i przemycał je w praniu?',
+  ]);
+  let last = -1;
+  function pick() { if (!all.length) return ''; let i = Math.floor(Math.random() * all.length); if (all.length > 1 && i === last) i = (i + 1) % all.length; last = i; return all[i]; }
+  window.MuseumTrivia = Object.freeze({ all, pick, count: all.length });
 })();
 </script><script>/* Collectible cards. Hero cards carry one passive bonus; weapon cards boost the matching weapon when it is equipped.
    Bosses of the night patrol (Hitler, Stalin and the rest) are never cards. */
@@ -2151,6 +2226,15 @@ window.MuseumConfig = Object.freeze({
     england:{bg:[[0,'#0a0c10'],[.65,'#2a2e36'],[1,'#0a0c0e']],wall:['#4a4a50','#44444a'],sign:['TOWER OF LONDON','SALA PLANTAGENETÓW'],consoles:['REX','1215'],floor:[[0,'#3a3a40'],[.25,'#303036'],[1,'#141418']],window:'moon',particles:'dust',light:'rgba(255,240,200,.08)',banner:{color:'#8b1a1a',edge:'#d4af37',glyph:'♛'}},
     junta:{bg:[[0,'#0c0e10'],[.65,'#2e3236'],[1,'#0c0e10']],wall:['#5a5a5a','#545454'],sign:['ESTADIO NACIONAL','SALA JUNTY'],consoles:['1973','DINA'],floor:[[0,'#4a4a4a'],[.25,'#3c3c3c'],[1,'#181818']],window:'none',particles:'ash',light:'rgba(255,255,255,.08)',banner:{color:'#1f3a6b',edge:'#b3202a',glyph:'▲'}},
     pyongyang:{bg:[[0,'#120608'],[.65,'#4a1420'],[1,'#120608']],wall:['#5a1a24','#521820'],sign:['평양','SALA DŻUCZE'],consoles:['1950','주체'],floor:[[0,'#4a4a4a'],[.25,'#3c3c3c'],[1,'#181818']],window:'none',particles:'ash',light:'rgba(255,200,200,.08)',banner:{color:'#b3202a',edge:'#d4af37',glyph:'✪'}},
+    senate:{bg:[[0,'#1a1812'],[.65,'#6a6250'],[1,'#1a1812']],wall:['#d8d0bc','#cfc6b0'],sign:['SENATVS','SALA REPUBLIKI'],consoles:['SPQR','82'],floor:[[0,'#e4dccb'],[.25,'#cfc6b0'],[1,'#4a4538']],window:'sun',particles:'dust',light:'rgba(255,240,200,.14)',banner:{color:'#8b1a1a',edge:'#d4af37',glyph:'⚖'}},
+    blaze:{bg:[[0,'#1a0804'],[.65,'#6a2210'],[1,'#1a0804']],wall:['#5a2a1a','#4a2014'],sign:['ROMA ARDET','POŻAR RZYMU · 64'],consoles:['IGNIS','NERO'],floor:[[0,'#4a3028'],[.25,'#3a2420'],[1,'#1a1010']],window:'sun',particles:'ash',light:'rgba(255,120,40,.18)',banner:{color:'#8b1a1a',edge:'#d4af37',glyph:'SPQR'}},
+    baghdad:{bg:[[0,'#06141a'],[.65,'#1a4a5a'],[1,'#06121a']],wall:['#1f6b8a','#1b5c78'],sign:['BAYT AL-HIKMA','SALA ILCHANÓW'],consoles:['1258','بغداد'],floor:[[0,'#5a4a30'],[.25,'#4a3c28'],[1,'#1e180f']],window:'moon',particles:'dust',light:'rgba(200,230,255,.10)',banner:{color:'#1f6b8a',edge:'#d4af37',glyph:'✦'}},
+    tudor:{bg:[[0,'#0c0a08'],[.65,'#3a2e22'],[1,'#0c0a08']],wall:['#4a3a2a','#443424'],sign:['TOWER OF LONDON','SALA TUDORÓW'],consoles:['1536','REX'],floor:[[0,'#3a3028'],[.25,'#302820'],[1,'#141010']],window:'moon',particles:'dust',light:'rgba(255,230,180,.08)',banner:{color:'#2a4a2a',edge:'#d4af37',glyph:'♜'}},
+    madrid:{bg:[[0,'#1a1208'],[.65,'#5a4020'],[1,'#1a1208']],wall:['#8a6a40','#7a5c36'],sign:['MADRID 1939','SALA FALANGI'],consoles:['1939','ESPAÑA'],floor:[[0,'#7a6a48'],[.25,'#6a5a3c'],[1,'#2a2214']],window:'sun',particles:'dust',light:'rgba(255,220,160,.12)',banner:{color:'#b3202a',edge:'#d4af37',glyph:'☀'}},
+    caribbean:{bg:[[0,'#06181a'],[.65,'#1a5a60'],[1,'#06161a']],wall:['#2a7a8a','#256c7a'],sign:['CIUDAD TRUJILLO','SALA GENERALISSIMUSA'],consoles:['1937','PALACIO'],floor:[[0,'#d8d0bc'],[.25,'#b8b0a0'],[1,'#4a4538']],window:'sun',particles:'dust',light:'rgba(200,255,255,.12)',banner:{color:'#2a7a8a',edge:'#d4af37',glyph:'✵'}},
+    coronation:{bg:[[0,'#14100a'],[.65,'#4a3a20'],[1,'#14100a']],wall:['#6a4a1a','#5c4018'],sign:['EMPIRE CENTRAFRICAIN','SALA KORONACJI'],consoles:['1977','BANGUI'],floor:[[0,'#8a1a1a'],[.25,'#6a1414'],[1,'#2a0a0a']],window:'sun',particles:'dust',light:'rgba(255,220,120,.14)',banner:{color:'#d4af37',edge:'#8a1a1a',glyph:'✦'}},
+    vatican:{bg:[[0,'#14120e'],[.65,'#5a5040'],[1,'#14120e']],wall:['#c8bca0','#bcb094'],sign:['BORGIA','SALA BORGIÓW'],consoles:['1503','ROMA'],floor:[[0,'#d8d0bc'],[.25,'#c4b8a0'],[1,'#4a4538']],window:'moon',particles:'dust',light:'rgba(255,240,200,.12)',banner:{color:'#f4f1e8',edge:'#d4af37',glyph:'♔'}},
+    paddy:{bg:[[0,'#06100a'],[.65,'#1a3a20'],[1,'#06100a']],wall:['#2a3a2a','#263426'],sign:['S-21','SALA ZEROWEGO ROKU'],consoles:['1977','KAMPUCZA'],floor:[[0,'#3a4a30'],[.25,'#2c3a28'],[1,'#10180e']],window:'none',particles:'ash',light:'rgba(200,255,200,.06)',banner:{color:'#1a2a1a',edge:'#b3202a',glyph:'✶'}},
     kremlin:{bg:[[0,'#170808'],[.65,'#3f1414'],[1,'#130606']],wall:['#4b1b1b','#451919'],sign:['КРЕМЛЬ','MOSKWA · 1953'],consoles:['1953','МОСКВА'],floor:[[0,'#5c2323'],[.25,'#4b1d1d'],[1,'#1f0b0b']],window:'moon',particles:'dust',light:'rgba(255,204,124,.10)',banner:{color:'#b3202a',edge:'#e8c547',glyph:'★'}}
   };
   function banner(c,x,y,w,h,b){
@@ -2840,10 +2924,13 @@ window.MuseumConfig = Object.freeze({
     speakeasy: generic('#4a4a52', '$', 'rgba(110,50,20,.45)'), fascist: generic('#111111', '⚒', 'rgba(60,60,60,.5)'), japan: generic('#e8e2d0', '●', 'rgba(180,60,60,.3)'),
     desert: generic('#2a8a4a', '☾', 'rgba(170,140,70,.4)'), cartel: generic('#2a3a6a', '$', 'rgba(90,40,110,.4)'), palace: generic('#8a1a1a', '☭', 'rgba(70,70,70,.45)'),
     babylon: generic('#1f4f9a', '◈', 'rgba(40,70,140,.4)'), england: generic('#8b1a1a', '♛', 'rgba(70,70,90,.4)'), junta: generic('#1f3a6b', '▲', 'rgba(70,70,70,.5)'), pyongyang: generic('#b3202a', '✪', 'rgba(140,30,50,.45)'),
-    hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true }
+    senate: generic('#8b1a1a', '⚖', 'rgba(210,200,170,.35)'), baghdad: generic('#1f6b8a', '✦', 'rgba(30,110,140,.35)'), tudor: generic('#2a4a2a', '♜', 'rgba(70,60,40,.45)'), madrid: generic('#b3202a', '☀', 'rgba(170,120,60,.35)'),
+    caribbean: generic('#2a7a8a', '✵', 'rgba(60,160,170,.3)'), coronation: generic('#d4af37', '✦', 'rgba(160,120,40,.35)'), vatican: generic('#f4f1e8', '♔', 'rgba(190,170,120,.35)'), paddy: generic('#1a2a1a', '✶', 'rgba(40,80,40,.4)'),
+    blaze: { tint: 'rgba(200,60,10,.45)', floorTint: 'rgba(120,40,10,.4)', banner: { color: '#8b1a1a', glyph: 'SPQR' }, window: 'sun', fire: true },
+    hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true, car: true }
   });
   // Door signs per era, so the same hall does not read MUSEUM in Sparta, Rome and the bunker alike.
-  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG' };
+  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG', senate: 'SENAT', baghdad: 'BAGDAD', tudor: 'TOWER', madrid: 'MADRYT', caribbean: 'SANTO DOMINGO', coronation: 'BANGUI', vatican: 'WATYKAN', paddy: 'PHNOM PENH', blaze: 'ROMA · 64' };
   function drawArena(c, t = 0, themeKey = 'museum', o = {}) {
     const th = themes[themeKey] || themes.museum;
     c.fillStyle = '#0a1014'; c.fillRect(0, 0, W, H);
@@ -2896,7 +2983,7 @@ window.MuseumConfig = Object.freeze({
     }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
-    if (th.fire) blit(c, arenaProps.carBig.rows, 148, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
+    if (th.car) blit(c, arenaProps.carBig.rows, 148, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
     // Vignette.
     const g = c.createRadialGradient(144, 80, 60, 144, 80, 190); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,4,10,.6)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
   }
@@ -4410,11 +4497,24 @@ window.MuseumConfig = Object.freeze({
   {id:'atelier',name:'Atelier Płatnerza',title:'Atelier Płatnerza',tag:'EPICKIE+',cost:6000,pricePLN:129.99,pool:'finish',family:'finishes',group:'finishes',
    description:'Tylko klejnoty, żywioły i mityczne powłoki. Żadnej farby z puszki, ale mityczne wciąż tylko 3%.',
    guarantee:'1 nowe wykończenie · minimum epickie',color:'#c4a1f0',glyph:'◈',
-   rarityWeights:Object.freeze({common:0,rare:0,epic:72,legendary:25,mythic:3})}
+   rarityWeights:Object.freeze({common:0,rare:0,epic:72,legendary:25,mythic:3})},
+  {id:'halloween',season:'halloween',name:'Dynia Kustosza',title:'Dynia Kustosza',tag:'HALLOWEEN',cost:1500,pricePLN:39.99,pool:'finish',family:'finishes',group:'seasonal',
+   description:'Sześć wykończeń tylko na Halloween: dynia, kość, pajęczyna, krew, mgła i widmo. Po sezonie skrzynia znika ze sklepu, zdobyte powłoki zostają na zawsze.',
+   guarantee:'1 nowe wykończenie · tylko halloweenowe',color:'#e07a2a',glyph:'☾',
+   rarityWeights:Object.freeze({common:0,rare:45,epic:35,legendary:20,mythic:0})},
+  {id:'christmas',season:'christmas',name:'Gwiazdka Kustosza',title:'Gwiazdka Kustosza',tag:'ŚWIĘTA',cost:1500,pricePLN:39.99,pool:'finish',family:'finishes',group:'seasonal',
+   description:'Sześć wykończeń tylko na święta: szron, laska cukrowa, choinka, bombka, piernik i zorza wigilijna. Po Trzech Królach skrzynia znika ze sklepu, zdobyte powłoki zostają.',
+   guarantee:'1 nowe wykończenie · tylko świąteczne',color:'#b3202a',glyph:'✶',
+   rarityWeights:Object.freeze({common:0,rare:45,epic:35,legendary:20,mythic:0})}
  ].map(crate=>Object.freeze({family:crate.categoryId?'themed':'classic',categoryId:null,pool:'skin',glyph:'✦',weaponType:null,...crate,group:crate.group||crate.family||(crate.categoryId?'themed':'classic'),
   rarityWeights:Object.freeze({...crate.rarityWeights,mythic:crate.rarityWeights.mythic??(crate.cost>=7000?1.2:crate.cost>=2500?.6:.35)})})));
  // Mythic finishes sneak into every crate with a tiny weight (a fraction of a percent), on top of the crate's own pool.
- const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'}]);
+ const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'},{id:'seasonal',name:'Skrzynie sezonowe'}]);
+ // Seasons: month/day windows that repeat every year; the christmas one crosses New Year.
+ const SEASONS=Object.freeze({halloween:{from:[10,20],to:[11,3],label:'DO 3 LISTOPADA'},christmas:{from:[12,6],to:[1,6],label:'DO 6 STYCZNIA'}});
+ function seasonActive(id,date=new Date()){const s=SEASONS[id];if(!s)return false;const md=(date.getMonth()+1)*100+date.getDate(),a=s.from[0]*100+s.from[1],b=s.to[0]*100+s.to[1];return a<=b?(md>=a&&md<=b):(md>=a||md<=b);}
+ function seasonLabel(id){return SEASONS[id]?.label||'';}
+ function activeCrates(date=new Date()){return crates.filter(c=>!c.season||seasonActive(c.season,date));}
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
  const rarityWeights = crates[0].rarityWeights;
@@ -4445,7 +4545,7 @@ window.MuseumConfig = Object.freeze({
   ...skins.map(skin=>({kind:'skin',...skin})),
   ...weaponsApi.all().map(weaponItem),
   ...cardsApi.all().map(c=>({kind:'card',...c,weight:rarityWeights[c.rarity],categoryId:c.type==='hero'?'heroes':'arsenal'})),
-  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN}))
+  ...(finishesApi?finishesApi.all():[]).map(x=>({kind:'finish',id:x.id,name:x.name,era:x.era,rarity:x.rarity||'mythic',summary:x.rarity==='mythic'?'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji. Limitowane, z animacją.':'Nakładasz na dowolną broń: nowy kolor stali, krawędzi i okuć w walce i w kolekcji.',description:x.flavour,weight:100,categoryId:'finishes',fx:x.fx,colors:x.colors,pricePLN:x.pricePLN,...(x.season?{season:x.season}:{})}))
  ].map(Object.freeze);
  const itemsById=new Map(items.map(item=>[item.id,item]));
  // Hidden packs: a weapon or skin registered after the catalogue was built. Weight 0 keeps them out of every crate; gift keeps them unsellable and auto-owned once unlocked.
@@ -4500,7 +4600,7 @@ window.MuseumConfig = Object.freeze({
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  const fits=s=>s.kind==='finish'?(crate.pool==='finish'||(s.rarity==='mythic'&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
+  const fits=s=>s.kind==='finish'?(crate.pool==='finish'?(crate.season?s.season===crate.season:!s.season):(s.rarity==='mythic'&&!s.season&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
   return crate ? items.filter(s => fits(s) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {
@@ -4540,7 +4640,7 @@ window.MuseumConfig = Object.freeze({
  function canPayPLN(profile,crateId){const price=cratePricePLN(crateId);return price>0&&integer(profile.balance)>=price;}
  function reserve(profile, random=randomValue,crateId='gallery',pay='coins') {
   const crate=getCrate(crateId);
-  if(!crate||profile.pendingReward)return null;
+  if(!crate||profile.pendingReward||(crate.season&&!seasonActive(crate.season)))return null;
   const pln=pay==='pln',price=pln?cratePricePLN(crate):0;
   const free=!pln&&crate.id==='gallery'&&profile.freeCrates>0,cost=pln||free?0:crate.cost;
   if(pln?!canPayPLN(profile,crate.id):profile.coins<cost)return null;
@@ -4611,7 +4711,7 @@ window.MuseumConfig = Object.freeze({
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,activeCrates,seasonActive,seasonLabel,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();
 </script><script>/* Hidden packs. Each pack is an AES-GCM blob whose key comes from an access code (PBKDF2). Without the code the source
    holds only ciphertext: no names, stats or art. A correct code decrypts the pack and registers its weapons, skins, art
@@ -4691,7 +4791,7 @@ window.MuseumConfig = Object.freeze({
  function node(tag,className,text){const element=document.createElement(tag);if(className)element.className=className;if(text!==undefined)element.textContent=text;return element;}
  function profile(){return callbacks.getProfile();}
  function isFree(crate,current){return crate.id==='gallery'&&current.freeCrates>0;}
- function validCrate(id){return loot.crates.find(crate=>crate.id===id);}
+ function validCrate(id){return loot.activeCrates().find(crate=>crate.id===id);}
  function scrollToSummary(){let reduced=false;try{reduced=!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}catch(_){}$('shopSummary').scrollIntoView({behavior:reduced?'instant':'smooth',block:'nearest'});}
  let view='crates';
  const filters=[['shopFilterAll','all'],['shopFilterClassic','classic'],['shopFilterThemed','themed'],['shopFilterWeapons','weapons'],['shopFilterCards','cards'],['shopFilterMixed','mixed'],['shopFilterFinishes','finishes']];
@@ -4707,7 +4807,7 @@ window.MuseumConfig = Object.freeze({
   return [pool.filter(item=>loot.has(current,item)).length,pool.length,crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':crate.pool==='skin'?'STROJÓW':'PRZEDMIOTÓW'];
  }
  function tile(crate,current){
-  const index=loot.crates.indexOf(crate),category=loot.getCategory(crate.categoryId),typeName=crate.weaponType?window.MuseumWeapons.types[crate.weaponType].name:null;
+  const index=loot.activeCrates().indexOf(crate),category=loot.getCategory(crate.categoryId),typeName=crate.weaponType?window.MuseumWeapons.types[crate.weaponType].name:null;
   const available=loot.remaining(current,crate.id).length>0,selected=crate.id===selectedId,[have,total,what]=poolLine(crate,current);
   const button=node('button',`shop-tile${selected?' is-selected':''}${available?'':' is-done'}${crate.id==='treasury'?' is-best':''}`);
   button.type='button';button.dataset.crateId=crate.id;button.style.setProperty('--crate-color',crate.color);
@@ -4715,7 +4815,7 @@ window.MuseumConfig = Object.freeze({
   button.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. ${number.format(crate.cost)} żetonów lub planowo ${currency.format(crate.pricePLN)}.`);
   const art=node('span','shop-tile-art');const canvas=document.createElement('canvas');canvas.width=142;canvas.height=120;art.append(canvas);drawCrateInto(canvas,crate,1.3);
   const body=node('span','shop-tile-body');
-  body.append(node('small','shop-tile-tag',`${String(index+1).padStart(2,'0')} · ${typeName||category?.name||crate.tag||'KOLEKCJA'}`),node('strong','shop-tile-name',crate.name),node('span','shop-tile-cost',`${number.format(crate.cost)} ✦`),node('span','shop-tile-pln',currency.format(crate.pricePLN)));
+  body.append(node('small','shop-tile-tag',`${String(index+1).padStart(2,'0')} · ${crate.season?`${crate.tag} · ${loot.seasonLabel(crate.season)}`:(typeName||category?.name||crate.tag||'KOLEKCJA')}`),node('strong','shop-tile-name',crate.name),node('span','shop-tile-cost',`${number.format(crate.cost)} ✦`),node('span','shop-tile-pln',currency.format(crate.pricePLN)));
   body.append(node('span','shop-tile-progress',!available?'ZEBRANA ✓':isFree(crate,current)?'PREZENT NA START':`${have} / ${total} ${what}`));
   if(crate.id==='treasury')button.append(node('span','shop-tile-badge','HIT'));
   button.append(art,body);
@@ -4728,9 +4828,9 @@ window.MuseumConfig = Object.freeze({
  function render(crateId){
   const requested=validCrate(crateId);
   if(requested){selectedId=requested.id;if(!matchesFamily(requested))familyFilter='all';}
-  const visible=loot.crates.filter(matchesFamily);
-  if(!visible.some(crate=>crate.id===selectedId))selectedId=visible[0]?.id||loot.crates[0]?.id;
-  const selected=validCrate(selectedId)||loot.crates[0];
+  const visible=loot.activeCrates().filter(matchesFamily);
+  if(!visible.some(crate=>crate.id===selectedId))selectedId=visible[0]?.id||loot.activeCrates()[0]?.id;
+  const selected=validCrate(selectedId)||loot.activeCrates()[0];
   if(!selected||!$('shopOffers'))return;
   selectedId=selected.id;
   const current=profile(),coins=Math.max(0,Number(current.coins)||0);
@@ -4746,7 +4846,7 @@ window.MuseumConfig = Object.freeze({
   $('shopOffers').replaceChildren(...blocks);
   if(focused)$('shopOffers').querySelector(`[data-crate-id="${focused}"]`)?.focus({preventScroll:true});
   for(const [id,filter] of filters)$(id).setAttribute('aria-pressed',String(familyFilter===filter));
-  $('shopOffersCount').textContent=String(loot.crates.length);
+  $('shopOffersCount').textContent=String(loot.activeCrates().length);
   $('shopBalance').textContent=`${number.format(coins)} ✦`;
   $('shopBalancePLN').textContent=pln(current.balance);
   // Selected crate panel.
@@ -4984,7 +5084,7 @@ window.MuseumConfig = Object.freeze({
  try { profile=loot.migrate(JSON.parse(localStorage.getItem('museum-night-v1')||'null')); } catch(_){}
  let selectedCrateId=profile.pendingCrateId||'gallery';
  let screen='menu', introTime=0, endingTime=0, endData=null, frameTime=0, toastTimer, helpWasPlaying=false, lastFocus, lootReturnFocus, crateBusy=false, rollToken=0;
- const totalIntro=18, totalCard=2.6, totalJump=4.2;
+ const totalIntro=18, totalCard=2.6, totalJump=7;
  // One night = one run through the patrol. It starts at the chosen level and ends on a loss or after the last hall.
  let night=null, cardTime=0, cardTotal=totalCard, jumpTime=0, jumpFrom=null, jumpTo=null;
  function currentLevel(){const chosen=profile.level&&levels.get(profile.level);if(chosen&&isUnlocked(chosen))return chosen;return firstOpenLevel();}
@@ -5079,7 +5179,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  function settleNight(){if(!night)return;profile.records=profile.records||{fastestNight:null,nightCoins:0};if(night.coins>profile.records.nightCoins)profile.records.nightCoins=night.coins;persist();pushCloud(true);}
  function chooseNext(){if(screen!=='choice')return;const level=levels.get(night.levelId),next=levels.next(level.id);show('choice',false);if(next)startTimeJump(level,next);else startEnding();}
  function chooseMenu(){if(screen!=='choice')return;settleNight();show('choice',false);menu();}
- function startTimeJump(from,to){screen='timejump';jumpTime=0;jumpFrom=from;jumpTo=to;night.levelId=to.id;show('hud',false);show('stageMeta',false);show('timejump');$('jumpLevel').textContent=`SALA ${String(to.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('jumpFrom').textContent=from.yearLabel;$('jumpTo').textContent=`→ ${to.yearLabel}`;$('jumpYear').textContent=from.yearLabel;$('jumpLabel').textContent=`${to.title} / ${to.hall}`;$('jumpText').textContent=to.card;$('jumpFoe').textContent=levelExhibit(to).name;twistLine('jumpTwist',to);$('jumpProgress').style.width='0%';$('topStatus').textContent=`PRZESKOK W CZASIE / ${to.yearLabel}`;stageState();}
+ function startTimeJump(from,to){screen='timejump';jumpTime=0;jumpFrom=from;jumpTo=to;const tip=window.MuseumTrivia?.pick();$('jumpTrivia').textContent=tip?`Czy wiesz, że ${tip}`:'';show('jumpTrivia',!!tip);night.levelId=to.id;show('hud',false);show('stageMeta',false);show('timejump');$('jumpLevel').textContent=`SALA ${String(to.number).padStart(2,'0')} / ${String(levels.count).padStart(2,'0')}`;$('jumpFrom').textContent=from.yearLabel;$('jumpTo').textContent=`→ ${to.yearLabel}`;$('jumpYear').textContent=from.yearLabel;$('jumpLabel').textContent=`${to.title} / ${to.hall}`;$('jumpText').textContent=to.card;$('jumpFoe').textContent=levelExhibit(to).name;twistLine('jumpTwist',to);$('jumpProgress').style.width='0%';$('topStatus').textContent=`PRZESKOK W CZASIE / ${to.yearLabel}`;stageState();}
  function updateTimeJump(){const k=Math.min(1,jumpTime/(totalJump*.72)),eased=1-Math.pow(1-k,3);const year=Math.round(jumpFrom.year+(jumpTo.year-jumpFrom.year)*eased);$('jumpYear').textContent=k>=1?jumpTo.yearLabel:yearText(year);$('jumpProgress').style.width=(jumpTime/totalJump*100)+'%';$('timejump').classList.toggle('arrived',k>=1);}
  function startEnding(){screen='ending';window.MuseumGame?.setScene('external');show('hud',false);show('stageMeta',false);show('ending');show('results',false);const won=endData?.win&&!levels.next(night.levelId);$('dreamTitle').textContent=won?'ŚWIT. MUZEUM OCALONE.':'TO BYŁ TYLKO SEN.';$('dreamText').innerHTML=won?'Stróż otwiera oczy o 06:00. Wszystkie sale są ciche. Wszystkie eksponaty stoją tam, gdzie powinny.<br>„Dobra zmiana.”':'„Znowu zasnąłem na zmianie…”<br>Stróż otwiera oczy. Wszystkie eksponaty stoją na swoich miejscach.';stageState();}
  function revealResults(){screen='result';show('results');stageState();const level=levels.get(night.levelId),next=levels.next(night.levelId);profile.records=profile.records||{fastestNight:null,nightCoins:0};if(night.coins>profile.records.nightCoins)profile.records.nightCoins=night.coins;if(endData?.win&&!next&&night.wins===levels.count&&(profile.records.fastestNight===null||night.time<profile.records.fastestNight))profile.records.fastestNight=Math.round(night.time*10)/10;persist();pushCloud(true);$('resultTime').textContent=formatTime(night.time);$('resultParries').textContent=night.parries;$('resultCoins').textContent=`+${night.coins} ✦`;$('resultLevel').textContent=`${night.wins} / ${levels.count}`;$('retryBtn').innerHTML=endData?.win&&!next?'JESZCZE RAZ OD POCZĄTKU <span>↗</span>':`${endData?.win?'DALEJ':'JESZCZE RAZ'}: SALA ${String(level.number).padStart(2,'0')} <span>↗</span>`;if(endData?.win&&!next){night.levelId=levels.first().id;profile.level=night.levelId;persist();}$('topStatus').textContent='06:00 / MUZEUM OTWIERA SIĘ ZA DWIE GODZINY';}
@@ -5416,8 +5516,8 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  persist();pixelUI();soundUI();renderMenuLevel();renderDaily();stageState();window.MuseumGame?.setScene('external');applySecrets();if(daily)setTimeout(()=>toast(daily.reset?`Seria przerwana. Bonus za dziś: +${daily.bonus} ✦. Wracaj jutro, seria rośnie.`:`Bonus za ${daily.streak}. dzień z rzędu: +${daily.bonus} ✦`),600);
  // Fit the stage to the window: the frame shrinks to the free height (top bar + section line + controls take --chrome),
  // and the in-frame UI zooms by the ratio of the frame to the full content width, so nothing is ever clipped.
- function skipCard(){if(screen!=='card'||cardTime<1)return;cardTime=cardTotal;startFight();}
- $('card').addEventListener('click',skipCard);document.addEventListener('keydown',e=>{if(screen==='card'&&(e.key==='Enter'||e.key===' '||e.key==='j'||e.key==='J'))skipCard();});
+ function skipCard(){if(screen==='card'&&cardTime>=1){cardTime=cardTotal;startFight();}else if(screen==='timejump'&&jumpTime>=1.2){jumpTime=totalJump;updateTimeJump();startFight();}}
+ $('card').addEventListener('click',skipCard);$('timejump').addEventListener('click',skipCard);document.addEventListener('keydown',e=>{if((screen==='card'||screen==='timejump')&&(e.key==='Enter'||e.key===' '||e.key==='j'||e.key==='J'))skipCard();});
  function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement,app=document.querySelector('.app')||parent;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(fullscreenOn()?1.4:1,frame.clientWidth/Math.max(1,app.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}
  // Fullscreen: the fight takes the whole screen (laptops are small), the menu gives the page back. Opt-out lives in localStorage; phones without the API simply stay inline.
  const FS_KEY='museum-fullscreen';

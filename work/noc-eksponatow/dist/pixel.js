@@ -40,10 +40,13 @@
     speakeasy: generic('#4a4a52', '$', 'rgba(110,50,20,.45)'), fascist: generic('#111111', '⚒', 'rgba(60,60,60,.5)'), japan: generic('#e8e2d0', '●', 'rgba(180,60,60,.3)'),
     desert: generic('#2a8a4a', '☾', 'rgba(170,140,70,.4)'), cartel: generic('#2a3a6a', '$', 'rgba(90,40,110,.4)'), palace: generic('#8a1a1a', '☭', 'rgba(70,70,70,.45)'),
     babylon: generic('#1f4f9a', '◈', 'rgba(40,70,140,.4)'), england: generic('#8b1a1a', '♛', 'rgba(70,70,90,.4)'), junta: generic('#1f3a6b', '▲', 'rgba(70,70,70,.5)'), pyongyang: generic('#b3202a', '✪', 'rgba(140,30,50,.45)'),
-    hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true }
+    senate: generic('#8b1a1a', '⚖', 'rgba(210,200,170,.35)'), baghdad: generic('#1f6b8a', '✦', 'rgba(30,110,140,.35)'), tudor: generic('#2a4a2a', '♜', 'rgba(70,60,40,.45)'), madrid: generic('#b3202a', '☀', 'rgba(170,120,60,.35)'),
+    caribbean: generic('#2a7a8a', '✵', 'rgba(60,160,170,.3)'), coronation: generic('#d4af37', '✦', 'rgba(160,120,40,.35)'), vatican: generic('#f4f1e8', '♔', 'rgba(190,170,120,.35)'), paddy: generic('#1a2a1a', '✶', 'rgba(40,80,40,.4)'),
+    blaze: { tint: 'rgba(200,60,10,.45)', floorTint: 'rgba(120,40,10,.4)', banner: { color: '#8b1a1a', glyph: 'SPQR' }, window: 'sun', fire: true },
+    hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true, car: true }
   });
   // Door signs per era, so the same hall does not read MUSEUM in Sparta, Rome and the bunker alike.
-  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG' };
+  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG', senate: 'SENAT', baghdad: 'BAGDAD', tudor: 'TOWER', madrid: 'MADRYT', caribbean: 'SANTO DOMINGO', coronation: 'BANGUI', vatican: 'WATYKAN', paddy: 'PHNOM PENH', blaze: 'ROMA · 64' };
   function drawArena(c, t = 0, themeKey = 'museum', o = {}) {
     const th = themes[themeKey] || themes.museum;
     c.fillStyle = '#0a1014'; c.fillRect(0, 0, W, H);
@@ -96,7 +99,7 @@
     }
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
-    if (th.fire) blit(c, arenaProps.carBig.rows, 148, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
+    if (th.car) blit(c, arenaProps.carBig.rows, 148, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
     // Vignette.
     const g = c.createRadialGradient(144, 80, 60, 144, 80, 190); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,4,10,.6)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
   }
