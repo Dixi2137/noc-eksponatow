@@ -396,3 +396,7 @@ Druga partia (2026-10-27) dociąga obchód do 50 sal plus piekło; nowa sceneria
 - Nowa skrzynia **Galeria Legend** (`heroes-gallery`, 2400 ✦ / 59,99 zł): tylko bohaterowie, rzadkie i lepsze. Bohaterowie wpadają też do Skrzyni Galerii, nie wpadają do skrzyń motywów.
 - **129 nowych broni** we wszystkich siedmiu typach i pięciu epokach (`// ── Faza 10` w `weapons.js`), razem 251. Nowe wpisy mają palety ikon (`palette`) i kilka świecących legend (`glow`). `w()` dostało ostatni parametr `extra`.
 - Licznik „NN / 50” w kolekcji liczy się dynamicznie.
+
+## Bonus powitalny (2026-10-27)
+
+Każde nowe konto dostaje jednorazowo 1000 ✦ i 50,00 zł. Migracja `supabase/2026-10-27-bonus-powitalny.sql`: trigger `profiles_welcome_bonus` (BEFORE INSERT) dopisuje bonus do `pending_coins`/`pending_balance`, a gracz odbiera go istniejącym `claim_adjustments()`, które zeruje kolejkę i zwraca `welcome: true` przy pierwszym odbiorze (gra pokazuje powitanie). Stare konta są oznaczone `welcome_bonus_at` i bonusu nie dostają. Powtórne logowanie nic nie dodaje, bo kolejka jest pusta.

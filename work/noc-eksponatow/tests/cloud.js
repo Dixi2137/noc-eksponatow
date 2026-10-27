@@ -78,7 +78,7 @@
       assert.ok(calls.at(-1).url.endsWith('/rest/v1/rpc/mod_list')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { q: 'zby', lim: 20 }); assert.equal(calls.at(-1).init.headers.Authorization, 'Bearer tok');
       await cloud.mod.ban('u2', 24, 'spam'); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', hours: 24, reason: 'spam' });
       await cloud.mod.adjust('u2', -500, 2137); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', coins_delta: -500, balance_delta: 2137 });
-      const claimed = await cloud.claimAdjustments(); assert.ok(calls.at(-1).url.endsWith('/rest/v1/rpc/claim_adjustments')); assert.equal(calls.at(-1).init.method, 'POST'); assert.ok(claimed.ok); assert.equal(typeof claimed.coins, 'number'); assert.equal(typeof claimed.balance, 'number');
+      const claimed = await cloud.claimAdjustments(); assert.ok(calls.at(-1).url.endsWith('/rest/v1/rpc/claim_adjustments')); assert.equal(calls.at(-1).init.method, 'POST'); assert.ok(claimed.ok); assert.equal(claimed.welcome, false, 'bez flagi welcome w odpowiedzi to zwykła korekta'); assert.equal(typeof claimed.coins, 'number'); assert.equal(typeof claimed.balance, 'number');
       await cloud.mod.stats(); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_stats'));
       assert.equal(cloud.titles['demon-slayer'].name, 'DEMON SLAYER'); assert.ok(cloud.titles['demon-slayer'].color && cloud.titles['demon-slayer'].note);
       await cloud.mod.setTitles('u2', ['veteran', '', 'demon-slayer']); assert.ok(calls.at(-1).url.endsWith('/rpc/mod_set_titles')); assert.deepEqual(JSON.parse(calls.at(-1).init.body), { target: 'u2', new_titles: ['veteran', 'demon-slayer'] });

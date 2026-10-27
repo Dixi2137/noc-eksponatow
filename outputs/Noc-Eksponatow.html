@@ -739,7 +739,7 @@ window.MuseumConfig = Object.freeze({
   }
   async function claimDaily() { const r = await request('/rest/v1/rpc/claim_daily_bonus', { method: 'POST', body: {} }); return r; }
   // Moderator adjustments wait on the server until the player's game picks them up (the local save is authoritative for the client).
-  async function claimAdjustments() { const r = await request('/rest/v1/rpc/claim_adjustments', { method: 'POST', body: {} }); return r.ok ? { ok: true, coins: Number(r.data?.coins) || 0, balance: Number(r.data?.balance) || 0 } : r; }
+  async function claimAdjustments() { const r = await request('/rest/v1/rpc/claim_adjustments', { method: 'POST', body: {} }); return r.ok ? { ok: true, coins: Number(r.data?.coins) || 0, balance: Number(r.data?.balance) || 0, welcome: r.data?.welcome === true } : r; }
   // Moderation: every call is an RPC guarded on the server by is_mod()/is_admin(); the client only shapes requests.
   function modMessage(r) { if (r.ok) return r; const t = String(r.raw?.message || r.error || ''); if (/title_taken|profiles_first_to_arrive/i.test(t)) return { ...r, error: 'Rangę FIRST TO ARRIVE ma już ktoś inny. Najpierw ją zdejmij.' }; if (/forbidden/i.test(t)) return { ...r, error: 'Brak uprawnień moderatora.' }; if (/self_ban/i.test(t)) return { ...r, error: 'Nie zbanujesz samego siebie.' }; if (/self_role/i.test(t)) return { ...r, error: 'Własnej roli nie zmienisz z gry.' }; if (/cannot_ban_admin/i.test(t)) return { ...r, error: 'Administratora może zbanować tylko inny administrator.' }; return r; }
   const rpc = async (name, body) => modMessage(await request(`/rest/v1/rpc/${name}`, { method: 'POST', body }));
@@ -5247,7 +5247,7 @@ window.MuseumConfig = Object.freeze({
 // Pixel art is the only look: the vector renderer stays in art.js as a fallback, but nothing in the UI switches to it.
 function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.MuseumPixel?.PX||5);document.body.classList.add('pixel');}
  function soundUI(){ $('soundBtn').classList.toggle('sound-on',profile.sound);$('soundBtn').setAttribute('aria-label',profile.sound?'Wyłącz dźwięk':'Włącz dźwięk');window.MuseumGame?.setSound(profile.sound); }
- function toast(text){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),3200);}
+ function toast(text,ms=3200){$('toast').textContent=text;show('toast');clearTimeout(toastTimer);toastTimer=setTimeout(()=>show('toast',false),ms||3200);}
  function stageState(){const fighting=screen==='fight'||screen==='paused';$('gameFrame').classList.toggle('fighting',fighting);$('touchControls').classList.toggle('enabled',fighting);for(const id of ['collectionTab','shopTab','hallTab','rankTab'])$(id).setAttribute('aria-disabled',String(!['menu','result'].includes(screen)));}
  function renderLevelStrip(){
   const strip=$('levelStrip');strip.replaceChildren();const chosen=currentLevel();
@@ -5356,7 +5356,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  let claimingAdjustments=false;
  async function syncAdjustments(){if(!cloud.user()||claimingAdjustments||typeof cloud.claimAdjustments!=='function')return;claimingAdjustments=true;try{const r=await cloud.claimAdjustments();if(!r.ok||(!r.coins&&!r.balance))return;
   profile=loot.migrate({...profile,coins:Math.max(0,profile.coins+r.coins),balance:Math.max(0,(profile.balance||0)+r.balance)});persist();refreshStores();
-  const parts=[];if(r.coins)parts.push(`${r.coins>0?'+':''}${number(r.coins)} ✦`);if(r.balance)parts.push(`${r.balance>0?'+':''}${pln(r.balance)}`);toast(`Kustosz zmienił twoje konto: ${parts.join(', ')}.`);}finally{claimingAdjustments=false;}}
+  const parts=[];if(r.coins)parts.push(`${r.coins>0?'+':''}${number(r.coins)} ✦`);if(r.balance)parts.push(`${r.balance>0?'+':''}${pln(r.balance)}`);toast(r.welcome?`Witaj na nocnej zmianie! Na start dostajesz ${parts.join(' i ')}. Wydaj je w sklepie.`:`Kustosz zmienił twoje konto: ${parts.join(', ')}.`,r.welcome?6000:undefined);}finally{claimingAdjustments=false;}}
  setInterval(syncAdjustments,45000);
  function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();applySecrets();}
  // Hidden packs: codes stored in the profile unlock their content again on every load; a newly entered code adds it.
