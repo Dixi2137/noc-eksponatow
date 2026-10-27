@@ -32,7 +32,7 @@
   const category=loot.getCategory(crate.categoryId);
   if(category&&crate.pool==='skin'){const pool=loot.items.filter(item=>item.kind==='skin'&&item.categoryId===category.id&&item.weight>0);return [pool.filter(item=>loot.has(current,item)).length,pool.length,'STROJÓW'];}
   if(crate.id==='collector'){const pool=loot.items.filter(item=>item.kind==='finish'&&item.rarity==='mythic');return [pool.filter(item=>loot.has(current,item)).length,pool.length,'MITYCZNYCH'];}
-  if(crate.pool==='finish'){const all=loot.items.filter(item=>item.kind==='finish'&&crate.rarityWeights[item.rarity]>0);return [all.length-loot.remaining(current,crate.id).length,all.length,'WYKOŃCZEŃ'];}
+  if(crate.pool==='finish'){const all=loot.items.filter(item=>item.kind==='finish'&&crate.rarityWeights[item.rarity]>0&&(crate.season?item.season===crate.season:!item.season));return [all.length-loot.remaining(current,crate.id).length,all.length,'WYKOŃCZEŃ'];}
   const pool=loot.items.filter(item=>(crate.pool==='any'||item.kind===crate.pool)&&item.weight>0&&crate.rarityWeights[item.rarity]>0&&(!category||item.categoryId===category.id)&&(!crate.weaponType||item.type===crate.weaponType));
   return [pool.filter(item=>loot.has(current,item)).length,pool.length,crate.pool==='weapon'?'BRONI':crate.pool==='card'?'KART':crate.pool==='skin'?'STROJÓW':'PRZEDMIOTÓW'];
  }
