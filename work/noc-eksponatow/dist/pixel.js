@@ -292,7 +292,7 @@
       px(c, 140, 44, '#2c4a3e', 8, 8); px(c, 143, 46, '#d9c28a', 2, 4);
     }
     if (v.banners !== false && th.banner) {
-      [84, 182].forEach(x => { px(c, x - 1, 30, '#3b352a', 24, 3); px(c, x, 33, th.banner.color, 22, 44); px(c, x, 77, th.banner.color, 11, 6); px(c, x + 11, 77, th.banner.color, 11, 6); px(c, x + 2, 35, 'rgba(255,255,255,.12)', 2, 40); const letters = [...String(th.banner.glyph || '')], col = mix(th.banner.color, '#ffffff', .6); if (o.texts) o.texts.push({ x: x + 11, y: 56, text: letters.join(''), size: 7, color: col }); else { c.fillStyle = col; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(letters.join(''), x + 11, 58); } });
+      [74, 196].forEach(x => { px(c, x - 1, 30, '#3b352a', 20, 3); px(c, x, 33, th.banner.color, 18, 44); px(c, x, 77, th.banner.color, 8, 6); px(c, x + 10, 77, th.banner.color, 8, 6); px(c, x + 1, 34, th.banner.edge || '#d4af37', 16, 1); px(c, x + 2, 35, 'rgba(255,255,255,.12)', 2, 40); const letters = [...String(th.banner.glyph || '')], col = mix(th.banner.color, '#ffffff', .6); if (o.texts) o.texts.push({ x: x + 9, y: 59, text: letters.join(''), size: 10, color: col }); else { c.fillStyle = col; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText(letters.join(''), x + 9, 61); } });
     } else if (v.banners !== false) { tile(c, 5, 3, 84, 44); tile(c, 5, 3, 188, 44); }
     if (v.pillars !== false) [8, 96, 176, 264].forEach(x => { tile(c, 6, 0, x, 16); for (let r = 1; r < 6; r++) tile(c, 6, 1, x, 16 + r * T); tile(c, 6, 2, x, 112); });
     const flick = Math.floor(t * 8) % 2;
