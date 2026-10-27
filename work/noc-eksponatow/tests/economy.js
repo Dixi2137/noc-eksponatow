@@ -8,6 +8,14 @@
   const seeded = () => { let k = 0; return () => ((k = (k * 9301 + 49297) % 233280) / 233280); };
   const ownAll = p => ({ ...p, finishes: window.MuseumFinishes.all().map(f => f.id) });   // no mythic finishes left to drop
 
+  test('Kod DIXI: 10000 żetonów i 2137 zł, działa tylko raz na profil, dla nowych i starych zapisów', () => {
+    let p = fresh(); assert.deepEqual(p.gifts, []);
+    const r = loot.claimGift(p, ' dixi '); assert.ok(r.ok); p = r.profile; assert.equal(p.coins, 10000); assert.equal(p.balance, 213700); assert.deepEqual(p.gifts, ['DIXI']);
+    const again = loot.claimGift(p, 'DIXI'); assert.equal(again.ok, false); assert.equal(again.reason, 'claimed');
+    assert.equal(loot.claimGift(p, 'NIEMA').reason, 'unknown');
+    const old = loot.migrate({ coins: 500, balance: 100, gifts: ['DIXI'] }); assert.equal(loot.claimGift(old, 'dixi').ok, false);
+    const migrated = loot.migrate(p); assert.deepEqual(migrated.gifts, ['DIXI']); assert.equal(migrated.coins, 10000);
+  });
   test('Świeży profil ma miecz, brak kart, zero ulepszeń i pustą serię logowań', () => {
     const p = fresh();
     assert.deepEqual(p.weapons, ['sword']); assert.equal(p.weapon, 'sword'); assert.deepEqual(p.cards, []); assert.equal(p.card, null);

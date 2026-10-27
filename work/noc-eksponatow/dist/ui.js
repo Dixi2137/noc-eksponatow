@@ -158,7 +158,10 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  function adoptCloudSave(save){profile=loot.migrate(save);persist();renderMenuLevel();renderDaily();soundUI();renderAccount();applySecrets();}
  // Hidden packs: codes stored in the profile unlock their content again on every load; a newly entered code adds it.
  async function applySecrets(){const secret=window.MuseumSecret;if(!secret||!profile.secrets?.length)return;const results=await secret.restore(profile.secrets);if(results.length){profile=loot.migrate({...profile,weapons:[...profile.weapons,...results.flatMap(r=>r.items.filter(i=>i.kind==='weapon').map(i=>i.id))]});persist();refreshStores();}}
- async function enterSecret(code){const secret=window.MuseumSecret;const msg=$('secretMsg');if(!secret){msg.textContent='Kody dostępu nie są dostępne w tej przeglądarce.';return;}const r=await secret.unlock(code);
+ async function enterSecret(code){const secret=window.MuseumSecret;const msg=$('secretMsg');
+  const gift=loot.getGift(code);if(gift){const g=loot.claimGift(profile,code);if(!g.ok){msg.textContent=`${gift.label}: ten kod już wykorzystałeś. Działa tylko raz.`;msg.classList.add('error');return;}
+   profile=loot.migrate(g.profile);persist();refreshStores();$('secretCode').value='';msg.classList.remove('error');msg.textContent=`${gift.label}: +${number(gift.coins)} ✦ i +${pln(gift.balance)}. Tylko raz, więc wydaj mądrze.`;toast(`${gift.label}: +${number(gift.coins)} ✦, +${pln(gift.balance)}`,5000);return;}
+  if(!secret){msg.textContent='Kody dostępu nie są dostępne w tej przeglądarce.';return;}const r=await secret.unlock(code);
   if(!r.ok){msg.textContent=r.reason==='empty'?'Wpisz kod.':r.reason==='crypto'?'Ta przeglądarka nie obsługuje szyfrowania.':'Nieznany kod.';msg.classList.add('error');return;}
   msg.classList.remove('error');const clean=secret.norm(code);const names=r.items.map(i=>i.name).join(', ');
   if(!profile.secrets.includes(clean))profile=loot.migrate({...profile,secrets:[...profile.secrets,clean],weapons:[...profile.weapons,...r.items.filter(i=>i.kind==='weapon').map(i=>i.id)]});

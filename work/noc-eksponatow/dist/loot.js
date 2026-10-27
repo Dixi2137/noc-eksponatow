@@ -253,6 +253,7 @@
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
    savedAt:typeof source.savedAt==='string' ? source.savedAt : null,   // when this save was last written (cloud vs local comparison)
    secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
+   gifts:Array.isArray(source.gifts) ? [...new Set(source.gifts.filter(code=>typeof code==='string'&&code.length<=32))].slice(0,50) : [],   // one-off gift codes already claimed (owner presents: once per user, ever)
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
  }
@@ -329,7 +330,13 @@
  }
  // PLN wallet (grosze). Deposits are simulated until payments go live; finishes are bought at pricePLN and bought back at SELL_RATE_PLN.
  const SELL_RATE_PLN=.75;
- function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;return {...profile,balance:Math.min(100000000,integer(profile.balance)+gr)};}
+ // One-off presents from the owner: a code gives coins and PLN exactly once per profile (guests: this browser; accounts: the cloud save).
+const GIFTS=Object.freeze({DIXI:{coins:10000,balance:213700,label:'Prezent od Ownera'}});
+function normGift(code){return String(code||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/\s+/g,'');}
+function getGift(code){const key=normGift(code);return GIFTS[key]?{id:key,...GIFTS[key]}:null;}
+function claimGift(profile,code){const gift=getGift(code);if(!gift)return {ok:false,reason:'unknown'};const claimed=Array.isArray(profile.gifts)?profile.gifts:[];if(claimed.includes(gift.id))return {ok:false,reason:'claimed',gift};
+ return {ok:true,gift,profile:{...profile,coins:integer(profile.coins)+gift.coins,balance:Math.min(100000000,integer(profile.balance)+gift.balance),gifts:[...claimed,gift.id]}};}
+function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;return {...profile,balance:Math.min(100000000,integer(profile.balance)+gr)};}
  function pricePLN(item){const it=typeof item==='string'?getItem(item):item;return it&&it.kind==='finish'?Math.round((it.pricePLN||0)*100):0;}
  function sellPricePLN(item){return Math.round(pricePLN(item)*SELL_RATE_PLN);}
  function canBuyFinish(profile,id){const item=getItem(id);return !!item&&item.kind==='finish'&&!has(profile,item)&&integer(profile.balance)>=pricePLN(item)&&pricePLN(item)>0;}
@@ -369,5 +376,5 @@
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,categories,getCategory,crates,crateGroups,getCrate,activeCrates,seasonActive,seasonLabel,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,GIFTS,getGift,claimGift,categories,getCategory,crates,crateGroups,getCrate,activeCrates,seasonActive,seasonLabel,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();
