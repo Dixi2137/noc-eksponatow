@@ -223,7 +223,7 @@
    coins:integer(source.coins),owned,
    skin:owned.includes(source.skin) ? source.skin : 'brass',sound:!!source.sound,pixel:true,   // pixel art is the only look
    lootVersion:2,freeCrates:Number(source.lootVersion)>=2 ? Math.min(1,integer(source.freeCrates)) : 1,
-   pendingReward,pendingCrateId:pendingReward ? (getCrate(source.pendingCrateId)||crates[0]).id : null,
+   pendingReward,pendingCrateId:pendingReward ? (getCrate(source.pendingCrateId)||crates[0]).id : null,pendingPay:pendingReward&&source.pendingPay==='pln'?'pln':'coins',
    // Night patrol progress: ids of cleared levels and the level chosen for the next night.
    cleared:Array.isArray(source.cleared) ? source.cleared.filter(id=>typeof id==='string') : [],
    level:typeof source.level==='string' ? source.level : null,
@@ -288,12 +288,12 @@
   if(pln?!canPayPLN(profile,crate.id):profile.coins<cost)return null;
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
-  const next={...profile,coins:profile.coins-cost,balance:integer(profile.balance)-price,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id};
+  const next={...profile,coins:profile.coins-cost,balance:integer(profile.balance)-price,freeCrates:free?profile.freeCrates-1:profile.freeCrates,pendingReward:reward.id,pendingKind:reward.kind,pendingCrateId:crate.id,pendingPay:pln?'pln':'coins'};
   if(reward.kind==='skin')next.owned=[...profile.owned,reward.id];else if(reward.kind==='weapon')next.weapons=[...profile.weapons,reward.id];else if(reward.kind==='finish')next.finishes=[...(profile.finishes||[]),reward.id];else next.cards=[...profile.cards,reward.id];
   return {reward,cost,free,crate,profile:next,pln:price};
  }
  function claim(profile, {equip=false}={}) {
-  const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null};
+  const reward=getItem(profile.pendingReward),next={...profile,pendingReward:null,pendingKind:null,pendingCrateId:null,pendingPay:'coins'};
   if(equip&&reward&&has(profile,reward)){if(reward.kind==='skin')next.skin=reward.id;else if(reward.kind==='weapon')next.weapon=reward.id;else if(reward.kind==='finish')next.finish=reward.id;else if(reward.type==='hero')next.card=reward.id;}
   return next;
  }

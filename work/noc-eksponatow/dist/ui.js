@@ -352,17 +352,19 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  // "Open again": keeps the reward in the collection and rolls the same crate without leaving the loot window.
  function updateAgainBtn(){
   const btn=$('lootAgainBtn'),crate=loot.getCrate(profile.pendingCrateId||selectedCrateId);if(!btn||!crate)return;
-  const after=profile.pendingReward?loot.claim(profile,{equip:false}):profile;const left=loot.remaining(after,crate.id).length,free=crate.id==='gallery'&&after.freeCrates>0,cost=free?0:crate.cost;
-  btn.disabled=!left||(!free&&after.coins<cost);
-  btn.innerHTML=!left?'SKRZYNIA WYCZERPANA':free?'OTWÓRZ PONOWNIE · GRATIS <span>↻</span>':after.coins<cost?`OTWÓRZ PONOWNIE · BRAKUJE ${number(cost-after.coins)} ✦`:`OTWÓRZ PONOWNIE · ${number(cost)} ✦ <span>↻</span>`;
+  const after=profile.pendingReward?loot.claim(profile,{equip:false}):profile;const left=loot.remaining(after,crate.id).length,paid=profile.pendingPay==='pln';
+  if(paid){const price=loot.cratePricePLN(crate),balance=Number(after.balance)||0;btn.disabled=!left||balance<price;
+   btn.innerHTML=!left?'SKRZYNIA WYCZERPANA':balance<price?`OTWÓRZ PONOWNIE · BRAKUJE ${pln(price-balance)}`:`OTWÓRZ PONOWNIE · ${pln(price)} <span>↻</span>`;}
+  else{const free=crate.id==='gallery'&&after.freeCrates>0,cost=free?0:crate.cost;btn.disabled=!left||(!free&&after.coins<cost);
+   btn.innerHTML=!left?'SKRZYNIA WYCZERPANA':free?'OTWÓRZ PONOWNIE · GRATIS <span>↻</span>':after.coins<cost?`OTWÓRZ PONOWNIE · BRAKUJE ${number(cost-after.coins)} ✦`:`OTWÓRZ PONOWNIE · ${number(cost)} ✦ <span>↻</span>`;}
   btn.title=!left?'Zebrano wszystko z tej skrzyni.':`${crate.name}: ${crate.guarantee}.`;
  }
  function openAgain(){
   if(crateBusy||!['menu','result'].includes(screen)||!profile.pendingReward)return;
-  const crate=loot.getCrate(profile.pendingCrateId||selectedCrateId);if(!crate)return;selectedCrateId=crate.id;
+  const crate=loot.getCrate(profile.pendingCrateId||selectedCrateId),pay=profile.pendingPay==='pln'?'pln':'coins';if(!crate)return;selectedCrateId=crate.id;
   const keepFocus=lootReturnFocus;profile=loot.claim(profile,{equip:false});persist();
   if(!loot.remaining(profile,crate.id).length){toast('Zebrano wszystko z tej skrzyni.');updateAgainBtn();renderSkins();return;}
-  openCrate();lootReturnFocus=keepFocus;
+  openCrate(pay);lootReturnFocus=keepFocus;
  }
  function openCrate(pay='coins'){
   if(crateBusy||!['menu','result'].includes(screen))return;
