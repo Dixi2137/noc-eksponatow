@@ -64,7 +64,7 @@
       tagline: 'Beton, kurz i koniec wojny.<br>Tyran w bunkrze nie ma już dokąd uciec.', card: 'Bunkier pod Kancelarią Rzeszy. Hitler nie ma już dokąd uciec.' },
     { id: 'moscow', year: 1953, yearLabel: '1953', title: 'MOSKWA', hall: 'KREML', exhibit: 'stalin', theme: 'kremlin',
       tagline: 'Czerwone mury, czerwona gwiazda.<br>Ostatni z dawnej szóstki.', card: 'Kreml. Stalin odkłada fajkę i sięga po szaszkę.' },
-    { id: 'beijing', year: 1966, yearLabel: '1966', title: 'PEKIN', hall: 'SALA REWOLUCJI KULTURALNEJ', exhibit: 'mao', theme: 'china',
+    { id: 'beijing', year: 1966, yearLabel: '1966', title: 'PEKIN', hall: 'SALA REWOLUCJI KULTURALNEJ', exhibit: 'mao', theme: 'tiananmen',
       tagline: 'Wielki Skok.<br>Mała czerwona książeczka i laska.', card: 'Plac Tiananmen. Mao odkłada książeczkę i bierze laskę.' },
     { id: 'kampala', year: 1976, yearLabel: '1976', title: 'KAMPALA', hall: 'SALA DYKTATORÓW', exhibit: 'amin', theme: 'jungle',
       tagline: 'Ordery nadane sobie samemu.<br>Pięść ciężka jak one wszystkie.', card: 'Pałac w Kampali. Idi Amin poprawia ordery i wyciąga pistolet.' },
