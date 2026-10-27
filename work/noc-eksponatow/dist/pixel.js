@@ -42,14 +42,104 @@
     babylon: generic('#1f4f9a', '◈', 'rgba(40,70,140,.4)'), england: generic('#8b1a1a', '♛', 'rgba(70,70,90,.4)'), junta: generic('#1f3a6b', '▲', 'rgba(70,70,70,.5)'), pyongyang: generic('#b3202a', '✪', 'rgba(140,30,50,.45)'),
     senate: generic('#8b1a1a', '⚖', 'rgba(210,200,170,.35)'), baghdad: generic('#1f6b8a', '✦', 'rgba(30,110,140,.35)'), tudor: generic('#2a4a2a', '♜', 'rgba(70,60,40,.45)'), madrid: generic('#b3202a', '☀', 'rgba(170,120,60,.35)'),
     caribbean: generic('#2a7a8a', '✵', 'rgba(60,160,170,.3)'), coronation: generic('#d4af37', '✦', 'rgba(160,120,40,.35)'), vatican: generic('#f4f1e8', '♔', 'rgba(190,170,120,.35)'), paddy: generic('#1a2a1a', '✶', 'rgba(40,80,40,.4)'),
+    colosseum: generic('#8b1a1a', 'SPQR', null),
     blaze: { tint: 'rgba(200,60,10,.45)', floorTint: 'rgba(120,40,10,.4)', banner: { color: '#8b1a1a', glyph: 'SPQR' }, window: 'sun', fire: true },
     hell: { tint: 'rgba(120,8,8,.58)', floorTint: 'rgba(160,40,10,.5)', banner: { color: '#2a0606', glyph: '666' }, window: 'none', fire: true, car: true }
   });
+  for (const [k, layout] of Object.entries({ cartel: 'rooftop', colosseum: 'colosseum', steppe: 'steppe', desert: 'desert', pirate: 'deck', napoleon: 'snow', jungle: 'jungle', paddy: 'jungle', junta: 'stadium', bunker: 'bunker' })) themes[k].layout = layout;
   // Door signs per era, so the same hall does not read MUSEUM in Sparta, Rome and the bunker alike.
-  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG', senate: 'SENAT', baghdad: 'BAGDAD', tudor: 'TOWER', madrid: 'MADRYT', caribbean: 'SANTO DOMINGO', coronation: 'BANGUI', vatican: 'WATYKAN', paddy: 'PHNOM PENH', blaze: 'ROMA · 64' };
+  const signs = { museum: 'MUSEUM', sparta: 'TERMOPILE', persia: 'PERSEPOLIS', china: 'XIANYANG', judea: 'JEROZOLIMA', rome: 'ROMA', steppe: 'STEP', castle: 'ZAMEK', church: 'KATEDRA', aztec: 'TENOCHTITLAN', tsar: 'KREML', pirate: 'PORT', revolution: 'PARYZ', napoleon: 'AUSTERLITZ', jungle: 'KONGO', speakeasy: 'CHICAGO', fascist: 'ROMA', bunker: 'BUNKIER', japan: 'TOKIO', kremlin: 'KREML', desert: 'PUSTYNIA', cartel: 'MEDELLIN', palace: 'PALAC', hell: 'PIEKŁO', hall: 'SALA', babylon: 'BABILON', england: 'LONDYN', junta: 'SANTIAGO', pyongyang: 'PJONGJANG', senate: 'SENAT', baghdad: 'BAGDAD', tudor: 'TOWER', madrid: 'MADRYT', caribbean: 'SANTO DOMINGO', coronation: 'BANGUI', vatican: 'WATYKAN', paddy: 'PHNOM PENH', blaze: 'ROMA · 64', colosseum: 'KOLOSEUM' };
+
+  // ── Scene layouts: a few halls leave the brick room behind. Each draws the whole 288 x 162 backdrop incl. the ground band. ──
+  const skyBand = (c, top, bottom, h = 126) => { for (let y = 0; y < h; y += 2) px(c, 0, y, mix(top, bottom, y / h), W, 2); };
+  const stars = (c, n, h = 80, seed = 0) => { for (let k = 0; k < n; k++) px(c, (k * 53 + 7 + seed) % W, (k * 29 + 3) % h, k % 5 ? '#9fb3c8' : '#ffffff'); };
+  const moon = (c, x, y) => { px(c, x, y, '#e8e6d0', 10, 10); px(c, x - 3, y - 2, '#0f1838', 8, 8); };
+  const ground = (c, col, line, dark) => { px(c, 0, 128, col, W, 34); px(c, 0, 127, line, W, 1); if (dark) px(c, 0, 150, dark, W, 12); };
+  const layouts = {
+    rooftop(c, t) {
+      skyBand(c, '#0a1030', '#1a2a50'); stars(c, 40, 70); moon(c, 236, 14);
+      [[0,70,22],[22,62,18],[40,78,30],[70,58,14],[84,74,26],[110,66,20],[130,80,34],[164,60,18],[182,72,24],[206,56,16],[222,76,28],[250,64,20],[270,70,18]]
+        .forEach(([x, y, w]) => { px(c, x, y, '#141c3a', w, 126 - y); for (let r = y + 4; r < 120; r += 7) for (let q = x + 2; q < x + w - 2; q += 5) if ((q * 7 + r) % 3) px(c, q, r, '#f3d27a', 2, 2); });
+      [[-4,96,40],[44,104,30],[80,92,36],[124,100,28],[160,88,44],[212,98,34],[254,90,40]]
+        .forEach(([x, y, w]) => { px(c, x, y, '#0b1024', w, 126 - y); for (let r = y + 5; r < 122; r += 8) for (let q = x + 3; q < x + w - 3; q += 6) if ((q * 5 + r) % 4) px(c, q, r, '#ffe08a', 2, 3); });
+      px(c, 20, 74, '#4a3a30', 28, 24); px(c, 18, 72, '#5a4a40', 32, 4); px(c, 22, 98, '#2a2220', 3, 14); px(c, 43, 98, '#2a2220', 3, 14); px(c, 30, 80, '#6a5a50', 8, 10);   // water tank
+      px(c, 250, 56, '#3a3a40', 2, 56); px(c, 240, 62, '#3a3a40', 22, 2); px(c, 244, 70, '#3a3a40', 14, 2); if (Math.floor(t * 2) % 2) px(c, 250, 54, '#ff3a3a', 2, 2);   // antenna
+      for (let x = 0; x < W; x += 16) { px(c, x, 112, '#5a3a30', 16, 16); px(c, x + 1, 113, '#7a4a3a', 14, 6); px(c, x + 1, 121, '#6a4236', 14, 6); }   // parapet
+      px(c, 0, 110, '#8a7a70', W, 3);
+      ground(c, '#4a4a4e', '#6a6a70'); for (let x = 0; x < W; x += 24) px(c, x, 128, '#3a3a3e', 1, 34);
+      px(c, 96, 138, '#2a2a30', 40, 14); px(c, 100, 140, '#8fb0d0', 32, 10);   // skylight
+    },
+    colosseum(c, t) {
+      skyBand(c, '#f0b060', '#f7d9a0', 40); px(c, 0, 40, '#c9a070', W, 20);
+      for (let x = 0; x < W; x += 24) px(c, x, 0, (x / 24) % 2 ? '#c84a3a' : '#f4e6c8', 24, 10);    // velarium stripes
+      for (let tier = 0; tier < 4; tier++) { const y = 46 + tier * 14; px(c, 0, y, tier % 2 ? '#b89a78' : '#a88a68', W, 14); for (let x = 2; x < W; x += 5) px(c, x + (tier % 2) * 2, y + 3 + ((x * 7 + tier) % 3), ['#5a3a2a', '#e8c8a0', '#8a2a2a', '#3a3a5a'][(x / 5 + tier) % 4], 3, 4); }   // crowd
+      px(c, 0, 102, '#c9b088', W, 24); for (let x = 8; x < W; x += 32) { px(c, x, 104, '#2a1a10', 16, 22); px(c, x + 2, 106, '#4a2a1a', 12, 20); }   // arcade of arches
+      px(c, 120, 92, '#8a1a1a', 48, 12); px(c, 124, 94, '#d4af37', 40, 2); px(c, 136, 98, '#f4e6c8', 16, 6);   // imperial box
+      ground(c, '#d8b878', '#b89858'); for (let k = 0; k < 30; k++) px(c, (k * 37) % W, 130 + (k * 11) % 30, '#c4a060', 3, 1);
+      px(c, 40, 138, '#8a2a2a', 14, 2); px(c, 230, 150, '#8a2a2a', 10, 2);   // old stains in the sand
+    },
+    steppe(c, t) {
+      skyBand(c, '#2a2a58', '#e07a3a'); px(c, 0, 96, '#f0b060', W, 30);
+      moon(c, 40, 18);
+      px(c, 0, 100, '#5a6a3a', W, 26); for (let x = 0; x < W; x += 6) px(c, x, 98 + ((x * 3) % 4), '#4a5a30', 6, 4);   // rolling grass horizon
+      [[60, 104, 26], [200, 108, 30], [250, 102, 20]].forEach(([x, y, w]) => { px(c, x, y, '#e8e4d8', w, 10); px(c, x + 3, y - 4, '#f4f1e8', w - 6, 5); px(c, x + w / 2 - 2, y - 7, '#5a3a1e', 4, 4); px(c, x + w / 2 - 3, y + 2, '#3a2a1a', 6, 8); });   // yurts
+      [[120, 70], [170, 66]].forEach(([x, y]) => { px(c, x, y, '#2a2a3a', 2, 56); px(c, x + 2, y, '#8b1a1a', 14, 10); px(c, x + 2, y + 10, '#d4af37', 10, 3); for (let k = 0; k < 6; k++) px(c, x - 1 + (k % 2), y + 14 + k * 3, '#2a2a3a', 2, 1); });   // banners with horsetails
+      ground(c, '#6a7a3a', '#8a9a4a', '#5a6a30'); for (let k = 0; k < 40; k++) px(c, (k * 29 + 5) % W, 130 + (k * 13) % 30, '#8a9a4a', 1, 3);
+    },
+    desert(c, t) {
+      skyBand(c, '#1a1030', '#e0703a'); px(c, 0, 90, '#f0a050', W, 20); px(c, 200, 70, '#ffd98a', 16, 16); px(c, 196, 74, '#ffd98a', 24, 8);   // sun
+      px(c, 0, 92, '#c89050', W, 34); for (let x = 0; x < W; x += 4) px(c, x, 90 + Math.round(Math.sin(x / 18) * 4), '#d8a060', 4, 8);        // far dunes
+      for (let x = 0; x < W; x += 4) px(c, x, 104 + Math.round(Math.sin(x / 11 + 2) * 5), '#b87838', 4, 24);                                 // near dunes
+      [[40, 84], [52, 88]].forEach(([x, y]) => { px(c, x, y, '#7a5a3a', 6, 22); px(c, x - 2, y - 2, '#9a7a4a', 10, 3); });   // ruined columns
+      px(c, 240, 70, '#3a2a1a', 3, 40); [[-10, 0], [8, -2], [-12, -8], [10, -9], [-2, -12]].forEach(([dx, dy]) => px(c, 240 + dx, 70 + dy, '#2a5a2a', 12, 3));   // palm
+      ground(c, '#d8b070', '#e8c080', '#c09858'); for (let k = 0; k < 30; k++) px(c, (k * 41 + 3) % W, 132 + (k * 17) % 28, '#c8a060', 4, 1);
+    },
+    deck(c, t) {
+      skyBand(c, '#0a1430', '#2a4a70'); stars(c, 30, 60, 11); moon(c, 60, 12);
+      px(c, 0, 80, '#1a3a5a', W, 46); for (let x = 0; x < W; x += 8) px(c, x, 84 + ((x * 5 + Math.floor(t * 3)) % 3), '#4a7a9a', 4, 1);   // sea
+      px(c, 150, 0, '#5a3a1e', 6, 126); px(c, 110, 20, '#5a3a1e', 86, 3); px(c, 112, 23, '#e8e4d8', 82, 40); px(c, 112, 23, '#c9c4b0', 82, 4);   // mast and sail
+      for (let k = 0; k < 8; k++) { px(c, 60 + k * 11, 24 + k * 10, '#3a2a1a', 1, 1); px(c, 236 - k * 11, 24 + k * 10, '#3a2a1a', 1, 1); }           // rigging
+      px(c, 150, 2, '#111111', 14, 8); px(c, 154, 4, '#f4f1e8', 4, 4);   // black flag
+      px(c, 0, 108, '#4a2e1a', W, 4); for (let x = 4; x < W; x += 16) px(c, x, 100, '#4a2e1a', 3, 10); px(c, 0, 98, '#6a4a2a', W, 2);   // railing
+      ground(c, '#8a6a3a', '#a07a44', '#6a4a26'); for (let y = 128; y < 162; y += 6) { px(c, 0, y, '#5a3a1e', W, 1); for (let x = (y % 12) * 2; x < W; x += 48) px(c, x, y + 1, '#5a3a1e', 1, 5); }
+      px(c, 20, 118, '#2a2a30', 26, 8); px(c, 44, 120, '#2a2a30', 8, 4); px(c, 22, 126, '#5a3a1e', 22, 3);   // cannon
+    },
+    snow(c, t) {
+      skyBand(c, '#5a6a7e', '#b8c4d0'); px(c, 0, 96, '#d8e0e8', W, 30);
+      [[30, 60], [70, 68], [230, 58], [262, 70]].forEach(([x, y]) => { px(c, x, y, '#3a3a40', 3, 126 - y); for (let k = 0; k < 4; k++) { px(c, x - 6 + k * 2, y + 6 + k * 8, '#3a3a40', 6, 1); px(c, x + 3, y + 10 + k * 8, '#3a3a40', 6 - k, 1); } });   // bare trees
+      px(c, 110, 96, '#6a6a60', 60, 14); px(c, 108, 92, '#8a8a80', 64, 4); px(c, 120, 100, '#2a2a30', 20, 6); px(c, 140, 102, '#2a2a30', 3, 3);   // redoubt with a cannon
+      for (let k = 0; k < 36; k++) px(c, (k * 31 + 2) % W, (k * 17 + Math.floor(t * 20)) % 126, '#ffffff');   // falling snow
+      ground(c, '#e8eef4', '#ffffff', '#c8d4dc'); for (let k = 0; k < 20; k++) px(c, (k * 43) % W, 134 + (k * 9) % 24, '#c8d4dc', 6, 1);
+      px(c, 200, 120, '#3a3a40', 2, 12); px(c, 202, 118, '#1f3a6b', 10, 7); px(c, 202, 118, '#f4f1e8', 3, 7); px(c, 209, 118, '#b3202a', 3, 7);   // tricolour
+    },
+    jungle(c, t) {
+      skyBand(c, '#0a1a10', '#1a3a20'); for (let x = 0; x < W; x += 20) { px(c, x + 8, 20 + (x % 40) / 4, '#0e2814', 6, 106); for (let k = 0; k < 4; k++) px(c, x - 4 + k * 2, 24 + (x % 40) / 4 + k * 10, '#143a1a', 24 - k * 2, 6); }   // trees
+      for (let k = 0; k < 14; k++) px(c, k * 21 + 3, 0, '#1e5a26', 2, 30 + (k * 13) % 40);   // vines
+      px(c, 190, 86, '#5a3a1e', 44, 30); px(c, 184, 78, '#8a6a3a', 56, 10); px(c, 206, 100, '#2a1a10', 12, 16);   // hut
+      for (let k = 0; k < 8; k++) if ((Math.floor(t * 3) + k) % 3) px(c, (k * 37 + 10) % W, 60 + (k * 23) % 50, '#d8ff8a');   // fireflies
+      ground(c, '#3a3a22', '#5a6a30', '#2a2a18'); for (let k = 0; k < 40; k++) px(c, (k * 29 + 5) % W, 129 + (k * 13) % 30, '#5a7a30', 1, 3);
+    },
+    stadium(c, t) {
+      skyBand(c, '#06080f', '#101828'); stars(c, 20, 40, 5);
+      [[40, 10], [240, 10]].forEach(([x, y]) => { px(c, x, y, '#3a3a40', 4, 80); px(c, x - 8, y, '#5a5a60', 20, 8); for (let k = 0; k < 4; k++) px(c, x - 6 + k * 5, y + 2, '#ffffff', 3, 3); c.fillStyle = 'rgba(255,255,220,.08)'; c.fillRect(x - 40, y + 8, 84, 110); });   // floodlights
+      for (let tier = 0; tier < 5; tier++) { const y = 56 + tier * 11; px(c, 0, y, tier % 2 ? '#3a3a44' : '#30303a', W, 11); for (let x = 2; x < W; x += 6) px(c, x, y + 3, (x + tier) % 7 ? '#2a2a34' : '#8a2a2a', 4, 5); }   // empty seats
+      px(c, 0, 111, '#5a5a62', W, 3); for (let x = 0; x < W; x += 10) px(c, x, 114, '#6a6a72', 1, 12); px(c, 0, 114, '#6a6a72', W, 1); px(c, 0, 125, '#6a6a72', W, 1);   // fence
+      ground(c, '#3a5a2a', '#4a7a30', '#2a4a20'); px(c, 0, 144, '#e8e8e8', W, 1); px(c, 142, 128, '#e8e8e8', 2, 34);
+    },
+    bunker(c, t) {
+      px(c, 0, 0, '#3a3a36', W, 126); for (let y = 0; y < 126; y += 18) px(c, 0, y, '#2e2e2a', W, 1); for (let x = 0; x < W; x += 36) px(c, x + (Math.floor(x / 36) % 2) * 18, 0, '#2e2e2a', 1, 126);   // concrete slabs
+      px(c, 0, 10, '#5a5a56', W, 6); px(c, 0, 12, '#4a4a46', W, 2); [[30, 10], [120, 10], [210, 10]].forEach(([x]) => px(c, x, 8, '#6a6a66', 6, 10));   // pipes
+      px(c, 140, 0, '#2a2a28', 2, 24); px(c, 132, 24, '#4a4a46', 18, 6); px(c, 136, 30, '#fff3b0', 10, 3); c.fillStyle = 'rgba(255,240,180,.10)'; c.fillRect(100, 30, 82, 96);   // hanging lamp
+      px(c, 30, 40, '#5a4a30', 56, 40); px(c, 34, 44, '#c9c4a0', 48, 32); px(c, 40, 50, '#8a2a2a', 20, 2); px(c, 50, 58, '#8a2a2a', 24, 2); px(c, 44, 66, '#1f3a6b', 14, 2);   // war map
+      px(c, 200, 70, '#3a3a2a', 60, 56); for (let r = 0; r < 4; r++) for (let k = 0; k < 5; k++) px(c, 202 + k * 12 + (r % 2) * 6, 72 + r * 14, '#6a6a4a', 10, 12);   // sandbags
+      px(c, 110, 90, '#2a2a28', 28, 36); px(c, 112, 92, '#1a1a18', 24, 32); px(c, 128, 106, '#8a8a80', 3, 3);   // steel door
+      ground(c, '#4a4a46', '#6a6a66', '#3a3a36');
+    }
+  };
   function drawArena(c, t = 0, themeKey = 'museum', o = {}) {
     const th = themes[themeKey] || themes.museum;
     c.fillStyle = '#0a1014'; c.fillRect(0, 0, W, H);
+    if (th.layout && layouts[th.layout]) { layouts[th.layout](c, t, th, o); drawPlaque(c, themeKey, o, 16); vignette(c); return; }
     // Brick wall: alternate three brick tiles, shaded darker toward the top.
     for (let r = 0; r < 8; r++) for (let col = 0; col < 18; col++) tile(c, [3, 4, 3, 1][(r + col) % 4], 3, col * T, r * T);
     c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, W, 16); c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(0, 16, W, 16);
@@ -87,11 +177,7 @@
     if (th.floorTint) { c.fillStyle = th.floorTint; c.fillRect(0, 128, W, 34); }
     px(c, 0, 127, '#6a6c50', W, 1); px(c, 0, 128, '#293d33', W, 2);
     [[2, 30], [258, 286]].forEach(([a, b]) => { px(c, a, 116, '#9f9061', 2, 14); px(c, b, 116, '#9f9061', 2, 14); for (let k = a + 2; k < b; k += 2) px(c, k, 120 + Math.round(Math.sin((k - a) / (b - a) * Math.PI) * 3), '#6c2637'); });
-    // Sign plaque above the door (drawn after the pillars so long names never hide behind them).
-    const sign = String(o.sign || signs[themeKey] || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
-    px(c, 144 - sw / 2 - 1, 44, '#3b352a', sw + 2, 13); px(c, 144 - sw / 2, 45, '#1a1612', sw, 11); px(c, 144 - sw / 2, 45, '#5a5040', sw, 1);
-    if (o.texts) o.texts.push({ x: 144, y: 54, text: sign, size: 7, color: '#e2cf8f', plaque: false });
-    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, 54); }
+    drawPlaque(c, themeKey, o, 44);   // sign plaque above the door (after the pillars so long names never hide behind them)
     if (th.fire) {   // hell: lava cracks on the floor and flames licking the plinth, flickering with time
       for (let col = 0; col < 18; col++) { const f = Math.floor(Math.sin(t * 7 + col * 1.7) * 2 + 3); px(c, col * T + 3, 127 - f, '#ff8a2a', 4, f); px(c, col * T + 4, 127 - Math.max(1, f - 2), '#ffd36a', 2, Math.max(1, f - 2)); px(c, col * T + 9, 129 - (f >> 1), '#ff5a1a', 3, f >> 1); }
       for (let k = 0; k < 9; k++) px(c, 8 + k * 32 + ((k * 7) % 5), 140 + (k % 3) * 6, '#ff7a2a', 10 + (k % 4) * 3, 1);
@@ -100,9 +186,15 @@
     // Chests as props by the pillars.
     tile(c, 5, 7, 24, 112); tile(c, 6, 7, 248, 112);
     if (th.car) blit(c, arenaProps.carBig.rows, 148, FLOOR - 47, arenaProps.carBig.palette);   // the Exorcist parked on Belzebub's side
-    // Vignette.
-    const g = c.createRadialGradient(144, 80, 60, 144, 80, 190); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,4,10,.6)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    vignette(c);
   }
+  function drawPlaque(c, themeKey, o, y) {
+    const sign = String(o.sign || signs[themeKey] || (themeKey === 'hall' ? 'SALA' : 'MUSEUM')).slice(0, 20), sw = Math.min(150, sign.length * 5 + 10);
+    px(c, 144 - sw / 2 - 1, y, '#3b352a', sw + 2, 13); px(c, 144 - sw / 2, y + 1, '#1a1612', sw, 11); px(c, 144 - sw / 2, y + 1, '#5a5040', sw, 1);
+    if (o.texts) o.texts.push({ x: 144, y: y + 10, text: sign, size: 7, color: '#e2cf8f', plaque: false });
+    else { c.fillStyle = '#e2cf8f'; c.font = '7px monospace'; c.textAlign = 'center'; c.fillText(sign, 144, y + 10); }
+  }
+  function vignette(c) { const g = c.createRadialGradient(144, 80, 60, 144, 80, 190); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,4,10,.6)'); c.fillStyle = g; c.fillRect(0, 0, W, H); }
 
   // Attack swing shared by the knight and the human rig. `hold` is the vertical sprite (grip at the bottom),
   // `fwd` the horizontal thrust sprite (grip on the left). The front arm is drawn by the same call so the hand stays on the grip.

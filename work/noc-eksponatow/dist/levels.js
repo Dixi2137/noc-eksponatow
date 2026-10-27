@@ -24,7 +24,7 @@
       tagline: 'Mianował konia senatorem.<br>Ciebie mianuje celem.', card: 'Pałac na Palatynie. Kaligula odkłada kielich i chwyta sztylet.' },
     { id: 'rome-nero', year: 64, yearLabel: '64 R.', title: 'POŻAR RZYMU', hall: 'SALA CESARSKA', exhibit: 'nero', theme: 'blaze',
       tagline: 'Rzym płonie.<br>Neron skończył grać.', card: 'Łuna nad Rzymem. Neron odkłada lirę i bierze laskę.' },
-    { id: 'colosseum', year: 192, yearLabel: '192 R.', title: 'KOLOSEUM', hall: 'ARENA', exhibit: 'commodus', theme: 'rome',
+    { id: 'colosseum', year: 192, yearLabel: '192 R.', title: 'KOLOSEUM', hall: 'ARENA', exhibit: 'commodus', theme: 'colosseum',
       tagline: 'Cesarz w zbroi gladiatora.<br>Tym razem przeciwnik ma prawdziwy miecz.', card: 'Piasek Koloseum. Kommodus unosi gladius ku pustym trybunom.' },
     { id: 'catalaunian', year: 451, yearLabel: '451 R.', title: 'POLA KATALAUNIJSKIE', hall: 'SALA WĘDRÓWKI LUDÓW', exhibit: 'attila', theme: 'steppe',
       tagline: 'Bicz Boży.<br>Trawa nie rośnie tam, gdzie stanął.', card: 'Step pod Châlons. Attyla zsiada z konia i dobywa szabli.' },
