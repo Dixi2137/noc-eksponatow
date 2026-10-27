@@ -252,6 +252,7 @@
   };
   const extraPalettes = {};   // knight palettes added by hidden packs: [base, dark, light, glint, cloth, clothDark]
   const extraFigures = {};    // whole human rigs used as player skins (hidden packs): figure definition like an exhibit's
+  for (const s of window.MuseumKnights?.skins || []) if (s.figure) extraFigures[s.id] = s.figure;   // public historical heroes
   // A figure skin: the human rig with the player's equipped weapon mapped onto it (by weapon type, or the weapon's own sprite).
   function drawFigureSkin(c, x, y, o = {}) {
     const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type;

@@ -848,7 +848,43 @@ window.MuseumConfig = Object.freeze({
    colors:Object.freeze(colors),motif,perk:benefit(title,kind,value)
   });
  }));
- window.MuseumKnights = Object.freeze({skins});
+
+ // Historical figures as playable skins: a whole costume on the human rig instead of a knight palette.
+ // slug, name, era line, rarity, [tint colours], perk (title, kind, value), costume
+ const heroRows = [
+  ['zawisza','Zawisza Czarny','Rycerz z Garbowa · Grunwald 1410','legendary',['#1a1a1e','#b3202a','#d4af37'],['CZARNA LEGENDA','damage',1.32],{skin:'#e2bf9f',hair:'#1a1410',armor:'#2a2a30',armorDark:'#101014',coat:'#1a1a1e',coatDark:'#0a0a0c',trousers:'#1a1a1e',boots:'#0d0d10',cloak:'#b3202a',hat:'helmet',hatColor:'#2a2a30',beard:'full'}],
+  ['sobieski','Jan III Sobieski','Król Polski · Wiedeń 1683','legendary',['#8b1a1a','#d4af37','#f4f1e8'],['ODSIECZ WIEDEŃSKA','hp',150],{skin:'#e8c3a5',hair:'#4a3a2a',coat:'#8b1a1a',coatDark:'#5a1010',lapel:'#d4af37',trousers:'#5a3a2a',boots:'#1a1a1a',armor:'#b08a3e',armorDark:'#6e5321',cloak:'#f4f1e8',mustache:'thick',sash:'#1f3a6b',build:'stocky'}],
+  ['kosciuszko','Tadeusz Kościuszko','Naczelnik · Racławice 1794','epic',['#e8e4d8','#b3202a','#3a3a44'],['RACŁAWICKA KOSA','cost',.78],{skin:'#e6c2a6',hair:'#5a4a3a',coat:'#e8e4d8',coatDark:'#b8b4a8',trousers:'#3a3a44',boots:'#1a1a1a',hat:'cap',hatColor:'#b3202a',sash:'#b3202a'}],
+  ['kopernik','Mikołaj Kopernik','Astronom · Frombork 1543','epic',['#8b1a1a','#1a1a1a','#d4af37'],['OBRÓT SFER','parry',.38],{skin:'#e6c2a6',hair:'#1a1410',hairstyle:'long',coat:'#8b1a1a',coatDark:'#5a1010',lapel:'#2a1a1a',trousers:'#2a1a1a',boots:'#1a1a1a'}],
+  ['sklodowska','Maria Skłodowska-Curie','Noblistka · Paryż 1903','legendary',['#1a1a1a','#e8e4d8','#7ae0a0'],['RADOWA ENERGIA','regen',1.4],{skin:'#e8c3a5',hair:'#8a8a8a',hairstyle:'long',coat:'#1a1a1a',coatDark:'#0a0a0a',lapel:'#e8e4d8',trousers:'#1a1a1a',boots:'#1a1a1a'}],
+  ['joanna','Joanna d’Arc','Dziewica Orleańska · 1429','legendary',['#c9d6dc','#1f3a6b','#f4f1e8'],['GŁOS Z NIEBA','heal',6],{skin:'#e8c3a5',hair:'#3a2a1f',armor:'#c9d6dc',armorDark:'#6a7a82',coat:'#1f3a6b',coatDark:'#12264a',trousers:'#2a2a3a',boots:'#3a2a1a',cloak:'#f4f1e8'}],
+  ['leonardo','Leonardo da Vinci','Mistrz renesansu · Florencja 1500','epic',['#5a3a8a','#c9c9c9','#d4af37'],['OKO MISTRZA','parry',.36],{skin:'#e2bf9f',hair:'#c9c9c9',hairstyle:'long',coat:'#5a3a8a',coatDark:'#3a2460',trousers:'#3a2a3a',boots:'#3a2616',hat:'beret',hatColor:'#8b1a1a',beard:'full'}],
+  ['aleksander','Aleksander Wielki','Król Macedonii · Gaugamela 331 p.n.e.','legendary',['#b08a3e','#8b1a1a','#f4f1e8'],['WĘZEŁ GORDYJSKI','damage',1.35],{skin:'#dcb08a',hair:'#b5853a',armor:'#b08a3e',armorDark:'#6e5321',tunic:'#f4f1e8',legs:'bare',boots:'#5a3a22',cloak:'#8b1a1a',hat:'laurel',hatColor:'#d4af37'}],
+  ['cezar','Juliusz Cezar','Dyktator Rzymu · Rubikon 49 p.n.e.','epic',['#e8e4d8','#8b1a1a','#d4af37'],['ALEA IACTA EST','cost',.76],{skin:'#e0b892',hair:'#3a3028',tunic:'#e8e4d8',legs:'bare',boots:'#5a3a22',cloak:'#8b1a1a',hat:'laurel',hatColor:'#d4af37'}],
+  ['kleopatra','Kleopatra VII','Królowa Egiptu · Aleksandria 41 p.n.e.','epic',['#f4f1e8','#d4af37','#1f4f9a'],['DAR NILU','heal',5],{skin:'#c9a078',hair:'#141010',hairstyle:'long',tunic:'#f4f1e8',legs:'bare',boots:'#b08a3e',sash:'#d4af37',hat:'crown',hatColor:'#d4af37'}],
+  ['musashi','Miyamoto Musashi','Mistrz miecza · Ganryūjima 1612','epic',['#3a3a44','#f4f1e8','#b3202a'],['DWA MIECZE','damage',1.3],{skin:'#e6c2a6',hair:'#141010',hairstyle:'long',coat:'#3a3a44',coatDark:'#24242c',trousers:'#5a5a6a',boots:'#1a1a1a',sash:'#f4f1e8'}],
+  ['saladyn','Saladyn','Sułtan · Hattin 1187','epic',['#2a5a3a','#f4f1e8','#d4af37'],['TARCZA JEROZOLIMY','armor',.82],{skin:'#c9a078',hair:'#1a1410',coat:'#2a5a3a',coatDark:'#1a3a26',trousers:'#2a3a2a',boots:'#3a2616',hat:'turban',hatColor:'#f4f1e8',beard:'full',sash:'#d4af37'}],
+  ['ryszard','Ryszard Lwie Serce','Król Anglii · Akka 1191','epic',['#8b1a1a','#9a9aa0','#d4af37'],['LWIE SERCE','hp',146],{skin:'#e8c3a5',hair:'#b5853a',armor:'#9a9aa0',armorDark:'#5a5a60',coat:'#8b1a1a',coatDark:'#5a1010',trousers:'#3a3a44',boots:'#1a1a1a',hat:'crown',hatColor:'#d4af37',beard:'full'}],
+  ['wallace','William Wallace','Strażnik Szkocji · Stirling 1297','epic',['#1f3a6b','#3a5a3a','#5a3a2a'],['WOLNOŚĆ','damage',1.28],{skin:'#e2bf9f',hair:'#5a3a2a',hairstyle:'long',tunic:'#1f3a6b',legs:'bare',boots:'#3a2616',cloak:'#3a5a3a',beard:'full'}],
+  ['waszyngton','George Washington','Generał · Delaware 1776','epic',['#1f3a6b','#e8e4d8','#d4af37'],['PRZEPRAWA PRZEZ DELAWARE','regen',1.3],{skin:'#e8c3a5',hair:'#e0e0e0',coat:'#1f3a6b',coatDark:'#12264a',lapel:'#e8e4d8',trousers:'#e8e4d8',boots:'#1a1a1a',hat:'tricorn',hatColor:'#15191f',epaulettes:'#d4af37'}],
+  ['lincoln','Abraham Lincoln','Prezydent · Gettysburg 1863','epic',['#1a1a1a','#e8e4d8','#4a4a52'],['UNIA','hp',144],{skin:'#e6c2a6',hair:'#1a1410',coat:'#1a1a1a',coatDark:'#0a0a0a',lapel:'#e8e4d8',trousers:'#1a1a1a',boots:'#1a1a1a',hat:'cap',hatColor:'#1a1a1a',beard:'full'}],
+  ['churchill','Winston Churchill','Premier · Londyn 1940','epic',['#2a2a34','#e8e4d8','#b3202a'],['NIGDY SIĘ NIE PODDAMY','armor',.8],{skin:'#e8c3a5',hair:'#8a8a8a',coat:'#2a2a34',coatDark:'#1a1a22',lapel:'#e8e4d8',trousers:'#2a2a34',boots:'#1a1a1a',hat:'fedora',hatColor:'#1a1a1a',build:'stocky'}],
+  ['tesla','Nikola Tesla','Wynalazca · Colorado Springs 1899','epic',['#1a1a1a','#8fd8ff','#e8e4d8'],['PRĄD ZMIENNY','parry',.4],{skin:'#e6c2a6',hair:'#141010',coat:'#1a1a1a',coatDark:'#0a0a0a',lapel:'#e8e4d8',trousers:'#1a1a1a',boots:'#1a1a1a',mustache:'thick'}],
+  ['gagarin','Jurij Gagarin','Kosmonauta · Wostok 1961','epic',['#e07a2a','#f4f1e8','#1f3a6b'],['POJECHALI!','regen',1.42],{skin:'#e6c2a6',hair:'#3a2a1f',coat:'#e07a2a',coatDark:'#a0521a',trousers:'#e07a2a',boots:'#1a1a1a',hat:'helmet',hatColor:'#f4f1e8',star:'#b3202a'}],
+  ['pilsudski','Józef Piłsudski','Marszałek · Warszawa 1920','legendary',['#5a6a7a','#b3202a','#d4af37'],['CUD NAD WISŁĄ','hp',152],{skin:'#e6c2a6',hair:'#8a8a8a',coat:'#5a6a7a',coatDark:'#3a4652',trousers:'#5a6a7a',boots:'#1a1a1a',hat:'cap',hatColor:'#5a6a7a',mustache:'thick',epaulettes:'#d4af37'}],
+  ['hannibal','Hannibal Barkas','Wódz Kartaginy · Kanny 216 p.n.e.','epic',['#5a1f7a','#b08a3e','#b5805a'],['PRZEZ ALPY','damage',1.32],{skin:'#b5805a',hair:'#141010',armor:'#b08a3e',armorDark:'#6e5321',tunic:'#5a1f7a',legs:'bare',boots:'#3a2616',cloak:'#3a1050',beard:'goatee'}],
+  ['boudika','Boudika','Królowa Icenów · Londinium 60','epic',['#2a5a3a','#8b1a1a','#b5603a'],['GNIEW ICENÓW','cost',.74],{skin:'#e8c3a5',hair:'#b5603a',hairstyle:'long',tunic:'#2a5a3a',trousers:'#3a2a1a',boots:'#3a2616',cloak:'#8b1a1a',sash:'#d4af37'}],
+  ['polo','Marco Polo','Podróżnik · Jedwabny Szlak 1295','rare',['#5a3a1e','#d4af37','#8b1a1a'],['JEDWABNY SZLAK','regen',1.25],{skin:'#e6c2a6',hair:'#3a2a1f',coat:'#5a3a1e',coatDark:'#3a2412',trousers:'#3a2a1a',boots:'#2a1a10',hat:'furhat',hatColor:'#3a2a1a',sash:'#8b1a1a'}],
+  ['beethoven','Ludwig van Beethoven','Kompozytor · Wiedeń 1808','rare',['#8b1a1a','#5a5a5a','#e8e4d8'],['DZIEWIĄTA SYMFONIA','parry',.35],{skin:'#e6c2a6',hair:'#5a5a5a',hairstyle:'long',coat:'#8b1a1a',coatDark:'#5a1010',lapel:'#e8e4d8',trousers:'#1a1a1a',boots:'#1a1a1a'}],
+  ['mozart','Wolfgang Amadeus Mozart','Kompozytor · Praga 1787','rare',['#b3202a','#f4f1e8','#d4af37'],['ALLEGRO','cost',.8],{skin:'#e8c3a5',hair:'#f4f1e8',hairstyle:'long',coat:'#b3202a',coatDark:'#7a1119',lapel:'#d4af37',trousers:'#e8e4d8',boots:'#1a1a1a'}],
+  ['szekspir','William Szekspir','Dramaturg · Londyn 1600','rare',['#1a1a2a','#e8e4d8','#d4af37'],['BYĆ ALBO NIE BYĆ','heal',4],{skin:'#e6c2a6',hair:'#3a2a1f',coat:'#1a1a2a',coatDark:'#0a0a14',lapel:'#e8e4d8',trousers:'#1a1a2a',boots:'#1a1a1a',beard:'goatee',mustache:'thick'}],
+  ['leif','Leif Eriksson','Odkrywca Winlandii · 1000','rare',['#6e5a3a','#5a3a1e','#b5853a'],['WINLANDIA','hp',140],{skin:'#e2bf9f',hair:'#b5853a',hairstyle:'long',armor:'#6e5a3a',armorDark:'#4a3a22',coat:'#5a3a1e',coatDark:'#3a2412',trousers:'#3a2a1a',boots:'#2a1a10',cloak:'#3a4a3a',beard:'full'}]
+ ];
+ const heroes = Object.freeze(heroRows.map((row, index) => {
+  const [slug,name,description,rarity,colors,[title,kind,value],figure] = row;
+  return Object.freeze({ id:`hero-${slug}`, number: rows.length + index + 1, name, description, rarity, colors:Object.freeze(colors), motif:'hero', categoryId:'heroes', figure:Object.freeze(figure), perk:benefit(title,kind,value) });
+ }));
+ window.MuseumKnights = Object.freeze({skins:Object.freeze([...skins, ...heroes]), heroes});
 })();
 </script><script>/* One museum skin, one combat benefit. Values are locked when a fight begins. */
 (() => {
@@ -940,7 +976,7 @@ window.MuseumConfig = Object.freeze({
   const rarityBonus = { basic: 0, common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
   const rarityLabel = { basic: 'KOLEKCJA PODSTAWOWA', common: 'ZWYKŁY EKSPONAT', rare: 'RZADKI EKSPONAT', epic: 'EPICKI EKSPONAT', legendary: 'LEGENDARNY EKSPONAT', mythic: 'EKSPONAT EKSPERYMENTALNY' };
   // w(id, name, era, type, rarity, icon, flavour, overrides)
-  const w = (id, name, era, type, rarity, icon, flavour, overrides = {}) => ({ id, name, categoryId: era, type, rarity, icon, flavour, overrides });
+  const w = (id, name, era, type, rarity, icon, flavour, overrides = {}, extra = {}) => ({ id, name, categoryId: era, type, rarity, icon, flavour, overrides, ...extra });
   const A = 'antiquity', M = 'medieval', R = 'renaissance', X = 'modern', C = 'contemporary';
   const definitions = [
     // ── Ostrza ───────────────────────────────────────────────────────────────
@@ -1071,7 +1107,143 @@ window.MuseumConfig = Object.freeze({
     w('ak47', 'AK-47', C, 'rifle', 'epic', 'assault', 'Najczęściej produkowany karabin świata. Działa po zakopaniu, zalaniu i upuszczeniu.', { ammo: 15, reload: 2.2, weakGuardDamage: 12, cooldown: .3, swing: .34, contact: .16 }),
     w('m16', 'M16', C, 'rifle', 'epic', 'assault', 'Lekki, celny, kapryśny w dżungli. Trzydzieści naboi.', { ammo: 15, reload: 2.0, weakGuardDamage: 11, cooldown: .28, swing: .32, contact: .15 }),
     w('dragunov', 'DRAGUNOW SWD', C, 'rifle', 'legendary', 'sniper', 'Karabin wyborowy z lunetą. Dziesięć naboi, każdy w słabą gardę z drugiego końca sali.', { ammo: 10, reload: 2.4, weakGuardDamage: 22, range: 1000, cooldown: .9, swing: .6, contact: .3 }),
-    w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 })
+    w('barrett', 'BARRETT M82', C, 'rifle', 'legendary', 'sniper', 'Kaliber .50. Nie strzela się z niego do ludzi, tylko do sprzętu. Tu robimy wyjątek.', { ammo: 5, reload: 3.2, weakGuardDamage: 30, range: 1000, cooldown: 1.1, swing: .7, contact: .35 }),
+    // ── Faza 10: blade ──
+    w('khopesh', 'KHOPESZ', A, 'blade', 'common', 'curved', 'Sierpowaty miecz faraonów. Hak na tarczę i cięcie w jednym ruchu.', { range: 380 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('kopis', 'KOPIS', A, 'blade', 'common', 'curved', 'Grecki tasak kawalerii. Ciężki brzusiec, mocne cięcie z góry.', { weakGuardDamage: 10 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('makhaira', 'MACHAIRA', A, 'blade', 'common', 'curved', 'Jednosieczny miecz jeźdźca. Tnie od ucha do strzemienia.', {}),
+    w('ulfberht', 'ULFBERHT', M, 'blade', 'rare', 'sword', 'Miecz z wytrawionym podpisem kowala. Stal lepsza niż cokolwiek z tej epoki.', { weakGuardDamage: 10 }, { palette: { M: '#c9d6dc', W: '#ffffff', S: '#6a7a82', D: '#e8dcb8' } }),
+    w('viking-sword', 'MIECZ WIKINGA', M, 'blade', 'common', 'sword', 'Szeroka klinga ze zbroczem i ciężką głowicą. Prosty jak drakkar.', {}),
+    w('arming', 'MIECZ JEDNORĘCZNY', M, 'blade', 'common', 'sword', 'Miecz do tarczy. Nic nadzwyczajnego, dopóki nie trafi.', {}),
+    w('estoc', 'ESTOK', M, 'blade', 'rare', 'rapier', 'Sztywna klinga do przebijania zbroi. Pchnięcie, nie cięcie.', { contact: .19, weakGuardDamage: 10 }),
+    w('kriegsmesser', 'KRIEGSMESSER', M, 'blade', 'rare', 'curved', 'Wielki nóż bojowy landsknechtów. Formalnie nóż, praktycznie miecz.', { weakGuardDamage: 10, comboBonus: 4 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('kilij', 'KILIDŻ', R, 'blade', 'rare', 'curved', 'Turecka szabla z rozszerzonym sztychem. Lekka w ręku, ciężka w ranie.', { swing: .33, comboBonus: 4 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('talwar', 'TALWAR', R, 'blade', 'common', 'curved', 'Indyjska szabla z tarczowym jelcem. Tnie w pół obrotu.', {}),
+    w('dha', 'DHA', R, 'blade', 'common', 'curved', 'Birmański miecz bez jelca. Prosty, lekki, uczciwy.', { swing: .33 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('karabela', 'KARABELA', R, 'blade', 'epic', 'curved', 'Szabla polskiej szlachty z głowicą w kształcie orlej głowy. Noszona do kontusza, używana do wszystkiego.', { swing: .32, comboBonus: 4, weakGuardDamage: 10 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('kampilan', 'KAMPILAN', R, 'blade', 'rare', 'sword', 'Filipiński miecz z rozszerzoną końcówką. Jedno cięcie, długa pamięć.', { weakGuardDamage: 11, swing: .38 }),
+    w('briquet', 'SZABLA BRIQUET', X, 'blade', 'common', 'curved', 'Krótka szabla piechoty napoleońskiej. Bardziej tasak niż szabla.', { range: 380 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('m1860', 'SZABLA M1860', X, 'blade', 'rare', 'curved', 'Lekka szabla kawalerii Unii. Krzywizna skrojona pod galop.', { swing: .33 }),
+    w('gunto', 'GUNTŌ', X, 'blade', 'epic', 'curved', 'Wojskowa katana z XX wieku. Fabryczna stal, tradycyjna oprawa.', { swing: .31, contact: .19, comboBonus: 4 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('patton', 'SZABLA PATTONA', X, 'blade', 'rare', 'rapier', 'Prosta szabla do pchnięcia, zaprojektowana przez młodego porucznika Pattona.', { contact: .19, weakGuardDamage: 10 }, { palette: { M: '#3f4f6a', W: '#9fb4d0', S: '#1b2434', D: '#5a3a22' } }),
+    w('ceramic-blade', 'OSTRZE CERAMICZNE', C, 'blade', 'epic', 'sword', 'Cyrkonowa ceramika ostrzejsza od stali. Krucha tylko w teorii.', { swing: .33, comboBonus: 4 }, { palette: { M: '#c9d6dc', W: '#ffffff', S: '#6a7a82', D: '#e8dcb8' } }),
+    w('nanotube', 'OSTRZE NANORUREK', C, 'blade', 'legendary', 'sword', 'Klinga z węglowych nanorurek. Nie tępi się, nie wybacza.', { weakGuardDamage: 12, comboBonus: 4 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
+    // ── Faza 10: heavy ──
+    w('sagaris', 'SAGARIS', A, 'heavy', 'common', 'axe', 'Scytyjski topór bojowy z długim szpicem. Przebija hełm, nie pyta.', {}, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('bipennis', 'BIPENNIS', A, 'heavy', 'rare', 'doubleaxe', 'Rzymski topór dwusieczny. Dwa ostrza, bo jedno to za mało.', { weakGuardDamage: 14 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('dolabra', 'DOLABRA', A, 'heavy', 'common', 'axe', 'Kilof legionisty. Buduje obozy, rozbija bramy.', {}, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('bearded', 'TOPÓR BRODATY', M, 'heavy', 'common', 'axe', 'Topór z brodą, która zahacza tarczę przeciwnika. Potem jest już łatwo.', {}),
+    w('goedendag', 'GODENDAG', M, 'heavy', 'rare', 'club', 'Flamandzka maczuga z kolcem. Dzień dobry, mówi kolec.', { weakGuardDamage: 14 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('bec-de-corbin', 'DZIÓB KRUKA', M, 'heavy', 'rare', 'hammer', 'Młot bojowy z krukowym dziobem. Przebija płytę jak skorupę.', { weakGuardDamage: 15, swing: .48 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('lucerne', 'MŁOT LUCERNEŃSKI', M, 'heavy', 'epic', 'poleaxe', 'Szwajcarski młot drzewcowy. Trzy sposoby na zbroję na jednym drzewcu.', { range: 450, weakGuardDamage: 15 }),
+    w('sparth', 'SPARTH', M, 'heavy', 'rare', 'poleaxe', 'Topór irlandzkich galloglasów. Długie drzewce, szerokie ostrze, krótka rozmowa.', { range: 450 }),
+    w('kanabo', 'KANABŌ', R, 'heavy', 'epic', 'club', 'Japońska pałka z żelaznymi guzami. Broń oni, w rękach człowieka.', { weakGuardDamage: 16, swing: .5, cooldown: .44 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('tabar', 'TABAR', R, 'heavy', 'common', 'axe', 'Perski topór z półksiężycowym ostrzem. Elegancki jak dywan, twardy jak kamień.', {}, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('tomahawk', 'TOMAHAWK', R, 'heavy', 'rare', 'axe', 'Lekki topór wojenny. Szybszy od innych ciężkich, bo prawie go nie czuć.', { staminaCost: 8, swing: .4, cooldown: .34, weakGuardDamage: 11 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('bulawa', 'BUŁAWA HETMAŃSKA', R, 'heavy', 'epic', 'mace', 'Znak władzy hetmana. W boju jednak działa jak każda buława.', { weakGuardDamage: 15 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('pernach', 'PIERNACZ', R, 'heavy', 'rare', 'mace', 'Buzdygan z piórami ze stali. Zbroja go nie obchodzi.', { weakGuardDamage: 14 }),
+    w('fireaxe', 'TOPÓR STRAŻACKI', X, 'heavy', 'common', 'axe', 'Czerwony topór ze szpicem. Wyważa drzwi i to, co za drzwiami.', {}, { palette: { M: '#b3202a', W: '#ff9d8e', S: '#5a1010', D: '#2a1a1a' } }),
+    w('trench-club', 'PAŁKA OKOPOWA', X, 'heavy', 'common', 'club', 'Deska z gwoździami z pierwszej wojny. Cicha i brzydka.', {}, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('pipe-wrench', 'KLUCZ HYDRAULICZNY', X, 'heavy', 'rare', 'hammer', 'Stalowy klucz na rury. Ciężki, bo rury też są ciężkie.', { weakGuardDamage: 14 }, { palette: { M: '#b3202a', W: '#ff9d8e', S: '#5a1010', D: '#2a1a1a' } }),
+    w('splitting-maul', 'ROZŁUPYWACZ', C, 'heavy', 'rare', 'hammer', 'Młot do drewna z ostrzem. Rozłupuje pnie, a tarcze to też drewno.', { weakGuardDamage: 15, swing: .5 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('hydraulic', 'MŁOT HYDRAULICZNY', C, 'heavy', 'legendary', 'hammer', 'Ręczny młot z siłownikiem. Jeden cios to tona nacisku.', { weakGuardDamage: 17, swing: .52, cooldown: .46 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
+    // ── Faza 10: polearm ──
+    w('dory', 'DORY', A, 'polearm', 'common', 'spear', 'Włócznia hoplity z brązowym okuciem na drugim końcu. Dwa końce, dwa powody do strachu.', {}, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('hasta', 'HASTA', A, 'polearm', 'common', 'spear', 'Włócznia triariów. Ostatnia linia, najdłuższa pamięć.', {}),
+    w('kontos', 'KONTOS', A, 'polearm', 'rare', 'pike', 'Dwuręczna lanca katafraktów. Cztery metry stali i konia.', { range: 490, weakGuardDamage: 9 }),
+    w('xyston', 'KSYSTON', A, 'polearm', 'rare', 'spear', 'Lanca macedońskiej konnicy. Aleksander nie potrzebował innej.', { range: 480 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('sudis', 'KOŁEK PALISADOWY', A, 'polearm', 'common', 'pike', 'Zaostrzony kołek z rzymskiego obozu. Włócznia dla biednych.', { weakGuardDamage: 7 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('ahlspiess', 'AHLSPIESS', M, 'polearm', 'rare', 'pike', 'Graniasty szpikulec na drzewcu. Przez kolczugę jak przez sweter.', { contact: .2, weakGuardDamage: 9 }),
+    w('bill', 'GIZARMA', M, 'polearm', 'common', 'halberd', 'Angielski hak na drzewcu. Ściąga jeźdźca i kończy sprawę.', {}),
+    w('voulge', 'VOULGE', M, 'polearm', 'common', 'halberd', 'Tasak przywiązany do kija. Chłopska broń, rycerskie skutki.', { weakGuardDamage: 9 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('ranseur', 'RANSEUR', M, 'polearm', 'rare', 'trident', 'Włócznia z dwoma bocznymi hakami. Łapie klingę i odbiera ją.', { parryDrain: 5 }),
+    w('corseque', 'KORSEKA', R, 'polearm', 'rare', 'trident', 'Włoska włócznia o trzech ostrzach. Trzy pchnięcia za jedno.', { comboBonus: 3 }),
+    w('spontoon', 'SPONTON', R, 'polearm', 'common', 'spear', 'Półpika oficera. Bardziej do wskazywania, ale zranić też umie.', {}, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('spetum', 'SPETUM', R, 'polearm', 'rare', 'trident', 'Długie ostrze z dwoma skrzydłami. Nie ma dokąd uciec.', { range: 480 }),
+    w('guandao', 'GUANDAO', R, 'polearm', 'epic', 'halberd', 'Chińska glewia generała Guan Yu. Ostrze jak księżyc, ciężar jak los.', { range: 480, weakGuardDamage: 11, swing: .4 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('qiang', 'QIANG', R, 'polearm', 'common', 'spear', 'Chińska włócznia z czerwoną kitą. Kita myli oko, grot nie.', { swing: .34 }, { palette: { M: '#b3202a', W: '#ff9d8e', S: '#5a1010', D: '#2a1a1a' } }),
+    w('boar-spear', 'OSZCZEP NA DZIKA', R, 'polearm', 'common', 'spear', 'Włócznia z poprzeczką. Dzik się nie nadziewa dalej, wróg też nie.', {}),
+    w('ulan-lance', 'LANCA UŁAŃSKA', X, 'polearm', 'rare', 'pike', 'Lanca polskich ułanów z proporczykiem. Ostatnia szarża świata.', { range: 490 }, { palette: { M: '#b3202a', W: '#ff9d8e', S: '#5a1010', D: '#2a1a1a' } }),
+    w('riot-pole', 'DRĄG SZTURMOWY', C, 'polearm', 'rare', 'pike', 'Teleskopowy drąg z grotem. Na zamieszki i na eksponaty.', { range: 470 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('plasma-lance', 'LANCA PLAZMOWA', C, 'polearm', 'legendary', 'trident', 'Drzewce z plazmowym grotem. Nie tyle przebija, co odparowuje.', { range: 490, weakGuardDamage: 11, comboBonus: 3 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
+    // ── Faza 10: light ──
+    w('acinaces', 'AKINAKES', A, 'light', 'common', 'dagger', 'Perski krótki miecz. Noszony przy pasie, używany z bliska.', {}, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('parazonium', 'PARAZONIUM', A, 'light', 'common', 'dagger', 'Sztylet rzymskich oficerów. Bardziej odznaka niż broń, aż do dziś.', {}, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('ulu', 'ULU', A, 'light', 'common', 'machete', 'Półokrągły nóż Inuitów. Do fok, skór i nieproszonych gości.', {}, { palette: { M: '#c9d6dc', W: '#ffffff', S: '#6a7a82', D: '#e8dcb8' } }),
+    w('skean', 'SKEAN', M, 'light', 'common', 'dagger', 'Irlandzki nóż bojowy. Krótki, bo i walka krótka.', {}),
+    w('baselard', 'BASELARD', M, 'light', 'common', 'dagger', 'Mieszczański sztylet z głowicą w kształcie litery I. Modny i śmiertelny.', {}),
+    w('cinquedea', 'CINQUEDEA', R, 'light', 'rare', 'dagger', 'Szeroki sztylet z Wenecji. Pięć palców szerokości u nasady.', { weakGuardDamage: 9 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('main-gauche', 'MAIN-GAUCHE', R, 'light', 'rare', 'dagger', 'Lewa ręka szermierza. Paruje, a potem dźga.', { parryReflect: { light: 20, heavy: 24 } }),
+    w('jambiya', 'DŻAMBIJA', R, 'light', 'common', 'dagger', 'Zakrzywiony sztylet z Jemenu. Noszony przez każdego, kto ma pas.', {}, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('katar', 'KATAR', R, 'light', 'epic', 'dagger', 'Indyjski sztylet z poprzecznym uchwytem. Cios idzie prosto z pięści.', { weakGuardDamage: 9, comboBonus: 6 }, { palette: { M: '#c9d6dc', W: '#ffffff', S: '#6a7a82', D: '#e8dcb8' } }),
+    w('kaiken', 'KAIKEN', R, 'light', 'rare', 'dagger', 'Krótki nóż samurajek. Mały, cichy, ostateczny.', { swing: .26, cooldown: .16 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('dirk', 'DIRK', R, 'light', 'common', 'dagger', 'Szkocki sztylet górali. Noszony do kiltu, dobywany do wszystkiego.', {}),
+    w('push-dagger', 'PUSH DAGGER', X, 'light', 'rare', 'dagger', 'Sztylet z uchwytem w poprzek dłoni. Dyliżans, saloon, cios.', { comboBonus: 6 }),
+    w('toothpick', 'ARKANSAS TOOTHPICK', X, 'light', 'rare', 'dagger', 'Długi, wąski sztylet pogranicza. Wykałaczka, która sięga do kręgosłupa.', { weakGuardDamage: 9, contact: .16 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('fairbairn', 'FAIRBAIRN-SYKES', X, 'light', 'epic', 'dagger', 'Sztylet komandosów. Wąski, obosieczny, bez wątpliwości.', { swing: .26, contact: .16, comboBonus: 6 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('ka-bar', 'KA-BAR', X, 'light', 'common', 'machete', 'Nóż piechoty morskiej. Otwiera puszki i zamyka tematy.', {}, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('carbon-dagger', 'SZTYLET WĘGLOWY', C, 'light', 'rare', 'dagger', 'Włókno węglowe, zero metalu. Wykrywacze go nie widzą, gardy też nie.', { swing: .27 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('vibro-knife', 'NÓŻ WIBRACYJNY', C, 'light', 'legendary', 'dagger', 'Ostrze drgające z częstotliwością ultradźwięku. Tnie zbroję jak masło.', { weakGuardDamage: 10, comboBonus: 7 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
+    // ── Faza 10: bow ──
+    w('scythian', 'ŁUK SCYTYJSKI', A, 'bow', 'rare', 'bow', 'Krótki refleksyjny łuk jeźdźców stepu. Strzela w pełnym galopie.', { cooldown: .5, ammo: 9 }),
+    w('egyptian', 'ŁUK FARAONA', A, 'bow', 'common', 'bow', 'Kompozytowy łuk z rydwanu. Rydwan nie jest wymagany.', {}, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('gastraphetes', 'GASTRAFETES', A, 'bow', 'epic', 'crossbow', 'Grecka kusza napinana brzuchem. Pierwsza maszyna, która strzelała.', { weakGuardDamage: 14, reload: 1.5, ammo: 5 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('hunnic', 'ŁUK HUŃSKI', A, 'bow', 'rare', 'bow', 'Asymetryczny łuk Hunów. Bicz Boży strzelał z takiego.', { ammo: 9 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('welsh', 'ŁUK WALIJSKI', M, 'bow', 'common', 'bow', 'Długi łuk z cisu. Jeszcze zanim Anglicy zrobili z niego legendę.', {}),
+    w('mongol', 'ŁUK MONGOLSKI', M, 'bow', 'epic', 'bow', 'Łuk z rogu i ścięgien. Trzysta metrów, a wiatr nie ma znaczenia.', { range: 950, weakGuardDamage: 12, ammo: 9 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('windlass', 'KUSZA Z KOŁOWROTEM', M, 'bow', 'rare', 'crossbow', 'Kusza napinana kołowrotem. Długo się ładuje, krótko boli.', { weakGuardDamage: 16, reload: 2.4, ammo: 4 }),
+    w('latchet', 'KUSZA LATCHET', R, 'bow', 'common', 'crossbow', 'Lekka kusza z dźwignią. Szybko ładuje, słabo strzela.', { weakGuardDamage: 9, reload: .9, ammo: 6 }),
+    w('hankyu', 'HANKYŪ', R, 'bow', 'common', 'bow', 'Krótki łuk samurajów na bliski dystans. Yumi do ciasnych korytarzy.', { range: 800 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('daikyu', 'DAIKYŪ', R, 'bow', 'rare', 'bow', 'Wielki łuk ceremonialny. Strzała nie wie, że to ceremonia.', { range: 950, weakGuardDamage: 12 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('turkish', 'ŁUK TURECKI', R, 'bow', 'epic', 'bow', 'Najsilniejszy łuk refleksyjny świata. Rekordy strzałów na odległość stoją do dziś.', { range: 980, weakGuardDamage: 12 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('bullet-crossbow', 'KUSZA KULOWA', R, 'bow', 'rare', 'crossbow', 'Kusza na ołowiane kulki. Na ptaki, a tu na eksponaty.', { weakGuardDamage: 11, ammo: 8, reload: 1 }),
+    w('recurve', 'ŁUK REFLEKSYJNY', X, 'bow', 'common', 'bow', 'Sportowy łuk olimpijski. Medal nie jest wymagany.', {}, { palette: { M: '#b3202a', W: '#ff9d8e', S: '#5a1010', D: '#2a1a1a' } }),
+    w('takedown', 'ŁUK TAKEDOWN', C, 'bow', 'common', 'bow', 'Rozkładany łuk myśliwski. Mieści się w plecaku, nie w gardzie.', {}, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('pistol-crossbow', 'KUSZA PISTOLETOWA', C, 'bow', 'rare', 'crossbow', 'Mała kusza na jedną rękę. Dziesięć bełtów i zero hałasu.', { ammo: 10, reload: 1, weakGuardDamage: 9, cooldown: .45 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('tactical-crossbow', 'KUSZA TAKTYCZNA', C, 'bow', 'epic', 'crossbow', 'Kusza z kolimatorem i szyną. Cicha jak noc w muzeum.', { weakGuardDamage: 15, reload: 1.4 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('rail-bow', 'ŁUK MAGNETYCZNY', C, 'bow', 'legendary', 'crossbow', 'Cewki zamiast cięciwy. Strzała wylatuje szybciej niż dźwięk.', { weakGuardDamage: 17, range: 1000, ammo: 6, reload: 1.6 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
+    // ── Faza 10: pistol ──
+    w('matchlock-pistol', 'PISTOLET LONTOWY', R, 'pistol', 'common', 'flintlock', 'Pierwszy pistolet. Lont, proch i modlitwa.', { ammo: 1, reload: 2.4, weakGuardDamage: 16 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('puffer', 'PUFFER', R, 'pistol', 'rare', 'flintlock', 'Pistolet z kulistą głowicą i zamkiem kołowym. Kiedy nie strzela, służy jako maczuga.', { ammo: 2, reload: 2, weakGuardDamage: 16 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('snaphance', 'SNAPHANCE', R, 'pistol', 'common', 'flintlock', 'Wczesny zamek skałkowy. Trzask, iskra, dym.', { ammo: 2, reload: 1.9 }),
+    w('blunderbuss-pistol', 'GARŁACZ PISTOLETOWY', R, 'pistol', 'rare', 'flintlock', 'Rozszerzona lufa na kartacze. Działa na odległość ramienia.', { range: 500, weakGuardDamage: 20, ammo: 1, reload: 2.2 }, { palette: { M: '#b08a3e', W: '#e6c97a', S: '#6e5321', D: '#5a3a22' } }),
+    w('pepperbox', 'PEPPERBOX', X, 'pistol', 'common', 'revolver', 'Wiązka luf obracana ręką. Sześć strzałów, zero celności.', { ammo: 6, reload: 2 }),
+    w('lemat', 'LEMAT', X, 'pistol', 'epic', 'revolver', 'Rewolwer z dodatkową lufą śrutową. Dziewięć naboi i niespodzianka.', { ammo: 9, reload: 2.2, weakGuardDamage: 15 }, { palette: { M: '#3f4f6a', W: '#9fb4d0', S: '#1b2434', D: '#5a3a22' } }),
+    w('schofield', 'SCHOFIELD', X, 'pistol', 'rare', 'revolver', 'Łamany rewolwer Smith & Wesson. Jesse James uznawał tylko ten.', { ammo: 6, reload: 1.3 }, { palette: { M: '#c9d6dc', W: '#ffffff', S: '#6a7a82', D: '#e8dcb8' } }),
+    w('webley', 'WEBLEY', X, 'pistol', 'rare', 'revolver', 'Brytyjski rewolwer imperium. Łamany, ciężki, niezawodny.', { ammo: 6, reload: 1.4, weakGuardDamage: 15 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('nambu', 'NAMBU TYP 14', X, 'pistol', 'common', 'pistol', 'Japoński pistolet oficerski. Słaby nabój, mocna tradycja.', { ammo: 8, reload: 1.5, weakGuardDamage: 12 }),
+    w('tokarev', 'TT-33', X, 'pistol', 'common', 'pistol', 'Radziecki pistolet bez bezpiecznika. Prosty jak rozkaz.', { ammo: 8, reload: 1.4 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('walther-ppk', 'WALTHER PPK', X, 'pistol', 'rare', 'pistol', 'Kieszonkowy pistolet pewnego agenta. Mały, ale z licencją.', { ammo: 7, reload: 1.2, weakGuardDamage: 12, cooldown: .42 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('browning-hp', 'BROWNING HI-POWER', X, 'pistol', 'rare', 'pistol', 'Trzynaście naboi w 1935 roku. Reszta świata dogoniła po wojnie.', { ammo: 13, reload: 1.6, weakGuardDamage: 13 }, { palette: { M: '#3f4f6a', W: '#9fb4d0', S: '#1b2434', D: '#5a3a22' } }),
+    w('makarov', 'MAKAROW', X, 'pistol', 'common', 'pistol', 'Pistolet milicji i KGB. Osiem naboi, zero fantazji.', { ammo: 8, reload: 1.4, weakGuardDamage: 13 }),
+    w('sig-p226', 'SIG P226', C, 'pistol', 'rare', 'modern', 'Pistolet jednostek specjalnych. Piętnaście naboi i zero zacięć.', { ammo: 15, reload: 1.5 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('usp', 'H&K USP', C, 'pistol', 'rare', 'modern', 'Uniwersalny pistolet samopowtarzalny. Działa po kąpieli w błocie.', { ammo: 12, reload: 1.4 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('fiveseven', 'FIVE-SEVEN', C, 'pistol', 'epic', 'modern', 'Dwadzieścia naboi, które przebijają kamizelkę. Lekki jak zabawka.', { ammo: 20, reload: 1.6, weakGuardDamage: 13, cooldown: .4 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('automag', 'AUTOMAG', C, 'pistol', 'epic', 'modern', 'Pierwszy samopowtarzalny magnum. Odrzut na granicy przyzwoitości.', { ammo: 7, reload: 1.8, weakGuardDamage: 18 }, { palette: { M: '#c9d6dc', W: '#ffffff', S: '#6a7a82', D: '#e8dcb8' } }),
+    w('coil-pistol', 'PISTOLET CEWKOWY', C, 'pistol', 'legendary', 'modern', 'Magnetyczny pistolet z pociskami z wolframu. Bez huku, z dziurą.', { ammo: 12, reload: 1.5, weakGuardDamage: 17 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
+    // ── Faza 10: rifle ──
+    w('hand-cannon', 'HAKOWNICA', R, 'rifle', 'common', 'blunderbuss', 'Rura z hakiem, oparta o mur. Pierwsza broń palna, która dostała kolbę.', { ammo: 1, reload: 3, weakGuardDamage: 24 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('caliver', 'KALIWER', R, 'rifle', 'common', 'musket', 'Lekka rusznica z zamkiem lontowym. Dla tych, co nie udźwigną muszkietu.', { ammo: 1, reload: 2.6, weakGuardDamage: 20 }),
+    w('jezail', 'DŻEZAIL', R, 'rifle', 'rare', 'musket', 'Afgański muszkiet z zakrzywioną kolbą. Trafiał Brytyjczyków z gór.', { ammo: 1, reload: 2.8, weakGuardDamage: 24, range: 950 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('kentucky', 'KARABIN KENTUCKY', R, 'rifle', 'rare', 'musket', 'Długa gwintowana lufa pogranicza. Jeden strzał, jeden jeleń.', { ammo: 1, reload: 2.6, weakGuardDamage: 24, range: 950 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('baker', 'KARABIN BAKERA', X, 'rifle', 'rare', 'musket', 'Gwintowany karabin strzelców Wellingtona. Zielone kurtki, celne oczy.', { ammo: 1, reload: 2.5, weakGuardDamage: 24 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('dreyse', 'IGLICÓWKA DREYSE', X, 'rifle', 'rare', 'bolt', 'Pierwszy karabin odtylcowy na iglicę. Prusacy strzelali z niego na leżąco.', { ammo: 1, reload: 1.6, weakGuardDamage: 20 }),
+    w('sharps', 'SHARPS', X, 'rifle', 'epic', 'lever', 'Karabin strzelców wyborowych Unii. Jeden strzał na tysiąc jardów.', { ammo: 1, reload: 1.8, weakGuardDamage: 26, range: 1000 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('henry', 'HENRY 1860', X, 'rifle', 'rare', 'lever', 'Szesnaście strzałów w karabinie, który ładowano w niedzielę i strzelano cały tydzień.', { ammo: 16, reload: 3, weakGuardDamage: 14, cooldown: .5 }, { palette: { M: '#d4af37', W: '#fff1b0', S: '#8a6a1a', D: '#3a2616' } }),
+    w('martini', 'MARTINI-HENRY', X, 'rifle', 'common', 'bolt', 'Jednostrzałowy karabin imperium. Rorke’s Drift strzelało z tego.', { ammo: 1, reload: 1.5, weakGuardDamage: 22 }),
+    w('lebel', 'LEBEL', X, 'rifle', 'common', 'bolt', 'Pierwszy karabin na proch bezdymny. Osiem naboi w rurze pod lufą.', { ammo: 8, reload: 2.6, weakGuardDamage: 17 }),
+    w('carcano', 'CARCANO', X, 'rifle', 'common', 'bolt', 'Włoski karabin z ładownikiem na sześć. Znany z jednego strzału w Dallas.', { ammo: 6, reload: 2.1, weakGuardDamage: 17 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('arisaka', 'ARISAKA', X, 'rifle', 'common', 'bolt', 'Japoński karabin z chryzantemą na komorze. Chryzantema zwykle spiłowana.', { ammo: 5, reload: 2.1 }),
+    w('svt40', 'SWT-40', X, 'rifle', 'rare', 'garand', 'Radziecki karabin samopowtarzalny. Snajperzy go lubili, piechota nie umiała czyścić.', { ammo: 10, reload: 2.2, weakGuardDamage: 17, cooldown: .55 }),
+    w('stg44', 'STG 44', X, 'rifle', 'epic', 'assault', 'Pierwszy karabin szturmowy. Wszystko potem jest jego kopią.', { ammo: 30, reload: 2.4, weakGuardDamage: 13, cooldown: .3 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('bar', 'BAR M1918', X, 'rifle', 'epic', 'garand', 'Karabin automatyczny Browninga. Dwadzieścia naboi i cztery kilo za dużo.', { ammo: 20, reload: 2.6, weakGuardDamage: 16, cooldown: .35 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('fal', 'FN FAL', C, 'rifle', 'rare', 'assault', 'Prawa ręka wolnego świata. Dwadzieścia naboi NATO.', { ammo: 20, reload: 2.3, weakGuardDamage: 16, cooldown: .4 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('g3', 'H&K G3', C, 'rifle', 'rare', 'assault', 'Niemiecki karabin z zamkiem półswobodnym. Kopie i trafia.', { ammo: 20, reload: 2.3, weakGuardDamage: 16, cooldown: .4 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('spas12', 'SPAS-12', C, 'rifle', 'epic', 'pump', 'Włoska strzelba bojowa z filmów akcji. Osiem naboi i składana kolba.', { ammo: 8, reload: 2.4, weakGuardDamage: 22, range: 700 }, { palette: { M: '#3a3a44', W: '#8a8a98', S: '#141418', D: '#2a2a30' } }),
+    w('saiga', 'SAIGA-12', C, 'rifle', 'rare', 'shotgun', 'Strzelba na magazynek z kałasznikowa. Osiem śrutów w trzy sekundy.', { ammo: 8, reload: 2.2, weakGuardDamage: 20, range: 650, cooldown: .5 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('scar', 'SCAR-H', C, 'rifle', 'epic', 'assault', 'Modułowy karabin sił specjalnych. Lekki, celny, drogi.', { ammo: 20, reload: 2.1, weakGuardDamage: 17, cooldown: .38 }, { palette: { M: '#8a5a3a', W: '#d9a070', S: '#4a2e1a', D: '#3a2412' } }),
+    w('awm', 'AWM', C, 'rifle', 'epic', 'sniper', 'Brytyjski karabin snajperski na .338. Rekordy dystansu stoją na nim.', { ammo: 5, reload: 2.6, weakGuardDamage: 28, range: 1000, cooldown: .9 }, { palette: { M: '#5a6a3a', W: '#a8b880', S: '#2e3a1e', D: '#3a3a2a' } }),
+    w('railgun', 'KARABIN SZYNOWY', C, 'rifle', 'legendary', 'sniper', 'Elektromagnetyczny karabin z prototypowego laboratorium. Pocisk nie potrzebuje prochu.', { ammo: 4, reload: 2.8, weakGuardDamage: 30, range: 1000, cooldown: 1 }, { palette: { M: '#6a7a9a', W: '#d0f0ff', S: '#2a3a5a', D: '#1a1a2a', L: '#9ff6ff' }, glow: true }),
   ];
   function build(d) {
     const type = types[d.type], merged = { ...baseline, ...type.stats, ...d.overrides };
@@ -2773,6 +2945,7 @@ window.MuseumConfig = Object.freeze({
   };
   const extraPalettes = {};   // knight palettes added by hidden packs: [base, dark, light, glint, cloth, clothDark]
   const extraFigures = {};    // whole human rigs used as player skins (hidden packs): figure definition like an exhibit's
+  for (const s of window.MuseumKnights?.skins || []) if (s.figure) extraFigures[s.id] = s.figure;   // public historical heroes
   // A figure skin: the human rig with the player's equipped weapon mapped onto it (by weapon type, or the weapon's own sprite).
   function drawFigureSkin(c, x, y, o = {}) {
     const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type;
@@ -4046,8 +4219,11 @@ window.MuseumConfig = Object.freeze({
   {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1500,pricePLN:39.99,
    description:'Wędrowcy, błędni rycerze i złote skorpiony ze szlaków poza horyzontem.',
    guarantee:'1 nowy skin · tylko piaski i szlaki',glyph:'✧',color:'#d8ba86',
-   rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
-,
+   rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})},
+  {id:'heroes-gallery',categoryId:'heroes',name:'Galeria Legend',title:'Galeria Legend',tag:'POSTACI',cost:2400,pricePLN:59.99,
+   description:'Grywalne postaci z kart historii: od Aleksandra i Kleopatry po Piłsudskiego i Gagarina. Każda z własnym kostiumem i atutem.',
+   guarantee:'1 nowa postać · rzadkie i lepsze',glyph:'♛',color:'#d9a0c6',
+   rarityWeights:Object.freeze({common:0,rare:30,epic:55,legendary:15})},
   {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:1500,pricePLN:39.99,
    description:'Sto dwadzieścia broni od maczugi po Barretta. Każda zmienia rytm walki.',
    guarantee:'1 nowa broń · wszystkie rzadkości',glyph:'⚔',color:'#c9b37a',
@@ -4153,7 +4329,7 @@ window.MuseumConfig = Object.freeze({
   {id:'royal',name:'KRÓLEWSKA WARTA',era:'AMETYST · EPICKI EKSPONAT',rarity:'epic',weight:15},
   {id:'solar',name:'SŁONECZNY PALADYN',era:'ZŁOTO · LEGENDARNY EKSPONAT',rarity:'legendary',weight:10},
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
- ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
+ ].map(skin=>Object.freeze({...skin,categoryId:skin.categoryId||skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
  // One catalogue for everything a crate can drop or a player can sell.
  const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
  const SELL_RATE=.4, UPGRADE_MAX=5;
@@ -4989,7 +5165,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   const matches=matchingItems(),pages=Math.max(1,Math.ceil(matches.length/SKINS_PER_PAGE));collectionPage=Math.max(0,Math.min(collectionPage,pages-1));const page=matches.slice(collectionPage*SKINS_PER_PAGE,(collectionPage+1)*SKINS_PER_PAGE);
   $('skinResultsCount').textContent=matches.length?`${itemCount(matches.length,collectionKind)} · ${collectionPage*SKINS_PER_PAGE+1}–${Math.min((collectionPage+1)*SKINS_PER_PAGE,matches.length)} na stronie`:itemCount(0,collectionKind);
   $('skinPageInfo').textContent=`Strona ${collectionPage+1} / ${pages}`;$('skinPagePrev').disabled=collectionPage===0;$('skinPageNext').disabled=collectionPage>=pages-1;show('skinPagination',matches.length>SKINS_PER_PAGE);show('skinEmpty',!matches.length);$('newSkinsOnly').setAttribute('aria-pressed',String(collectionFilters.newOnly));
-  const equippedSkin=equippedSkinItem(),equippedWeapon=weapons.get(profile.weapon),equippedCard=cardsApi.get(profile.card);
+  const equippedSkin=equippedSkinItem(),equippedWeapon=weapons.get(profile.weapon),equippedCard=cardsApi.get(profile.card),numberedSkins=loot.items.filter(i=>i.kind==='skin'&&i.number).length;
   $('equippedSkin').textContent=`ZAŁOŻONO: ${equippedSkin.name} · ${equippedWeapon.name}${equippedCard?` · KARTA: ${equippedCard.name}`:' · BEZ KARTY'} · ${perks.get(profile.skin).summary}`;
   const busy=()=>crateBusy||!['menu','result'].includes(screen);
   const ownedTotal=matches.filter(s=>loot.has(profile,s)).length,lockedTotal=matches.length-ownedTotal;
@@ -5000,7 +5176,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
    const owned=loot.has(profile,s),selected=loot.equipped(profile,s),level=loot.upgradeLevel(profile,s.id),cell=document.createElement('div'),b=document.createElement('button');cell.className='skin-cell';
    if(!owned&&!lockedDivider){lockedDivider=true;if(ownedTotal||lockedTotal)grid.appendChild(divider('ZABLOKOWANE',lockedTotal));}
    b.className=`skin-card ${selected?'selected':''} ${owned?'':'locked'}`;b.dataset.rarity=s.rarity;b.dataset.skinId=s.id;b.dataset.category=s.categoryId;b.style.setProperty('--rarity',loot.rarities[s.rarity].color);b.setAttribute('aria-pressed',String(selected));b.setAttribute('aria-label',`${s.name}. ${loot.getCategory(s.categoryId)?.name||''}. ${itemSummary(s)}${owned?(selected?' — wybrany':' — wybierz'):' — do odkrycia'}`);
-   const badge=s.number?`<span class="skin-number">${String(s.number).padStart(2,'0')} / 50</span>`:s.gift?'<span class="skin-number">★ SPECJALNY</span>':level?`<span class="skin-number">ULEPSZENIE +${level}</span>`:'';
+   const badge=s.number?`<span class="skin-number">${String(s.number).padStart(2,'0')} / ${numberedSkins}</span>`:s.gift?'<span class="skin-number">★ SPECJALNY</span>':level?`<span class="skin-number">ULEPSZENIE +${level}</span>`:'';
    const lockSvg='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7h1Zm2 0h4V5a2 2 0 0 0-4 0v2Zm1 4v2h2v-2H7Z" fill="currentColor"/></svg>';
    if(owned)b.innerHTML=`${badge}<canvas width="360" height="360" aria-hidden="true"></canvas><small>${s.era}</small><strong>${s.name}</strong><span class="skin-category"></span><span class="skin-perk"><strong></strong><span></span></span><span class="skin-state">${equipLabel(s,selected)}</span>`;
    else{b.innerHTML=`<span class="skin-number">${loot.rarities[s.rarity].name}</span><span class="skin-art"><canvas width="360" height="360" aria-hidden="true"></canvas><span class="skin-lock">${lockSvg}<span>ZABLOKOWANE</span></span></span><small>NIEODKRYTY EKSPONAT</small><strong>? ? ?</strong><span class="skin-category"></span><span class="skin-perk"><strong>${loot.rarities[s.rarity].name}</strong><span>Wypada ze skrzyni. Otwórz ją w sklepie.</span></span><span class="skin-state">${lockSvg} ZABLOKOWANE</span>`;b.setAttribute('aria-label',`Zablokowany ${s.kind==='skin'?'strój':s.kind==='weapon'?'broń':s.kind==='card'?'karta':'wykończenie'}, ${loot.rarities[s.rarity].name.toLowerCase()}, ${loot.getCategory(s.categoryId)?.name||''}. Wypada ze skrzyni w sklepie.`);}

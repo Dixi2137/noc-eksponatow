@@ -71,8 +71,11 @@
   {id:'desert',categoryId:'desert',name:'Karawana Piasków',title:'Karawana Piasków',tag:'PIASKI',cost:1500,pricePLN:39.99,
    description:'Wędrowcy, błędni rycerze i złote skorpiony ze szlaków poza horyzontem.',
    guarantee:'1 nowy skin · tylko piaski i szlaki',glyph:'✧',color:'#d8ba86',
-   rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})}
-,
+   rarityWeights:Object.freeze({common:42,rare:50,epic:0,legendary:8})},
+  {id:'heroes-gallery',categoryId:'heroes',name:'Galeria Legend',title:'Galeria Legend',tag:'POSTACI',cost:2400,pricePLN:59.99,
+   description:'Grywalne postaci z kart historii: od Aleksandra i Kleopatry po Piłsudskiego i Gagarina. Każda z własnym kostiumem i atutem.',
+   guarantee:'1 nowa postać · rzadkie i lepsze',glyph:'♛',color:'#d9a0c6',
+   rarityWeights:Object.freeze({common:0,rare:30,epic:55,legendary:15})},
   {id:'armory',family:'weapons',pool:'weapon',name:'Arsenał Kustosza',title:'Arsenał Kustosza',tag:'BROŃ',cost:1500,pricePLN:39.99,
    description:'Sto dwadzieścia broni od maczugi po Barretta. Każda zmienia rytm walki.',
    guarantee:'1 nowa broń · wszystkie rzadkości',glyph:'⚔',color:'#c9b37a',
@@ -178,7 +181,7 @@
   {id:'royal',name:'KRÓLEWSKA WARTA',era:'AMETYST · EPICKI EKSPONAT',rarity:'epic',weight:15},
   {id:'solar',name:'SŁONECZNY PALADYN',era:'ZŁOTO · LEGENDARNY EKSPONAT',rarity:'legendary',weight:10},
   ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
- ].map(skin=>Object.freeze({...skin,categoryId:skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
+ ].map(skin=>Object.freeze({...skin,categoryId:skin.categoryId||skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
  // One catalogue for everything a crate can drop or a player can sell.
  const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
  const SELL_RATE=.4, UPGRADE_MAX=5;

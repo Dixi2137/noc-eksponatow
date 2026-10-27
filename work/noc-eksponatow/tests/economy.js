@@ -153,7 +153,7 @@
     for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
     assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
     assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
-    assert.equal(loot.crates.length, 32); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+    assert.equal(loot.crates.length, 33); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
   });
   test('Lakiernia: ~390 wykończeń w pięciu rzadkościach, dwie skrzynie tylko z wykończeniami, ceny od groszy do tysięcy', () => {
     const F = window.MuseumFinishes, all = F.all(); assert.ok(all.length >= 380 && all.length <= 400, String(all.length));
@@ -238,6 +238,15 @@
     p = loot.equip(p, 'gold-marble'); assert.equal(loot.sellFinish(p, 'gold-marble'), null, 'nałożone'); p = loot.equip(p, 'gold-marble');
     const sold = loot.sellFinish(p, 'gold-marble'); assert.ok(sold); assert.equal(sold.price, 112425); assert.equal(sold.profile.balance, 21470 + 112425); assert.deepEqual(sold.profile.finishes, []);
     assert.equal(loot.sellFinish(p, 'sword'), null, 'tylko wykończenia'); assert.equal(loot.migrate({ balance: '12.7' }).balance, 12); assert.equal(loot.migrate({ balance: -5 }).balance, 0);
+  });
+  test('Galeria Legend: postaci z historii mają kostium i atut, skrzynia losuje tylko je, zwykłe skrzynie strojów ich nie dają', () => {
+    const heroes = loot.items.filter(i => i.kind === 'skin' && i.categoryId === 'heroes');
+    assert.ok(heroes.length >= 25, String(heroes.length));
+    for (const h of heroes) { assert.ok(h.figure && h.figure.skin && h.figure.coat || h.figure.tunic, `kostium ${h.id}`); assert.ok(window.MuseumPerks.get(h.id).stats.maxHP > 0, `perk ${h.id}`); assert.ok(['rare', 'epic', 'legendary'].includes(h.rarity), h.id); }
+    const p = loot.migrate(null); const pool = loot.remaining(p, 'heroes-gallery').filter(i => i.kind !== 'finish'); assert.ok(pool.length === heroes.length, `${pool.length}/${heroes.length}`); assert.ok(pool.every(i => i.categoryId === 'heroes'));
+    assert.ok(loot.remaining(p, 'elements').every(i => i.categoryId !== 'heroes'), 'skrzynie motywów bez bohaterów');
+    assert.ok(loot.remaining(p, 'gallery').some(i => i.categoryId === 'heroes'), 'Skrzynia Galerii może dać bohatera');
+    const r = loot.reserve({ ...p, coins: 5000 }, () => .5, 'heroes-gallery'); assert.ok(r && r.reward.categoryId === 'heroes');
   });
   test('Skrzynia za złotówki: cena w groszach z cennika, schodzi z salda, żetony i darmowa skrzynia nietknięte', () => {
     let p = { ...loot.migrate(null), coins: 0, freeCrates: 1 }; assert.equal(loot.cratePricePLN('gallery'), 2999); assert.equal(loot.canPayPLN(p, 'gallery'), false);

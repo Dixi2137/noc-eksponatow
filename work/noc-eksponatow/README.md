@@ -389,3 +389,10 @@ Obchód ma teraz 50 sal plus finał w piekle. Nowe sale wskakują w środek hist
 | 1950 | Kim Ir Sen | gunman 5 | pyongyang |
 
 Druga partia (2026-10-27) dociąga obchód do 50 sal plus piekło; nowa sceneria `pyongyang`.
+
+## Faza 10 — postaci z historii i druga zbrojownia (2026-10-27)
+
+- **27 grywalnych postaci** z historii (`heroRows` w `knights.js`): od Aleksandra, Cezara i Kleopatry przez Zawiszę, Joannę d’Arc, Sobieskiego i Kościuszkę po Skłodowską, Piłsudskiego, Churchilla i Gagarina. Każda to kostium na rigu figurki (`figure`, jak u bossów), własny atut przez `benefit()`, kategoria `heroes`, numery 51+. `pixel.js` rejestruje je do `extraFigures` przy starcie, więc `drawKnight` rysuje je tak jak postaci z ukrytych paczek.
+- Nowa skrzynia **Galeria Legend** (`heroes-gallery`, 2400 ✦ / 59,99 zł): tylko bohaterowie, rzadkie i lepsze. Bohaterowie wpadają też do Skrzyni Galerii, nie wpadają do skrzyń motywów.
+- **129 nowych broni** we wszystkich siedmiu typach i pięciu epokach (`// ── Faza 10` w `weapons.js`), razem 251. Nowe wpisy mają palety ikon (`palette`) i kilka świecących legend (`glow`). `w()` dostało ostatni parametr `extra`.
+- Licznik „NN / 50” w kolekcji liczy się dynamicznie.
