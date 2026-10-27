@@ -442,6 +442,9 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  // and the in-frame UI zooms by the ratio of the frame to the full content width, so nothing is ever clipped.
  function skipCard(){if(screen==='card'&&cardTime>=1){cardTime=cardTotal;startFight();}else if(screen==='timejump'&&jumpTime>=1.2){jumpTime=totalJump;updateTimeJump();startFight();}}
  $('card').addEventListener('click',skipCard);$('timejump').addEventListener('click',skipCard);document.addEventListener('keydown',e=>{if((screen==='card'||screen==='timejump')&&(e.key==='Enter'||e.key===' '||e.key==='j'||e.key==='J'))skipCard();});
+ // Seasonal page dressing: shown only while the matching seasonal crate is live, so it vanishes with the crate.
+ function seasonDeco(){const on=loot.seasonActive('halloween');show('seasonDeco',on);document.body.classList.toggle('season-halloween',on);}
+ seasonDeco();setInterval(seasonDeco,60*60*1000);
  function fitStage(){const frame=$('gameFrame'),parent=frame.parentElement,app=document.querySelector('.app')||parent;if(!frame||!parent)return;const top=frame.getBoundingClientRect().top+window.scrollY,under=document.querySelector('.understage')?.getBoundingClientRect().height||0;document.documentElement.style.setProperty('--chrome',`${Math.round(top+under+18)}px`);const z=Math.min(fullscreenOn()?1.4:1,frame.clientWidth/Math.max(1,app.clientWidth));frame.style.setProperty('--ui-zoom',z.toFixed(4));}
  // Fullscreen: the fight takes the whole screen (laptops are small), the menu gives the page back. Opt-out lives in localStorage; phones without the API simply stay inline.
  const FS_KEY='museum-fullscreen';
