@@ -197,6 +197,15 @@
     p.stamina -= w.staminaCost; p.attack = w.swing; p.attackDone = false; p.cooldown = w.cooldown;
     if (w.kind === 'ranged' && p.ammo != null) { p.ammo--; p.shots++; }
     tone(w.kind === 'ranged' ? 'hit' : 'swing');
+    shout();
+  }
+  // Skins from the hidden packs can carry battle cries: one of them pops over the knight on roughly every second attack.
+  let lastShout = -1;
+  function shout() {
+    const lines = window.MuseumLoot?.getItem?.(state.skin)?.shouts;
+    if (!lines || !lines.length || Math.random() < .45) return;
+    let i = Math.floor(Math.random() * lines.length); if (lines.length > 1 && i === lastShout) i = (i + 1) % lines.length; lastShout = i;
+    label(lines[i], state.player.x + 10, FLOOR - 300, '#fff6d6', 22);
   }
 
   // Every blow provokes a dodge or a parry. A tired guard still lets damage through.

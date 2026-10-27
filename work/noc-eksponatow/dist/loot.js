@@ -194,7 +194,7 @@
  function register(pack){
   const added=[];
   for(const w of pack.weapons||[]){if(itemsById.has(w.id))continue;const weapon=weaponsApi.register(w);const item=Object.freeze(weaponItem(weapon));items.push(item);itemsById.set(item.id,item);added.push(item);}
-  for(const sk of pack.skins||[]){if(itemsById.has(sk.id))continue;const skin=Object.freeze({id:sk.id,name:sk.name,era:sk.era||'EKSPONAT EKSPERYMENTALNY · ODBLOKOWANY KODEM',description:sk.description||'',rarity:sk.rarity||'mythic',weight:0,gift:true,hidden:true,categoryId:'special'});skins.push(skin);const item=Object.freeze({kind:'skin',...skin});items.push(item);itemsById.set(item.id,item);added.push(item);}
+  for(const sk of pack.skins||[]){if(itemsById.has(sk.id))continue;const skin=Object.freeze({id:sk.id,name:sk.name,era:sk.era||'EKSPONAT EKSPERYMENTALNY · ODBLOKOWANY KODEM',description:sk.description||'',rarity:sk.rarity||'mythic',weight:0,gift:true,hidden:true,categoryId:'special',...(Array.isArray(sk.shouts)&&sk.shouts.length?{shouts:Object.freeze(sk.shouts.map(String))}:{})});skins.push(skin);const item=Object.freeze({kind:'skin',...skin});items.push(item);itemsById.set(item.id,item);added.push(item);}
   return added;
  }
  function getItem(id){return itemsById.get(id)||null;}
