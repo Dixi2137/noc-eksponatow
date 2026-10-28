@@ -18,6 +18,7 @@
   {id:'forge',name:'Kuźnia i Technika',color:'#d99c7b'},
   {id:'desert',name:'Piaski i Szlaki',color:'#d8ba86'},
   {id:'special',name:'Eksponaty Specjalne',color:'#76d5d9'},
+  {id:'halloween',name:'Halloween',color:'#e07a2a'},
   {id:'finishes',name:'Limitowane wykończenia',color:'#7ff0e0'}
  ].map(Object.freeze));
  function getCategory(id) { return categories.find(category=>category.id===id)||null; }
@@ -160,6 +161,10 @@
    description:'Sześć wykończeń tylko na Halloween: dynia, kość, pajęczyna, krew, mgła i widmo. Po sezonie skrzynia znika ze sklepu, zdobyte powłoki zostają na zawsze.',
    guarantee:'1 nowe wykończenie · tylko halloweenowe',color:'#e07a2a',glyph:'☾',
    rarityWeights:Object.freeze({common:0,rare:45,epic:35,legendary:20,mythic:0})},
+  {id:'crypt',season:'halloween',categoryId:'halloween',name:'Krypta Kustosza',title:'Krypta Kustosza',tag:'HALLOWEEN',cost:2500,pricePLN:59.99,pool:'skin',family:'themed',group:'seasonal',
+   description:'Pięć strojów tylko na Halloween: Dyniogłowy, Czarownica z Archiwum, Hrabia z Krypty, Szkielet z Gabloty i Mumia z Magazynu. Po sezonie krypta się zamyka, zdobyte stroje zostają na zawsze.',
+   guarantee:'1 nowy strój · tylko halloweenowe',color:'#e07a2a',glyph:'☠',
+   rarityWeights:Object.freeze({common:0,rare:44,epic:38,legendary:18,mythic:0})},
   {id:'christmas',season:'christmas',name:'Gwiazdka Kustosza',title:'Gwiazdka Kustosza',tag:'ŚWIĘTA',cost:1500,pricePLN:39.99,pool:'finish',family:'finishes',group:'seasonal',
    description:'Sześć wykończeń tylko na święta: szron, laska cukrowa, choinka, bombka, piernik i zorza wigilijna. Po Trzech Królach skrzynia znika ze sklepu, zdobyte powłoki zostają.',
    guarantee:'1 nowe wykończenie · tylko świąteczne',color:'#b3202a',glyph:'✶',
@@ -193,7 +198,7 @@
   {id:'ember',name:'ŻAR KUŹNI',era:'OGIEŃ · EPICKI EKSPONAT',rarity:'epic',weight:15},
   {id:'royal',name:'KRÓLEWSKA WARTA',era:'AMETYST · EPICKI EKSPONAT',rarity:'epic',weight:15},
   {id:'solar',name:'SŁONECZNY PALADYN',era:'ZŁOTO · LEGENDARNY EKSPONAT',rarity:'legendary',weight:10},
-  ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
+  ...window.MuseumKnights.skins.map(skin => ({...skin,era:skin.era||skin.description.toLocaleUpperCase('pl'),weight:rarityWeights[skin.rarity]}))
  ].map(skin=>Object.freeze({...skin,categoryId:skin.categoryId||skinCategory(skin.id)}));   // mutable: hidden packs add skins at runtime
  // One catalogue for everything a crate can drop or a player can sell.
  const values=Object.freeze({basic:0,common:240,rare:700,epic:1800,legendary:4500,mythic:15000});
@@ -259,7 +264,7 @@
  }
  function remaining(profile,crateId='gallery') {
   const crate=getCrate(crateId);
-  const fits=s=>s.kind==='finish'?(crate.pool==='finish'?(crate.season?s.season===crate.season:!s.season):(s.rarity==='mythic'&&!s.season&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);
+  const fits=s=>s.kind==='finish'?(crate.pool==='finish'?(crate.season?s.season===crate.season:!s.season):(s.rarity==='mythic'&&!s.season&&crate.rarityWeights.mythic>0)):(crate.pool==='any' || s.kind===crate.pool) && (crate.season?s.season===crate.season:!s.season) && (!crate.categoryId||s.categoryId===crate.categoryId) && (!crate.weaponType||s.type===crate.weaponType);   // seasonal costumes drop only from their season's crate
   return crate ? items.filter(s => fits(s) && s.weight > 0 && crate.rarityWeights[s.rarity]>0 && !has(profile,s)) : [];
  }
  function odds(profile,crateId='gallery') {

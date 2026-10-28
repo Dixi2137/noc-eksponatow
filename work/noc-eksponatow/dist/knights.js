@@ -111,5 +111,18 @@
   const [slug,name,description,rarity,colors,[title,kind,value],figure,bio] = row;
   return Object.freeze({ id:`hero-${slug}`, number: rows.length + index + 1, name, description, rarity, colors:Object.freeze(colors), motif:'hero', categoryId:'heroes', figure:Object.freeze(figure), bio, perk:benefit(title,kind,value) });
  }));
- window.MuseumKnights = Object.freeze({skins:Object.freeze([...skins, ...heroes]), heroes});
+ // Seasonal costumes: the same human rig as the heroes, but they drop only from their season's crate (loot.js SEASONS) and stay forever once owned.
+ // slug, name, era line, rarity, [tint colours], perk (title, kind, value), costume, description
+ const seasonRows = [
+  ['halloween-pumpkin','Dyniogłowy','HALLOWEEN · STRÓJ LIMITOWANY','legendary',['#e8762a','#3a2a1e','#ffd166'],['DYNIOWA LATARNIA','damage',1.32],{skin:'#c9a070',coat:'#3a2a1e',coatDark:'#241a12',trousers:'#2a2420',boots:'#1a1410',cloak:'#2a1a2a',hat:'pumpkin',hatColor:'#e8762a',accent:'#5c8a2a',glow:'#ffd166'},'Wydrążona dynia zamiast głowy, w środku świeczka. Uśmiech wycięty nożem do kitu, oczy świecą przez całą noc.','halloween'],
+  ['halloween-witch','Czarownica z Archiwum','HALLOWEEN · STRÓJ LIMITOWANY','epic',['#2a1a3a','#8a3ab0','#9fbf7a'],['KLĄTWA ARCHIWISTKI','regen',1.38],{skin:'#9fbf7a',hair:'#1a1410',hairstyle:'long',coat:'#2a1a3a',coatDark:'#160c20',trousers:'#1a1020',boots:'#1a1410',cloak:'#3a1a4a',hat:'witch',hatColor:'#1a1020',accent:'#8a3ab0',sash:'#8a3ab0'},'Spiczasty kapelusz, fioletowa szarfa i zielona cera po stu latach w archiwum bez okien. Kota nie ma, kot się zgubił między gablotami.','halloween'],
+  ['halloween-vampire','Hrabia z Krypty','HALLOWEEN · STRÓJ LIMITOWANY','epic',['#141418','#8b1a1a','#e8e0e8'],['KRWIOPIJCA','heal',6],{skin:'#e8e0e8',hair:'#101014',coat:'#141418',coatDark:'#000000',lapel:'#b3202a',trousers:'#141418',boots:'#0d0d0d',cloak:'#8b1a1a',hat:'tophat',hatColor:'#141418',accent:'#b3202a'},'Cylinder, czerwona podszewka peleryny i cera, która nie widziała słońca od czasów Draculi. Śpi w sali numizmatycznej, w gablocie numer trzynaście.','halloween'],
+  ['halloween-skeleton','Szkielet z Gabloty','HALLOWEEN · STRÓJ LIMITOWANY','rare',['#141216','#e8e4d8','#9a9aa0'],['BEZ SKÓRY, BEZ STRACHU','cost',.8],{skin:'#e8e4d8',hair:'#e8e4d8',coat:'#141216',coatDark:'#000000',lapel:'#e8e4d8',trousers:'#141216',boots:'#1a1410',hat:'skull',hatColor:'#e8e4d8'},'Eksponat z działu anatomii, który w nocy schodzi ze stojaka. Czaszka, żebra na czarnym trykocie i kości rąk, które nie puszczają broni.','halloween'],
+  ['halloween-mummy','Mumia z Magazynu','HALLOWEEN · STRÓJ LIMITOWANY','rare',['#d8ccb0','#a89878','#1a1410'],['BANDAŻE FARAONA','armor',.84],{skin:'#d8ccb0',hair:'#d8ccb0',coat:'#d8ccb0',coatDark:'#a89878',trousers:'#d8ccb0',boots:'#b0a080',sash:'#a89878',hat:'bandages',hatColor:'#d8ccb0'},'Owinięta od stóp do głów bandażami z magazynu egiptologii. Jedno oko widać, drugie zostało w sarkofagu.','halloween']
+ ];
+ const seasonal = Object.freeze(seasonRows.map(row => {
+  const [id,name,era,rarity,colors,[title,kind,value],figure,description,season] = row;
+  return Object.freeze({ id, name, description, era, rarity, colors:Object.freeze(colors), motif:'season', categoryId:'halloween', season, figure:Object.freeze(figure), perk:benefit(title,kind,value) });
+ }));
+ window.MuseumKnights = Object.freeze({skins:Object.freeze([...skins, ...heroes, ...seasonal]), heroes, seasonal});
 })();

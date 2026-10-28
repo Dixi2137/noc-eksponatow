@@ -161,7 +161,7 @@
     for (let i = 0; i < 20; i++) assert.equal(loot.draw(p, random, 'legends').rarity, 'legendary');
     assert.ok(loot.remaining(p, 'pantheon').every(i => i.kind === 'card' && i.categoryId === 'heroes'));
     assert.ok(loot.remaining(p, 'blueprints').every(i => i.kind === 'card' && i.categoryId === 'arsenal'));
-    assert.equal(loot.crates.length, 35); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
+    assert.equal(loot.crates.length, 36); assert.ok(loot.crates.every(c => c.glyph && c.color && c.cost > 0 && c.group));
   });
   test('Lakiernia: ~390 wykończeń w pięciu rzadkościach, dwie skrzynie tylko z wykończeniami, ceny od groszy do tysięcy', () => {
     const F = window.MuseumFinishes, all = F.all(); assert.ok(all.length >= 380 && all.length <= 400, String(all.length));
@@ -265,6 +265,17 @@
     for (const id of ['lacquer', 'atelier', 'collector', 'gallery', 'armory', 'night']) assert.ok(loot.remaining(p, id).every(i => !i.season), `${id}: bez sezonowych`);
     const live = loot.activeCrates().some(c => c.id === 'halloween'); const r = loot.reserve(p, () => .5, 'halloween'); assert.equal(!!r, live, 'rezerwacja tylko w sezonie'); if (r) assert.equal(r.reward.season, 'halloween');
     assert.ok(loot.seasonLabel('halloween').includes('LISTOPADA'));
+  });
+  test('Stroje halloweenowe: pięć limitowanych na rigu postaci, wypadają tylko z Krypty Kustosza i tylko w sezonie, zostają po nim', () => {
+    const K = window.MuseumKnights; assert.equal(K.seasonal.length, 5); assert.ok(K.seasonal.every(s => s.season === 'halloween' && s.figure && s.perk && s.categoryId === 'halloween' && K.skins.includes(s)));
+    const items = loot.items.filter(i => i.kind === 'skin' && i.season === 'halloween'); assert.equal(items.length, 5); assert.ok(items.every(i => i.weight > 0 && i.era.includes('LIMITOWANY')));
+    const p = { ...loot.migrate(null), coins: 50000 }; const pool = loot.remaining(p, 'crypt'); assert.equal(pool.length, 5); assert.ok(pool.every(i => i.kind === 'skin' && i.season === 'halloween'), 'krypta: tylko stroje halloweenowe');
+    for (const id of ['gallery', 'treasury', 'relic', 'shadow', 'night', 'halloween']) assert.ok(loot.remaining(p, id).every(i => i.season !== 'halloween' || i.kind === 'finish'), `${id}: bez strojów sezonowych`);
+    const ids = d => loot.activeCrates(d).map(c => c.id); assert.ok(ids(new Date(2026, 9, 31)).includes('crypt') && !ids(new Date(2026, 10, 4)).includes('crypt'));
+    const live = loot.activeCrates().some(c => c.id === 'crypt'); const r = loot.reserve(p, () => .5, 'crypt'); assert.equal(!!r, live, 'rezerwacja tylko w sezonie');
+    if (r) { assert.equal(r.reward.kind, 'skin'); assert.equal(r.reward.season, 'halloween'); const c = loot.claim(r.profile, { equip: true }); assert.ok(loot.has(c, r.reward)); assert.equal(c.skin, r.reward.id); assert.equal(window.MuseumPerks.get(r.reward.id).title, r.reward.perk.title); }
+    const owned = loot.migrate({ ...p, owned: ['halloween-pumpkin'], skin: 'halloween-pumpkin' }); assert.ok(owned.owned.includes('halloween-pumpkin') && owned.skin === 'halloween-pumpkin', 'po sezonie strój zostaje w zapisie');
+    assert.equal(loot.remaining(owned, 'crypt').length, 4);
   });
   test('Skrzynia za złotówki: cena w groszach z cennika, schodzi z salda, żetony i darmowa skrzynia nietknięte', () => {
     let p = { ...loot.migrate(null), coins: 0, freeCrates: 1 }; assert.equal(loot.cratePricePLN('gallery'), 2999); assert.equal(loot.canPayPLN(p, 'gallery'), false);

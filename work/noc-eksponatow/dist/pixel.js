@@ -721,7 +721,13 @@
       beret: ["....OOOO....", "..OOPPPPOO..", ".OPPPPPPPPO.", "OPPPPPPPPPPO", ".OOOOOOOOOO."],
       fedora: ["...OOOOOO...", "..OWWWWWWO..", "..OWWWWWWO..", ".OOOOOOOOOO.", "OWWWWWWWWWWO", ".OOOOOOOOOO."],
       morion: ["....OO....", "...OMMO...", "..OMMMMO..", ".OMMMMMMO.", "OMMMMMMMMO", ".OOMMMMOO.", "OOOOOOOOOO"],
-      helmet: ["....OO....", "....OM....", "...OMMO...", "..OMMMMO..", ".OMMMMMMO.", "OMMMMMMMMO", "OPPPPPPPPO"]
+      helmet: ["....OO....", "....OM....", "...OMMO...", "..OMMMMO..", ".OMMMMMMO.", "OMMMMMMMMO", "OPPPPPPPPO"],
+      // Halloween costumes (knights.js seasonRows): full-head covers sit on the whole 11-row head, hats on its top like the others.
+      pumpkin: ["......VV......", ".....OVVO.....", "...OOOpPpOOO..", "..OPPpPPPpPPO.", ".OPPPpPPPpPPPO", "OPPXXpPPPpXXPO", "OPXXXpPPPpXXXO", "OPPPPpPPPpPPPO", "OPPXPPXXPPXPPO", "OPPXXXXXXXXPPO", ".OPPXPPPPXPPO.", ".OPPPpPPPpPPO.", "..OPPPpPPpPO..", "...OOOOOOOO..."],
+      witch: ["........OO....", ".......OPPO...", "......OPPPO...", ".....OPPPPO...", ".....OPPPPO...", "....OPPPPPPO..", "....OPPPPPPO..", "...OVVVVVVVVO.", "OOOPPPPPPPPPOO", "OPPPPPPPPPPPPO", ".OOOOOOOOOOOO."],
+      tophat: ["..OOOOOOOO..", "..OPPPPPPO..", "..OPPPPPPO..", "..OPPPPPPO..", "..OPPPPPPO..", "..OVVVVVVO..", "..OPPPPPPO..", "OOOPPPPPPOOO", "OPPPPPPPPPPO", ".OOOOOOOOOO."],
+      skull: ["...OOOOOO...", "..OPPPPPPO..", ".OPPPPPPPPO.", ".OPPPPPPPPO.", "OPPPPPPPPPPO", "OPOOPPPPOOPO", "OPOOPPPPOOPO", "OPPPPOOPPPPO", ".OPPPPPPPPO.", ".OPOPOPOPOO.", "..OOOOOOOO.."],
+      bandages: ["...OOOOOO...", "..OPPPPPPO..", ".OPpppppppO.", ".OPPPPPPPPO.", "OPppppPPPPpO", "OPPPSKSPPPPO", "OppPPPPPpppO", "OPPPPPppPPPO", ".OpppPPPPPO.", ".OPPPPpppPO.", "..OOOOOOOO.."]
     },
     weapons: {
       spear: { hold: [".OO.", "OMMO", "OMMO", ".OO.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD.", ".DD."], fwd: ["DDDDDDDDDDDDDDDDOMMMMO", "................OMMO.."] },
@@ -753,7 +759,7 @@
       C: coat, c: coatDark, T: trousers, t: mix(trousers, '#000000', .35), B: boots, b: mix(boots, '#ffffff', .2), D: '#5a3a22',
       L: F.lapel || '#e8e4d8', A: F.armor || '#9a9aa0', a: F.armorDark || '#5a5a60', Q: F.sash || '#c0392b', E: F.epaulettes || '#d4af37', e: mix(F.epaulettes || '#d4af37', '#000', .3),
       R: F.armband || F.crest || F.star || '#b3202a', G: '#d4af37', W: F.hatColor === '#e8e2d0' || F.hat === 'turban' ? (F.hatColor || '#f0ead6') : (F.hatColor || '#e8e2d0'),
-      P: F.hatColor || coat, p: mix(F.hatColor || coat, '#000000', .3), M: '#c9d6dc', k: mix(F.cloak || '#5a3a1e', '#000', .4), ...(F.cloak ? { K: F.cloak } : {}),
+      P: F.hatColor || coat, p: mix(F.hatColor || coat, '#000000', .3), M: '#c9d6dc', V: F.accent || '#7ab648', v: mix(F.accent || '#7ab648', '#000000', .35), X: F.glow || '#ffd166',   // V/v accent (stem, hat band), X glow (carved eyes) k: mix(F.cloak || '#5a3a1e', '#000', .4), ...(F.cloak ? { K: F.cloak } : {}),
       // shield uses P for its field; override below if a shield colour is given
     };
   }
@@ -789,7 +795,7 @@
     if (stocky) B(human.headWide, -7, 0); else B(human.head, -6, 0);
     if (F.hairstyle === 'long') B(human.hairFront, stocky ? -7 : -6, 3);
     if (F.beard) B(human.hair[F.beard], -3, 7); if (F.mustache) B(human.hair[F.mustache], -3, 7);
-    if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), F.hat === 'corinthian' ? -1 : F.hat === 'hood' ? -2 : F.hat === 'laurel' ? 1 : -(h.length - 4)); }
+    if (F.hat && F.hat !== 'none' && human.hats[F.hat]) { const h = human.hats[F.hat]; const w = h[0].length; B(h, -Math.round(w / 2), ({ corinthian: -1, hood: -2, laurel: 1, pumpkin: -3, skull: 0, bandages: 0 })[F.hat] ?? -(h.length - 4)); }
     if (F.shield) B(human.shield, pose === 'guard' ? 4 : -11, pose === 'guard' ? 10 : 14, { ...pal, P: F.shield, G: mix(F.shield, '#000', .5) });
     if (attacking) swing(B, p, { raised: bare ? human.armRaisedBare : human.armRaised, fwd: bare ? human.armFwdBare : human.armFwd }, wp.hold, wp.fwd, wpal);
     else holdIdle(B, bare ? human.armBare : human.armFront, wp.hold, wpal);
