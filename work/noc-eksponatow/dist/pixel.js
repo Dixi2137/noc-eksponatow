@@ -778,7 +778,7 @@
     const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
     // Weapon colours live in their own palette so a weapon's letters (A/B/C…) never recolour the figure's coat or skin.
     const wdef = o.weapon ? window.MuseumWeapons?.get(o.weapon) : null;
-    const wpal = { ...pal, ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}) };
+    const wpal = { ...pal, ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // a finish recolours the weapon on this rig too (heroes, seasonal costumes)
     B(bare ? human.armBare : human.armBack, stocky ? 6 : 4, 12);
     if (attacking) c.translate(lunge(p), 0);
     const lx = stocky ? -8 : -6, rx = stocky ? 2 : 0;
