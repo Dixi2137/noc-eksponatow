@@ -310,7 +310,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   const matches=matchingItems(),pages=Math.max(1,Math.ceil(matches.length/SKINS_PER_PAGE));collectionPage=Math.max(0,Math.min(collectionPage,pages-1));const page=matches.slice(collectionPage*SKINS_PER_PAGE,(collectionPage+1)*SKINS_PER_PAGE);
   $('skinResultsCount').textContent=matches.length?`${itemCount(matches.length,collectionKind)} · ${collectionPage*SKINS_PER_PAGE+1}–${Math.min((collectionPage+1)*SKINS_PER_PAGE,matches.length)} na stronie`:itemCount(0,collectionKind);
   $('skinPageInfo').textContent=`Strona ${collectionPage+1} / ${pages}`;$('skinPagePrev').disabled=collectionPage===0;$('skinPageNext').disabled=collectionPage>=pages-1;show('skinPagination',matches.length>SKINS_PER_PAGE);show('skinEmpty',!matches.length);$('newSkinsOnly').setAttribute('aria-pressed',String(collectionFilters.newOnly));
-  const equippedSkin=equippedSkinItem(),equippedWeapon=weapons.get(profile.weapon),equippedCard=cardsApi.get(profile.card),numberedSkins=loot.items.filter(i=>i.kind==='skin'&&i.number).length;
+  const equippedSkin=equippedSkinItem(),equippedWeapon=perks.get(equippedSkin.id).stats.unarmed&&weapons.has('fists')?weapons.get('fists'):weapons.get(profile.weapon),equippedCard=cardsApi.get(profile.card),numberedSkins=loot.items.filter(i=>i.kind==='skin'&&i.number).length;
   $('equippedSkin').textContent=`ZAŁOŻONO: ${equippedSkin.name} · ${equippedWeapon.name}${equippedCard?` · KARTA: ${equippedCard.name}`:' · BEZ KARTY'} · ${perks.get(profile.skin).summary}`;
   const busy=()=>crateBusy||!['menu','result'].includes(screen);
   const ownedTotal=matches.filter(s=>loot.has(profile,s)).length,lockedTotal=matches.length-ownedTotal;
