@@ -545,7 +545,7 @@
     const B = (rows, dx, dy, pl = pal) => blit(c, rows, dx, oy + dy, pl);
     B(popeParts.armBack, 4, 12);
     const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type, held = wdef?.sprite && human.weapons[wdef.sprite] ? human.weapons[wdef.sprite] : wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? (fp => fp ? { ...fp, E: pose === 'attack' ? mix(fp.M, '#ffffff', .35) : fp.M } : {})(window.MuseumFinishes?.palette(o.finish, t)) : {}) };   // the plain knight blade uses the glow letter E, so a finish paints it with its steel
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
     // The cassock reaches the shoes: a long skirt instead of greaves, shoes peeking out underneath.
@@ -576,7 +576,7 @@
     B(knightParts.cape, -12, 8);                                   // cape behind
     B(knightParts.armBack, 4, 12);
     const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type, held = wdef?.sprite && human.weapons[wdef.sprite] ? human.weapons[wdef.sprite] : wtype && wtype !== 'blade' ? human.weapons[({ heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype]] : null;
-    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? window.MuseumFinishes?.palette(o.finish, t) || {} : {}) };   // weapon colours (steel, edge, wood, brass), recoloured by a finish
+    const wpal = { ...pal, M: '#c9d6dc', W: '#f5f6d3', D: '#5a3a22', G: '#c9a94a', ...(wdef?.palette || {}), ...(wdef?.glow ? { L: mix(wdef.palette?.L || '#6ff6ff', '#ffffff', (Math.sin(t * 7) + 1) / 4) } : {}), ...(o.finish ? (fp => fp ? { ...fp, E: pose === 'attack' ? mix(fp.M, '#ffffff', .35) : fp.M } : {})(window.MuseumFinishes?.palette(o.finish, t)) : {}) };   // the plain knight blade uses the glow letter E, so a finish paints it with its steel   // weapon colours (steel, edge, wood, brass), recoloured by a finish
     const Wb = (rows, dx, dy) => B(rows, dx, dy, wpal);
     const hold = held ? held.hold : knightParts.sword, fwd = held ? held.fwd : knightParts.swordFwd;
     if (pose === 'attack') c.translate(lunge(p), 0);
