@@ -26,6 +26,25 @@
     const p = loot.migrate({ secrets: ['TAJNEHASLO123', 'TAJNEHASLO123', 7], weapons: ['test-ray'] });
     assert.deepEqual(p.secrets, ['TAJNEHASLO123'], 'kody w profilu bez duplikatów i śmieci'); assert.ok(p.weapons.includes('test-ray') && p.owned.includes('test-suit'), 'po odblokowaniu broń i skin w profilu');
   });
+  // A talker from a pack: swings that miss, lines on a clock that chip the foe, fists instead of whatever is equipped.
+  const talker = { id: 'test-talker', weapons: [{ id: 'fists', name: 'PIĘŚCI TESTOWE', categoryId: 'contemporary', type: 'light', rarity: 'mythic', icon: 'fists', flavour: 'x', overrides: { weakGuardDamage: 6, range: 330 }, sprite: 'fists' }],
+    skins: [{ id: 'test-talker', name: 'GADUŁA', description: 'x', rarity: 'mythic', shouts: ['raz', 'dwa', 'trzy'] }],
+    perks: [{ id: 'test-talker', title: 'GADANIE', summary: 'x', details: ['x'], stats: { attackFailChance: 1, weakGuardDamageMultiplier: .5, unarmed: 1, banterEvery: 4, banterDamage: 1, banterHitChance: 1 } }],
+    art: { icons: { fists: ['OAAO', 'OAAO'] }, held: { fists: { hold: ['.'], fwd: ['.'] } }, figures: { 'test-talker': { skin: '#e8cdb8', hair: '#1c1a20', hairUnder: '#b3202a', hairstyle: 'long', coat: '#26232b', trousers: '#201e25', boots: '#111014', build: 'tall', weapon: 'fists', hat: 'none' } } } };
+  test('Gaduła z pakietu: pięści zamiast broni, każdy zamach pudłuje, tekst co 4 s rani o 1 HP, rig wysoki i bez stali', () => {
+    secret._test.apply(talker);
+    const g = window.MuseumGame, t = g._test; g.reset(); let s = g.start({ sound: false, skin: 'test-talker', weapon: 'test-ray', rng: () => .5 });
+    assert.equal(s.weapon.id, 'fists', 'walczy pięściami, choć założony jest karabin');
+    t.setState({ foe: { x: 650, state: 'recover', timer: 0 }, player: { x: 365, stamina: 100 } }); t.input('attack', true); s = t.step(.05); t.input('attack', false); assert.ok(s.stamina < 100, 'pudło kosztuje wytrzymałość'); t.step(.5); s = g.getState();
+    assert.equal(s.foeHP, s.foe.maxHP, 'zamach w powietrze: słaba garda nie oberwała');
+    t.setState({ banterClock: 0, foe: { state: 'idle', timer: 0 } }); s = t.step(3); const hp = s.foeHP; s = t.step(1.5); assert.equal(s.foeHP, hp - 1, 'po 4 sekundach farmazon zdejmuje 1 HP');
+    s = t.step(4.5); assert.equal(s.foeHP, hp - 2, 'kolejny tekst po następnych 4 sekundach');
+    const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d');
+    window.MuseumPixel.drawKnight(c, 32, 60, { pose: 'idle', facing: 1, time: 0, skin: 'test-talker', weapon: 'test-ray' });
+    const d = c.getImageData(0, 0, 64, 64).data; let steel = 0, red = 0, top = 64;
+    for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 10) continue; const k = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2]; if (k === 0xc9d6dc) steel++; if (k === 0xb3202a) red++; top = Math.min(top, (i / 4 / 64) | 0); }
+    assert.equal(steel, 0, 'bez broni w ręce'); assert.ok(red > 0, 'czerwone włosy pod czarnymi'); assert.ok(top <= 60 - 36, 'wysoka sylwetka: 36 wierszy od ziemi');
+  });
   test('Przepalona garda: broń z pierce rani wroga podczas zamachu zamiast być odbita', () => {
     const g = window.MuseumGame, t = g._test; g.reset(); let s = g.start({ sound: false, skin: 'brass', weapon: 'test-ray', rng: () => .99 });
     t.setState({ foe: { x: 650, state: 'windup', timer: 0, heavy: true }, player: { x: 365, stamina: 100 } }); t.input('attack', true); t.step(.05); t.input('attack', false); t.step(.3); s = g.getState();

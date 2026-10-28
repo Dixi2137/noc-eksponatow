@@ -477,8 +477,9 @@
   // A figure skin: the human rig with the player's equipped weapon mapped onto it (by weapon type, or the weapon's own sprite).
   function drawFigureSkin(c, x, y, o = {}) {
     const wdef = window.MuseumWeapons?.get(o.weapon), wtype = wdef?.type;
-    const key = wdef?.sprite && human.weapons[wdef.sprite] ? wdef.sprite : ({ blade: 'sabre', heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype] || 'sabre';
-    drawFigure(c, x, y, { ...o, figure: { ...extraFigures[o.skin], weapon: key } });
+    const fig = extraFigures[o.skin];
+    const key = fig.weapon === 'fists' && human.weapons.fists ? 'fists' : wdef?.sprite && human.weapons[wdef.sprite] ? wdef.sprite : ({ blade: 'sabre', heavy: 'axe', polearm: 'spear', light: 'dagger', bow: 'bow', pistol: 'pistol', rifle: 'rifle' })[wtype] || 'sabre';   // a bare-handed figure stays bare-handed whatever is equipped
+    drawFigure(c, x, y, { ...o, figure: { ...fig, weapon: key } });
   }
   function knightPalette(skin) {
     let base = '#687b7e', dark = '#172b36', light = '#bad2c8', glint = '#e5dfab', cloth = ['#581e32', '#26182b'];
@@ -767,12 +768,12 @@
     const F = o.figure || {}, pose = o.pose || 'idle', p = Math.max(0, Math.min(1, o.progress ?? 0)), t = o.time || 0;
     const pal = figurePalette(F); const flip = o.facing === -1;
     const walk = pose === 'walk' ? Math.round(Math.sin(t * 9)) : 0, bob = pose === 'walk' ? Math.abs(Math.round(Math.sin(t * 9))) : 0;
-    const bare = F.legs === 'bare', stocky = F.build === 'stocky';
+    const bare = F.legs === 'bare', stocky = F.build === 'stocky', tall = F.build === 'tall', shin = tall ? 3 : 0;   // tall: three more rows of shin under the trousers
     c.save(); c.translate(Math.round(x), Math.round(y)); if (flip) c.scale(-1, 1);
     c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(-9, -1, 18, 2);
     if (pose === 'dead') { c.translate(-6, -4); c.rotate(-Math.PI / 2); c.translate(-14, 2); }
     else if (pose === 'dodge') c.translate(-4, 2); else if (pose === 'hurt') c.translate(-2, 0);
-    const oy = -33 - bob;   // boots (legs 22 + 9 rows, boot 30 + 3 rows) end exactly at ground level
+    const oy = -33 - shin - bob;   // boots (legs 22 + 9 rows, boot 30 + 3 rows) end exactly at ground level
     const B = (rows, dx, dy, pl = pal) => rows && blit(c, rows, dx, oy + dy, pl);
     if (F.cloak) B(human.cloak, -11, 9);
     const wp = human.weapons[F.weapon] || human.weapons.sabre, attacking = pose === 'attack';
@@ -783,14 +784,14 @@
     if (attacking) c.translate(lunge(p), 0);
     const lx = stocky ? -8 : -6, rx = stocky ? 2 : 0;
     if (bare) { B(human.legBare, lx, 22); B(human.legBare, rx, 22); B(human.sandal, lx, 30); B(human.sandal, rx, 30); }
-    else { B(walk > 0 ? human.legB : human.legA, lx, 22); B(walk < 0 ? human.legB : human.legA, rx, 22); B(human.boot, lx, 30); B(human.boot, rx, 30); }
+    else { B(walk > 0 ? human.legB : human.legA, lx, 22); B(walk < 0 ? human.legB : human.legA, rx, 22); if (tall) { B(human.legA.slice(2, 5), lx, 30); B(human.legA.slice(2, 5), rx, 30); } B(human.boot, lx, 30 + shin); B(human.boot, rx, 30 + shin); }
     if (stocky) B(human.torsoWide, -9, 11); else B(human.torso, -7, 11);
     if (F.armor) B(human.armor, -6, 12);
     if (F.lapel) B(human.lapel, -4, 12);
     if (F.sash) B(human.sash, -6, 12);
     if (F.epaulettes) { B(human.epaulette, -7, 11); B(human.epaulette, 3, 11); }
     if (F.armband) B(human.armband, 4, 15);
-    if (F.hairstyle === 'long') B(human.hairLong, stocky ? -7 : -6, 0);
+    if (F.hairstyle === 'long') B(human.hairLong, stocky ? -7 : -6, 0, F.hairUnder ? { ...pal, H: F.hairUnder } : pal);   // hairUnder: the long back hair in a second colour (dyed on top)
     B(human.neck, stocky ? -3 : -2, 10); if (stocky) B(human.neck, 0, 10);
     if (stocky) B(human.headWide, -7, 0); else B(human.head, -6, 0);
     if (F.hairstyle === 'long') B(human.hairFront, stocky ? -7 : -6, 3);

@@ -31,6 +31,7 @@
   function pressureFor(level) { const n = Number(level); return n <= 1 || !Number.isFinite(n) ? 0 : clamp(.45 + (n - 2) / 18, 0, 1); }
   function fresh(skin = 'brass', exhibitId = 'trex', weaponId = 'sword', theme = 'museum', modifiers = null, twistId = null, specials = false, difficulty = 1) {
     const exhibit = window.MuseumExhibits.get(exhibitId);
+    if (window.MuseumPerks.get(skin).stats.unarmed && window.MuseumWeapons.has('fists')) weaponId = 'fists';   // a bare-handed skin fights with its fists whatever is equipped
     const { perk, weapon } = applyModifiers(window.MuseumPerks.get(skin), window.MuseumWeapons.get(weaponId), modifiers);
     const stats = perk.stats, twist = window.MuseumTwists?.get(twistId) || null, combat = { ...exhibit.stats.combat }, damage = { ...exhibit.stats.damage };
     if (twist) {
@@ -196,6 +197,8 @@
     }
     p.stamina -= w.staminaCost; p.attack = w.swing; p.attackDone = false; p.cooldown = w.cooldown;
     if (w.kind === 'ranged' && p.ammo != null) { p.ammo--; p.shots++; }
+    // Some skins see double: the swing plays and costs breath, but the blow itself never comes.
+    if (state.perk.stats.attackFailChance && state.rng() < state.perk.stats.attackFailChance) { p.attackDone = true; tone('dodge'); label('PUDŁO', p.x + 40, FLOOR - 285, '#adb6b9', 20); hint('Zamach w powietrze. Tak to jest, jak się widzi podwójnie.', 1.2); return; }
     tone(w.kind === 'ranged' ? 'hit' : 'swing');
     shout();
   }
@@ -203,9 +206,18 @@
   let lastShout = -1;
   function shout() {
     const lines = window.MuseumLoot?.getItem?.(state.skin)?.shouts;
-    if (!lines || !lines.length || Math.random() < .45) return;
+    if (!lines || !lines.length || state.perk.stats.banterEvery || Math.random() < .45) return;   // talkers on a clock keep their lines for banter()
     let i = Math.floor(Math.random() * lines.length); if (lines.length > 1 && i === lastShout) i = (i + 1) % lines.length; lastShout = i;
     label(lines[i], state.player.x + 10, FLOOR - 300, '#fff6d6', 22);
+  }
+
+  // A talker's lines come on a clock, not with the blows: each one is a jab of its own that most foes simply shrug off.
+  function banter() {
+    const p = state.player, r = state.foe, stats = state.perk.stats;
+    const lines = window.MuseumLoot?.getItem?.(state.skin)?.shouts || [];
+    if (lines.length) { let i = Math.floor(state.rng() * lines.length); if (lines.length > 1 && i === lastShout) i = (i + 1) % lines.length; lastShout = i; label(lines[i], p.x + 10, FLOOR - 300, '#fff6d6', 22); }
+    if (state.rng() < (stats.banterHitChance ?? 0)) { damageFoe(Math.max(1, Math.round(stats.banterDamage ?? 1))); label('FARMAZON', r.x - 70, FLOOR - 255, '#d9a9ff', 19); checkEnd(); }
+    else label('ODPORNY', r.x - 70, FLOOR - 255, '#adb6b9', 19);
   }
 
   // Every blow provokes a dodge or a parry. A tired guard still lets damage through.
@@ -345,6 +357,7 @@
     if (state.status !== 'running') return;
     if (hitstop > 0) { hitstop -= dt; return; }
     state.elapsed += dt; eventClock -= dt;
+    if (state.perk.stats.banterEvery) { state.banterClock = (state.banterClock || 0) + dt; if (state.banterClock >= state.perk.stats.banterEvery) { state.banterClock = 0; banter(); if (state.status !== 'running') return; } }
     const p = state.player, r = state.foe, combat = state.combat, w = state.weapon.stats, GAP = combat.minGap;
     p.cooldown = Math.max(0, p.cooldown - dt); p.hurt = Math.max(0, p.hurt - dt);
     p.evade = Math.max(0, p.evade - dt); p.defense = Math.max(0, p.defense - dt);
