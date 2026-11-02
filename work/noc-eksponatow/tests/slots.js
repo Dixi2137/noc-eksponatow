@@ -15,6 +15,7 @@
     assert.deepEqual(jackpot.symbols, ['kufel', 'kufel', 'kufel']); assert.equal(jackpot.payout, 10000); assert.equal(jackpot.profile.coins, 900); assert.deepEqual(jackpot.profile.slots.pending, { currency: 'coins', amount: 10000 });
     assert.equal(S.canBet(jackpot.profile, { amount: 100, currency: 'coins' }).reason, 'pending');
     assert.equal(S.settle({ ...p, balance: 150000000, slots: { pending: { currency: 'pln', amount: 300000000 } } }).balance, 450000000, 'wygrana w zł bez górnego limitu');
+    assert.equal(S.settle({ ...p, balance: -2000, slots: { pending: { currency: 'pln', amount: 500 } } }).balance, -1500, 'wygrana spłaca debet'); assert.equal(S.canBet({ ...p, balance: -2000 }, { amount: 100, currency: 'pln' }).reason, 'funds');
     const settled = S.settle(jackpot.profile); assert.equal(settled.coins, 10900); assert.equal(settled.slots.pending, null); assert.equal(settled.slots.coinsNet, 9900); assert.equal(settled.slots.spins, 1);
     // rng cycling 1/16, 2/16, 3/16 → coin, sword, pumpkin: nothing, nothing pending, PLN stake gone.
     let i = 0; const lose = S.spin(settled, { amount: 100, currency: 'pln' }, () => [1, 2, 3][i++ % 3] / 16);

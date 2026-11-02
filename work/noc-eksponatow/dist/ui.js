@@ -40,7 +40,7 @@
  window.addEventListener('pagehide',()=>{if(!cloud.user())return;clearTimeout(pushTimer);cloud.upsertProfile({save:profile,...cloudStats()},{keepalive:true});});
  async function pushCloud(now=false){if(!cloud.user())return null;clearTimeout(pushTimer);if(!now){pushTimer=setTimeout(()=>pushCloud(true),1200);return null;}if(pushing){pushAgain=true;return null;}pushing=true;const r=await cloud.upsertProfile({save:profile,...cloudStats()});pushing=false;if(pushAgain){pushAgain=false;pushCloud();}setAccountStatus(r.ok?'':`Zapis w chmurze nie powiódł się: ${r.error}`,!r.ok);return r;}
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
- function persist(){profile.savedAt=new Date().toISOString();try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);updateLoadout();pushCloud();}
+ function persist(){profile.savedAt=new Date().toISOString();try{localStorage.setItem('museum-night-v1',JSON.stringify(profile));}catch(_){} $('coins').textContent=profile.coins;$('balance').textContent=pln(profile.balance);document.body.classList.toggle('is-debt',Number(profile.balance)<0);updateLoadout();pushCloud();}
  function refreshStores(){if(!$('collection').classList.contains('hidden'))renderSkins();if(!$('shop').classList.contains('hidden'))window.MuseumShop.render();}
  function buyFinish(id){const result=loot.buyFinish(profile,id);if(!result){toast('Za mało na saldzie. Wpłać najpierw złotówki.');return;}profile=result.profile;persist();refreshStores();toast(`Kupiono ${result.item.name} za ${pln(result.price)}. Nałóż je w kolekcji, zakładka WYKOŃCZENIA.`);}
 // Pixel art is the only look: the vector renderer stays in art.js as a fallback, but nothing in the UI switches to it.
@@ -154,7 +154,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
  // Coins / PLN granted by a moderator: pulled from the server and added to the local save (the local save otherwise wins every push).
  let claimingAdjustments=false;
  async function syncAdjustments(){if(!cloud.user()||claimingAdjustments||typeof cloud.claimAdjustments!=='function')return;claimingAdjustments=true;try{const r=await cloud.claimAdjustments();if(!r.ok||(!r.coins&&!r.balance))return;
-  profile=loot.migrate({...profile,coins:Math.max(0,profile.coins+r.coins),balance:Math.max(0,(profile.balance||0)+r.balance)});persist();refreshStores();
+  profile=loot.migrate({...profile,coins:Math.max(0,profile.coins+r.coins),balance:(profile.balance||0)+r.balance});persist();refreshStores();
   const parts=[];if(r.coins)parts.push(`${r.coins>0?'+':''}${number(r.coins)} ✦`);if(r.balance)parts.push(`${r.balance>0?'+':''}${pln(r.balance)}`);toast(r.welcome?`Witaj na nocnej zmianie! Na start dostajesz ${parts.join(' i ')}. Wydaj je w sklepie.`:`Kustosz zmienił twoje konto: ${parts.join(', ')}.`,r.welcome?6000:undefined);}finally{claimingAdjustments=false;}}
  setInterval(syncAdjustments,45000);
  function adoptCloudSave(save){profile=loot.migrate(save);if(profile.roulette?.pending&&window.MuseumRoulette)profile=loot.migrate(window.MuseumRoulette.settle(profile));if(profile.slots?.pending&&window.MuseumSlots)profile=loot.migrate(window.MuseumSlots.settle(profile));persist();renderMenuLevel();renderDaily();soundUI();renderAccount();applySecrets();}
@@ -210,7 +210,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   $('modList').replaceChildren(...(list.data||[]).map(p=>{
    const row=document.createElement('div');row.className='mod-row';row.dataset.id=p.id;
    const banned=p.banned_until&&new Date(p.banned_until)>new Date(),perm=banned&&new Date(p.banned_until).getFullYear()-new Date().getFullYear()>50;
-   row.innerHTML=`<div><strong></strong><small></small></div><span class="mod-role ${p.role}">${p.role}</span><span>${p.halls_cleared} / ${levels.count}</span><span>${number(p.coins)} ✦</span><span>${plnText(p.balance)}</span><span class="${banned?'mod-banned':'mod-ok'}"></span>`;
+   row.innerHTML=`<div><strong></strong><small></small></div><span class="mod-role ${p.role}">${p.role}</span><span>${p.halls_cleared} / ${levels.count}</span><span>${number(p.coins)} ✦</span><span class="${Number(p.balance)<0?'mod-debt':''}">${plnText(p.balance)}</span><span class="${banned?'mod-banned':'mod-ok'}"></span>`;
    row.querySelector('strong').textContent=p.nickname+(p.id===me?.id?' (ty)':'');for(const key of cloud.titlesOf(p)){const tt=cloud.titles?.[key];if(!tt)continue;const badge=document.createElement('small');badge.className='rank-title';badge.textContent=tt.name;badge.style.color=tt.color;badge.title=tt.note;row.querySelector('strong').append(badge);}row.querySelector('div>small').textContent=`prestiż ${p.prestige} · ostatnio ${new Date(p.updated_at).toLocaleString('pl-PL')}${p.mod_note?` · notatka: ${p.mod_note}`:''}`;
    row.querySelector('.mod-ok,.mod-banned').textContent=banned?`BAN ${perm?'∞':'do '+new Date(p.banned_until).toLocaleDateString('pl-PL')}${p.ban_reason?' · '+p.ban_reason:''}`:'AKTYWNY';
    const actions=document.createElement('div');actions.className='mod-actions';const self=p.id===me?.id;

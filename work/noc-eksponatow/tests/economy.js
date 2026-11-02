@@ -245,8 +245,9 @@
     assert.equal(p.balance, 21370 + 150000 - 149900); assert.deepEqual(p.finishes, ['gold-marble']); assert.equal(loot.canBuyFinish(p, 'gold-marble'), false, 'już masz');
     p = loot.equip(p, 'gold-marble'); assert.equal(loot.sellFinish(p, 'gold-marble'), null, 'nałożone'); p = loot.equip(p, 'gold-marble');
     const sold = loot.sellFinish(p, 'gold-marble'); assert.ok(sold); assert.equal(sold.price, 112425); assert.equal(sold.profile.balance, 21470 + 112425); assert.deepEqual(sold.profile.finishes, []);
-    assert.equal(loot.sellFinish(p, 'sword'), null, 'tylko wykończenia'); assert.equal(loot.migrate({ balance: '12.7' }).balance, 12); assert.equal(loot.migrate({ balance: -5 }).balance, 0);
+    assert.equal(loot.sellFinish(p, 'sword'), null, 'tylko wykończenia'); assert.equal(loot.migrate({ balance: '12.7' }).balance, 12); assert.equal(loot.migrate({ balance: -5 }).balance, -5, 'debet zostaje');
     assert.equal(loot.deposit(loot.migrate({ balance: 250000000 }), 100000000).balance, 350000000, 'saldo bez górnego limitu (3,5 mln zł)'); assert.equal(loot.migrate({ balance: 900000000 }).balance, 900000000);
+    const debt = loot.migrate({ balance: -250000, coins: 5000 }); assert.equal(loot.canPayPLN(debt, 'gallery'), false, 'na debecie nie kupisz'); assert.equal(loot.canBuyFinish(debt, 'gold-marble'), false); assert.equal(loot.deposit(debt, 100000).balance, -150000, 'wpłata spłaca debet'); assert.equal(loot.migrate({ coins: -40 }).coins, 0, 'żetony nigdy ujemne');
   });
   test('Galeria Legend: postaci z historii mają kostium i atut, skrzynia losuje tylko je, zwykłe skrzynie strojów ich nie dają', () => {
     const heroes = loot.items.filter(i => i.kind === 'skin' && i.categoryId === 'heroes');

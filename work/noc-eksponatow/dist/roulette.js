@@ -32,8 +32,8 @@
   // Credits the parked payout. Safe to call when nothing is pending.
   function settle(profile) {
     const p = profile.roulette?.pending; if (!p || !integer(p.amount)) return { ...profile, roulette: stats(profile) };
-    const key = field(p.currency);   // no upper limit on tokens or balance
-    return { ...profile, [key]: integer(profile[key]) + integer(p.amount), roulette: stats(profile) };
+    const key = field(p.currency);   // no upper limit; a PLN debt keeps its sign, so the win pays it down first
+    return { ...profile, [key]: (key === 'balance' ? signed(profile[key]) : integer(profile[key])) + integer(p.amount), roulette: stats(profile) };
   }
   window.MuseumRoulette = Object.freeze({ WHEEL, PAYOUT, MIN, canBet, spin, settle, stats });
 })();

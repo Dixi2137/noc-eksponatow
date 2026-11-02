@@ -332,6 +332,7 @@ body.pixel .exhibit-tag #exhibitTagName{font-family:var(--pixel-head);font-weigh
 .shop-fin-buy:disabled{background:#2a3324;color:#8f9b84;cursor:default}
 .shop-v2 .shop-wallet-panel{margin:0 0 16px}
 .shop-v2 .shop-notice{margin:0}
+.is-debt #balance,.is-debt #shopBalancePLN,.is-debt #shopWalletPLN,.is-debt #rouPLN,.is-debt #slPLN,.mod-debt{color:#ff6b6b!important}
 body.pixel .shop-v2 .shop-summary h3,body.pixel .shop-balances .shop-wallet strong,body.pixel .shop-v2 .shop-total strong,body.pixel 
 body.pixel .shop-v2 .shop-summary h3{font-size:34px}
 body.pixel 
