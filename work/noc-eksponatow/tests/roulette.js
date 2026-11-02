@@ -19,6 +19,7 @@
     // rng 0 → index 0 = green, ×14 from the PLN balance.
     const green = R.spin(settled, { color: 'green', amount: 100, currency: 'pln' }, () => 0);
     assert.equal(green.color, 'green'); assert.equal(green.payout, 1400); assert.equal(green.profile.balance, 4900); assert.equal(R.settle(green.profile).balance, 6300);
+    assert.equal(R.settle({ ...settled, balance: 99999900, roulette: { pending: { currency: 'pln', amount: 1400 } } }).balance, 100001300, 'saldo przechodzi przez milion zł');
     // rng .99 → index 14 = black: a red bet loses, nothing pending, settle is a no-op.
     const lose = R.spin(settled, { color: 'red', amount: 300, currency: 'coins' }, () => .99);
     assert.equal(lose.color, 'black'); assert.ok(!lose.win); assert.equal(lose.profile.coins, 800); assert.equal(lose.profile.roulette.pending, null); assert.equal(R.settle(lose.profile).coins, 800); assert.equal(lose.profile.roulette.coinsNet, -200);

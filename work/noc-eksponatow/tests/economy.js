@@ -246,6 +246,7 @@
     p = loot.equip(p, 'gold-marble'); assert.equal(loot.sellFinish(p, 'gold-marble'), null, 'nałożone'); p = loot.equip(p, 'gold-marble');
     const sold = loot.sellFinish(p, 'gold-marble'); assert.ok(sold); assert.equal(sold.price, 112425); assert.equal(sold.profile.balance, 21470 + 112425); assert.deepEqual(sold.profile.finishes, []);
     assert.equal(loot.sellFinish(p, 'sword'), null, 'tylko wykończenia'); assert.equal(loot.migrate({ balance: '12.7' }).balance, 12); assert.equal(loot.migrate({ balance: -5 }).balance, 0);
+    assert.equal(loot.deposit(loot.migrate({ balance: 250000000 }), 100000000).balance, 350000000, 'saldo bez górnego limitu (3,5 mln zł)'); assert.equal(loot.migrate({ balance: 900000000 }).balance, 900000000);
   });
   test('Galeria Legend: postaci z historii mają kostium i atut, skrzynia losuje tylko je, zwykłe skrzynie strojów ich nie dają', () => {
     const heroes = loot.items.filter(i => i.kind === 'skin' && i.categoryId === 'heroes');

@@ -44,8 +44,8 @@
   }
   function settle(profile) {
     const p = profile.slots?.pending; if (!p || !integer(p.amount)) return { ...profile, slots: stats(profile) };
-    const key = field(p.currency), cap = key === 'balance' ? 100000000 : Number.MAX_SAFE_INTEGER;
-    return { ...profile, [key]: Math.min(cap, integer(profile[key]) + integer(p.amount)), slots: stats(profile) };
+    const key = field(p.currency);   // no upper limit on tokens or balance
+    return { ...profile, [key]: integer(profile[key]) + integer(p.amount), slots: stats(profile) };
   }
   // Expected return per unit staked, by enumerating every stop combination.
   function rtp() { let total = 0; const n = REEL.length; for (let a = 0; a < n; a++) for (let b = 0; b < n; b++) for (let c = 0; c < n; c++) total += evaluate([REEL[a], REEL[b], REEL[c]]).multiplier; return total / (n * n * n); }

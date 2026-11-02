@@ -257,7 +257,7 @@
    weapons,weapon:weapons.includes(source.weapon) ? source.weapon : 'sword',
    cards,card:cards.includes(source.card)&&cardsApi.get(source.card)?.type==='hero' ? source.card : null,
    finishes,finish:finishes.includes(source.finish) ? source.finish : null,
-   balance:Math.min(100000000,integer(source.balance)),   // PLN wallet in grosze (demo: no real payments yet)
+   balance:integer(source.balance),   // PLN wallet in grosze (demo: no real payments yet); no upper limit
    pendingKind:pendingReward ? (getItem(pendingReward)?.kind||'skin') : null,
    upgrades,login:{last:typeof source.login?.last==='string' ? source.login.last : null,streak:Math.min(3650,integer(source.login?.streak))},
    hall:window.MuseumHall ? window.MuseumHall.migrate(source.hall) : {name:'',slots:{}},
@@ -347,8 +347,8 @@ const GIFTS=Object.freeze({DIXI:{coins:10000,balance:213700,label:'Prezent od Ow
 function normGift(code){return String(code||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/\s+/g,'');}
 function getGift(code){const key=normGift(code);return GIFTS[key]?{id:key,...GIFTS[key]}:null;}
 function claimGift(profile,code){const gift=getGift(code);if(!gift)return {ok:false,reason:'unknown'};const claimed=Array.isArray(profile.gifts)?profile.gifts:[];if(claimed.includes(gift.id))return {ok:false,reason:'claimed',gift};
- return {ok:true,gift,profile:{...profile,coins:integer(profile.coins)+gift.coins,balance:Math.min(100000000,integer(profile.balance)+gift.balance),gifts:[...claimed,gift.id]}};}
-function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;return {...profile,balance:Math.min(100000000,integer(profile.balance)+gr)};}
+ return {ok:true,gift,profile:{...profile,coins:integer(profile.coins)+gift.coins,balance:integer(profile.balance)+gift.balance,gifts:[...claimed,gift.id]}};}
+function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;return {...profile,balance:integer(profile.balance)+gr};}
  function pricePLN(item){const it=typeof item==='string'?getItem(item):item;return it&&it.kind==='finish'?Math.round((it.pricePLN||0)*100):0;}
  function sellPricePLN(item){return Math.round(pricePLN(item)*SELL_RATE_PLN);}
  function canBuyFinish(profile,id){const item=getItem(id);return !!item&&item.kind==='finish'&&!has(profile,item)&&integer(profile.balance)>=pricePLN(item)&&pricePLN(item)>0;}
@@ -358,7 +358,7 @@ function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;ret
  }
  function sellFinish(profile,id){
   const item=getItem(id);if(!item||item.kind!=='finish'||!canSell(profile,id))return null;const price=sellPricePLN(item);
-  return {profile:{...profile,balance:Math.min(100000000,integer(profile.balance)+price),finishes:(profile.finishes||[]).filter(x=>x!==item.id)},item,price};
+  return {profile:{...profile,balance:integer(profile.balance)+price,finishes:(profile.finishes||[]).filter(x=>x!==item.id)},item,price};
  }
  // Upgrades: skins gain +6 max HP per level, weapons +8% weak-guard damage per level. Five levels, rising price.
  const upgradeKey=(kind,id)=>`${kind}:${id}`;
