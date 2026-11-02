@@ -7,7 +7,7 @@
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -154,14 +154,16 @@
  }
  function showView(next){
   view=next;if(view==='finishes')startFinishAnim();
-  for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet']])$(id).setAttribute('aria-selected',String(view===name));
-  for(const [id,name] of [['shopViewCrates','crates'],['shopViewFinishes','finishes'],['shopViewWallet','wallet']])$(id).classList.toggle('hidden',view!==name);
+  for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette']])$(id).setAttribute('aria-selected',String(view===name));
+  for(const [id,name] of [['shopViewCrates','crates'],['shopViewFinishes','finishes'],['shopViewWallet','wallet'],['shopViewRoulette','roulette']])$(id).classList.toggle('hidden',view!==name);
+  if(view==='roulette')roulette.render();
  }
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];
   if(!mounted){
    for(const [id,filter] of filters)$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
-   for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet']])$(id).addEventListener('click',()=>showView(name));
+   for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette']])$(id).addEventListener('click',()=>showView(name));
+   roulette.mount();
    const soon=()=>callbacks.notify('Płatności nie są jeszcze podpięte. Wpłaty ruszą razem z operatorem płatności.');
    for(const b of document.querySelectorAll('.shop-deposit-btn'))b.addEventListener('click',soon);
    $('shopDepositBtn')?.addEventListener('click',soon);
@@ -181,5 +183,48 @@
   showView(view);
   render();
  }
+ // ── Ruletka Kustosza: a strip of 15 fields scrolls under the pointer and eases out on the drawn one ──
+ const roulette=(()=>{
+  const R=()=>window.MuseumRoulette,CELL=48,LAPS=4,SPIN_MS=3400;
+  const colors={red:['#b3202a','#7a1119'],black:['#2a2a30','#141418'],green:['#2f8f4e','#1b5a30']};
+  let currency='coins',spinning=false,offset=0,anim=0,history=[];
+  const amountEl=()=>$('rouAmount');
+  const grosze=v=>Math.round(Number(v)*100);
+  const stake=()=>currency==='pln'?grosze(amountEl().value):Math.floor(Number(amountEl().value)||0);
+  const fmt=(amount,cur)=>cur==='pln'?pln(amount):`${number.format(amount)} ✦`;
+  function drawStrip(){const c=$('rouStrip');if(!c)return;const x=c.getContext('2d');const W=c.width,H=c.height,wheel=R().WHEEL,n=wheel.length;x.imageSmoothingEnabled=false;x.fillStyle='#0d120c';x.fillRect(0,0,W,H);
+   const start=Math.floor(offset/CELL)-1;for(let i=start;i<start+Math.ceil(W/CELL)+2;i++){const idx=((i%n)+n)%n,px=Math.round(i*CELL-offset),[a,b]=colors[wheel[idx]];x.fillStyle=b;x.fillRect(px+2,10,CELL-4,H-20);x.fillStyle=a;x.fillRect(px+4,12,CELL-8,H-28);x.fillStyle='#0d120c';x.fillRect(px,0,2,H);
+    if(wheel[idx]==='green'){x.fillStyle='#d6f27a';x.fillRect(px+CELL/2-6,H/2-8,12,4);x.fillRect(px+CELL/2-2,H/2-12,4,12);x.fillRect(px+CELL/2-6,H/2+4,12,4);}}
+   x.fillStyle='#0d120c';x.fillRect(0,0,W,10);x.fillRect(0,H-10,W,10);}
+  function render(){const p=profile(),st=R().stats(p);$('rouCoins').textContent=`${number.format(p.coins)} ✦`;$('rouPLN').textContent=pln(p.balance);$('shopBalance').textContent=`${number.format(p.coins)} ✦`;$('shopBalancePLN').textContent=pln(p.balance);
+   $('rouNet').textContent=`${st.coinsNet>=0?'+':''}${number.format(st.coinsNet)} ✦ · ${st.plnNet>=0?'+':''}${pln(st.plnNet)}`;
+   for(const b of document.querySelectorAll('.roulette-currency button'))b.setAttribute('aria-pressed',String(b.dataset.currency===currency));
+   $('rouAmountLabel').textContent=currency==='pln'?'STAWKA (ZŁ)':'STAWKA (✦)';const quick=document.querySelectorAll('.roulette-quick button');quick[0].textContent=currency==='pln'?'+5':'+100';quick[1].textContent=currency==='pln'?'+20':'+500';
+   const can=!spinning&&callbacks.canOpen();for(const b of document.querySelectorAll('.roulette-bet'))b.disabled=!can;
+   const hist=$('rouHistory');hist.replaceChildren(...history.slice(-12).map(h=>{const d=document.createElement('span');d.className=`roulette-chip is-${h.color}${h.win?' is-win':''}`;d.title=h.win?`+${fmt(h.payout,h.currency)}`:`−${fmt(h.amount,h.currency)}`;d.textContent=h.color==='green'?'K':'';return d;}));
+   drawStrip();}
+  function setAmount(v){const el=amountEl();const n=currency==='pln'?Math.max(1,Math.round(v)):Math.max(10,Math.floor(v));el.value=String(n);}
+  function quick(kind){const p=profile(),cur=stake();const haveRaw=currency==='pln'?p.balance:p.coins,cap=Math.min(haveRaw,R().MAX[currency]),unit=currency==='pln'?100:1;
+   const next=kind==='a'?cur+(currency==='pln'?500:100):kind==='b'?cur+(currency==='pln'?2000:500):kind==='x2'?cur*2:kind==='half'?Math.floor(cur/2):cap;setAmount(Math.min(cap,Math.max(R().MIN[currency],next))/unit);}
+  function bet(color){if(spinning)return;const p=profile(),check=R().canBet(p,{color,amount:stake(),currency});
+   if(!callbacks.canOpen()){callbacks.notify('Ruletka jest dostępna przed następnym pojedynkiem.');return;}
+   if(!check.ok){const why={min:`Minimalna stawka to ${fmt(R().MIN[currency],currency)}.`,max:`Maksymalna stawka to ${fmt(R().MAX[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.'}[check.reason]||'Niepoprawny zakład.';$('rouResult').textContent=why;callbacks.notify(why);return;}
+   const r=callbacks.onRoulette({color,amount:check.amount,currency});if(!r)return;
+   spinning=true;render();$('rouResult').textContent=`Postawione ${fmt(r.amount,r.currency)} na ${({red:'czerwone',black:'czarne',green:'Kustosza'})[color]}. Kręci się…`;
+   const c=$('rouStrip'),n=R().WHEEL.length,centre=c.width/2;const startOffset=offset;
+   // The pointer sits at the strip's centre; land it on the drawn field a few laps ahead, with a little random slack inside the cell.
+   const base=Math.ceil((startOffset+centre)/(n*CELL))*n*CELL;const target=base+LAPS*n*CELL+r.index*CELL+CELL/2+(Math.random()-.5)*CELL*.6-centre;
+   const t0=performance.now();cancelAnimationFrame(anim);
+   const step=now=>{const k=Math.min(1,(now-t0)/SPIN_MS),e=1-Math.pow(1-k,3);offset=startOffset+(target-startOffset)*e;drawStrip();if(k<1){anim=requestAnimationFrame(step);return;}
+    spinning=false;history.push(r);callbacks.onRouletteSettle();
+    $('rouResult').textContent=r.win?`${({red:'CZERWONE',black:'CZARNE',green:'KUSTOSZ'})[r.color]}! Wygrywasz ${fmt(r.payout,r.currency)}.`:`${({red:'Czerwone',black:'Czarne',green:'Kustosz'})[r.color]}. Przepadło ${fmt(r.amount,r.currency)}.`;
+    render();};
+   anim=requestAnimationFrame(step);}
+  function mount(){for(const b of document.querySelectorAll('.roulette-currency button'))b.addEventListener('click',()=>{if(spinning)return;currency=b.dataset.currency;setAmount(currency==='pln'?5:100);render();});
+   for(const b of document.querySelectorAll('.roulette-quick button'))b.addEventListener('click',()=>{if(!spinning)quick(b.dataset.quick);});
+   for(const b of document.querySelectorAll('.roulette-bet'))b.addEventListener('click',()=>bet(b.dataset.color));
+   amountEl()?.addEventListener('change',()=>setAmount(Number(amountEl().value)||0));}
+  return {mount,render};
+ })();
  window.MuseumShop=Object.freeze({mount,render,showView});
 })();

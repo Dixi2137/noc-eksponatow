@@ -264,6 +264,7 @@
    savedAt:typeof source.savedAt==='string' ? source.savedAt : null,   // when this save was last written (cloud vs local comparison)
    secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    gifts:Array.isArray(source.gifts) ? [...new Set(source.gifts.filter(code=>typeof code==='string'&&code.length<=32))].slice(0,50) : [],   // one-off gift codes already claimed (owner presents: once per user, ever)
+   roulette:(r=>{const signed=v=>Number.isFinite(Number(v))?Math.trunc(Number(v)):0,pend=r?.pending;return {spins:integer(r?.spins),coinsNet:signed(r?.coinsNet),plnNet:signed(r?.plnNet),pending:pend&&(pend.currency==='coins'||pend.currency==='pln')&&integer(pend.amount)>0?{currency:pend.currency,amount:integer(pend.amount)}:null};})(source.roulette),   // Ruletka Kustosza: net results keep their sign, a parked payout survives a refresh
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
  }
