@@ -7,7 +7,7 @@
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -154,16 +154,16 @@
  }
  function showView(next){
   view=next;if(view==='finishes')startFinishAnim();
-  for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette']])$(id).setAttribute('aria-selected',String(view===name));
-  for(const [id,name] of [['shopViewCrates','crates'],['shopViewFinishes','finishes'],['shopViewWallet','wallet'],['shopViewRoulette','roulette']])$(id).classList.toggle('hidden',view!==name);
-  if(view==='roulette')roulette.render();
+  for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots']])$(id).setAttribute('aria-selected',String(view===name));
+  for(const [id,name] of [['shopViewCrates','crates'],['shopViewFinishes','finishes'],['shopViewWallet','wallet'],['shopViewRoulette','roulette'],['shopViewSlots','slots']])$(id).classList.toggle('hidden',view!==name);
+  if(view==='roulette')roulette.render();if(view==='slots')slots.render();
  }
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];
   if(!mounted){
    for(const [id,filter] of filters)$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
-   for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette']])$(id).addEventListener('click',()=>showView(name));
-   roulette.mount();
+   for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots']])$(id).addEventListener('click',()=>showView(name));
+   roulette.mount();slots.mount();
    const soon=()=>callbacks.notify('Płatności nie są jeszcze podpięte. Wpłaty ruszą razem z operatorem płatności.');
    for(const b of document.querySelectorAll('.shop-deposit-btn'))b.addEventListener('click',soon);
    $('shopDepositBtn')?.addEventListener('click',soon);
@@ -224,6 +224,57 @@
    for(const b of document.querySelectorAll('.roulette-quick button'))b.addEventListener('click',()=>{if(!spinning)quick(b.dataset.quick);});
    for(const b of document.querySelectorAll('.roulette-bet'))b.addEventListener('click',()=>bet(b.dataset.color));
    amountEl()?.addEventListener('change',()=>setAmount(Number(amountEl().value)||0));}
+  return {mount,render};
+ })();
+ // ── Automaty Kustosza: three reels of pixel symbols, each eases to a stop in turn ──
+ const slots=(()=>{
+  const S=()=>window.MuseumSlots,CELL=16,SCALE=4,VIEW=3;   // a reel shows three symbols; the middle row is the pay line
+  const pal={O:'#141216',W:'#f2efe6',A:'#e07a2a',a:'#a2531d',G:'#d4af37',g:'#8a6a1a',R:'#b3202a',L:'#5c8a2a',X:'#ffd166',M:'#c9d6dc',S:'#6d757a',D:'#5a3a22'};
+  const art={
+   kufel:["................","....WWWWWWW.....","...WWWWWWWWW....","...OWWWWWWWO....","...OAAAAAAAOOO..","...OAaAAAaAOAO..","...OAaAAAaAO.AO.","...OAaAAAaAO.AO.","...OAaAAAaAO.AO.","...OAaAAAaAOAO..","...OAaAAAaAOO...","...OAAAAAAAO....","...OaaaaaaaO....","....OOOOOOO.....","................","................"],
+   crown:["................","................","..O.....O.....O.",".OGO...OGO...OGO",".OGO..OGGGO..OGO",".OGGO.OGGGO.OGGO",".OGGGOGGGGGOGGGO",".OGGGGGGGGGGGGGO",".OGGRGGGGRGGGGRO",".OGGGGGGGGGGGGGO",".OgggggggggggggO",".OGGGGGGGGGGGGGO",".OOOOOOOOOOOOOOO","................","................","................"],
+   skull:["................",".....OOOOOO.....","....OWWWWWWO....","...OWWWWWWWWO...","...OWWWWWWWWO...","...OWOOWWOOWO...","...OWOOWWOOWO...","...OWWWWWWWWO...","...OWWWOOWWWO...","....OWWWWWWO....","....OWOWWOWO....","....OWOWWOWO....",".....OOOOOO.....","................","................","................"],
+   pumpkin:["................",".......OLO......",".......OLO......","....OOOOLOOOO...","...OAAAOAOAAAO..","..OAAAAAAAAAAAO.","..OAAOOAAAOOAAO.","..OAAOXAAAXOAAO.","..OAAAAAAAAAAAO.","..OAAAAAOAAAAAO.","..OAAOOOOOOOAAO.","..OAAAOXXXOAAAO.","...OAAAOOOAAAO..","....OOOOOOOOO...","................","................"],
+   coin:["................",".....OOOOOO.....","....OGGGGGGO....","...OGGGGGGGGO...","..OGGGGggGGGGO..","..OGGGgGGgGGGO..","..OGGGgGGGGGGO..","..OGGGGggGGGGO..","..OGGGGGGgGGGO..","..OGGGgGGgGGGO..","..OGGGGggGGGGO..","...OGGGGGGGGO...","....OGGGGGGO....",".....OOOOOO.....","................","................"]};
+  const rows=sym=>sym==='sword'?window.MuseumPixel.icons.sword:art[sym];
+  let currency='coins',spinning=false,offsets=[0,0,0],anim=0;
+  const amountEl=()=>$('slAmount');
+  const stake=()=>currency==='pln'?Math.round(Number(amountEl().value)*100):Math.floor(Number(amountEl().value)||0);
+  const fmt=(amount,cur)=>cur==='pln'?pln(amount):`${number.format(amount)} ✦`;
+  const reels=()=>[...document.querySelectorAll('.slots-reel')];
+  function drawReel(c,offset){const x=c.getContext('2d');const strip=S().REEL,n=strip.length;x.setTransform(1,0,0,1,0,0);x.imageSmoothingEnabled=false;x.fillStyle='#0d120c';x.fillRect(0,0,c.width,c.height);x.setTransform(SCALE,0,0,SCALE,0,0);
+   const first=Math.floor(offset/CELL)-1;for(let i=first;i<first+VIEW+2;i++){const idx=((i%n)+n)%n;window.MuseumPixel.blit(x,rows(strip[idx]),0,Math.round(i*CELL-offset),pal);}
+   x.setTransform(1,0,0,1,0,0);const g=x.createLinearGradient(0,0,0,c.height);g.addColorStop(0,'rgba(13,18,12,.85)');g.addColorStop(.3,'rgba(13,18,12,0)');g.addColorStop(.7,'rgba(13,18,12,0)');g.addColorStop(1,'rgba(13,18,12,.85)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);}
+  function drawAll(){reels().forEach((c,i)=>drawReel(c,offsets[i]));}
+  function paytable(){const host=$('slPaytable');if(host.childElementCount)return;const line=(syms,mult,note)=>{const row=document.createElement('div');row.className='slots-pay';const icons=document.createElement('span');icons.className='slots-pay-icons';for(const s of syms){const cv=document.createElement('canvas');cv.width=cv.height=32;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.setTransform(2,0,0,2,0,0);window.MuseumPixel.blit(x,rows(s),0,0,pal);icons.append(cv);}
+    const m=document.createElement('strong');m.textContent=`×${mult}`;const t=document.createElement('small');t.textContent=note;row.append(icons,m,t);host.append(row);};
+   for(const s of S().SYMBOLS)line([s,s,s],S().TRIPLE[s],`3 × ${S().NAMES[s]}`);line(['kufel','kufel'],S().KUFEL[2],'2 kufle gdziekolwiek');line(['kufel'],S().KUFEL[1],'1 kufel gdziekolwiek');
+   const rtp=$('slRtp');if(rtp)rtp.textContent=String(Math.round(S().rtp()*100));}
+  function render(){const p=profile(),st=S().stats(p);$('slCoins').textContent=`${number.format(p.coins)} ✦`;$('slPLN').textContent=pln(p.balance);$('shopBalance').textContent=`${number.format(p.coins)} ✦`;$('shopBalancePLN').textContent=pln(p.balance);
+   $('slNet').textContent=`${st.coinsNet>=0?'+':''}${number.format(st.coinsNet)} ✦ · ${st.plnNet>=0?'+':''}${pln(st.plnNet)}`;
+   for(const b of document.querySelectorAll('#shopViewSlots .roulette-currency button'))b.setAttribute('aria-pressed',String(b.dataset.currency===currency));
+   $('slAmountLabel').textContent=currency==='pln'?'STAWKA (ZŁ)':'STAWKA (✦)';const quick=document.querySelectorAll('#shopViewSlots .roulette-quick button');quick[0].textContent=currency==='pln'?'+5':'+100';quick[1].textContent=currency==='pln'?'+20':'+500';
+   $('slSpin').disabled=spinning||!callbacks.canOpen();paytable();drawAll();}
+  function setAmount(v){const el=amountEl();el.value=String(currency==='pln'?Math.max(1,Math.round(v)):Math.max(10,Math.floor(v)));}
+  function quick(kind){const p=profile(),cur=stake(),cap=currency==='pln'?p.balance:p.coins,unit=currency==='pln'?100:1;
+   const next=kind==='a'?cur+(currency==='pln'?500:100):kind==='b'?cur+(currency==='pln'?2000:500):kind==='x2'?cur*2:kind==='half'?Math.floor(cur/2):cap;setAmount(Math.min(cap,Math.max(S().MIN[currency],next))/unit);}
+  function pull(){if(spinning)return;const p=profile(),check=S().canBet(p,{amount:stake(),currency});
+   if(!callbacks.canOpen()){callbacks.notify('Automaty są dostępne przed następnym pojedynkiem.');return;}
+   if(!check.ok){const why={min:`Minimalna stawka to ${fmt(S().MIN[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.'}[check.reason]||'Niepoprawny zakład.';$('slResult').textContent=why;callbacks.notify(why);return;}
+   const r=callbacks.onSlots({amount:check.amount,currency});if(!r)return;
+   spinning=true;render();$('slResult').textContent=`Postawione ${fmt(r.amount,r.currency)}. Bębny się kręcą…`;
+   const n=S().REEL.length,starts=offsets.slice(),t0=performance.now(),durations=[1300,1900,2500],centre=CELL;   // the middle row sits one cell down
+   const targets=r.stops.map((stop,i)=>{const base=Math.ceil((starts[i]+centre)/(n*CELL))*n*CELL;return base+(3+i)*n*CELL+stop*CELL-centre;});
+   cancelAnimationFrame(anim);
+   const step=now=>{let done=true;for(let i=0;i<3;i++){const k=Math.min(1,(now-t0)/durations[i]),e=1-Math.pow(1-k,3);offsets[i]=starts[i]+(targets[i]-starts[i])*e;if(k<1)done=false;}drawAll();if(!done){anim=requestAnimationFrame(step);return;}
+    spinning=false;callbacks.onSlotsSettle();
+    const names=r.symbols.map(s=>S().NAMES[s]).join(' · ');
+    $('slResult').textContent=r.win?`${names}. ${r.rule==='triple'?'TRÓJKA!':r.count===2?'DWA KUFLE!':'Kufel.'} Wygrywasz ${fmt(r.payout,r.currency)} (×${r.multiplier}).`:`${names}. Nic z tego, przepadło ${fmt(r.amount,r.currency)}.`;
+    render();};
+   anim=requestAnimationFrame(step);}
+  function mount(){for(const b of document.querySelectorAll('#shopViewSlots .roulette-currency button'))b.addEventListener('click',()=>{if(spinning)return;currency=b.dataset.currency;setAmount(currency==='pln'?5:100);render();});
+   for(const b of document.querySelectorAll('#shopViewSlots .roulette-quick button'))b.addEventListener('click',()=>{if(!spinning)quick(b.dataset.quick);});
+   $('slSpin')?.addEventListener('click',pull);amountEl()?.addEventListener('change',()=>setAmount(Number(amountEl().value)||0));}
   return {mount,render};
  })();
  window.MuseumShop=Object.freeze({mount,render,showView});
