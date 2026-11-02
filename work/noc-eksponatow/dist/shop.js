@@ -7,7 +7,7 @@
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},onLoanTake:()=>null,onLoanRepay:()=>null,onLoanCollect:()=>false,notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -154,16 +154,16 @@
  }
  function showView(next){
   view=next;if(view==='finishes')startFinishAnim();
-  for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots']])$(id).setAttribute('aria-selected',String(view===name));
-  for(const [id,name] of [['shopViewCrates','crates'],['shopViewFinishes','finishes'],['shopViewWallet','wallet'],['shopViewRoulette','roulette'],['shopViewSlots','slots']])$(id).classList.toggle('hidden',view!==name);
-  if(view==='roulette')roulette.render();if(view==='slots')slots.render();
+  for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots'],['shopTabLoan','loan']])$(id).setAttribute('aria-selected',String(view===name));
+  for(const [id,name] of [['shopViewCrates','crates'],['shopViewFinishes','finishes'],['shopViewWallet','wallet'],['shopViewRoulette','roulette'],['shopViewSlots','slots'],['shopViewLoan','loan']])$(id).classList.toggle('hidden',view!==name);
+  if(view==='roulette')roulette.render();if(view==='slots')slots.render();if(view==='loan')loan.render();
  }
  function mount(options={}){
   for(const key of Object.keys(callbacks))if(typeof options[key]==='function')callbacks[key]=options[key];
   if(!mounted){
    for(const [id,filter] of filters)$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
-   for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots']])$(id).addEventListener('click',()=>showView(name));
-   roulette.mount();slots.mount();
+   for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots'],['shopTabLoan','loan']])$(id).addEventListener('click',()=>showView(name));
+   roulette.mount();slots.mount();loan.mount();
    const soon=()=>callbacks.notify('Płatności nie są jeszcze podpięte. Wpłaty ruszą razem z operatorem płatności.');
    for(const b of document.querySelectorAll('.shop-deposit-btn'))b.addEventListener('click',soon);
    $('shopDepositBtn')?.addEventListener('click',soon);
@@ -313,6 +313,45 @@
    for(const b of document.querySelectorAll('#shopViewSlots .roulette-quick button'))b.addEventListener('click',()=>{if(!busy())quick(b.dataset.quick);});
    for(const b of document.querySelectorAll('#shopViewSlots .slots-auto button'))b.addEventListener('click',()=>startAuto(Number(b.dataset.auto)));
    $('slSpin')?.addEventListener('click',()=>{if(auto)stopAuto();else pull();});amountEl()?.addEventListener('change',()=>setAmount(Number(amountEl().value)||0));}
+  return {mount,render};
+ })();
+ const loan=(()=>{
+  // Pożyczka Kustosza: sliders for amount, installments and pace, a quote, and the active loan with the bailiff's haul.
+  const L=()=>window.MuseumLoan;
+  const PACE={1:'RAZ DZIENNIE · co 24 h',2:'DWA RAZY DZIENNIE · co 12 h',3:'TRZY RAZY DZIENNIE · co 8 h'};
+  const bailiffArt=["........................","........OOOOOOOO........","........OHHHHHHO........","........OHHHHHHO........","......OOOHHHHHHOOO......","......OOOOOOOOOOOO......",".......OSSSSSSSSO.......",".......OSGGSSGGSO.......",".......OSGGSSGGSO.......",".......OSSSSSSSSO.......",".......OSSSOOSSSO.......","........OSSSSSSO........",".........OSSSSO.........","......OOOOWWWWOOOO......","....OKKKOWWRRWWOKKKO....","...OKKKKOWWRRWWOKKKKO...","...OKKKKOWWRRWWOKKKKO...","...OKKKKKOWRRWOKKKKKO...","...OKKKKKOWRRWOKKKKKO...","...OKKKKKKORROKKKKKKO...","...OKKKKKKKOOKKKKKKKO...","...OSSOKKKKKKKKKKOSSO...","...OSSOKKKKKKKKKKOSSO...","...OOOOKKKKKKKKKKOOOO...","..OBBBBO.OKKKKOKKKKO....","..ObBBBO.OKKKKOKKKKO....","..OBYBBO.OKKKKOKKKKO....","..OBBBBO.OKKKKOKKKKO....","..OOOOOO.OKKKKOKKKKO....",".........OOOOOOOOOOO....",".........OOOOO.OOOOO....","........................"];
+  const bailiffPal={O:'#141216',H:'#1d1b22',S:'#e6c2a6',G:'#0d120c',W:'#f2efe6',R:'#b3202a',K:'#23232a',B:'#5a3a22',b:'#3a2414',Y:'#d4af37'};
+  let currency='pln',drawn=false,timer=0;
+  const fmt=(amount,cur)=>cur==='pln'?pln(amount):`${number.format(amount)} ✦`;
+  const sliders=()=>({amount:$('loanAmount'),count:$('loanCount'),pace:$('loanPace')});
+  function drawBailiff(){if(drawn)return;const c=$('loanBailiff');if(!c)return;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.setTransform(8,0,0,8,0,0);window.MuseumPixel.blit(x,bailiffArt,0,0,bailiffPal);drawn=true;}
+  function params(){const s=sliders(),unit=currency==='pln'?100:1;return {currency,amount:Number(s.amount.value)*unit,installments:Number(s.count.value),perDay:Number(s.pace.value)};}
+  function setCurrency(next){currency=next;const s=sliders(),lim=L().LIMITS[currency],unit=currency==='pln'?100:1;s.amount.min=String(lim.min/unit);s.amount.max=String(lim.max/unit);s.amount.step=String(lim.step/unit);s.amount.value=String(currency==='pln'?100:5000);render();}
+  const hours=ms=>{const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return h?`${h} h ${String(m).padStart(2,'0')} min`:`${m} min`;};
+  const when=iso=>new Date(iso).toLocaleString('pl-PL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  function renderQuote(){const q=L().quote(params());const s=sliders();s.count.value=String(q.installments);s.pace.value=String(q.perDay);
+   $('loanAmountOut').textContent=fmt(q.amount,q.currency);$('loanCountOut').textContent=`${q.installments}`;$('loanPaceOut').textContent=PACE[q.perDay];
+   $('loanQuote').innerHTML=`<span>DOSTAJESZ<strong>${fmt(q.amount,q.currency)}</strong></span><span>ODDAJESZ<strong>${fmt(q.total,q.currency)}</strong><small>odsetki ${Math.round(q.rate*100)} % · ${fmt(q.interest,q.currency)}</small></span><span>RATA<strong>${fmt(q.installment,q.currency)}</strong><small>${q.installments} rat, pierwsza za ${hours(q.every)}</small></span>`;
+   $('loanTake').disabled=!callbacks.canOpen();}
+  function renderActive(p){const l=p.loan,left=L().remaining(l),paid=l.total-left,n=L().installmentsLeft(l),due=L().dueCount(p),ms=Date.parse(l.next)-Date.now();
+   $('loanBar').style.width=`${Math.round(paid/l.total*100)}%`;
+   $('loanActiveHead').innerHTML=`<span>POŻYCZKA<strong>${fmt(l.principal,l.currency)}</strong></span><span>SPŁACONO<strong>${fmt(paid,l.currency)}</strong><small>z ${fmt(l.total,l.currency)}</small></span><span>ZOSTAŁO<strong>${fmt(left,l.currency)}</strong><small>${n} ${n===1?'rata':n<5?'raty':'rat'} po ${fmt(Math.min(l.installment,left),l.currency)}</small></span>`;
+   $('loanStatus').textContent=due?`Rata do zapłaty teraz. Jak nie masz z czego, komornik już idzie.`:`Następna rata ${fmt(Math.min(l.installment,left),l.currency)} za ${hours(ms)} (${when(l.next)}), ${PACE[l.perDay].toLowerCase()}.`;
+   const have=l.currency==='pln'?Number(p.balance)||0:p.coins;$('loanPayOne').disabled=!callbacks.canOpen()||have<Math.min(l.installment,left);$('loanPayAll').disabled=!callbacks.canOpen()||have<left;$('loanPayAll').textContent=`SPŁAĆ CAŁOŚĆ · ${fmt(left,l.currency)}`;
+   const host=$('loanSeized');host.innerHTML='';if(!l.seized.length)host.innerHTML='<em>Jeszcze nic. Płać raty, to tak zostanie.</em>';for(const s of l.seized.slice().reverse()){const row=document.createElement('span');row.textContent=`${s.name} · ${fmt(s.value,l.currency)}`;host.append(row);}}
+  function render(){drawBailiff();callbacks.onLoanCollect();const p=profile(),st=L().stats(p);
+   $('loanCoins').textContent=`${number.format(p.coins)} ✦`;$('loanPLN').textContent=pln(p.balance);$('loanHistory').textContent=`${st.taken} · ${st.repaid} · ${st.seized}`;$('shopBalance').textContent=`${number.format(p.coins)} ✦`;$('shopBalancePLN').textContent=pln(p.balance);
+   for(const b of document.querySelectorAll('#shopViewLoan .roulette-currency button'))b.setAttribute('aria-pressed',String(b.dataset.currency===currency));
+   $('loanForm').classList.toggle('hidden',!!p.loan);$('loanActive').classList.toggle('hidden',!p.loan);
+   if(p.loan)renderActive(p);else renderQuote();}
+  function take(){if(!callbacks.canOpen()){callbacks.notify('Pożyczka jest dostępna przed następnym pojedynkiem.');return;}const q=L().quote(params());if(!window.confirm(`Bierzesz ${fmt(q.amount,q.currency)}, oddajesz ${fmt(q.total,q.currency)} w ${q.installments} ratach po ${fmt(q.installment,q.currency)}, ${PACE[q.perDay].toLowerCase()}. Spóźniona rata = komornik. Jedziemy?`))return;
+   const r=callbacks.onLoanTake(params());if(!r)return;callbacks.notify(`Pożyczka ${fmt(r.loan.principal,r.loan.currency)} na koncie. Pierwsza rata ${when(r.loan.next)}.`);render();}
+  function pay(all){const p=profile();if(!p.loan)return;const r=callbacks.onLoanRepay(all?L().remaining(p.loan):0);if(!r){callbacks.notify('Za mało środków na tę ratę.');return;}callbacks.notify(r.closed?'Pożyczka spłacona. Komornik odwołany.':`Rata ${fmt(r.amount,p.loan.currency)} zapłacona.`);render();}
+  function mount(){for(const b of document.querySelectorAll('#shopViewLoan .roulette-currency button'))b.addEventListener('click',()=>setCurrency(b.dataset.currency));
+   const s=sliders();for(const el of Object.values(s))el?.addEventListener('input',renderQuote);
+   $('loanTake')?.addEventListener('click',take);$('loanPayOne')?.addEventListener('click',()=>pay(false));$('loanPayAll')?.addEventListener('click',()=>pay(true));
+   if(s.amount)setCurrency('pln');
+   timer=setInterval(()=>{const v=$('shopViewLoan');if(v&&!v.classList.contains('hidden')&&v.offsetParent)render();},20000);}
   return {mount,render};
  })();
  window.MuseumShop=Object.freeze({mount,render,showView});
