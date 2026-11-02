@@ -204,11 +204,11 @@
    const hist=$('rouHistory');hist.replaceChildren(...history.slice(-12).map(h=>{const d=document.createElement('span');d.className=`roulette-chip is-${h.color}${h.win?' is-win':''}`;d.title=h.win?`+${fmt(h.payout,h.currency)}`:`−${fmt(h.amount,h.currency)}`;d.textContent=h.color==='green'?'K':'';return d;}));
    drawStrip();}
   function setAmount(v){const el=amountEl();const n=currency==='pln'?Math.max(1,Math.round(v)):Math.max(10,Math.floor(v));el.value=String(n);}
-  function quick(kind){const p=profile(),cur=stake();const haveRaw=currency==='pln'?p.balance:p.coins,cap=Math.min(haveRaw,R().MAX[currency]),unit=currency==='pln'?100:1;
+  function quick(kind){const p=profile(),cur=stake();const cap=currency==='pln'?p.balance:p.coins,unit=currency==='pln'?100:1;
    const next=kind==='a'?cur+(currency==='pln'?500:100):kind==='b'?cur+(currency==='pln'?2000:500):kind==='x2'?cur*2:kind==='half'?Math.floor(cur/2):cap;setAmount(Math.min(cap,Math.max(R().MIN[currency],next))/unit);}
   function bet(color){if(spinning)return;const p=profile(),check=R().canBet(p,{color,amount:stake(),currency});
    if(!callbacks.canOpen()){callbacks.notify('Ruletka jest dostępna przed następnym pojedynkiem.');return;}
-   if(!check.ok){const why={min:`Minimalna stawka to ${fmt(R().MIN[currency],currency)}.`,max:`Maksymalna stawka to ${fmt(R().MAX[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.'}[check.reason]||'Niepoprawny zakład.';$('rouResult').textContent=why;callbacks.notify(why);return;}
+   if(!check.ok){const why={min:`Minimalna stawka to ${fmt(R().MIN[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.'}[check.reason]||'Niepoprawny zakład.';$('rouResult').textContent=why;callbacks.notify(why);return;}
    const r=callbacks.onRoulette({color,amount:check.amount,currency});if(!r)return;
    spinning=true;render();$('rouResult').textContent=`Postawione ${fmt(r.amount,r.currency)} na ${({red:'czerwone',black:'czarne',green:'Kustosza'})[color]}. Kręci się…`;
    const c=$('rouStrip'),n=R().WHEEL.length,centre=c.width/2;const startOffset=offset;

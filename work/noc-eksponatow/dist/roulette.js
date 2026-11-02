@@ -5,8 +5,7 @@
   'use strict';
   const WHEEL = Object.freeze(['green', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black']);
   const PAYOUT = Object.freeze({ red: 2, black: 2, green: 14 });
-  const MIN = Object.freeze({ coins: 10, pln: 100 });          // pln in grosze
-  const MAX = Object.freeze({ coins: 100000, pln: 50000 });    // per spin: 100 000 ✦ or 500 zł
+  const MIN = Object.freeze({ coins: 10, pln: 100 });          // pln in grosze; no upper limit: the stake is whatever the player holds
   const integer = v => Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0;
   const signed = v => Number.isFinite(Number(v)) ? Math.trunc(Number(v)) : 0;
   const stats = profile => ({ spins: integer(profile.roulette?.spins), coinsNet: signed(profile.roulette?.coinsNet), plnNet: signed(profile.roulette?.plnNet), pending: null });
@@ -17,7 +16,6 @@
     if (currency !== 'coins' && currency !== 'pln') return { ok: false, reason: 'currency' };
     if (profile.roulette?.pending) return { ok: false, reason: 'pending' };
     if (amount < MIN[currency]) return { ok: false, reason: 'min', min: MIN[currency] };
-    if (amount > MAX[currency]) return { ok: false, reason: 'max', max: MAX[currency] };
     if (integer(profile[field(currency)]) < amount) return { ok: false, reason: 'funds' };
     return { ok: true, amount };
   }
@@ -37,5 +35,5 @@
     const key = field(p.currency), cap = key === 'balance' ? 100000000 : Number.MAX_SAFE_INTEGER;
     return { ...profile, [key]: Math.min(cap, integer(profile[key]) + integer(p.amount)), roulette: stats(profile) };
   }
-  window.MuseumRoulette = Object.freeze({ WHEEL, PAYOUT, MIN, MAX, canBet, spin, settle, stats });
+  window.MuseumRoulette = Object.freeze({ WHEEL, PAYOUT, MIN, canBet, spin, settle, stats });
 })();
