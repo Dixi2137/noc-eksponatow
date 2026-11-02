@@ -271,7 +271,7 @@ body.pixel .exhibit-tag #exhibitTagName{font-family:var(--pixel-head);font-weigh
 .shop-tabs button small{font-size:8px;color:#7f8c74;letter-spacing:.5px}
 .shop-tabs button[aria-selected="true"]{background:#10180e;border-color:#2c3626;color:var(--lime);margin-bottom:-1px}
 .shop-tabs button[aria-selected="true"] small{color:var(--lime)}
-.shop-view{flex:1;min-height:0;background:#10180e}
+.shop-view{flex:1;min-height:0;background:#10180e}.shop-view:not(.shop-view-crates):not(.shop-view-finishes){overflow:auto;overscroll-behavior:contain}
 .shop-view-crates,.shop-view-finishes{display:grid;grid-template-columns:minmax(0,1fr) 330px}
 .shop-catalogue{min-height:0;overflow:auto;padding:16px 20px 24px}
 .shop-v2 .shop-filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
