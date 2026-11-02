@@ -265,6 +265,11 @@
     for (const id of ['lacquer', 'atelier', 'collector', 'gallery', 'armory', 'night']) assert.ok(loot.remaining(p, id).every(i => !i.season), `${id}: bez sezonowych`);
     const live = loot.activeCrates().some(c => c.id === 'halloween'); const r = loot.reserve(p, () => .5, 'halloween'); assert.equal(!!r, live, 'rezerwacja tylko w sezonie'); if (r) assert.equal(r.reward.season, 'halloween');
     assert.ok(loot.seasonLabel('halloween').includes('LISTOPADA'));
+    // Promotion window: Krypta and Dynia 40% off tokens and PLN on 2 and 3 November (the season's last two days); the ,99 ending stays, outside the window the full price returns.
+    assert.equal(loot.crateCost('crypt', new Date(2026, 10, 3)), 1500); assert.equal(loot.crateCost('crypt', new Date(2026, 10, 4)), 2500); assert.equal(loot.crateCost('halloween', new Date(2026, 10, 2)), 900);
+    assert.equal(loot.cratePricePLN('crypt', new Date(2026, 10, 3)), 3599); assert.equal(loot.cratePricePLN('crypt', new Date(2026, 10, 4)), 5999); assert.equal(loot.cratePricePLN('gallery', new Date(2026, 10, 3)), 2999, 'inne skrzynie bez zmian');
+    assert.ok(loot.promoFor('crypt', new Date(2026, 10, 2))?.label.includes('40%') && !loot.promoFor('crypt', new Date(2026, 10, 1)));
+    if (loot.promoFor('crypt')) { const q = loot.reserve({ ...loot.migrate(null), coins: 5000 }, () => .5, 'crypt'); assert.ok(q && q.profile.coins === 5000 - 1500, 'w promocji rezerwacja zdejmuje obniżoną cenę'); }
   });
   test('Stroje halloweenowe: pięć limitowanych na rigu postaci, wypadają tylko z Krypty Kustosza i tylko w sezonie, zostają po nim', () => {
     const K = window.MuseumKnights; assert.equal(K.seasonal.length, 5); assert.ok(K.seasonal.every(s => s.season === 'halloween' && s.figure && s.perk && s.categoryId === 'halloween' && K.skins.includes(s)));

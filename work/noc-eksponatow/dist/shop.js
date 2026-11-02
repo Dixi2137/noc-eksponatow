@@ -42,12 +42,14 @@
   const button=node('button',`shop-tile${selected?' is-selected':''}${available?'':' is-done'}${crate.id==='treasury'?' is-best':''}`);
   button.type='button';button.dataset.crateId=crate.id;button.style.setProperty('--crate-color',crate.color);
   button.setAttribute('aria-pressed',String(selected));
-  button.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. ${number.format(crate.cost)} żetonów lub planowo ${currency.format(crate.pricePLN)}.`);
+  const promo=loot.promoFor(crate),cost=loot.crateCost(crate),plnPrice=loot.cratePricePLN(crate)/100;
+  button.setAttribute('aria-label',`${crate.name}. ${crate.guarantee}. ${number.format(cost)} żetonów lub planowo ${currency.format(plnPrice)}.${promo?` ${promo.label}.`:''}`);
   const art=node('span','shop-tile-art');const canvas=document.createElement('canvas');canvas.width=142;canvas.height=120;art.append(canvas);drawCrateInto(canvas,crate,1.3);
   const body=node('span','shop-tile-body');
-  body.append(node('small','shop-tile-tag',`${String(index+1).padStart(2,'0')} · ${crate.season?`${crate.tag} · ${loot.seasonLabel(crate.season)}`:(typeName||category?.name||crate.tag||'KOLEKCJA')}`),node('strong','shop-tile-name',crate.name),node('span','shop-tile-cost',`${number.format(crate.cost)} ✦`),node('span','shop-tile-pln',currency.format(crate.pricePLN)));
+  body.append(node('small','shop-tile-tag',`${String(index+1).padStart(2,'0')} · ${crate.season?`${crate.tag} · ${loot.seasonLabel(crate.season)}`:(typeName||category?.name||crate.tag||'KOLEKCJA')}`),node('strong','shop-tile-name',crate.name),node('span','shop-tile-cost',`${number.format(cost)} ✦`),node('span','shop-tile-pln',currency.format(plnPrice)));
+  if(promo){for(const [cls,old] of [['shop-tile-cost',`${number.format(crate.cost)} ✦`],['shop-tile-pln',currency.format(crate.pricePLN)]]){const el=body.querySelector('.'+cls),was=document.createElement('s');was.textContent=old;el.prepend(was,' ');}}
   body.append(node('span','shop-tile-progress',!available?'ZEBRANA ✓':isFree(crate,current)?'PREZENT NA START':`${have} / ${total} ${what}`));
-  if(crate.id==='treasury')button.append(node('span','shop-tile-badge','HIT'));
+  if(promo)button.append(node('span','shop-tile-badge is-promo',promo.label));else if(crate.id==='treasury')button.append(node('span','shop-tile-badge','HIT'));
   button.append(art,body);
   button.addEventListener('click',()=>{
    if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}
@@ -82,7 +84,7 @@
   // Selected crate panel.
   drawCrateInto($('shopSelectedArt'),selected,1.3);
   $('shopSelectedName').textContent=selected.name;
-  $('shopSelectedPrice').textContent=currency.format(selected.pricePLN);
+  $('shopSelectedPrice').textContent=currency.format(loot.cratePricePLN(selected)/100);
   $('shopSelectedGuarantee').textContent=`${selected.guarantee}. Bez duplikatów. ${selected.description||''}`;
   const category=loot.getCategory(selected.categoryId);
   $('shopSelectedCategory').textContent=selected.pool==='any'?'MIESZANA · STROJE, BROŃ I KARTY':selected.pool==='finish'?'WYKOŃCZENIA BRONI':category?`${category.name} · SKRZYNIA ${selected.pool==='card'?'KART':'TEMATYCZNA'}`:selected.pool==='weapon'?'BROŃ · ARSENAŁ':selected.pool==='card'?'KARTY BOHATERÓW I BRONI':'WSZYSTKIE KATEGORIE · SKRZYNIA KLASYCZNA';
@@ -93,7 +95,7 @@
   const entries=loot.entries(current,selected.id);
   $('shopContentsSummary').textContent=entries.length?`ZAWARTOŚĆ: ${entries.length} MOŻLIWYCH ODKRYĆ`:'ZAWARTOŚĆ ZEBRANA · 0 NOWYCH';
   $('shopContentsList').replaceChildren(...entries.map(({item,chance})=>{const row=node('li','drop-row');row.style.setProperty('--rarity',loot.rarities[item.rarity].color);row.append(node('span','',item.name),node('small','',loot.rarities[item.rarity].name),node('strong','',percent(chance)));return row;}));
-  const free=isFree(selected,current),cost=free?0:selected.cost;
+  const free=isFree(selected,current),cost=free?0:loot.crateCost(selected);
   const tokenButton=$('shopTokenBtn');
   tokenButton.disabled=!available||!!current.pendingReward||!callbacks.canOpen();
   tokenButton.textContent=!available?'ZAWARTOŚĆ ZEBRANA ✓':current.pendingReward?'ODBIERZ POPRZEDNIĄ NAGRODĘ':free?'WYBIERZ DARMOWĄ SKRZYNIĘ':coins<cost?`BRAKUJE ${number.format(cost-coins)} ✦`:`WYBIERZ ZA ${number.format(cost)} ✦`;

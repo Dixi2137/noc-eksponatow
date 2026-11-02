@@ -175,8 +175,13 @@
  const crateGroups=Object.freeze([{id:'classic',name:'Skrzynie klasyczne'},{id:'themed',name:'Stroje według motywu'},{id:'weapons',name:'Cała zbrojownia'},{id:'weapon-type',name:'Broń według typu'},{id:'weapon-era',name:'Broń według epoki'},{id:'cards',name:'Karty'},{id:'mixed',name:'Skrzynie mieszane'},{id:'finishes',name:'Limitowane wykończenia broni'},{id:'seasonal',name:'Skrzynie sezonowe'}]);
  // Seasons: month/day windows that repeat every year; the christmas one crosses New Year.
  const SEASONS=Object.freeze({halloween:{from:[10,20],to:[11,3],label:'DO 3 LISTOPADA'},christmas:{from:[12,6],to:[1,6],label:'DO 6 STYCZNIA'}});
- function seasonActive(id,date=new Date()){const s=SEASONS[id];if(!s)return false;const md=(date.getMonth()+1)*100+date.getDate(),a=s.from[0]*100+s.from[1],b=s.to[0]*100+s.to[1];return a<=b?(md>=a&&md<=b):(md>=a||md<=b);}
+ function windowActive(from,to,date){const md=(date.getMonth()+1)*100+date.getDate(),a=from[0]*100+from[1],b=to[0]*100+to[1];return a<=b?(md>=a&&md<=b):(md>=a||md<=b);}
+ function seasonActive(id,date=new Date()){const s=SEASONS[id];return !!s&&windowActive(s.from,s.to,date);}
  function seasonLabel(id){return SEASONS[id]?.label||'';}
+ // Time-boxed crate promotions: a fraction off the token cost and the PLN price while the window lasts (month, day).
+ const PROMOS=Object.freeze({halloween:{off:.4,from:[11,2],to:[11,3],label:'DO JUTRA −40%'},crypt:{off:.4,from:[11,2],to:[11,3],label:'DO JUTRA −40%'}});
+ function promoFor(crate,date=new Date()){const c=typeof crate==='string'?getCrate(crate):crate;const p=c&&PROMOS[c.id];return p&&windowActive(p.from,p.to,date)?p:null;}
+ function crateCost(crate,date=new Date()){const c=typeof crate==='string'?getCrate(crate):crate;if(!c)return 0;const p=promoFor(c,date);return p?Math.round(c.cost*(1-p.off)/10)*10:c.cost;}
  function activeCrates(date=new Date()){return crates.filter(c=>!c.season||seasonActive(c.season,date));}
  function getCrate(id='gallery') { return crates.find(crate=>crate.id===id)||null; }
  const COST = crates[0].cost;
@@ -300,13 +305,13 @@
   }
   return pool[pool.length-1];
  }
- function cratePricePLN(crate){const c=typeof crate==='string'?getCrate(crate):crate;return c?Math.round((c.pricePLN||0)*100):0;}
+ function cratePricePLN(crate,date=new Date()){const c=typeof crate==='string'?getCrate(crate):crate;if(!c)return 0;const p=promoFor(c,date);return p?Math.floor((c.pricePLN||0)*(1-p.off))*100+99:Math.round((c.pricePLN||0)*100);}   // a promo keeps the ,99 ending
  function canPayPLN(profile,crateId){const price=cratePricePLN(crateId);return price>0&&integer(profile.balance)>=price;}
  function reserve(profile, random=randomValue,crateId='gallery',pay='coins') {
   const crate=getCrate(crateId);
   if(!crate||profile.pendingReward||(crate.season&&!seasonActive(crate.season)))return null;
   const pln=pay==='pln',price=pln?cratePricePLN(crate):0;
-  const free=!pln&&crate.id==='gallery'&&profile.freeCrates>0,cost=pln||free?0:crate.cost;
+  const free=!pln&&crate.id==='gallery'&&profile.freeCrates>0,cost=pln||free?0:crateCost(crate);
   if(pln?!canPayPLN(profile,crate.id):profile.coins<cost)return null;
   const reward=draw(profile,random,crateId);
   if(!reward)return null;
@@ -381,5 +386,5 @@ function deposit(profile,grosze){const gr=integer(grosze);if(!gr)return null;ret
   const bonus=Math.min(500,80+(streak-1)*40);
   return {profile:{...profile,coins:profile.coins+bonus,login:{last:today,streak}},bonus,streak,reset:profile.login?.last&&profile.login.last!==yesterday};
  }
- window.MuseumLoot=Object.freeze({COST,GIFTS,getGift,claimGift,categories,getCategory,crates,crateGroups,getCrate,activeCrates,seasonActive,seasonLabel,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
+ window.MuseumLoot=Object.freeze({COST,GIFTS,getGift,claimGift,categories,getCategory,crates,crateGroups,getCrate,activeCrates,seasonActive,seasonLabel,promoFor,crateCost,skins,items,getItem,register,value,values,sellPrice,has,equipped,equip,canSell,sell,upgradeLevel,upgradeCost,upgradeEffect,canUpgrade,upgrade,UPGRADE_MAX,modifiers,dailyBonus,dateKey,rarities,rarityWeights,migrate,remaining,odds,entries,draw,reserve,claim,deposit,pricePLN,cratePricePLN,canPayPLN,sellPricePLN,SELL_RATE_PLN,canBuyFinish,buyFinish,sellFinish});
 })();

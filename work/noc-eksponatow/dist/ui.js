@@ -371,7 +371,7 @@ function pixelUI(){profile.pixel=true;window.MuseumArt?.setPixelFactor(window.Mu
   const after=profile.pendingReward?loot.claim(profile,{equip:false}):profile;const left=loot.remaining(after,crate.id).length,paid=profile.pendingPay==='pln';
   if(paid){const price=loot.cratePricePLN(crate),balance=Number(after.balance)||0;btn.disabled=!left||balance<price;
    btn.innerHTML=!left?'SKRZYNIA WYCZERPANA':balance<price?`OTWÓRZ PONOWNIE · BRAKUJE ${pln(price-balance)}`:`OTWÓRZ PONOWNIE · ${pln(price)} <span>↻</span>`;}
-  else{const free=crate.id==='gallery'&&after.freeCrates>0,cost=free?0:crate.cost;btn.disabled=!left||(!free&&after.coins<cost);
+  else{const free=crate.id==='gallery'&&after.freeCrates>0,cost=free?0:loot.crateCost(crate);btn.disabled=!left||(!free&&after.coins<cost);
    btn.innerHTML=!left?'SKRZYNIA WYCZERPANA':free?'OTWÓRZ PONOWNIE · GRATIS <span>↻</span>':after.coins<cost?`OTWÓRZ PONOWNIE · BRAKUJE ${number(cost-after.coins)} ✦`:`OTWÓRZ PONOWNIE · ${number(cost)} ✦ <span>↻</span>`;}
   btn.title=!left?'Zebrano wszystko z tej skrzyni.':`${crate.name}: ${crate.guarantee}.`;
  }
