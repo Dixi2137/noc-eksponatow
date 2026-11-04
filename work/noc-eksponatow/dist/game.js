@@ -115,9 +115,9 @@
         warning: [75, 61, .26, 'sawtooth', .055], hurt: [125, 35, .17, 'square', .045],
         win: [440, 880, .65, 'triangle', .08], loss: [140, 40, .8, 'sawtooth', .06],
         // Shop tables: a chip on the felt, the strip ticking past the pointer, and the green Kustosz field.
-        chip: [900, 500, .06, 'square', .03], tick: [1400, 900, .025, 'square', .025], jackpot: [330, 1320, 1.1, 'triangle', .09],
-        // Slot machine: the lever clunk, a reel locking into place, and a short low miss (softer than a fight loss, it plays on every losing autospin).
-        lever: [220, 90, .12, 'square', .05], stop: [520, 240, .08, 'square', .05], miss: [210, 120, .18, 'triangle', .04]
+        // Shop tables use soft waves only (sine/triangle), quiet and short: the fight's square and sawtooth buzz is wrong on felt.
+        chip: [700, 420, .05, 'triangle', .03], tick: [900, 600, .02, 'sine', .018], coin: [988, 1319, .11, 'sine', .04], jackpot: [440, 1760, .9, 'sine', .06],
+        lever: [200, 90, .1, 'triangle', .045], stop: [420, 200, .07, 'triangle', .04], miss: [210, 120, .18, 'triangle', .035]
       };
       const [from, to, duration, type, volume] = sounds[kind] || sounds.hit;
       const oscillator = audio.createOscillator(), gain = audio.createGain();
