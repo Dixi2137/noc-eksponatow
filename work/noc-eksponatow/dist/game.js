@@ -113,7 +113,9 @@
         hit: [100, 48, .14, 'sawtooth', .075], parry: [550, 1150, .19, 'triangle', .085],
         swing: [190, 75, .09, 'sawtooth', .035], dodge: [280, 540, .07, 'sine', .035],
         warning: [75, 61, .26, 'sawtooth', .055], hurt: [125, 35, .17, 'square', .045],
-        win: [440, 880, .65, 'triangle', .08], loss: [140, 40, .8, 'sawtooth', .06]
+        win: [440, 880, .65, 'triangle', .08], loss: [140, 40, .8, 'sawtooth', .06],
+        // Shop tables: a chip on the felt, the strip ticking past the pointer, and the green Kustosz field.
+        chip: [900, 500, .06, 'square', .03], tick: [1400, 900, .025, 'square', .025], jackpot: [330, 1320, 1.1, 'triangle', .09]
       };
       const [from, to, duration, type, volume] = sounds[kind] || sounds.hit;
       const oscillator = audio.createOscillator(), gain = audio.createGain();
@@ -676,6 +678,7 @@
     reset() { state = fresh(); state.rng = Math.random; scene = 'arena'; for (const key in input) input[key] = false; particles.length = labels.length = rings.length = 0; updateEvent(true); draw(); },
     setScene(name) { if (name === 'arena' || name === 'guard' || name === 'external') { scene = name; draw(); } },
     setSound(enabled) { soundEnabled = !!enabled; if (soundEnabled) audioReady(); },
+    sfx(kind) { audioReady(); tone(kind); },   // the shop's roulette borrows the fight synthesizer (respects the sound toggle)
     getState: snapshot
   };
   if (window.__MUSEUM_TEST__) window.MuseumGame._test = {

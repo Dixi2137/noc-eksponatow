@@ -185,7 +185,7 @@
  }
  // ── Ruletka Kustosza: a strip of 15 fields scrolls under the pointer and eases out on the drawn one ──
  const roulette=(()=>{
-  const R=()=>window.MuseumRoulette,CELL=48,LAPS=4,SPIN_MS=3400;
+  const R=()=>window.MuseumRoulette,CELL=48,LAPS=4,SPIN_MS=3400,sfx=kind=>window.MuseumGame?.sfx?.(kind);
   const colors={red:['#b3202a','#7a1119'],black:['#2a2a30','#141418'],green:['#2f8f4e','#1b5a30']};
   let currency='coins',spinning=false,offset=0,anim=0,history=[];
   const amountEl=()=>$('rouAmount');
@@ -210,13 +210,15 @@
    if(!callbacks.canOpen()){callbacks.notify('Ruletka jest dostępna przed następnym pojedynkiem.');return;}
    if(!check.ok){const why={min:`Minimalna stawka to ${fmt(R().MIN[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.'}[check.reason]||'Niepoprawny zakład.';$('rouResult').textContent=why;callbacks.notify(why);return;}
    const r=callbacks.onRoulette({color,amount:check.amount,currency});if(!r)return;
-   spinning=true;render();$('rouResult').textContent=`Postawione ${fmt(r.amount,r.currency)} na ${({red:'czerwone',black:'czarne',green:'Kustosza'})[color]}. Kręci się…`;
+   spinning=true;sfx('chip');render();$('rouResult').textContent=`Postawione ${fmt(r.amount,r.currency)} na ${({red:'czerwone',black:'czarne',green:'Kustosza'})[color]}. Kręci się…`;
    const c=$('rouStrip'),n=R().WHEEL.length,centre=c.width/2;const startOffset=offset;
    // The pointer sits at the strip's centre; land it on the drawn field a few laps ahead, with a little random slack inside the cell.
    const base=Math.ceil((startOffset+centre)/(n*CELL))*n*CELL;const target=base+LAPS*n*CELL+r.index*CELL+CELL/2+(Math.random()-.5)*CELL*.6-centre;
-   const t0=performance.now();cancelAnimationFrame(anim);
-   const step=now=>{const k=Math.min(1,(now-t0)/SPIN_MS),e=1-Math.pow(1-k,3);offset=startOffset+(target-startOffset)*e;drawStrip();if(k<1){anim=requestAnimationFrame(step);return;}
-    spinning=false;history.push(r);callbacks.onRouletteSettle();
+   const t0=performance.now();cancelAnimationFrame(anim);let lastCell=Math.floor((startOffset+centre)/CELL);
+   const step=now=>{const k=Math.min(1,(now-t0)/SPIN_MS),e=1-Math.pow(1-k,3);offset=startOffset+(target-startOffset)*e;drawStrip();
+    const cell=Math.floor((offset+centre)/CELL);if(cell!==lastCell){lastCell=cell;sfx('tick');}   // one tick per field passing the pointer, so the ticking slows with the strip
+    if(k<1){anim=requestAnimationFrame(step);return;}
+    spinning=false;history.push(r);callbacks.onRouletteSettle();sfx(r.win?(r.color==='green'?'jackpot':'win'):'loss');
     $('rouResult').textContent=r.win?`${({red:'CZERWONE',black:'CZARNE',green:'KUSTOSZ'})[r.color]}! Wygrywasz ${fmt(r.payout,r.currency)}.`:`${({red:'Czerwone',black:'Czarne',green:'Kustosz'})[r.color]}. Przepadło ${fmt(r.amount,r.currency)}.`;
     render();};
    anim=requestAnimationFrame(step);}
