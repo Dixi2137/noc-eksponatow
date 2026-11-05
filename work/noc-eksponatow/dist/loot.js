@@ -266,7 +266,7 @@
    savedAt:typeof source.savedAt==='string' ? source.savedAt : null,   // when this save was last written (cloud vs local comparison)
    secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    gifts:Array.isArray(source.gifts) ? [...new Set(source.gifts.filter(code=>typeof code==='string'&&code.length<=32))].slice(0,50) : [],   // one-off gift codes already claimed (owner presents: once per user, ever)
-   roulette:gambleRecord(source.roulette),slots:gambleRecord(source.slots),
+   roulette:gambleRecord(source.roulette),slots:slotsRecord(source.slots),
    loan:loanRecord(source.loan),lastLoan:loanRecord(source.lastLoan,true),loans:{taken:integer(source.loans?.taken),repaid:integer(source.loans?.repaid),seized:integer(source.loans?.seized)},   // Pożyczka Kustosza   // Ruletka i Automaty Kustosza: net results keep their sign, a parked payout survives a refresh
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
@@ -315,6 +315,10 @@ function loanRecord(l,closed=false){if(!l||typeof l!=='object')return null;const
  const rec={currency,principal:integer(l.principal),total,paid,installment,installments:Math.max(1,integer(l.installments)),perDay:[1,2,3].includes(Number(l.perDay))?Number(l.perDay):1,every,started:when(l.started),next:when(l.next)||new Date(Date.now()+every).toISOString(),
   seized:(Array.isArray(l.seized)?l.seized:[]).filter(s=>s&&typeof s==='object').slice(-50).map(s=>({id:String(s.id||''),name:String(s.name||''),kind:String(s.kind||''),value:integer(s.value),at:when(s.at)}))};
  if(closed&&when(l.closed))rec.closed=l.closed;return rec;}
+// Automaty: the gamble record plus the chosen machine, the jackpot pots per machine and currency, and free spins in progress.
+function slotsRecord(r){const base=gambleRecord(r),pots={};for(const [id,v] of Object.entries(r?.pots&&typeof r.pots==='object'?r.pots:{}))if(/^[a-z]{2,20}$/.test(id))pots[id]={coins:integer(v?.coins),pln:integer(v?.pln)};
+ const f=r?.free,free=f&&typeof f.machine==='string'&&integer(f.left)>0&&(f.currency==='coins'||f.currency==='pln')&&integer(f.amount)>0?{machine:f.machine,left:integer(f.left),amount:integer(f.amount),currency:f.currency}:null;
+ return {...base,machine:typeof r?.machine==='string'&&/^[a-z]{2,20}$/.test(r.machine)?r.machine:'kufel',pots,free};}
 function gambleRecord(r){const signed=v=>Number.isFinite(Number(v))?Math.trunc(Number(v)):0,pend=r?.pending;return {spins:integer(r?.spins),coinsNet:signed(r?.coinsNet),plnNet:signed(r?.plnNet),pending:pend&&(pend.currency==='coins'||pend.currency==='pln')&&integer(pend.amount)>0?{currency:pend.currency,amount:integer(pend.amount)}:null};}
  function cratePricePLN(crate,date=new Date()){const c=typeof crate==='string'?getCrate(crate):crate;if(!c)return 0;const p=promoFor(c,date);return p?Math.floor((c.pricePLN||0)*(1-p.off))*100+99:Math.round((c.pricePLN||0)*100);}   // a promo keeps the ,99 ending
  function canPayPLN(profile,crateId){const price=cratePricePLN(crateId);return price>0&&grosze(profile.balance)>=price;}

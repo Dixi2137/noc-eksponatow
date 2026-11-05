@@ -7,7 +7,7 @@
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},onLoanTake:()=>null,onLoanRepay:()=>null,onLoanCollect:()=>false,notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},onSlotsSelect:()=>{},onLoanTake:()=>null,onLoanRepay:()=>null,onLoanCollect:()=>false,notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -232,51 +232,46 @@
  })();
  // ── Automaty Kustosza: three reels of pixel symbols, each eases to a stop in turn ──
  const slots=(()=>{
-  // One pixel-art cabinet on a single canvas (152×112 logical px at ×4): marquee with chasing lamps and the kufel,
-  // brass reel frame with three windows, lime pay line markers, a lever that drops when pulled, a coin tray that fills on a win.
-  const S=()=>window.MuseumSlots,CELL=16,SCALE=4,VIEW=3,CW=152,CH=112,REEL_X=[32,60,88],REEL_Y=30,LAMPS=[14,25,36,47,86,97,108,119],sfx=kind=>window.MuseumGame?.sfx?.(kind);
+  // One pixel-art cabinet on a single canvas (152×112 logical px at ×4), recoloured per machine: marquee with chasing lamps
+  // and the machine's top symbol, trimmed reel frame with three windows, lime pay line markers, a lever that drops when pulled,
+  // a coin tray that fills on a win. Sixteen machines share the cabinet; a row of small cabinets above picks one.
+  const S=()=>window.MuseumSlots,ART=()=>window.MuseumSlotsArt,CELL=16,SCALE=4,VIEW=3,REEL_X=[32,60,88],REEL_Y=30,LAMPS=[14,25,36,47,86,97,108,119],sfx=kind=>window.MuseumGame?.sfx?.(kind);
   const outcome=(win,jackpot)=>{if(!win){sfx('miss');return;}[0,110,220].forEach(ms=>setTimeout(()=>sfx('coin'),ms));if(jackpot)setTimeout(()=>sfx('jackpot'),300);};
-  const pal={O:'#141216',W:'#f2efe6',A:'#e07a2a',a:'#a2531d',G:'#d4af37',g:'#8a6a1a',R:'#b3202a',L:'#5c8a2a',X:'#ffd166',M:'#c9d6dc',S:'#6d757a',D:'#5a3a22'};
-  const art={
-   kufel:["................","....WWWWWWW.....","...WWWWWWWWW....","...OWWWWWWWO....","...OAAAAAAAOOO..","...OAaAAAaAOAO..","...OAaAAAaAO.AO.","...OAaAAAaAO.AO.","...OAaAAAaAO.AO.","...OAaAAAaAOAO..","...OAaAAAaAOO...","...OAAAAAAAO....","...OaaaaaaaO....","....OOOOOOO.....","................","................"],
-   crown:["................","................","..O.....O.....O.",".OGO...OGO...OGO",".OGO..OGGGO..OGO",".OGGO.OGGGO.OGGO",".OGGGOGGGGGOGGGO",".OGGGGGGGGGGGGGO",".OGGRGGGGRGGGGRO",".OGGGGGGGGGGGGGO",".OgggggggggggggO",".OGGGGGGGGGGGGGO",".OOOOOOOOOOOOOOO","................","................","................"],
-   skull:["................",".....OOOOOO.....","....OWWWWWWO....","...OWWWWWWWWO...","...OWWWWWWWWO...","...OWOOWWOOWO...","...OWOOWWOOWO...","...OWWWWWWWWO...","...OWWWOOWWWO...","....OWWWWWWO....","....OWOWWOWO....","....OWOWWOWO....",".....OOOOOO.....","................","................","................"],
-   pumpkin:["................",".......OLO......",".......OLO......","....OOOOLOOOO...","...OAAAOAOAAAO..","..OAAAAAAAAAAAO.","..OAAOOAAAOOAAO.","..OAAOXAAAXOAAO.","..OAAAAAAAAAAAO.","..OAAAAAOAAAAAO.","..OAAOOOOOOOAAO.","..OAAAOXXXOAAAO.","...OAAAOOOAAAO..","....OOOOOOOOO...","................","................"],
-   coin:["................",".....OOOOOO.....","....OGGGGGGO....","...OGGGGGGGGO...","..OGGGGggGGGGO..","..OGGGgGGgGGGO..","..OGGGgGGGGGGO..","..OGGGGggGGGGO..","..OGGGGGGgGGGO..","..OGGGgGGgGGGO..","..OGGGGggGGGGO..","...OGGGGGGGGO...","....OGGGGGGO....",".....OOOOOO.....","................","................"]};
-  const rows=sym=>sym==='sword'?window.MuseumPixel.icons.sword:art[sym];
-  let currency='coins',spinning=false,offsets=[0,0,0],anim=0,run=null,leverT0=-1e9,winUntil=0,auto=null,autoTimer=0;
-  const amountEl=()=>$('slAmount'),cab=()=>$('slCabinet');
+  let currency='coins',machineId=null,spinning=false,offsets=[0,0,0],anim=0,run=null,leverT0=-1e9,winUntil=0,auto=null,autoTimer=0,paytableFor=null;
+  const M=()=>S().machine(machineId),amountEl=()=>$('slAmount'),cab=()=>$('slCabinet');
   const stake=()=>currency==='pln'?Math.round(Number(amountEl().value)*100):Math.floor(Number(amountEl().value)||0);
   const fmt=(amount,cur)=>cur==='pln'?pln(amount):`${number.format(amount)} ✦`;
+  const name=id=>ART().name(id);
   const busy=()=>spinning||!!auto;
   const px=(x,X,Y,w,h,col)=>{x.fillStyle=col;x.fillRect(X,Y,w,h);};
-  function drawCabinet(now){const c=cab();if(!c)return;const x=c.getContext('2d'),t=now/1000,win=now<winUntil,blink=Math.floor(t*6)%2===0;
+  const blit=(x,id,X,Y)=>{const sp=ART().sprite(id);window.MuseumPixel.blit(x,sp.rows,X,Y,sp.pal);};
+  function drawCabinet(now){const c=cab();if(!c)return;const m=M(),col=m.cabinet,x=c.getContext('2d'),t=now/1000,win=now<winUntil,blink=Math.floor(t*6)%2===0;
    x.setTransform(1,0,0,1,0,0);x.imageSmoothingEnabled=false;x.clearRect(0,0,c.width,c.height);x.setTransform(SCALE,0,0,SCALE,0,0);
-   // Body: dark green lacquer with a bevel, like the display cases in the shop.
-   px(x,0,8,136,104,'#0a0e08');px(x,1,9,134,102,'#1b2616');px(x,1,9,134,1,'#33452a');px(x,1,9,1,102,'#33452a');px(x,1,110,134,1,'#0f160c');px(x,134,9,1,102,'#0f160c');
-   // Marquee: brass frame, black glass, eight lamps and the kufel in the middle.
-   px(x,8,0,120,22,'#8a6a1a');px(x,9,1,118,20,'#d4af37');px(x,10,2,116,18,'#0d120c');
-   LAMPS.forEach((lx,k)=>{const on=win?blink:spinning?Math.floor(t*14)%8===k:Math.floor(t*2)%8===k;px(x,lx,5,3,3,on?'#ffd166':'#3b3014');if(on)px(x,lx+1,6,1,1,'#fff6c8');});
-   window.MuseumPixel.blit(x,art.kufel,60,3,pal);px(x,4,12,2,2,'#d4af37');px(x,130,12,2,2,'#d4af37');px(x,4,104,2,2,'#d4af37');px(x,130,104,2,2,'#d4af37');
+   // Body: lacquer with a bevel, in the machine's colours.
+   px(x,0,8,136,104,'#0a0e08');px(x,1,9,134,102,col.body);px(x,1,9,134,1,col.bevel);px(x,1,9,1,102,col.bevel);px(x,1,110,134,1,'#0f160c');px(x,134,9,1,102,'#0f160c');
+   // Marquee: trim frame, black glass, eight lamps and the top symbol in the middle.
+   px(x,8,0,120,22,col.trimDark);px(x,9,1,118,20,col.trim);px(x,10,2,116,18,'#0d120c');
+   LAMPS.forEach((lx,k)=>{const on=win?blink:spinning?Math.floor(t*14)%8===k:Math.floor(t*2)%8===k;px(x,lx,5,3,3,on?col.lamp:'#3b3014');if(on)px(x,lx+1,6,1,1,'#ffffff');});
+   blit(x,m.symbols[0],60,3);px(x,4,12,2,2,col.trim);px(x,130,12,2,2,col.trim);px(x,4,104,2,2,col.trim);px(x,130,104,2,2,col.trim);
    // Reel frame and three windows.
-   px(x,26,26,84,58,win&&blink?'#d5ed71':'#d4af37');px(x,27,27,82,56,'#8a6a1a');px(x,28,28,80,54,'#101710');
-   const strip=S().REEL,n=strip.length;
+   px(x,26,26,84,58,win&&blink?'#d5ed71':col.trim);px(x,27,27,82,56,col.trimDark);px(x,28,28,80,54,'#101710');
+   const strip=m.reel,n=strip.length;
    for(let i=0;i<3;i++){const rx=REEL_X[i];px(x,rx-2,REEL_Y-2,20,VIEW*CELL+4,'#2c3626');px(x,rx-1,REEL_Y-1,18,VIEW*CELL+2,'#0d120c');
     x.save();x.beginPath();x.rect(rx,REEL_Y,CELL,VIEW*CELL);x.clip();const off=offsets[i],first=Math.floor(off/CELL)-1;
-    for(let j=first;j<first+VIEW+2;j++)window.MuseumPixel.blit(x,rows(strip[((j%n)+n)%n]),rx,Math.round(REEL_Y+j*CELL-off),pal);
+    for(let j=first;j<first+VIEW+2;j++)blit(x,strip[((j%n)+n)%n],rx,Math.round(REEL_Y+j*CELL-off));
     x.setTransform(1,0,0,1,0,0);const g=x.createLinearGradient(0,REEL_Y*SCALE,0,(REEL_Y+VIEW*CELL)*SCALE);g.addColorStop(0,'rgba(13,18,12,.8)');g.addColorStop(.3,'rgba(13,18,12,0)');g.addColorStop(.7,'rgba(13,18,12,0)');g.addColorStop(1,'rgba(13,18,12,.8)');x.fillStyle=g;x.fillRect(rx*SCALE,REEL_Y*SCALE,CELL*SCALE,VIEW*CELL*SCALE);x.restore();x.setTransform(SCALE,0,0,SCALE,0,0);}
    // Pay line: a faint lime line through the middle row and arrows on the frame.
    x.globalAlpha=win?.9:.45;px(x,28,REEL_Y+CELL*1.5,80,1,'#d5ed71');x.globalAlpha=1;
    [[28,1],[107,-1]].forEach(([ax,dir])=>{for(let k=0;k<3;k++)px(x,dir>0?ax+k:ax-k,REEL_Y+CELL*1.5-2+k,1,5-2*k,'#d5ed71');});
-   // Name plate.
-   px(x,26,88,84,10,'#8a6a1a');px(x,27,89,82,8,'#141a10');
-   x.setTransform(1,0,0,1,0,0);x.font='700 20px "Barlow Condensed","Arial Narrow",Impact,sans-serif';try{x.letterSpacing='3px';}catch(e){}x.fillStyle='#d4af37';x.textAlign='center';x.textBaseline='middle';x.fillText('KUSTOSZ',68*SCALE,93.5*SCALE);x.setTransform(SCALE,0,0,SCALE,0,0);
+   // Name plate with the machine's name.
+   px(x,26,88,84,10,col.trimDark);px(x,27,89,82,8,'#141a10');
+   x.setTransform(1,0,0,1,0,0);x.font='700 20px "Barlow Condensed","Arial Narrow",Impact,sans-serif';try{x.letterSpacing='2px';}catch(e){}x.fillStyle=col.trim;x.textAlign='center';x.textBaseline='middle';x.fillText(m.name,68*SCALE,93.5*SCALE,80*SCALE);x.setTransform(SCALE,0,0,SCALE,0,0);
    // Coin tray; a win spills gold into it.
-   px(x,38,100,60,9,'#0a0e08');px(x,39,101,58,7,'#8a6a1a');px(x,40,102,56,5,'#0d120c');
+   px(x,38,100,60,9,'#0a0e08');px(x,39,101,58,7,col.trimDark);px(x,40,102,56,5,'#0d120c');
    if(win)for(let k=0;k<9;k++){const cx=42+k*6,cy=103+((k*5+Math.floor(t*4))%2);px(x,cx,cy,4,3,'#d4af37');px(x,cx+1,cy,1,1,'#ffd166');}
-   // Lever: brass bracket on the right, steel arm, red knob. The knob drops for a moment after a pull.
+   // Lever: bracket on the right, steel arm, red knob. The knob drops for a moment after a pull.
    const dl=now-leverT0,lever=dl<180?dl/180:dl<620?1-(dl-180)/440:0,ky=30+48*lever;
-   px(x,136,46,10,14,'#8a6a1a');px(x,137,47,8,12,'#d4af37');px(x,139,50,4,6,'#0d120c');
+   px(x,136,46,10,14,col.trimDark);px(x,137,47,8,12,col.trim);px(x,139,50,4,6,'#0d120c');
    px(x,140,Math.min(54,ky),3,Math.abs(54-ky)+1,'#9aa5aa');px(x,140,Math.min(54,ky),1,Math.abs(54-ky)+1,'#dfe7ea');
    px(x,138,ky-3,7,7,'#7a1620');px(x,139,ky-2,5,5,'#b3202a');px(x,140,ky-1,2,2,'#e8707a');}
   function loop(now){const c=cab();if(!c||!c.offsetParent){anim=0;if(auto)stopAuto('Autospin zatrzymany: automat schowany.');return;}   // `anim` keeps the fired id while the body runs, so render() never queues a second loop
@@ -284,33 +279,52 @@
      if(k>=1){if(!run.stopped[i]){run.stopped[i]=true;sfx('stop');}}else{done=false;const cell=Math.floor(offsets[i]/CELL);if(cell!==run.cells[i]){run.cells[i]=cell;if(now-run.lastTick>70){run.lastTick=now;sfx('tick');}}}}   // a soft tick per symbol passing, at most every 70 ms across the three reels; a thud when a reel locks
     if(done)finish(now);}
    drawCabinet(now);anim=requestAnimationFrame(loop);}
-  function paytable(){const host=$('slPaytable');if(host.childElementCount)return;const line=(syms,mult,note)=>{const row=document.createElement('div');row.className='slots-pay';const icons=document.createElement('span');icons.className='slots-pay-icons';for(const s of syms){const cv=document.createElement('canvas');cv.width=cv.height=32;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.setTransform(2,0,0,2,0,0);window.MuseumPixel.blit(x,rows(s),0,0,pal);icons.append(cv);}
-    const m=document.createElement('strong');m.textContent=`×${mult}`;const t=document.createElement('small');t.textContent=note;row.append(icons,m,t);host.append(row);};
-   for(const s of S().SYMBOLS)line([s,s,s],S().TRIPLE[s],`3 × ${S().NAMES[s]}`);line(['kufel','kufel'],S().KUFEL[2],'2 kufle gdziekolwiek');line(['kufel'],S().KUFEL[1],'1 kufel gdziekolwiek');
-   const rtp=$('slRtp');if(rtp)rtp.textContent=String(Math.round(S().rtp()*100));}
-  function render(){const p=profile(),st=S().stats(p);$('slCoins').textContent=`${number.format(p.coins)} ✦`;$('slPLN').textContent=pln(p.balance);$('shopBalance').textContent=`${number.format(p.coins)} ✦`;$('shopBalancePLN').textContent=pln(p.balance);
+  // The row of small cabinets: one button per machine, with its top symbol, name and bonus line.
+  function machines(){const host=$('slMachines');if(!host||host.childElementCount)return;
+   for(const m of S().MACHINES){const b=document.createElement('button');b.type='button';b.className='slots-pick';b.dataset.machine=m.id;b.setAttribute('aria-pressed','false');
+    const cv=document.createElement('canvas');cv.width=cv.height=32;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.setTransform(2,0,0,2,0,0);blit(x,m.symbols[0],0,0);
+    const nm=document.createElement('strong');nm.textContent=m.name;const tag=document.createElement('span');tag.textContent=m.tag;const r=document.createElement('small');r.textContent=`ZWROT ${Math.round(S().rtp(m)*100)} %`;
+    b.append(cv,nm,tag,r);b.addEventListener('click',()=>select(m.id));host.append(b);}}
+  function select(id){if(busy())return;const p=profile(),free=S().stats(p).free;if(free&&free.machine!==id){callbacks.notify(`Najpierw dokręć darmowe obroty na automacie ${S().machine(free.machine).name}.`);return;}
+   machineId=id;callbacks.onSlotsSelect(id);offsets=[0,0,0];$('slResult').textContent=`${S().machine(id).name}: ${S().machine(id).tag.toLowerCase()}. Wpisz stawkę i pociągnij za wajchę.`;render();}
+  function paytable(){const m=M(),host=$('slPaytable');if(paytableFor===m.id)return;paytableFor=m.id;host.innerHTML='';
+   const line=(syms,mult,note)=>{const row=document.createElement('div');row.className='slots-pay';const icons=document.createElement('span');icons.className='slots-pay-icons';for(const s of syms){const cv=document.createElement('canvas');cv.width=cv.height=32;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.setTransform(2,0,0,2,0,0);blit(x,s,0,0);icons.append(cv);}
+    const mm=document.createElement('strong');mm.textContent=mult;const t=document.createElement('small');t.textContent=note;row.append(icons,mm,t);host.append(row);};
+   const b=m.bonus;for(const [s,v] of Object.entries(m.triple).sort((p,q)=>q[1]-p[1]))line([s,s,s],`×${v}`,b.type==='jackpot'&&s===b.symbol?`3 × ${name(s)} + PULA`:`3 × ${name(s)}`);
+   if(b.type==='scatter')for(const [n,v] of Object.entries(b.pays).sort((p,q)=>q[0]-p[0]))line(Array(Number(n)).fill(b.symbol),`×${v}`,`${n} × ${name(b.symbol)} gdziekolwiek`);
+   if(b.type==='wild')line([b.symbol],'DZIKI',`${name(b.symbol)} zastępuje każdy symbol w trójce`);
+   if(b.type==='pair')line([m.symbols[2],m.symbols[2]],`×${b.pays}`,'dowolna para na linii');
+   if(b.type==='multiplier'){line([m.symbols[2],m.symbols[2]],`×${b.pair}`,'dowolna para na linii');line([b.symbol],`×${b.times}`,`${name(b.symbol)} na środkowym bębnie mnoży parę`);}
+   if(b.type==='freespins')line([b.symbol,b.symbol,b.symbol],`${b.spins}×`,`darmowe obroty za tę samą stawkę`);
+   if(b.type==='jackpot')line([b.symbol],'PULA',`${Math.round(b.feed*100)} % każdej stawki idzie do puli`);
+   const rtp=$('slRtp');if(rtp)rtp.textContent=String(Math.round(S().rtp(m)*100));$('slPaytableTitle').textContent=`TABELA WYPŁAT · ${m.name}`;}
+  function render(){const p=profile(),st=S().stats(p);if(!machineId)machineId=st.machine;const m=M();machines();
+   $('slCoins').textContent=`${number.format(p.coins)} ✦`;$('slPLN').textContent=pln(p.balance);$('shopBalance').textContent=`${number.format(p.coins)} ✦`;$('shopBalancePLN').textContent=pln(p.balance);
    $('slNet').textContent=`${st.coinsNet>=0?'+':''}${number.format(st.coinsNet)} ✦ · ${st.plnNet>=0?'+':''}${pln(st.plnNet)}`;
+   for(const b of document.querySelectorAll('#slMachines .slots-pick')){b.setAttribute('aria-pressed',String(b.dataset.machine===machineId));b.disabled=busy();}
    for(const b of document.querySelectorAll('#shopViewSlots .roulette-currency button'))b.setAttribute('aria-pressed',String(b.dataset.currency===currency));
    for(const b of document.querySelectorAll('#shopViewSlots .slots-auto button')){b.setAttribute('aria-pressed',String(!!auto&&Number(b.dataset.auto)===auto.total));b.disabled=busy()||!callbacks.canOpen();}
    $('slAmountLabel').textContent=currency==='pln'?'STAWKA (ZŁ)':'STAWKA (✦)';const quick=document.querySelectorAll('#shopViewSlots .roulette-quick button');quick[0].textContent=currency==='pln'?'+5':'+100';quick[1].textContent=currency==='pln'?'+20':'+500';
-   const spin=$('slSpin');spin.disabled=!auto&&(spinning||!callbacks.canOpen());spin.classList.toggle('is-stop',!!auto);spin.textContent=auto?`STOP · ZOSTAŁO ${auto.left}`:'ZAKRĘĆ';
+   const free=st.free&&st.free.machine===m.id?st.free:null,spin=$('slSpin');spin.disabled=!auto&&(spinning||!callbacks.canOpen());spin.classList.toggle('is-stop',!!auto);spin.textContent=auto?`STOP · ZOSTAŁO ${auto.left}`:free?`DARMOWY OBRÓT · ZOSTAŁO ${free.left}`:'ZAKRĘĆ';
+   const potEl=$('slPot');if(m.bonus.type==='jackpot'){potEl.classList.remove('hidden');potEl.innerHTML=`<small>PULA TEJ SZAFY</small>${number.format(S().pot(p,m.id,'coins'))} ✦ · ${pln(S().pot(p,m.id,'pln'))}`;}else potEl.classList.add('hidden');
    paytable();if(!anim)anim=requestAnimationFrame(loop);}
   function setAmount(v){const el=amountEl();el.value=String(currency==='pln'?Math.max(1,Math.round(v)):Math.max(10,Math.floor(v)));}
   function quick(kind){const p=profile(),cur=stake(),cap=currency==='pln'?p.balance:p.coins,unit=currency==='pln'?100:1;
    const next=kind==='a'?cur+(currency==='pln'?500:100):kind==='b'?cur+(currency==='pln'?2000:500):kind==='x2'?cur*2:kind==='half'?Math.floor(cur/2):cap;setAmount(Math.min(cap,Math.max(S().MIN[currency],next))/unit);}
-  const why=reason=>({min:`Minimalna stawka to ${fmt(S().MIN[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.'}[reason]||'Niepoprawny zakład.');
+  const why=check=>({min:`Minimalna stawka to ${fmt(S().MIN[currency],currency)}.`,funds:currency==='pln'?'Za mało na saldzie.':'Za mało żetonów.',pending:'Poprzednia wygrana jeszcze się księguje.',free:`Masz darmowe obroty na automacie ${S().machine(check.machine||'kufel').name}, dokręć je tam.`}[check.reason]||'Niepoprawny zakład.');
   // One pull. Returns false when the bet could not be placed (autospin stops on that).
-  function pull(){if(spinning)return false;const p=profile(),check=S().canBet(p,{amount:stake(),currency});
+  function pull(){if(spinning)return false;const p=profile(),check=S().canBet(p,{amount:stake(),currency,machine:machineId});
    if(!callbacks.canOpen()){callbacks.notify('Automaty są dostępne przed następnym pojedynkiem.');return false;}
-   if(!check.ok){$('slResult').textContent=why(check.reason);callbacks.notify(why(check.reason));return false;}
-   const r=callbacks.onSlots({amount:check.amount,currency});if(!r)return false;
-   spinning=true;leverT0=performance.now();winUntil=0;sfx('lever');render();$('slResult').textContent=`${auto?`Autospin ${auto.total-auto.left+1}/${auto.total}. `:''}Postawione ${fmt(r.amount,r.currency)}. Bębny się kręcą…`;
-   const n=S().REEL.length,starts=offsets.slice(),centre=CELL,durations=auto?[900,1300,1700]:[1300,1900,2500];   // the middle row sits one cell down
+   if(!check.ok){$('slResult').textContent=why(check);callbacks.notify(why(check));return false;}
+   const r=callbacks.onSlots({amount:stake(),currency,machine:machineId});if(!r)return false;
+   spinning=true;leverT0=performance.now();winUntil=0;sfx('lever');render();$('slResult').textContent=`${auto?`Autospin ${auto.total-auto.left+1}/${auto.total}. `:''}${r.free?'Darmowy obrót.':`Postawione ${fmt(r.amount,r.currency)}.`} Bębny się kręcą…`;
+   const n=M().reel.length,starts=offsets.slice(),centre=CELL,durations=auto?[900,1300,1700]:[1300,1900,2500];   // the middle row sits one cell down
    const targets=r.stops.map((stop,i)=>{const base=Math.ceil((starts[i]+centre)/(n*CELL))*n*CELL;return base+(3+i)*n*CELL+stop*CELL-centre;});
    run={r,starts,targets,t0:performance.now(),durations,stopped:[false,false,false],cells:starts.map(s=>Math.floor(s/CELL)),lastTick:0};return true;}
-  function finish(now){const {r}=run;run=null;spinning=false;callbacks.onSlotsSettle();outcome(r.win,r.rule==='triple'&&r.symbol==='kufel');
-   const names=r.symbols.map(s=>S().NAMES[s]).join(' · ');if(r.win)winUntil=now+1600;
-   $('slResult').textContent=r.win?`${names}. ${r.rule==='triple'?'TRÓJKA!':r.count===2?'DWA KUFLE!':'Kufel.'} Wygrywasz ${fmt(r.payout,r.currency)} (×${r.multiplier}).`:`${names}. Nic z tego, przepadło ${fmt(r.amount,r.currency)}.`;
+  function finish(now){const {r}=run;run=null;spinning=false;callbacks.onSlotsSettle();const m=M();outcome(r.win||r.rule==='free',r.rule==='jackpot'||(r.rule==='triple'&&r.symbol===m.symbols[0]));
+   const names=r.symbols.map(name).join(' · ');if(r.win||r.rule==='free')winUntil=now+1600;
+   const how=r.rule==='triple'?'TRÓJKA!':r.rule==='wild'?`DZIKA TRÓJKA (${name(m.bonus.symbol)} w roli ${name(r.symbol)})!`:r.rule==='scatter'?`${r.count} × ${name(r.symbol)} gdziekolwiek.`:r.rule==='pair'?`Para ${name(r.symbol)}${r.boosted?` ×${r.boosted} za ${name(m.bonus.symbol)} na środku`:''}.`:r.rule==='jackpot'?`JACKPOT! Trzy ${name(r.symbol)} i cała pula ${fmt(r.pot,r.currency)}.`:'';
+   $('slResult').textContent=r.rule==='free'?`${names}. DARMOWE OBROTY ×${r.spins} za ${fmt(r.amount,r.currency)} każdy!`:r.win?`${names}. ${how} Wygrywasz ${fmt(r.payout,r.currency)}${r.rule==='jackpot'?'':` (×${r.multiplier})`}.${r.freeLeft?` Zostało ${r.freeLeft} darmowych.`:''}`:`${names}. Nic z tego${r.free?'':`, przepadło ${fmt(r.amount,r.currency)}`}.${r.freeLeft?` Zostało ${r.freeLeft} darmowych.`:''}`;
    if(auto){auto.left-=1;if(auto.left<=0){stopAuto(`Autospin skończony: ${auto.total} obrotów.`);return;}
     const left=auto.left;autoTimer=setTimeout(()=>{if(!auto||auto.left!==left)return;if(!cab()?.offsetParent){stopAuto('Autospin zatrzymany: automat schowany.');return;}if(!pull())stopAuto(`Autospin zatrzymany przy ${auto.total-auto.left+1}/${auto.total}: ${$('slResult').textContent}`);},r.win?1200:650);}
    render();}
