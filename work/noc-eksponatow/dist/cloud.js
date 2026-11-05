@@ -166,10 +166,12 @@
   // Rabunek: the server rolls the outcome; the victim's side travels through pending adjustments, the robber's comes back here.
   async function rob(name, currency = 'coins', amount = 0) { const r = await request('/rest/v1/rpc/rob', { method: 'POST', body: { target_name: name, currency, amount: Math.max(0, Math.floor(Number(amount) || 0)) } }); return r.ok ? { ok: true, data: r.data } : r; }
   async function buyProtection(hours) { const r = await request('/rest/v1/rpc/buy_protection', { method: 'POST', body: { hours } }); return r.ok ? { ok: true, data: r.data } : r; }
+  async function shieldSubscribe(currency) { const r = await request('/rest/v1/rpc/shield_subscribe', { method: 'POST', body: { currency } }); return r.ok ? { ok: true, data: r.data } : r; }
+  async function shieldCancel() { const r = await request('/rest/v1/rpc/shield_cancel', { method: 'POST', body: {} }); return r.ok ? { ok: true, data: r.data } : r; }
   async function robStatus() { const r = await request('/rest/v1/rpc/rob_status', { method: 'POST', body: {} }); return r.ok ? { ok: true, data: r.data } : r; }
   async function robberies(since) { const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' }; return request(`/rest/v1/robberies?select=*&victim=eq.${me.id}&at=gt.${encodeURIComponent(since)}&order=at.desc&limit=20`); }
   async function leaderboard(limit = 50) { return request(`/rest/v1/leaderboard?select=*&order=halls_cleared.desc,prestige.desc,fastest_night.asc.nullslast&limit=${limit}`, { auth: false }); }
-  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, rob, buyProtection, robStatus, robberies, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, titlesOf, announcements,
+  window.MuseumCloud = Object.freeze({ enabled, user, restore, signUp, signIn, signOut, recover, updatePassword, consumeAuthHash, claimAdjustments, rob, buyProtection, shieldSubscribe, shieldCancel, robStatus, robberies, nicknameTaken, fetchProfile, upsertProfile, claimDaily, leaderboard, messageFor, mod, titles, titlesOf, announcements,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     _test: { store, expired: () => expired(), request } });
 })();

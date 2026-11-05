@@ -1,23 +1,25 @@
-/* Rabunek i ochrona: shared numbers, chance by share, paying for protection, applying the robber's side, messages, migration. */
+/* Rabunek i ochrona: shared numbers, chance by share, the subscription, applying the robber's side, messages, migration. */
 (() => {
   'use strict';
   const { test, assert } = window.MuseumTests;
   const R = window.MuseumRob, loot = window.MuseumLoot;
-  test('Rabunek: łup do 25 % majątku ofiary, szansa 60 % do 5 % udziału i 10 % przy 25 %, kara do 20 % własnego konta', () => {
+  test('Rabunek: łup do 25 % majątku ofiary, szansa 90 % do 5 % udziału i 60 % przy 25 %, kara do 20 % własnego konta', () => {
     assert.equal(R.maxLoot(1000), 250); assert.equal(R.maxLoot(-5), 0); assert.deepEqual(R.MIN, { coins: 10, pln: 100 });
-    assert.equal(R.chance(.01), .6); assert.equal(R.chance(.05), .6); assert.equal(Math.round(R.chance(.15) * 100), 35); assert.equal(Math.round(R.chance(.25) * 100), 10); assert.equal(R.chance(.9), .1);
+    assert.equal(R.chance(.01), .9); assert.equal(R.chance(.05), .9); assert.equal(Math.round(R.chance(.15) * 100), 75); assert.equal(Math.round(R.chance(.25) * 100), 60); assert.equal(R.chance(.9), .6);
     assert.equal(R.penalty(1000, 500), 200); assert.equal(R.penalty(1000, 150), 150);
     assert.equal(R.COOLDOWN_MS, 600000);
     assert.equal(R.cooldownLeft(new Date(Date.now() + 60000).toISOString()) > 59000, true); assert.equal(R.cooldownLeft(null), 0);
   });
-  test('Ochrona: dwa progi, płatność żetonami albo saldem, przedłużanie od końca obecnej ochrony', () => {
+  test('Ochrona: abonament 10 000 ✦ albo 20 000 zł dziennie, status z opłaconego dnia albo jednorazowego stempla', () => {
     const now = Date.parse('2026-11-05T12:00:00Z');
-    let p = { ...loot.migrate(null), coins: 1000, balance: 1000 };
-    assert.ok(R.canAfford(p, 24, 'coins')); assert.ok(!R.canAfford(p, 168, 'coins')); assert.ok(R.canAfford(p, 24, 'pln')); assert.ok(!R.canAfford(p, 99, 'coins'));
-    p = R.pay(p, 24, 'coins', now); assert.equal(p.coins, 600); assert.equal(p.protectedUntil, '2026-11-06T12:00:00.000Z'); assert.ok(R.isProtected(p, now)); assert.ok(!R.isProtected(p, now + 25 * 3600000));
-    p = R.pay(p, 24, 'pln', now + 3600000); assert.equal(p.balance, 601); assert.equal(p.protectedUntil, '2026-11-07T12:00:00.000Z', 'doliczone od końca, nie od teraz');
-    assert.equal(R.pay({ ...p, coins: 10 }, 24, 'coins', now), null);
-    assert.equal(loot.migrate(p).protectedUntil, '2026-11-07T12:00:00.000Z'); assert.equal(loot.migrate({ protectedUntil: 'nie-data' }).protectedUntil, null); assert.equal(loot.migrate({ robSeen: '2026-11-05T10:00:00.000Z' }).robSeen, '2026-11-05T10:00:00.000Z');
+    assert.deepEqual(R.SHIELD, { coins: 10000, pln: 2000000 });
+    let p = { ...loot.migrate(null), coins: 10000, balance: 1999999 };
+    assert.ok(R.canAfford(p, 'coins')); assert.ok(!R.canAfford(p, 'pln')); assert.ok(!R.canAfford({ ...p, coins: 9999 }, 'coins'));
+    assert.ok(!R.isProtected(p, now)); assert.ok(!R.subscribed(p));
+    p = loot.migrate({ ...p, shield: { currency: 'coins', paidUntil: '2026-11-06T12:00:00.000Z', days: 3 } });
+    assert.deepEqual(p.shield, { currency: 'coins', paidUntil: '2026-11-06T12:00:00.000Z', days: 3 }); assert.ok(R.subscribed(p)); assert.ok(R.isProtected(p, now)); assert.ok(!R.isProtected(p, now + 25 * 3600000));
+    assert.equal(R.protectedUntil({ protectedUntil: '2026-11-07T12:00:00.000Z', shield: p.shield }, now), Date.parse('2026-11-07T12:00:00Z'), 'późniejszy z dwóch');
+    assert.equal(loot.migrate({ shield: { currency: 'eur', paidUntil: '2026-11-06T12:00:00.000Z' } }).shield, null); assert.equal(loot.migrate({ protectedUntil: 'nie-data' }).protectedUntil, null); assert.equal(loot.migrate({ robSeen: '2026-11-05T10:00:00.000Z' }).robSeen, '2026-11-05T10:00:00.000Z');
   });
   test('Rabunek: strona napastnika w obu walutach i komunikaty dla obu stron', () => {
     const p = { ...loot.migrate(null), coins: 500, balance: 300 };

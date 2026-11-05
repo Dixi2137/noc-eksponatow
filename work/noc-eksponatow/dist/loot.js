@@ -268,6 +268,7 @@
    gifts:Array.isArray(source.gifts) ? [...new Set(source.gifts.filter(code=>typeof code==='string'&&code.length<=32))].slice(0,50) : [],   // one-off gift codes already claimed (owner presents: once per user, ever)
    roulette:gambleRecord(source.roulette),slots:slotsRecord(source.slots),
    protectedUntil:typeof source.protectedUntil==='string'&&Number.isFinite(Date.parse(source.protectedUntil)) ? source.protectedUntil : null,robSeen:typeof source.robSeen==='string'&&Number.isFinite(Date.parse(source.robSeen)) ? source.robSeen : null,   // Rabunek: protection stamp from the server, last robbery the player was told about
+   shield:(source.shield&&(source.shield.currency==='coins'||source.shield.currency==='pln')) ? {currency:source.shield.currency,paidUntil:typeof source.shield.paidUntil==='string'&&Number.isFinite(Date.parse(source.shield.paidUntil)) ? source.shield.paidUntil : null,days:integer(source.shield.days)} : null,   // Ochrona: subscription mirrored from the server
    loan:loanRecord(source.loan),lastLoan:loanRecord(source.lastLoan,true),loans:{taken:integer(source.loans?.taken),repaid:integer(source.loans?.repaid),seized:integer(source.loans?.seized)},   // Pożyczka Kustosza   // Ruletka i Automaty Kustosza: net results keep their sign, a parked payout survives a refresh
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };

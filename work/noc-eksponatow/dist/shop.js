@@ -7,7 +7,7 @@
  const number=new Intl.NumberFormat('pl-PL');
  const percent=value=>`${new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2}).format(value)}%`;
  let selectedId='gallery',familyFilter='all',mounted=false;
- let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},onSlotsSelect:()=>{},onProtect:async()=>({ok:false,error:'Brak chmury.'}),onLoanTake:()=>null,onLoanRepay:()=>null,onLoanCollect:()=>false,notify:()=>{}};
+ let callbacks={getProfile:()=>({coins:0,owned:[],freeCrates:0}),canOpen:()=>false,onOpenWithTokens:()=>{},onBuyFinish:()=>{},onOpenWithPLN:()=>{},onRoulette:()=>null,onRouletteSettle:()=>{},onSlots:()=>null,onSlotsSettle:()=>{},onSlotsSelect:()=>{},onShield:async()=>({ok:false,error:'Brak chmury.'}),onShieldCancel:async()=>({ok:false,error:'Brak chmury.'}),onLoanTake:()=>null,onLoanRepay:()=>null,onLoanCollect:()=>false,notify:()=>{}};
  const pln=gr=>(Number(gr||0)/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'});
  const chest='<svg viewBox="0 0 180 145" fill="none" aria-hidden="true" focusable="false"><ellipse cx="90" cy="129" rx="64" ry="9" fill="currentColor" opacity=".09"/><path d="m28 62 62-24 62 24v57l-62 19-62-19V62Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="1.4"/><path d="m28 62 62 23 62-23M90 85v53M28 87l62 22 62-22" stroke="currentColor" stroke-opacity=".65" stroke-width="1.3"/><path d="m53 52 62 23v55M123 51 61 74v55" stroke="currentColor" stroke-width="7"/><path d="m81 81 18 1v25l-9 7-9-7V81Z" fill="currentColor"/><path d="M90 89v12" stroke="#182014" stroke-width="3"/><path d="m90 7 4 13 13 4-13 4-4 13-4-13-13-4 13-4 4-13ZM143 26l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z" fill="currentColor"/><path d="M35 26v11m-5-5h10" stroke="currentColor" stroke-opacity=".4"/></svg>';
  const emblems={
@@ -113,10 +113,12 @@
  function finishWeapon(current){return window.MuseumWeapons.get(current.weapon)||window.MuseumWeapons.get('sword');}
  function drawFinish(canvas,weapon,finishId,scale,time){const ctx=canvas.getContext('2d');if(!ctx||!window.MuseumPixel)return;ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,canvas.width,canvas.height);
   window.MuseumPixel.drawWeaponIcon(ctx,weapon,Math.round((canvas.width-16*scale)/2),Math.round((canvas.height-16*scale)/2),scale,{finish:finishId,time});}
-// Ochrona przed napadem: status and the four price buttons (two tiers, tokens or PLN) from MuseumRob.PROTECTION.
- function renderProtection(current){const rob=window.MuseumRob,st=$('protectStatus');if(!rob||!st)return;const until=rob.protectedUntil(current);
-  st.textContent=until?`CHRONIONY DO ${new Date(until).toLocaleString('pl-PL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`:'BRAK OCHRONY';st.classList.toggle('is-on',!!until);
-  for(const b of document.querySelectorAll('.shop-protect-buttons button')){const tier=rob.PROTECTION[b.dataset.hours];if(!tier)continue;b.textContent=`${tier.label} · ${b.dataset.currency==='pln'?pln(tier.pln):`${number.format(tier.coins)} ✦`}`;b.disabled=!rob.canAfford(current,Number(b.dataset.hours),b.dataset.currency);}}
+// Ochrona przed napadem: subscription status, two subscribe buttons (tokens or PLN), cancel.
+ function renderProtection(current){const rob=window.MuseumRob,st=$('protectStatus');if(!rob||!st)return;const until=rob.protectedUntil(current),sub=rob.subscribed(current),when=t=>new Date(t).toLocaleString('pl-PL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  st.textContent=sub?`ABONAMENT AKTYWNY · OPŁACONY DO ${when(until)}`:until?`OCHRONA DO ${when(until)} (BEZ ABONAMENTU)`:'BRAK OCHRONY';st.classList.toggle('is-on',!!until);
+  $('protectLine').textContent=sub?`Codziennie o tej porze serwer pobiera ${rob.money(rob.SHIELD[current.shield.currency],current.shield.currency)}${current.shield.days?` (opłacone dni: ${current.shield.days})`:''}. Jak nie będzie z czego, abonament wygaśnie i znów można cię okraść.`:'Abonament pobiera się sam, także gdy nie grasz. Pierwszy dzień schodzi od razu.';
+  for(const b of document.querySelectorAll('.shop-protect-buttons button[data-currency]')){b.textContent=`ABONAMENT · ${rob.money(rob.SHIELD[b.dataset.currency],b.dataset.currency)} / DZIEŃ`;b.disabled=sub||!rob.canAfford(current,b.dataset.currency);}
+  $('protectCancel').classList.toggle('hidden',!sub);}
  function renderFinishes(current){
   const root=$('shopFinishes');if(!root||!window.MuseumFinishes)return;
   const list=finishList(),weapon=finishWeapon(current);
@@ -168,7 +170,8 @@
    for(const [id,filter] of filters)$(id).addEventListener('click',()=>{if(!callbacks.canOpen()){callbacks.notify('Sklep jest dostępny przed następnym pojedynkiem.');return;}familyFilter=filter;render();});
    for(const [id,name] of [['shopTabCrates','crates'],['shopTabFinishes','finishes'],['shopTabWallet','wallet'],['shopTabRoulette','roulette'],['shopTabSlots','slots'],['shopTabLoan','loan']])$(id).addEventListener('click',()=>showView(name));
    roulette.mount();slots.mount();loan.mount();
-   for(const b of document.querySelectorAll('.shop-protect-buttons button'))b.addEventListener('click',async()=>{if(!callbacks.canOpen())return;b.disabled=true;const r=await callbacks.onProtect(Number(b.dataset.hours),b.dataset.currency);callbacks.notify(r.ok?`Ochrona aktywna do ${new Date(r.until).toLocaleString('pl-PL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}. Napastnicy będą płacić tobie.`:r.error,5000);render();});
+   for(const b of document.querySelectorAll('.shop-protect-buttons button[data-currency]'))b.addEventListener('click',async()=>{if(!callbacks.canOpen())return;const rob=window.MuseumRob;if(!window.confirm(`Abonament ochrony za ${rob.money(rob.SHIELD[b.dataset.currency],b.dataset.currency)} dziennie? Pierwsza opłata schodzi teraz, kolejne co 24 h, dopóki nie anulujesz albo nie zabraknie środków.`))return;b.disabled=true;const r=await callbacks.onShield(b.dataset.currency);callbacks.notify(r.ok?(r.already?'Abonament już działa.':`Ochrona aktywna. Napastnicy będą płacić tobie.`):r.error,5000);render();});
+   $('protectCancel')?.addEventListener('click',async()=>{if(!window.confirm('Anulować abonament? Opłacony dzień jeszcze chroni, potem koniec.'))return;const r=await callbacks.onShieldCancel();callbacks.notify(r.ok?'Abonament anulowany.':r.error,4000);render();});
    const soon=()=>callbacks.notify('Płatności nie są jeszcze podpięte. Wpłaty ruszą razem z operatorem płatności.');
    for(const b of document.querySelectorAll('.shop-deposit-btn'))b.addEventListener('click',soon);
    $('shopDepositBtn')?.addEventListener('click',soon);
