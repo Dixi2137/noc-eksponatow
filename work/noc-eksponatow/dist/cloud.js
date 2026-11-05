@@ -164,7 +164,7 @@
     'demon-slayer': { name: 'DEMON SLAYER', color: '#ff4a3a', note: 'Pokonał Belzebuba w piekle.' }
   });
   // Rabunek: the server rolls the outcome; the victim's side travels through pending adjustments, the robber's comes back here.
-  async function rob(name) { const r = await request('/rest/v1/rpc/rob', { method: 'POST', body: { target_name: name } }); return r.ok ? { ok: true, data: r.data } : r; }
+  async function rob(name, currency = 'coins', amount = 0) { const r = await request('/rest/v1/rpc/rob', { method: 'POST', body: { target_name: name, currency, amount: Math.max(0, Math.floor(Number(amount) || 0)) } }); return r.ok ? { ok: true, data: r.data } : r; }
   async function buyProtection(hours) { const r = await request('/rest/v1/rpc/buy_protection', { method: 'POST', body: { hours } }); return r.ok ? { ok: true, data: r.data } : r; }
   async function robStatus() { const r = await request('/rest/v1/rpc/rob_status', { method: 'POST', body: {} }); return r.ok ? { ok: true, data: r.data } : r; }
   async function robberies(since) { const me = user(); if (!me) return { ok: false, error: 'Nie jesteś zalogowany.' }; return request(`/rest/v1/robberies?select=*&victim=eq.${me.id}&at=gt.${encodeURIComponent(since)}&order=at.desc&limit=20`); }
