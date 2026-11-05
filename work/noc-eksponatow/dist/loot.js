@@ -267,6 +267,7 @@
    secrets:Array.isArray(source.secrets) ? [...new Set(source.secrets.filter(code=>typeof code==='string'&&code.length<=64))].slice(0,20) : [],   // access codes already entered (hidden packs re-unlock on load)
    gifts:Array.isArray(source.gifts) ? [...new Set(source.gifts.filter(code=>typeof code==='string'&&code.length<=32))].slice(0,50) : [],   // one-off gift codes already claimed (owner presents: once per user, ever)
    roulette:gambleRecord(source.roulette),slots:slotsRecord(source.slots),
+   protectedUntil:typeof source.protectedUntil==='string'&&Number.isFinite(Date.parse(source.protectedUntil)) ? source.protectedUntil : null,robSeen:typeof source.robSeen==='string'&&Number.isFinite(Date.parse(source.robSeen)) ? source.robSeen : null,   // Rabunek: protection stamp from the server, last robbery the player was told about
    loan:loanRecord(source.loan),lastLoan:loanRecord(source.lastLoan,true),loans:{taken:integer(source.loans?.taken),repaid:integer(source.loans?.repaid),seized:integer(source.loans?.seized)},   // Pożyczka Kustosza   // Ruletka i Automaty Kustosza: net results keep their sign, a parked payout survives a refresh
    records:{fastestNight:Number.isFinite(Number(source.records?.fastestNight))&&source.records.fastestNight!==null ? Number(source.records.fastestNight) : null,nightCoins:integer(source.records?.nightCoins)}
   };
