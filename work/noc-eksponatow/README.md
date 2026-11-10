@@ -289,6 +289,10 @@ Od fazy 148 rig człowieka w pakiecie rozumie też `hairUnder` (długie włosy z
 
 `dist/roulette.js` (`window.MuseumRoulette`): pasek 15 pól (7 czerwonych, 7 czarnych, 1 zielone „Kustosz”), czerwone i czarne płacą ×2, zielone ×14; stawka z żetonów albo z salda PLN (grosze), minimum 10 ✦ / 1 zł, bez górnego limitu. `canBet` sprawdza kolor, walutę, minimum, środki i czy nie wisi niezaksięgowana wygrana; `spin(profile, bet, rng)` od razu zdejmuje stawkę i parkuje wygraną w `profile.roulette.pending`, a `settle(profile)` ją księguje. UI (zakładka RULETKA w sklepie, `shop.js`) księguje po zatrzymaniu paska, a `ui.js` księguje zaparkowaną wygraną przy starcie i po przyjęciu zapisu z chmury, więc odświeżenie w trakcie kręcenia nigdy nie zjada wygranej ani nie cofa przegranej. `profile.roulette` (spins, coinsNet, plnNet ze znakiem, pending) przechodzi przez `migrate`. Testy w `tests/roulette.js`.
 
+## Wyjście z walki na telefonie (faza171)
+
+Pauza ma przycisk WRÓĆ DO MUZEUM (`#pauseMenuBtn` → `menu()`): na telefonie nie ma Esc, a scena zakrywa nawigację, więc bez niego z walki wychodziło się tylko przez KO albo upadek. Sprawdzone w emulacji: pauza → muzeum → `body.mobile-fight` znika, `--ui-zoom` wraca do 0,94, ramka wraca do strony. Uwaga dla testów na telefonie: GitHub Pages każe Safari trzymać `index.html` przez 10 minut (`max-age=600`), więc zaraz po wdrożeniu trzeba zamknąć kartę i otworzyć od nowa albo wejść z parametrem `?v=NNN`.
+
 ## Powrót do menu na telefonie (faza170)
 
 Po pojedynku i powrocie do menu nakładki (tytuł, przycisk, pasek sal, plakietka) zostawały w skali trybu telefonu (`--ui-zoom` 1,16–1,35), bo `layoutMobileStage` przy wyjściu z trybu czyściło wymiary ramki i kończyło przed `fitStage()`. Teraz woła `fitStage()` także w tej gałęzi, więc zoom wraca do skali strony. Zgłoszone przez Jakuba zrzutem z iPhone'a w poziomie.
