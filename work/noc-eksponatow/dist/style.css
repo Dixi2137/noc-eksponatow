@@ -516,3 +516,5 @@ body.mobile-fight .understage,body.mobile-fight .topbar,body.mobile-fight nav{vi
 body.mobile-fight .stage-meta{display:none}
 body.mobile-fight .combat-hint{bottom:auto;top:24%;max-width:60%;font-size:9px}
 body.mobile-fight .game-frame .card,body.mobile-fight .game-frame .dialog{max-height:92%;overflow:auto}
+.pwa-hint{display:flex;align-items:center;gap:12px;margin:10px 0 0;padding:10px 12px;background:#d5ed7112;border:1px solid #d5ed7155;color:var(--cream);font-size:11px;line-height:1.5}.pwa-hint b{color:var(--lime)}.pwa-hint button{flex-shrink:0;width:30px;height:30px;border:1px solid var(--line);background:transparent;color:var(--cream);font-size:13px;cursor:pointer}
+body.mobile-fight .pwa-hint{display:none}
