@@ -493,3 +493,26 @@ body.pixel .menu-screen h1{font-size:7.2vw;margin:8px 0 6px}
 @media(pointer:coarse){
 .control-group .control:not(.fs-toggle),.understage .under-tip{display:none}
 }
+
+/* ── Walka na telefonie (faza168): arena na cały ekran, w pionie obrócona do poziomu, pad dotykowy na wierzchu, bez zoomu gestami. ── */
+html{-webkit-text-size-adjust:100%}
+body{touch-action:manipulation}
+.game-frame,.touch-controls button{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.touch-controls button{touch-action:none}
+body.mobile-fight{overflow:hidden;position:fixed;inset:0;width:100%}
+body.mobile-fight .game-frame{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;margin:0;border:0;aspect-ratio:auto;z-index:60;background:#000;isolation:isolate}
+body.mobile-fight .game-frame #arena{width:100%;height:100%;object-fit:contain}
+@media(orientation:portrait){body.mobile-fight .game-frame{width:100vh;width:100dvh;height:100vw;transform:rotate(90deg) translateY(-100%);transform-origin:top left}}
+body.mobile-fight .touch-controls.enabled{display:flex!important;position:absolute;left:0;right:0;bottom:0;top:auto;margin:0;padding:0 max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));justify-content:space-between;align-items:flex-end;z-index:9;pointer-events:none;zoom:1!important}
+body.mobile-fight .touch-controls>div{gap:10px;pointer-events:none;align-items:flex-end}
+body.mobile-fight .touch-controls button{pointer-events:auto;width:64px;height:64px;border-radius:50%;font-size:22px;line-height:1;opacity:.85;background:#1c2715d9;border:1px solid #9fb06a;color:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+body.mobile-fight .touch-controls button.pressed{opacity:1;transform:scale(.94)}
+body.mobile-fight .touch-controls .touch-attack{background:#d5ed71e6;color:#18200f;width:74px;height:74px}
+body.mobile-fight .touch-controls .touch-guard{color:var(--lime)}
+body.mobile-fight .touch-controls .touch-dodge{color:#cfe0ff}
+body.mobile-fight .touch-controls small{font-size:7px;letter-spacing:.8px}
+body.mobile-fight .center-hud #pauseBtn{width:34px;height:34px;font-size:16px}
+body.mobile-fight .understage,body.mobile-fight .topbar,body.mobile-fight nav{visibility:hidden}
+body.mobile-fight .stage-meta{display:none}
+body.mobile-fight .combat-hint{bottom:auto;top:24%;max-width:60%;font-size:9px}
+body.mobile-fight .game-frame .card,body.mobile-fight .game-frame .dialog{max-height:92%;overflow:auto}
